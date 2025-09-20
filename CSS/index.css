@@ -1,0 +1,178 @@
+        * {
+            box-sizing: border-box; /* Incluir padding y border en el cálculo del tamaño */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000000; /* Color de fondo similar al de la imagen */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: 100vw; /* Ancho completo del viewport */
+            overflow-x: hidden; /* Evitar scroll horizontal */
+        }
+
+        header {
+        background-color: #212121b5;
+        padding: 10px 20px;
+        display: flex; /* Use flexbox for layout */
+        justify-content: space-between; /* Space out the items */
+        align-items: flex-start; /* Align items vertically */
+        height: 200px;
+        position: fixed; /* Cambiar a fixed para que se mantenga en pantalla */
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        gap: 10px; /* Adds space between the user icon, nav-icons and arrow */
+        transition: all 0.5s ease-in-out; /* Transición suave para todas las propiedades */
+    }
+
+        header.sidebar {
+            width: 80px; /* Ancho reducido para barra lateral */
+            height: 100vh; /* Altura completa de la pantalla */
+            flex-direction: column; /* Cambiar a columna para disposición vertical */
+            justify-content: space-between; /* Distribuir elementos a lo largo de la barra */
+            align-items: center; /* Centrar horizontalmente */
+            padding: 20px 10px; /* Ajustar padding */
+            left: auto; /* Quitar left para que se mantenga a la derecha */
+            right: 0; /* Posicionar a la derecha */
+        }
+
+        .icon-bar-container {
+           display: flex; /* Use flexbox to arrange the icons */
+            gap: 50px; /* Space between icons */
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            /* Position the icons to be centered between the user icon and the arrow */
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 150px;
+        }
+
+        header.sidebar .icon-bar-container {
+            position: static; /* Cambiar a static para el layout vertical */
+            transform: none; /* Quitar transform */
+            flex-direction: column; /* Cambiar a columna */
+            gap: 40px; /* Espaciado vertical más amplio */
+            flex-grow: 1; /* Ocupar el espacio disponible */
+            justify-content: center; /* Centrar verticalmente */
+            align-items: center; /* Centrar horizontalmente */
+        }
+
+        .icon-bar {
+            display: flex;
+            gap: 70px;
+            color: rgba(255, 205, 172, 0.639);
+            font-size: 1.4em;
+            cursor: pointer;
+            margin-left: auto; /* Para que los iconos se alineen a la derecha */
+        }
+
+        header.sidebar .icon-bar {
+            flex-direction: column; /* Cambiar a columna en modo sidebar */
+            margin-left: 0; /* Quitar margin-left */
+            gap: 40px; /* Espaciado vertical más amplio */
+            height: 100%; /* Ocupar toda la altura disponible */
+            justify-content: space-around; /* Distribuir uniformemente */
+        }
+
+        .icon-bar i {
+            padding: 5px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        /* Efectos hover específicos para cada botón */
+        .icon-bar i.fa-house:hover {
+            color: rgb(224, 206, 4); /* <-- Esto cambia el color del icono */
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgb(224, 206, 4);
+        }
+
+        .icon-bar i.fa-truck-ramp-box:hover {
+            color: #149800;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(4, 228, 34, 0.616);
+        }
+
+        .icon-bar i.fa-truck:hover {
+            color: rgb(1, 100, 181);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(1, 146, 179, 0.674);
+        }
+
+        .icon-bar i.fa-credit-card:hover {
+            color: rgb(184, 0, 114);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(217, 0, 188, 0.628);
+        }
+
+
+        /* Efectos hover para el modo sidebar */
+        header.sidebar .icon-bar i:hover {
+            background-color: inherit;
+            transform: scale(1.2);
+        }
+
+        header.sidebar .icon-bar i.fa-house:hover {
+            color: rgb(224, 206, 4); /* <-- Esto cambia el color del icono */
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgb(224, 206, 4);
+        }
+
+        header.sidebar .icon-bar i.fa-truck-ramp-box:hover {
+            color: #149800;
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgba(4, 228, 34, 0.616);
+        }
+
+        header.sidebar .icon-bar i.fa-truck:hover {
+             color: rgb(1, 100, 181);
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgba(1, 146, 179, 0.674);
+        }
+
+        header.sidebar .icon-bar i.fa-credit-card:hover {
+            color: rgb(184, 0, 114);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(217, 0, 188, 0.628);
+        }
+
+       .user-icon {
+            color: rgba(255, 115, 0, 0.749);
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        .login-section {
+            background-color: #000000;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            margin-top: 200px; /* Espacio para el header fijo */
+            transition: margin-right 0.5s ease-in-out; /* Transición para el contenido */
+        }
+
+        body.sidebar-active .login-section {
+            margin-right: 80px; /* Espacio para la barra lateral a la derecha */
+        }
+
+        .login-section h1 {
+            color: rgba(255, 115, 0, 0.749);
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .login-section img {
+            max-width: 150px;
+            height: auto;
+        }
