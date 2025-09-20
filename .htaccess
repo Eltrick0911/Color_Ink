@@ -1,0 +1,14 @@
+RewriteEngine On
+Options All -Indexes
+
+#prevenir acceso al archivo .htaccess
+<files .htaccess>
+order allow,deny
+deny from all
+</files>
+
+# camuflar archivos PHP como NAS, se puede ocultar la versión 
+#de php también, etc.
+AddType application/x-httpd-php .nas
+
+

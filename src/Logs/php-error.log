@@ -1,0 +1,152 @@
+[18-Feb-2025 10:15:08 America/Tegucigalpa] Esto es una prueba de error...
+[20-Feb-2025 08:17:08 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:2
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(25): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 2
+[20-Feb-2025 08:21:42 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:2
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(25): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 2
+[20-Feb-2025 08:24:12 America/Tegucigalpa] PHP Parse error:  Unclosed '{' on line 9 in C:\xampp\htdocs\api-rest-composer-0800\src\Config\Security.php on line 103
+[20-Feb-2025 08:27:01 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(25): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:28:22 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:28:23 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:13 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:14 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:14 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:14 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:15 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:15 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:15 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:15 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:32:13 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:42 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:43 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:43 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:43 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:43 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:44 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:53 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:53 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:53 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:53 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:54 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:54 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[27-Feb-2025 08:35:26 America/Tegucigalpa] PHP Warning:  Undefined variable $AqfGgkqFeoj7qVLdTShX8e in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 7
+[27-Feb-2025 08:35:26 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:37:02 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:37:21 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:39:31 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:40:05 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:42:19 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:43:44 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:43:45 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:43:45 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:43:45 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:53:02 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:02 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:02 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:02 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:03 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:03 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:04 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:04 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:04 America/Tegucigalpa] Conexión exitosa
