@@ -1,6 +1,7 @@
 /**
  * JavaScript para la página de gestión de usuarios
- 
+    Prueba 2 para el merge
+    
  */
 
 document.addEventListener('DOMContentLoaded', function() {
