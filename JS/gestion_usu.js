@@ -1,5 +1,6 @@
 /**
  * JavaScript para la página de gestión de usuarios
+ * Este solo es un coomentario de prueba de los commit en una rama
  */
 
 document.addEventListener('DOMContentLoaded', function() {
