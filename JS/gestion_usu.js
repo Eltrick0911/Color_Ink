@@ -1,7 +1,7 @@
 /**
  * JavaScript para la página de gestión de usuarios
     Prueba 2 para el merge
-    
+    Muestra de modificacion 2
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -17,7 +17,7 @@ function initGestionUsuariosPage() {
     setupFilters();
     
     // Configurar búsqueda
-    setupSearch();
+    setupSearch();  
     
     // Actualizar estadísticas
     updateStats();
