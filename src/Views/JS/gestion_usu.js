@@ -1,5 +1,7 @@
 /**
  * JavaScript para la página de gestión de usuarios
+ * Comentario de prueba
+ * 
  */
 
 document.addEventListener('DOMContentLoaded', function() {
