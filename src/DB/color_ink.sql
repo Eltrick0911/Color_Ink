@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 10-08-2025 a las 03:55:33
+-- Tiempo de generación: 22-09-2025 a las 08:25:40
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -238,7 +238,19 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_categoria` (IN `p_id_cat
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_detalle_pedido` (IN `p_id_detalle` INT)   BEGIN
-    SELECT * FROM detallepedido WHERE id_detalle = p_id_detalle;
+    SELECT
+        dp.*,
+        p.nombre_producto,
+        pe.fecha_pedido,
+        pe.id_usuario,
+        mi.salida AS cantidad_salida,
+        mi.entrada AS cantidad_entrada,
+        mi.fecha_movimiento
+    FROM detallepedido dp
+    JOIN producto p ON dp.id_producto = p.id_producto
+    JOIN pedido pe ON dp.id_pedido = pe.id_pedido
+    JOIN movimientoinventario mi ON dp.id_movimiento = mi.id_movimiento
+    WHERE dp.id_detalle = p_id_detalle;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_estado` (IN `p_id_estado` INT)   BEGIN
@@ -246,23 +258,38 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_estado` (IN `p_id_estado
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_pedido` (IN `p_id_pedido` INT)   BEGIN
-    SELECT * FROM pedido WHERE id_pedido = p_id_pedido;
+    SELECT
+        pe.*,
+        u.nombre_usuario,
+        e.proceso AS estado_proceso
+    FROM pedido pe
+    JOIN usuario u ON pe.id_usuario = u.id_usuario
+    JOIN estadopedido e ON pe.id_estado = e.id_estado
+    WHERE pe.id_pedido = p_id_pedido;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_producto` (IN `p_id_producto` INT)   BEGIN
-    SELECT * FROM producto WHERE id_producto = p_id_producto;
+    SELECT
+        p.*,
+        pr.descripcion_proveedor AS nombre_proveedor,
+        c.descripcion AS nombre_categoria
+    FROM producto p
+    JOIN proveedor pr ON p.id_proveedor = pr.id_proveedor
+    JOIN categoriaproducto c ON p.id_categoria = c.id_categoria
+    WHERE p.id_producto = p_id_producto;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_proveedor` (IN `p_id_proveedor` INT)   BEGIN
     SELECT * FROM proveedor WHERE id_proveedor = p_id_proveedor;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_rol` (IN `p_id_rol` INT)   BEGIN
-    SELECT * FROM rol WHERE id_rol = p_id_rol;
-END$$
-
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_usuario` (IN `p_id_usuario` INT)   BEGIN
-    SELECT * FROM usuario WHERE id_usuario = p_id_usuario;
+    SELECT
+        u.*,
+        r.descripcion AS nombre_rol
+    FROM usuario u
+    JOIN rol r ON u.id_rol = r.id_rol
+    WHERE u.id_usuario = p_id_usuario;
 END$$
 
 DELIMITER ;
