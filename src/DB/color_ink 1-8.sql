@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-09-2025 a las 08:25:40
+-- Tiempo de generación: 27-09-2025 a las 22:41:06
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `color_ink`
 --
+CREATE DATABASE IF NOT EXISTS `color_ink` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `color_ink`;
 
 DELIMITER $$
 --
@@ -40,8 +42,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_detalle_pedido` (IN `
     WHERE id_detalle = p_id_detalle;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_estado` (IN `p_id_estado` INT, IN `p_proceso` VARCHAR(50), IN `p_entregado` TINYINT(1), IN `p_cancelado` TINYINT(1))   BEGIN
-    UPDATE estadopedido SET proceso = p_proceso, entregado = p_entregado, cancelado = p_cancelado WHERE id_estado = p_id_estado;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_estado` (IN `p_id_estado` INT, IN `p_codigo` VARCHAR(10), IN `p_nombre` VARCHAR(50), IN `p_es_final` TINYINT(1), IN `p_orden` INT)   BEGIN
+    UPDATE cat_estado_pedido 
+    SET 
+        codigo = p_codigo, 
+        nombre = p_nombre, 
+        es_final = p_es_final, 
+        orden = p_orden 
+    WHERE 
+        id_estado = p_id_estado;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_pedido` (IN `p_id_pedido` INT, IN `p_id_usuario` INT, IN `p_fecha_pedido` DATETIME, IN `p_fecha_entrega` DATETIME, IN `p_id_estado` INT)   BEGIN
@@ -72,61 +81,95 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_categoria` (IN `p_descripc
     INSERT INTO categoriaproducto (descripcion) VALUES (p_descripcion);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_detallepedido` (IN `p_producto_solicitado` VARCHAR(255), IN `p_precio_unitario` DECIMAL(10,2), IN `p_precio_venta` DECIMAL(10,2), IN `p_id_pedido` INT, IN `p_id_producto` INT, IN `p_cantidad` INT, IN `p_id_usuario` INT)   BEGIN
-    DECLARE v_iddetalle INT;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_detalle_pedido` (IN `p_producto_solicitado` VARCHAR(255), IN `p_precio_unitario` DECIMAL(10,2), IN `p_descuento` DECIMAL(10,2), IN `p_impuesto` DECIMAL(10,2), IN `p_id_pedido` INT, IN `p_id_producto` INT, IN `p_cantidad` INT, IN `p_id_usuario` INT)   BEGIN
     DECLARE v_idmovimiento INT;
+    DECLARE v_total_bruto DECIMAL(12,2);
+    DECLARE v_total_neto DECIMAL(12,2);
+    DECLARE v_stock_actual INT;
+    DECLARE v_nueva_cantidad INT;
 
-    -- 1. Inserta el movimiento de inventario por la salida del producto
-    INSERT INTO movimientoinventario (
-        id_producto,
-        entrada,
-        salida,
-        fecha_movimiento,
-        cantidad,
-        id_usuario
-    ) VALUES (
-        p_id_producto,
-        0,  -- No es una entrada
-        p_cantidad,
-        NOW(),
-        p_cantidad,
-        p_id_usuario
-    );
+    -- 1. VALIDACIÓN DE STOCK
+    SELECT stock INTO v_stock_actual FROM producto WHERE id_producto = p_id_producto;
+    SET v_nueva_cantidad = v_stock_actual - p_cantidad;
 
-    -- Obtener el ID del movimiento recién insertado
-    SET v_idmovimiento = LAST_INSERT_ID();
+    IF v_nueva_cantidad < 0 THEN
+        -- Evitar stock negativo en SALIDA
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Stock insuficiente para crear el detalle del pedido.';
+    ELSE
+        -- 2. Cálculo del total de la línea
+        SET v_total_bruto = p_cantidad * p_precio_unitario; 
+        SET v_total_neto = (v_total_bruto - p_descuento) * (1 + p_impuesto);
 
-    -- 2. Inserta el detalle del pedido
-    INSERT INTO detallepedido (
-        producto_solicitado,
-        precio_unitario,
-        precio_venta,
-        id_pedido,
-        id_producto,
-        id_movimiento
-    ) VALUES (
-        p_producto_solicitado,
-        p_precio_unitario,
-        p_precio_venta,
-        p_id_pedido,
-        p_id_producto,
-        v_idmovimiento
-    );
+        -- 3. Inserta el movimiento de inventario (USANDO NUEVA ESTRUCTURA)
+        INSERT INTO movimientoinventario (
+            id_producto, 
+            tipo_movimiento, 
+            origen, 
+            id_origen, 
+            fecha_movimiento, 
+            cantidad, 
+            id_usuario
+        ) VALUES (
+            p_id_producto, 
+            'SALIDA', 
+            'PEDIDO', 
+            p_id_pedido, -- Se enlaza directamente al ID del pedido
+            NOW(), 
+            p_cantidad, -- Cantidad positiva, el tipo_movimiento define la acción
+            p_id_usuario
+        );
 
-    -- 3. Actualiza el stock del producto
-    UPDATE producto
-    SET stock = stock - p_cantidad
-    WHERE id_producto = p_id_producto;
+        SET v_idmovimiento = LAST_INSERT_ID();
+
+        -- 4. Inserta el detalle del pedido (Sin cambios, solo para referencia)
+        INSERT INTO detallepedido (
+            producto_solicitado, precio_unitario, descuento, impuesto, total_linea,
+            id_pedido, id_producto, cantidad, id_movimiento
+        ) VALUES (
+            p_producto_solicitado, p_precio_unitario, p_descuento, p_impuesto, v_total_neto,
+            p_id_pedido, p_id_producto, p_cantidad, v_idmovimiento
+        );
+
+        -- 5. Actualiza el stock del producto
+        UPDATE producto
+        SET stock = v_nueva_cantidad
+        WHERE id_producto = p_id_producto;
+    END IF;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_estado` (IN `p_proceso` VARCHAR(50), IN `p_entregado` TINYINT(1), IN `p_cancelado` TINYINT(1))   BEGIN
     INSERT INTO estadopedido (proceso, entregado, cancelado) VALUES (p_proceso, p_entregado, p_cancelado);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_movimiento` (IN `p_id_producto` INT, IN `p_entrada` INT, IN `p_salida` INT, IN `p_id_usuario` INT)   BEGIN
-    INSERT INTO movimientoinventario (id_producto, entrada, salida, fecha_movimiento, cantidad, id_usuario)
-    VALUES (p_id_producto, p_entrada, p_salida, NOW(), p_entrada - p_salida, p_id_usuario);
-    UPDATE producto SET stock = stock + p_entrada - p_salida WHERE id_producto = p_id_producto;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_movimiento` (IN `p_id_producto` INT, IN `p_cantidad` INT, IN `p_tipo_movimiento` ENUM('ENTRADA','AJUSTE','TRANSFERENCIA'), IN `p_origen` ENUM('COMPRA','AJUSTE','TRANSFERENCIA'), IN `p_id_origen` INT, IN `p_id_usuario` INT)   BEGIN
+    
+    -- 1. Inserta el movimiento de inventario
+    INSERT INTO movimientoinventario (
+        id_producto, 
+        tipo_movimiento, 
+        origen, 
+        id_origen, 
+        fecha_movimiento, 
+        cantidad, 
+        id_usuario
+    ) VALUES (
+        p_id_producto, 
+        p_tipo_movimiento, 
+        p_origen, 
+        p_id_origen,
+        NOW(), 
+        p_cantidad, 
+        p_id_usuario
+    );
+
+    -- 2. Actualiza el stock del producto
+    -- Esta lógica aplica tanto para ENTRADA (suma) como para AJUSTE positivo.
+    -- Para SALIDA, el proceso es diferente (se usa sp_crear_detalle_pedido).
+    UPDATE producto
+    SET stock = stock + p_cantidad
+    WHERE id_producto = p_id_producto;
+    
+    SELECT LAST_INSERT_ID() AS id_movimiento;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_pedido` (IN `p_id_usuario` INT, IN `p_fecha_pedido` DATETIME, IN `p_fecha_entrega` DATETIME, IN `p_id_estado` INT)   BEGIN
@@ -134,9 +177,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_pedido` (IN `p_id_usuario`
     VALUES (p_id_usuario, p_fecha_pedido, p_fecha_entrega, p_id_estado);
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_producto` (IN `p_nombre_producto` VARCHAR(255), IN `p_descripcion` TEXT, IN `p_precio` DECIMAL(10,2), IN `p_stock` INT, IN `p_id_proveedor` INT, IN `p_id_categoria` INT)   BEGIN
-    INSERT INTO producto (nombre_producto, descripcion, precio, stock, id_proveedor, id_categoria)
-    VALUES (p_nombre_producto, p_descripcion, p_precio, p_stock, p_id_proveedor, p_id_categoria);
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_producto` (IN `p_id_categoria` INT, IN `p_id_proveedor` INT, IN `p_sku` VARCHAR(50), IN `p_nombre_producto` VARCHAR(255), IN `p_activo` TINYINT(1), IN `p_stock` INT, IN `p_stock_minimo` INT, IN `p_costo_unitario` DECIMAL(12,2), IN `p_precio_venta_base` DECIMAL(12,2), IN `p_fecha_registro` DATETIME)   BEGIN
+    INSERT INTO producto (
+        id_categoria, id_proveedor, sku, nombre_producto, activo, stock, stock_minimo, 
+        costo_unitario, precio_venta_base, fecha_registro
+    )
+    VALUES (
+        p_id_categoria, p_id_proveedor, p_sku, p_nombre_producto, p_activo, p_stock, 
+        p_stock_minimo, p_costo_unitario, p_precio_venta_base, p_fecha_registro
+    );
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_proveedor` (IN `p_descripcion` VARCHAR(100), IN `p_contacto` VARCHAR(100), IN `p_direccion` VARCHAR(150))   BEGIN
@@ -149,8 +198,26 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_rol` (IN `p_descripcion` V
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_usuario` (IN `p_nombre_usuario` VARCHAR(100), IN `p_correo` VARCHAR(100), IN `p_contrasena` VARCHAR(255), IN `p_telefono` VARCHAR(20), IN `p_id_rol` INT)   BEGIN
-    INSERT INTO usuario (nombre_usuario, correo, contrasena, telefono, fecha_ingreso, ultimo_acceso, id_rol)
-    VALUES (p_nombre_usuario, p_correo, p_contrasena, p_telefono, NOW(), NOW(), p_id_rol);
+    INSERT INTO usuario (
+        nombre_usuario, 
+        correo, 
+        contrasena, 
+        password_updated_at, -- Nuevo campo
+        telefono, 
+        fecha_ingreso, 
+        ultimo_acceso, 
+        id_rol -- Campo de rol original (1:N)
+    )
+    VALUES (
+        p_nombre_usuario, 
+        p_correo, 
+        p_contrasena, 
+        NOW(), -- Se establece la fecha de creación/actualización de la contraseña
+        p_telefono, 
+        NOW(), 
+        NOW(), 
+        p_id_rol
+    );
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_categoria` (IN `p_id_categoria` INT)   BEGIN
@@ -188,23 +255,34 @@ END$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_login_usuario` (IN `p_usuario` VARCHAR(100), IN `p_contrasena` VARCHAR(255))   BEGIN
     DECLARE v_id_usuario INT;
 
-    -- Verificar si existe el usuario por correo o teléfono y contraseña
+    -- Intentamos encontrar un usuario que no esté bloqueado y coincida con el usuario/teléfono
     SELECT id_usuario INTO v_id_usuario
     FROM usuario
     WHERE (correo = p_usuario OR telefono = p_usuario)
-      AND contrasena = p_contrasena
+      AND contrasena = p_contrasena 
+      AND (bloqueado_hasta IS NULL OR bloqueado_hasta < NOW())
     LIMIT 1;
 
-    -- Si existe, actualizamos ultimo_acceso y devolvemos datos
     IF v_id_usuario IS NOT NULL THEN
+        -- Login Exitoso
         UPDATE usuario
-        SET ultimo_acceso = NOW()
+        SET 
+            ultimo_acceso = NOW(), 
+            intentos_fallidos = 0 -- Resetea intentos fallidos
         WHERE id_usuario = v_id_usuario;
 
         SELECT id_usuario, nombre_usuario, id_rol
         FROM usuario
         WHERE id_usuario = v_id_usuario;
     ELSE
+        -- Login Fallido: Incrementa intentos y potencialmente bloquea.
+        UPDATE usuario
+        SET 
+            intentos_fallidos = intentos_fallidos + 1,
+            -- Bloquea por 2 minutos si los intentos fallidos superan un umbral (ej. 5)
+            bloqueado_hasta = IF(intentos_fallidos + 1 >= 5, DATE_ADD(NOW(), INTERVAL 2 MINUTE), bloqueado_hasta) 
+        WHERE (correo = p_usuario OR telefono = p_usuario);
+
         SELECT 'ERROR' AS mensaje;
     END IF;
 END$$
@@ -225,9 +303,12 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_modificar_usuario` (IN `p_id_usuario` INT, IN `p_nombre_usuario` VARCHAR(100), IN `p_correo` VARCHAR(100), IN `p_contrasena` VARCHAR(255), IN `p_telefono` VARCHAR(20), IN `p_id_rol` INT)   BEGIN
     UPDATE usuario
-    SET nombre_usuario = p_nombre_usuario,
+    SET 
+        nombre_usuario = p_nombre_usuario,
         correo = p_correo,
         contrasena = p_contrasena,
+        -- Actualiza `password_updated_at` solo si se pasa una nueva contraseña
+        password_updated_at = IF(p_contrasena IS NOT NULL AND p_contrasena != '', NOW(), password_updated_at),
         telefono = p_telefono,
         id_rol = p_id_rol
     WHERE id_usuario = p_id_usuario;
@@ -316,29 +397,56 @@ INSERT INTO `categoriaproducto` (`id_categoria`, `descripcion`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `cat_estado_pedido`
+--
+
+CREATE TABLE `cat_estado_pedido` (
+  `id_estado` int(11) NOT NULL,
+  `codigo` varchar(10) NOT NULL,
+  `nombre` varchar(50) NOT NULL,
+  `es_final` tinyint(1) DEFAULT 0 COMMENT '1 si es un estado final (Entregado o Cancelado), 0 en caso contrario',
+  `orden` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `cat_estado_pedido`
+--
+
+INSERT INTO `cat_estado_pedido` (`id_estado`, `codigo`, `nombre`, `es_final`, `orden`) VALUES
+(1, 'ENTRG', 'Entregado', 1, 3),
+(2, 'CANC', 'Cancelado', 1, 4),
+(3, 'PROCESO', 'En Proceso', 0, 2);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `detallepedido`
 --
 
 CREATE TABLE `detallepedido` (
   `id_detalle` int(11) NOT NULL,
   `producto_solicitado` varchar(100) DEFAULT NULL,
+  `cantidad` int(11) NOT NULL,
   `precio_unitario` decimal(10,2) DEFAULT NULL,
-  `precio_venta` decimal(10,2) DEFAULT NULL,
+  `descuento` decimal(10,2) DEFAULT 0.00,
+  `impuesto` decimal(10,2) DEFAULT 0.00,
+  `total_linea` decimal(12,2) NOT NULL,
   `id_pedido` int(11) DEFAULT NULL,
   `id_producto` int(11) DEFAULT NULL,
   `id_movimiento` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ;
 
 --
 -- Volcado de datos para la tabla `detallepedido`
 --
 
-INSERT INTO `detallepedido` (`id_detalle`, `producto_solicitado`, `precio_unitario`, `precio_venta`, `id_pedido`, `id_producto`, `id_movimiento`) VALUES
-(4, 'Camisa', 15.00, 200.00, 1, 1, NULL),
-(5, 'Camisa', 15.00, 200.00, 1, 1, NULL),
-(6, 'Camisa', 15.00, 200.00, 1, 1, NULL),
-(7, 'Camisa', 15.00, 200.00, 1, 1, NULL),
-(8, 'Camisa', 15.00, 200.00, 1, 1, 1);
+INSERT INTO `detallepedido` (`id_detalle`, `producto_solicitado`, `cantidad`, `precio_unitario`, `descuento`, `impuesto`, `total_linea`, `id_pedido`, `id_producto`, `id_movimiento`) VALUES
+(4, 'Camisa', 1, 15.00, 0.00, 0.00, 0.00, 1, 1, NULL),
+(5, 'Camisa', 1, 15.00, 0.00, 0.00, 0.00, 1, 1, NULL),
+(6, 'Camisa', 1, 15.00, 0.00, 0.00, 0.00, 1, 1, NULL),
+(7, 'Camisa', 1, 15.00, 0.00, 0.00, 0.00, 1, 1, NULL),
+(8, 'Camisa', 1, 15.00, 0.00, 0.00, 0.00, 1, 1, 1),
+(10, 'Camisa', 1, 20.00, 0.00, 0.00, 40.00, 1, 1, 3);
 
 --
 -- Disparadores `detallepedido`
@@ -371,47 +479,28 @@ CREATE TABLE `detallepedido_aud` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `estadopedido`
---
-
-CREATE TABLE `estadopedido` (
-  `id_estado` int(11) NOT NULL,
-  `proceso` varchar(50) DEFAULT NULL,
-  `entregado` tinyint(1) DEFAULT 0,
-  `cancelado` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `estadopedido`
---
-
-INSERT INTO `estadopedido` (`id_estado`, `proceso`, `entregado`, `cancelado`) VALUES
-(1, NULL, 1, 0),
-(2, NULL, 0, 1),
-(3, 'En Proceso', 0, 0);
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `movimientoinventario`
 --
 
 CREATE TABLE `movimientoinventario` (
   `id_movimiento` int(11) NOT NULL,
-  `entrada` int(11) DEFAULT 0,
-  `salida` int(11) DEFAULT 0,
+  `tipo_movimiento` enum('ENTRADA','SALIDA','AJUSTE') NOT NULL,
+  `origen` enum('PEDIDO','COMPRA','AJUSTE','TRANSFERENCIA') NOT NULL,
+  `id_origen` int(11) DEFAULT NULL,
   `fecha_movimiento` date DEFAULT NULL,
-  `cantidad` int(11) DEFAULT NULL,
+  `cantidad` int(11) NOT NULL,
   `id_usuario` int(11) DEFAULT NULL,
   `id_producto` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ;
 
 --
 -- Volcado de datos para la tabla `movimientoinventario`
 --
 
-INSERT INTO `movimientoinventario` (`id_movimiento`, `entrada`, `salida`, `fecha_movimiento`, `cantidad`, `id_usuario`, `id_producto`) VALUES
-(1, 0, 10, '2025-08-09', 10, 1, 1);
+INSERT INTO `movimientoinventario` (`id_movimiento`, `tipo_movimiento`, `origen`, `id_origen`, `fecha_movimiento`, `cantidad`, `id_usuario`, `id_producto`) VALUES
+(1, 'ENTRADA', 'PEDIDO', NULL, '2025-08-09', 10, 1, 1),
+(2, 'ENTRADA', 'PEDIDO', NULL, '2025-09-27', 2, 1, 1),
+(3, 'ENTRADA', 'PEDIDO', NULL, '2025-09-27', 2, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -421,8 +510,11 @@ INSERT INTO `movimientoinventario` (`id_movimiento`, `entrada`, `salida`, `fecha
 
 CREATE TABLE `pedido` (
   `id_pedido` int(11) NOT NULL,
-  `id_usuario` int(11) DEFAULT NULL,
+  `numero_pedido` varchar(50) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
   `fecha_pedido` date DEFAULT NULL,
+  `fecha_compromiso` date DEFAULT NULL,
+  `observaciones` text DEFAULT NULL,
   `fecha_entrega` date DEFAULT NULL,
   `id_estado` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -431,8 +523,8 @@ CREATE TABLE `pedido` (
 -- Volcado de datos para la tabla `pedido`
 --
 
-INSERT INTO `pedido` (`id_pedido`, `id_usuario`, `fecha_pedido`, `fecha_entrega`, `id_estado`) VALUES
-(1, 1, '0000-00-00', '0000-00-00', 1);
+INSERT INTO `pedido` (`id_pedido`, `numero_pedido`, `id_usuario`, `fecha_pedido`, `fecha_compromiso`, `observaciones`, `fecha_entrega`, `id_estado`) VALUES
+(1, '', 1, '0000-00-00', NULL, NULL, '0000-00-00', 1);
 
 --
 -- Disparadores `pedido`
@@ -470,10 +562,14 @@ CREATE TABLE `pedido_aud` (
 
 CREATE TABLE `producto` (
   `id_producto` int(11) NOT NULL,
+  `sku` varchar(50) NOT NULL,
   `nombre_producto` varchar(100) DEFAULT NULL,
+  `activo` tinyint(1) DEFAULT 1,
   `descripcion` text DEFAULT NULL,
-  `precio` decimal(10,2) DEFAULT NULL,
+  `precio_venta_base` decimal(12,2) NOT NULL,
   `stock` int(11) DEFAULT 0,
+  `stock_minimo` int(11) DEFAULT 0,
+  `costo_unitario` decimal(12,2) DEFAULT 0.00,
   `id_proveedor` int(11) DEFAULT NULL,
   `id_categoria` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -482,8 +578,8 @@ CREATE TABLE `producto` (
 -- Volcado de datos para la tabla `producto`
 --
 
-INSERT INTO `producto` (`id_producto`, `nombre_producto`, `descripcion`, `precio`, `stock`, `id_proveedor`, `id_categoria`) VALUES
-(1, 'Camisa', 'Camisa Azu', 15.00, 10, 1, 2);
+INSERT INTO `producto` (`id_producto`, `sku`, `nombre_producto`, `activo`, `descripcion`, `precio_venta_base`, `stock`, `stock_minimo`, `costo_unitario`, `id_proveedor`, `id_categoria`) VALUES
+(1, '', 'Camisa', 1, 'Camisa Azu', 15.00, 8, 0, 0.00, 1, 2);
 
 --
 -- Disparadores `producto`
@@ -615,18 +711,22 @@ CREATE TABLE `usuario` (
   `nombre_usuario` varchar(100) NOT NULL,
   `correo` varchar(100) NOT NULL,
   `contrasena` varchar(255) NOT NULL,
+  `password_updated_at` datetime DEFAULT NULL,
+  `intentos_fallidos` int(11) DEFAULT 0,
+  `bloqueado_hasta` datetime DEFAULT NULL,
   `telefono` varchar(20) DEFAULT NULL,
   `fecha_ingreso` date NOT NULL,
   `ultimo_acceso` datetime DEFAULT NULL,
   `id_rol` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
-INSERT INTO `usuario` (`id_usuario`, `nombre_usuario`, `correo`, `contrasena`, `telefono`, `fecha_ingreso`, `ultimo_acceso`, `id_rol`) VALUES
-(1, 'Patrick', 'pat@gmail.com', 'prueba', '98989890', '2025-08-08', '2025-08-08 21:46:14', 1);
+INSERT INTO `usuario` (`id_usuario`, `nombre_usuario`, `correo`, `contrasena`, `password_updated_at`, `intentos_fallidos`, `bloqueado_hasta`, `telefono`, `fecha_ingreso`, `ultimo_acceso`, `id_rol`) VALUES
+(1, 'Patrick', 'pat@gmail.com', 'prueba', '2025-09-27 10:49:54', 0, NULL, '98989890', '2025-08-08', '2025-08-08 21:46:14', 1),
+(2, 'nuevo_usuario', 'nuevo@email.com', '123456', '2025-09-27 10:49:54', 0, NULL, '123456789', '2025-09-27', '2025-09-27 00:39:15', 1);
 
 --
 -- Disparadores `usuario`
@@ -664,7 +764,15 @@ CREATE TABLE `usuario_aud` (
 -- Indices de la tabla `categoriaproducto`
 --
 ALTER TABLE `categoriaproducto`
-  ADD PRIMARY KEY (`id_categoria`);
+  ADD PRIMARY KEY (`id_categoria`),
+  ADD UNIQUE KEY `idx_categoria_descripcion` (`descripcion`);
+
+--
+-- Indices de la tabla `cat_estado_pedido`
+--
+ALTER TABLE `cat_estado_pedido`
+  ADD PRIMARY KEY (`id_estado`),
+  ADD UNIQUE KEY `codigo` (`codigo`);
 
 --
 -- Indices de la tabla `detallepedido`
@@ -682,12 +790,6 @@ ALTER TABLE `detallepedido_aud`
   ADD PRIMARY KEY (`id_aud`);
 
 --
--- Indices de la tabla `estadopedido`
---
-ALTER TABLE `estadopedido`
-  ADD PRIMARY KEY (`id_estado`);
-
---
 -- Indices de la tabla `movimientoinventario`
 --
 ALTER TABLE `movimientoinventario`
@@ -700,6 +802,7 @@ ALTER TABLE `movimientoinventario`
 --
 ALTER TABLE `pedido`
   ADD PRIMARY KEY (`id_pedido`),
+  ADD UNIQUE KEY `numero_pedido` (`numero_pedido`),
   ADD KEY `fk_pedido_usuario` (`id_usuario`),
   ADD KEY `fk_pedido_estado` (`id_estado`);
 
@@ -714,6 +817,7 @@ ALTER TABLE `pedido_aud`
 --
 ALTER TABLE `producto`
   ADD PRIMARY KEY (`id_producto`),
+  ADD UNIQUE KEY `sku` (`sku`),
   ADD KEY `fk_producto_proveedor` (`id_proveedor`),
   ADD KEY `fk_producto_categoria` (`id_categoria`);
 
@@ -773,10 +877,16 @@ ALTER TABLE `categoriaproducto`
   MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT de la tabla `cat_estado_pedido`
+--
+ALTER TABLE `cat_estado_pedido`
+  MODIFY `id_estado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT de la tabla `detallepedido`
 --
 ALTER TABLE `detallepedido`
-  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `detallepedido_aud`
@@ -785,16 +895,10 @@ ALTER TABLE `detallepedido_aud`
   MODIFY `id_aud` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `estadopedido`
---
-ALTER TABLE `estadopedido`
-  MODIFY `id_estado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
 -- AUTO_INCREMENT de la tabla `movimientoinventario`
 --
 ALTER TABLE `movimientoinventario`
-  MODIFY `id_movimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_movimiento` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `pedido`
@@ -848,7 +952,7 @@ ALTER TABLE `rol`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario_aud`
@@ -879,8 +983,8 @@ ALTER TABLE `movimientoinventario`
 -- Filtros para la tabla `pedido`
 --
 ALTER TABLE `pedido`
-  ADD CONSTRAINT `fk_pedido_estado` FOREIGN KEY (`id_estado`) REFERENCES `estadopedido` (`id_estado`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_pedido_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_pedido_estado_nuevo` FOREIGN KEY (`id_estado`) REFERENCES `cat_estado_pedido` (`id_estado`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pedido_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `producto`
