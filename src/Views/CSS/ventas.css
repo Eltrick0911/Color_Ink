@@ -1,0 +1,135 @@
+/* Estilos de Ventas - consistente con inventario/usuarios/pedidos */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #000000;
+}
+
+.ventas-container {
+    padding: 20px;
+    color: #ffffff;
+}
+
+.ventas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.btn-nueva-venta {
+    background-color: #68045a;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.ventas-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.stat-icon i {
+    color: rgba(217, 0, 188, 0.8);
+    font-size: 1.6em;
+}
+
+.stat-info h3 {
+    margin: 0;
+    font-size: 0.95em;
+    color: #cccccc;
+}
+
+.stat-number {
+    margin: 5px 0 0 0;
+    font-weight: bold;
+}
+
+.ventas-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.ventas-filters .search-input,
+.ventas-filters .filter-select,
+.ventas-filters input[type="date"] {
+    background-color: #111;
+    color: #fff;
+    border: 1px solid #333;
+    padding: 8px 10px;
+    border-radius: 6px;
+}
+
+.ventas-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #151515;
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ventas-table thead th {
+    text-align: left;
+    padding: 12px 10px;
+    background-color: #1f1f1f;
+    color: #bbb;
+}
+
+.ventas-table tbody td {
+    padding: 12px 10px;
+    border-top: 1px solid #262626;
+}
+
+.ventas-table .resultado-positivo {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.ventas-table .resultado-negativo {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.btn-action {
+    background: transparent;
+    border: 1px solid #444;
+    color: #ddd;
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+}
+
+@media (max-width: 900px) {
+    .ventas-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 520px) {
+    .ventas-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+
