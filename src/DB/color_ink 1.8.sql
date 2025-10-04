@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 28-09-2025 a las 03:47:26
+-- Tiempo de generación: 03-10-2025 a las 04:35:49
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -27,12 +27,10 @@ DELIMITER $$
 --
 -- Procedimientos
 --
-DROP PROCEDURE IF EXISTS `sp_actualizar_categoria`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_categoria` (IN `p_id_categoria` INT, IN `p_descripcion` VARCHAR(100))   BEGIN
     UPDATE categoriaproducto SET descripcion = p_descripcion WHERE id_categoria = p_id_categoria;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_actualizar_detalle_pedido`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_detalle_pedido` (IN `p_id_detalle` INT, IN `p_producto_solicitado` VARCHAR(255), IN `p_cantidad_nueva` INT, IN `p_precio_unitario_nuevo` DECIMAL(10,2), IN `p_descuento_nuevo` DECIMAL(10,2), IN `p_impuesto_nuevo` DECIMAL(10,2), IN `p_id_usuario` INT)   BEGIN
     DECLARE v_old_cantidad INT;
     DECLARE v_id_producto INT;
@@ -104,7 +102,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_detalle_pedido` (IN `
     
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_actualizar_estado`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_estado` (IN `p_id_estado` INT, IN `p_codigo` VARCHAR(10), IN `p_nombre` VARCHAR(50), IN `p_es_final` TINYINT(1), IN `p_orden` INT)   BEGIN
     UPDATE cat_estado_pedido 
     SET 
@@ -116,7 +113,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_estado` (IN `p_id_est
         id_estado = p_id_estado;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_actualizar_pedido`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_pedido` (IN `p_id_pedido` INT, IN `p_id_usuario` INT, IN `p_fecha_pedido` DATETIME, IN `p_fecha_entrega` DATETIME, IN `p_id_estado` INT)   BEGIN
     UPDATE pedido
     SET id_usuario = p_id_usuario,
@@ -126,7 +122,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_pedido` (IN `p_id_ped
     WHERE id_pedido = p_id_pedido;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_actualizar_producto`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_producto` (IN `p_id_producto` INT, IN `p_nombre_producto` VARCHAR(255), IN `p_descripcion` TEXT, IN `p_precio` DECIMAL(10,2), IN `p_stock` INT, IN `p_id_proveedor` INT, IN `p_id_categoria` INT)   BEGIN
     UPDATE producto
     SET nombre_producto = p_nombre_producto,
@@ -138,12 +133,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_producto` (IN `p_id_p
     WHERE id_producto = p_id_producto;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_actualizar_rol`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_rol` (IN `p_id_rol` INT, IN `p_descripcion` VARCHAR(100), IN `p_estado` VARCHAR(20))   BEGIN
     UPDATE rol SET descripcion = p_descripcion, estado = p_estado WHERE id_rol = p_id_rol;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_alerta_stock_minimo`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_alerta_stock_minimo` ()   BEGIN
     -- 1. Eliminar alertas antiguas que ya fueron atendidas para no duplicar datos
     DELETE FROM alerta_stock 
@@ -176,7 +169,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_alerta_stock_minimo` ()   BEGIN
 
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_cambiar_estado_pedido`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_cambiar_estado_pedido` (IN `p_id_pedido` INT, IN `p_id_estado_nuevo` INT, IN `p_id_usuario` INT)   BEGIN
     DECLARE v_es_final TINYINT(1);
     
@@ -204,12 +196,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_cambiar_estado_pedido` (IN `p_id
         
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_crear_categoria`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_categoria` (IN `p_descripcion` VARCHAR(100))   BEGIN
     INSERT INTO categoriaproducto (descripcion) VALUES (p_descripcion);
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_crear_detalle_pedido`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_detalle_pedido` (IN `p_producto_solicitado` VARCHAR(255), IN `p_precio_unitario` DECIMAL(10,2), IN `p_descuento` DECIMAL(10,2), IN `p_impuesto` DECIMAL(10,2), IN `p_id_pedido` INT, IN `p_id_producto` INT, IN `p_cantidad` INT, IN `p_id_usuario` INT)   BEGIN
     DECLARE v_idmovimiento INT;
     DECLARE v_total_bruto DECIMAL(12,2);
@@ -266,12 +256,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_detalle_pedido` (IN `p_pro
     END IF;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_crear_estado`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_estado` (IN `p_proceso` VARCHAR(50), IN `p_entregado` TINYINT(1), IN `p_cancelado` TINYINT(1))   BEGIN
     INSERT INTO estadopedido (proceso, entregado, cancelado) VALUES (p_proceso, p_entregado, p_cancelado);
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_crear_movimiento`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_movimiento` (IN `p_id_producto` INT, IN `p_cantidad` INT, IN `p_tipo_movimiento` ENUM('ENTRADA','AJUSTE','TRANSFERENCIA'), IN `p_origen` ENUM('COMPRA','AJUSTE','TRANSFERENCIA'), IN `p_id_origen` INT, IN `p_id_usuario` INT)   BEGIN
     
     -- 1. Inserta el movimiento de inventario
@@ -303,7 +291,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_movimiento` (IN `p_id_prod
     SELECT LAST_INSERT_ID() AS id_movimiento;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_crear_pedido`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_pedido` (IN `p_numero_pedido` VARCHAR(50), IN `p_fecha_compromiso` DATE, IN `p_observaciones` TEXT, IN `p_id_estado_inicial` INT, IN `p_id_usuario` INT)   BEGIN
     DECLARE v_id_pedido INT;
     
@@ -331,7 +318,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_pedido` (IN `p_numero_pedi
     
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_crear_producto`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_producto` (IN `p_id_categoria` INT, IN `p_id_proveedor` INT, IN `p_sku` VARCHAR(50), IN `p_nombre_producto` VARCHAR(255), IN `p_activo` TINYINT(1), IN `p_stock` INT, IN `p_stock_minimo` INT, IN `p_costo_unitario` DECIMAL(12,2), IN `p_precio_venta_base` DECIMAL(12,2), IN `p_fecha_registro` DATETIME)   BEGIN
     INSERT INTO producto (
         id_categoria, id_proveedor, sku, nombre_producto, activo, stock, stock_minimo, 
@@ -343,18 +329,15 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_producto` (IN `p_id_catego
     );
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_crear_proveedor`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_proveedor` (IN `p_descripcion` VARCHAR(100), IN `p_contacto` VARCHAR(100), IN `p_direccion` VARCHAR(150))   BEGIN
     INSERT INTO proveedor (descripcion_proveedor, forma_contacto, direccion)
     VALUES (p_descripcion, p_contacto, p_direccion);
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_crear_rol`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_rol` (IN `p_descripcion` VARCHAR(100), IN `p_estado` VARCHAR(20))   BEGIN
     INSERT INTO rol (descripcion, estado) VALUES (p_descripcion, p_estado);
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_crear_usuario`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_usuario` (IN `p_nombre_usuario` VARCHAR(100), IN `p_correo` VARCHAR(100), IN `p_contrasena` VARCHAR(255), IN `p_telefono` VARCHAR(20), IN `p_id_rol` INT)   BEGIN
     INSERT INTO usuario (
         nombre_usuario, 
@@ -378,47 +361,38 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_usuario` (IN `p_nombre_usu
     );
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_categoria`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_categoria` (IN `p_id_categoria` INT)   BEGIN
     DELETE FROM categoriaproducto WHERE id_categoria = p_id_categoria;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_detalle_pedido`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_detalle_pedido` (IN `p_id_detalle` INT)   BEGIN
     DELETE FROM detallepedido WHERE id_detalle = p_id_detalle;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_estado`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_estado` (IN `p_id_estado` INT)   BEGIN
     DELETE FROM estadopedido WHERE id_estado = p_id_estado;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_pedido`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_pedido` (IN `p_id_pedido` INT)   BEGIN
     DELETE FROM pedido WHERE id_pedido = p_id_pedido;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_producto`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_producto` (IN `p_id_producto` INT)   BEGIN
     DELETE FROM producto WHERE id_producto = p_id_producto;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_proveedor`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_proveedor` (IN `p_id` INT)   BEGIN
     DELETE FROM proveedor WHERE id_proveedor = p_id;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_rol`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_rol` (IN `p_id_rol` INT)   BEGIN
     DELETE FROM rol WHERE id_rol = p_id_rol;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_eliminar_usuario`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_usuario` (IN `p_id` INT)   BEGIN
     DELETE FROM usuario WHERE id_usuario = p_id;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_login_usuario`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_login_usuario` (IN `p_usuario` VARCHAR(100), IN `p_contrasena` VARCHAR(255))   BEGIN
     DECLARE v_id_usuario INT;
 
@@ -454,12 +428,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_login_usuario` (IN `p_usuario` V
     END IF;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_obtener_categoria`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_categoria` (IN `p_id_categoria` INT)   BEGIN
     SELECT * FROM categoriaproducto WHERE id_categoria = p_id_categoria;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_obtener_detalle_pedido`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_detalle_pedido` (IN `p_id_detalle` INT)   BEGIN
     SELECT
         dp.*,
@@ -476,12 +448,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_detalle_pedido` (IN `p_i
     WHERE dp.id_detalle = p_id_detalle;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_obtener_estado`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_estado` (IN `p_id_estado` INT)   BEGIN
     SELECT * FROM estadopedido WHERE id_estado = p_id_estado;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_obtener_pedido`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_pedido` (IN `p_id_pedido` INT)   BEGIN
     SELECT
         pe.*,
@@ -493,7 +463,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_pedido` (IN `p_id_pedido
     WHERE pe.id_pedido = p_id_pedido;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_obtener_producto`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_producto` (IN `p_id_producto` INT)   BEGIN
     SELECT
         p.*,
@@ -505,12 +474,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_producto` (IN `p_id_prod
     WHERE p.id_producto = p_id_producto;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_obtener_proveedor`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_proveedor` (IN `p_id_proveedor` INT)   BEGIN
     SELECT * FROM proveedor WHERE id_proveedor = p_id_proveedor;
 END$$
 
-DROP PROCEDURE IF EXISTS `sp_obtener_usuario`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_usuario` (IN `p_id_usuario` INT)   BEGIN
     SELECT
         u.*,
@@ -528,7 +495,6 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `alerta_stock`
 --
 
-DROP TABLE IF EXISTS `alerta_stock`;
 CREATE TABLE IF NOT EXISTS `alerta_stock` (
   `id_alerta` int(11) NOT NULL AUTO_INCREMENT,
   `id_producto` int(11) NOT NULL,
@@ -547,7 +513,6 @@ CREATE TABLE IF NOT EXISTS `alerta_stock` (
 -- Estructura de tabla para la tabla `categoriaproducto`
 --
 
-DROP TABLE IF EXISTS `categoriaproducto`;
 CREATE TABLE IF NOT EXISTS `categoriaproducto` (
   `id_categoria` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(100) DEFAULT NULL,
@@ -569,7 +534,6 @@ INSERT INTO `categoriaproducto` (`id_categoria`, `descripcion`) VALUES
 -- Estructura de tabla para la tabla `cat_estado_pedido`
 --
 
-DROP TABLE IF EXISTS `cat_estado_pedido`;
 CREATE TABLE IF NOT EXISTS `cat_estado_pedido` (
   `id_estado` int(11) NOT NULL AUTO_INCREMENT,
   `codigo` varchar(10) NOT NULL,
@@ -595,7 +559,6 @@ INSERT INTO `cat_estado_pedido` (`id_estado`, `codigo`, `nombre`, `es_final`, `o
 -- Estructura de tabla para la tabla `detallepedido`
 --
 
-DROP TABLE IF EXISTS `detallepedido`;
 CREATE TABLE IF NOT EXISTS `detallepedido` (
   `id_detalle` int(11) NOT NULL AUTO_INCREMENT,
   `producto_solicitado` varchar(100) DEFAULT NULL,
@@ -611,7 +574,7 @@ CREATE TABLE IF NOT EXISTS `detallepedido` (
   KEY `fk_detalle_pedido` (`id_pedido`),
   KEY `fk_detalle_producto` (`id_producto`),
   KEY `fk_detalle_movimiento` (`id_movimiento`)
-) ;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `detallepedido`
@@ -628,7 +591,6 @@ INSERT INTO `detallepedido` (`id_detalle`, `producto_solicitado`, `cantidad`, `p
 --
 -- Disparadores `detallepedido`
 --
-DROP TRIGGER IF EXISTS `tr_detallepedido_after_delete`;
 DELIMITER $$
 CREATE TRIGGER `tr_detallepedido_after_delete` AFTER DELETE ON `detallepedido` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 1;
@@ -647,7 +609,6 @@ CREATE TRIGGER `tr_detallepedido_after_delete` AFTER DELETE ON `detallepedido` F
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `tr_detallepedido_after_insert`;
 DELIMITER $$
 CREATE TRIGGER `tr_detallepedido_after_insert` AFTER INSERT ON `detallepedido` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 1;
@@ -666,7 +627,6 @@ CREATE TRIGGER `tr_detallepedido_after_insert` AFTER INSERT ON `detallepedido` F
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `tr_detallepedido_after_update`;
 DELIMITER $$
 CREATE TRIGGER `tr_detallepedido_after_update` AFTER UPDATE ON `detallepedido` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 1;
@@ -691,7 +651,6 @@ CREATE TRIGGER `tr_detallepedido_after_update` AFTER UPDATE ON `detallepedido` F
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `trg_detallepedido_delete`;
 DELIMITER $$
 CREATE TRIGGER `trg_detallepedido_delete` AFTER DELETE ON `detallepedido` FOR EACH ROW BEGIN
     INSERT INTO detallepedido_aud (id_detalle, id_pedido, id_producto, accion, usuario_accion)
@@ -706,7 +665,6 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `detallepedido_aud`
 --
 
-DROP TABLE IF EXISTS `detallepedido_aud`;
 CREATE TABLE IF NOT EXISTS `detallepedido_aud` (
   `id_aud` int(11) NOT NULL AUTO_INCREMENT,
   `id_detalle` int(11) DEFAULT NULL,
@@ -726,7 +684,6 @@ CREATE TABLE IF NOT EXISTS `detallepedido_aud` (
 -- Estructura de tabla para la tabla `movimientoinventario`
 --
 
-DROP TABLE IF EXISTS `movimientoinventario`;
 CREATE TABLE IF NOT EXISTS `movimientoinventario` (
   `id_movimiento` int(11) NOT NULL AUTO_INCREMENT,
   `tipo_movimiento` enum('ENTRADA','SALIDA','AJUSTE') NOT NULL,
@@ -739,7 +696,7 @@ CREATE TABLE IF NOT EXISTS `movimientoinventario` (
   PRIMARY KEY (`id_movimiento`),
   KEY `fk_movimiento_usuario` (`id_usuario`),
   KEY `fk_movimiento_producto` (`id_producto`)
-) ;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `movimientoinventario`
@@ -756,7 +713,6 @@ INSERT INTO `movimientoinventario` (`id_movimiento`, `tipo_movimiento`, `origen`
 -- Estructura de tabla para la tabla `pedido`
 --
 
-DROP TABLE IF EXISTS `pedido`;
 CREATE TABLE IF NOT EXISTS `pedido` (
   `id_pedido` int(11) NOT NULL AUTO_INCREMENT,
   `numero_pedido` varchar(50) NOT NULL,
@@ -782,7 +738,6 @@ INSERT INTO `pedido` (`id_pedido`, `numero_pedido`, `id_usuario`, `fecha_pedido`
 --
 -- Disparadores `pedido`
 --
-DROP TRIGGER IF EXISTS `tr_pedido_after_delete`;
 DELIMITER $$
 CREATE TRIGGER `tr_pedido_after_delete` AFTER DELETE ON `pedido` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 0;
@@ -809,7 +764,6 @@ CREATE TRIGGER `tr_pedido_after_delete` AFTER DELETE ON `pedido` FOR EACH ROW BE
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `tr_pedido_after_insert`;
 DELIMITER $$
 CREATE TRIGGER `tr_pedido_after_insert` AFTER INSERT ON `pedido` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 0;
@@ -836,7 +790,6 @@ CREATE TRIGGER `tr_pedido_after_insert` AFTER INSERT ON `pedido` FOR EACH ROW BE
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `tr_pedido_after_update`;
 DELIMITER $$
 CREATE TRIGGER `tr_pedido_after_update` AFTER UPDATE ON `pedido` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 0;
@@ -873,7 +826,6 @@ CREATE TRIGGER `tr_pedido_after_update` AFTER UPDATE ON `pedido` FOR EACH ROW BE
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `trg_pedido_delete`;
 DELIMITER $$
 CREATE TRIGGER `trg_pedido_delete` AFTER DELETE ON `pedido` FOR EACH ROW BEGIN
     INSERT INTO pedido_aud (id_pedido, id_usuario, id_estado, fecha_pedido, accion, usuario_accion)
@@ -888,7 +840,6 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `pedido_aud`
 --
 
-DROP TABLE IF EXISTS `pedido_aud`;
 CREATE TABLE IF NOT EXISTS `pedido_aud` (
   `id_aud` int(11) NOT NULL AUTO_INCREMENT,
   `fecha_accion` datetime NOT NULL,
@@ -909,7 +860,6 @@ CREATE TABLE IF NOT EXISTS `pedido_aud` (
 -- Estructura de tabla para la tabla `producto`
 --
 
-DROP TABLE IF EXISTS `producto`;
 CREATE TABLE IF NOT EXISTS `producto` (
   `id_producto` int(11) NOT NULL AUTO_INCREMENT,
   `sku` varchar(50) NOT NULL,
@@ -938,7 +888,6 @@ INSERT INTO `producto` (`id_producto`, `sku`, `nombre_producto`, `activo`, `desc
 --
 -- Disparadores `producto`
 --
-DROP TRIGGER IF EXISTS `tr_producto_after_delete`;
 DELIMITER $$
 CREATE TRIGGER `tr_producto_after_delete` AFTER DELETE ON `producto` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 1;
@@ -957,7 +906,6 @@ CREATE TRIGGER `tr_producto_after_delete` AFTER DELETE ON `producto` FOR EACH RO
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `tr_producto_after_insert`;
 DELIMITER $$
 CREATE TRIGGER `tr_producto_after_insert` AFTER INSERT ON `producto` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 1;
@@ -976,7 +924,6 @@ CREATE TRIGGER `tr_producto_after_insert` AFTER INSERT ON `producto` FOR EACH RO
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `tr_producto_after_update`;
 DELIMITER $$
 CREATE TRIGGER `tr_producto_after_update` AFTER UPDATE ON `producto` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 1;
@@ -1001,7 +948,6 @@ CREATE TRIGGER `tr_producto_after_update` AFTER UPDATE ON `producto` FOR EACH RO
 END
 $$
 DELIMITER ;
-DROP TRIGGER IF EXISTS `trg_producto_delete`;
 DELIMITER $$
 CREATE TRIGGER `trg_producto_delete` AFTER DELETE ON `producto` FOR EACH ROW BEGIN
     INSERT INTO producto_aud (id_producto, descripcion_producto, id_proveedor, id_categoria, stock, accion, usuario_accion)
@@ -1016,7 +962,6 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `producto_aud`
 --
 
-DROP TABLE IF EXISTS `producto_aud`;
 CREATE TABLE IF NOT EXISTS `producto_aud` (
   `id_aud` int(11) NOT NULL AUTO_INCREMENT,
   `fecha_accion` datetime NOT NULL,
@@ -1046,7 +991,6 @@ INSERT INTO `producto_aud` (`id_aud`, `fecha_accion`, `usuario_accion`, `json_an
 -- Estructura de tabla para la tabla `proveedor`
 --
 
-DROP TABLE IF EXISTS `proveedor`;
 CREATE TABLE IF NOT EXISTS `proveedor` (
   `id_proveedor` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion_proveedor` varchar(100) DEFAULT NULL,
@@ -1065,7 +1009,6 @@ INSERT INTO `proveedor` (`id_proveedor`, `descripcion_proveedor`, `forma_contact
 --
 -- Disparadores `proveedor`
 --
-DROP TRIGGER IF EXISTS `trg_proveedor_delete`;
 DELIMITER $$
 CREATE TRIGGER `trg_proveedor_delete` AFTER DELETE ON `proveedor` FOR EACH ROW BEGIN
     INSERT INTO proveedor_aud (id_proveedor, descripcion_proveedor, forma_contacto, direccion, accion, usuario_accion)
@@ -1080,7 +1023,6 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `proveedor_aud`
 --
 
-DROP TABLE IF EXISTS `proveedor_aud`;
 CREATE TABLE IF NOT EXISTS `proveedor_aud` (
   `id_aud` int(11) NOT NULL AUTO_INCREMENT,
   `id_proveedor` int(11) DEFAULT NULL,
@@ -1099,7 +1041,6 @@ CREATE TABLE IF NOT EXISTS `proveedor_aud` (
 -- Estructura de tabla para la tabla `registroconsulta`
 --
 
-DROP TABLE IF EXISTS `registroconsulta`;
 CREATE TABLE IF NOT EXISTS `registroconsulta` (
   `id_consulta` int(11) NOT NULL AUTO_INCREMENT,
   `tipo_consulta` varchar(50) DEFAULT NULL,
@@ -1124,7 +1065,6 @@ INSERT INTO `registroconsulta` (`id_consulta`, `tipo_consulta`, `fecha_inicial`,
 -- Estructura de tabla para la tabla `rol`
 --
 
-DROP TABLE IF EXISTS `rol`;
 CREATE TABLE IF NOT EXISTS `rol` (
   `id_rol` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(100) NOT NULL,
@@ -1137,8 +1077,8 @@ CREATE TABLE IF NOT EXISTS `rol` (
 --
 
 INSERT INTO `rol` (`id_rol`, `descripcion`, `estado`) VALUES
-(1, 'Gerente', 'Activo'),
-(2, 'Administrador', 'Activo');
+(1, 'Administrador', 'Activo'),
+(2, 'Usuario', 'Activo');
 
 -- --------------------------------------------------------
 
@@ -1146,7 +1086,6 @@ INSERT INTO `rol` (`id_rol`, `descripcion`, `estado`) VALUES
 -- Estructura de tabla para la tabla `usuario`
 --
 
-DROP TABLE IF EXISTS `usuario`;
 CREATE TABLE IF NOT EXISTS `usuario` (
   `id_usuario` int(11) NOT NULL AUTO_INCREMENT,
   `nombre_usuario` varchar(100) NOT NULL,
@@ -1162,21 +1101,21 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `uk_usuario_correo` (`correo`),
   KEY `fk_usuario_rol` (`id_rol`)
-) ;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
 INSERT INTO `usuario` (`id_usuario`, `nombre_usuario`, `correo`, `contrasena`, `password_updated_at`, `intentos_fallidos`, `bloqueado_hasta`, `telefono`, `fecha_ingreso`, `ultimo_acceso`, `id_rol`) VALUES
-(1, 'Patrick', 'pat@gmail.com', 'prueba', '2025-09-27 10:49:54', 0, NULL, '98989890', '2025-08-08', '2025-08-08 21:46:14', 1),
+(1, 'Patrick', 'pat@gmail.com', 'prueba', '2025-09-27 10:49:54', 0, NULL, '98989890', '2025-08-08', '2025-10-01 22:56:36', 1),
 (2, 'nuevo_usuario', 'nuevo@email.com', '123456', '2025-09-27 10:49:54', 0, NULL, '123456789', '2025-09-27', '2025-09-27 00:39:15', 1),
-(3, 'SISTEMA/NO LOGUEADO', 'sistema@tuempresa.com', 'N/A', NULL, 0, NULL, NULL, '0000-00-00', NULL, 1);
+(3, 'SISTEMA/NO LOGUEADO', 'sistema@tuempresa.com', 'N/A', NULL, 0, NULL, NULL, '0000-00-00', NULL, 1),
+(4, 'Juan Pérez', 'juan@email.com', '123456', '2025-10-01 22:57:15', 0, NULL, '987654321', '2025-10-01', '2025-10-01 23:32:14', 1);
 
 --
 -- Disparadores `usuario`
 --
-DROP TRIGGER IF EXISTS `trg_usuario_delete`;
 DELIMITER $$
 CREATE TRIGGER `trg_usuario_delete` AFTER DELETE ON `usuario` FOR EACH ROW BEGIN
     INSERT INTO usuario_aud (id_usuario, nombre, correo, id_rol, accion, usuario_accion)
@@ -1191,7 +1130,6 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `usuario_aud`
 --
 
-DROP TABLE IF EXISTS `usuario_aud`;
 CREATE TABLE IF NOT EXISTS `usuario_aud` (
   `id_aud` int(11) NOT NULL AUTO_INCREMENT,
   `id_usuario` int(11) DEFAULT NULL,
@@ -1202,7 +1140,14 @@ CREATE TABLE IF NOT EXISTS `usuario_aud` (
   `accion` enum('INSERT','UPDATE','DELETE') DEFAULT NULL,
   `usuario_accion` int(11) DEFAULT NULL,
   PRIMARY KEY (`id_aud`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `usuario_aud`
+--
+
+INSERT INTO `usuario_aud` (`id_aud`, `id_usuario`, `nombre`, `correo`, `id_rol`, `fecha_accion`, `accion`, `usuario_accion`) VALUES
+(1, 5, 'Test User', 'test@email.com', 1, '2025-10-02 20:33:51', 'DELETE', 1);
 
 --
 -- Restricciones para tablas volcadas
@@ -1277,10 +1222,8 @@ DELIMITER $$
 --
 -- Eventos
 --
-DROP EVENT IF EXISTS `evt_alerta_stock_minimo`$$
 CREATE DEFINER=`root`@`localhost` EVENT `evt_alerta_stock_minimo` ON SCHEDULE EVERY 1 DAY STARTS '2025-09-28 00:00:00' ON COMPLETION NOT PRESERVE ENABLE DO CALL sp_alerta_stock_minimo()$$
 
-DROP EVENT IF EXISTS `evt_purgado_auditoria`$$
 CREATE DEFINER=`root`@`localhost` EVENT `evt_purgado_auditoria` ON SCHEDULE EVERY 1 MONTH STARTS '2025-10-01 01:00:00' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
     CALL sp_purgar_auditoria();
 END$$
