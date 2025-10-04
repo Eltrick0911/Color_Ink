@@ -183,6 +183,17 @@
     animation: fadeIn 0.3s ease;
 }
 
+/* Enhanced Modal Styles */
+.modal-enhanced {
+    animation: fadeInEnhanced 0.4s ease;
+}
+
+.modal-floating {
+    animation: slideInFloating 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    border: 2px solid rgba(20, 152, 0, 0.3);
+}
+
 .modal-large .modal-content {
     max-width: 1000px;
     width: 95%;
@@ -216,6 +227,52 @@
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 2s infinite;
+}
+
+.modal-header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.modal-icon {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 12px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+}
+
+.modal-icon i {
+    font-size: 1.5em;
+}
+
+.modal-title-section h2 {
+    margin: 0;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.pedido-id-display {
+    font-size: 0.9em;
+    opacity: 0.8;
+    font-weight: normal;
+    margin-top: 2px;
 }
 
 .modal-header h2 {
@@ -588,28 +645,74 @@
 .color-selection {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
 }
 
 .color-picker-container {
     display: flex;
-    gap: 10px;
+    gap: 15px;
     align-items: center;
+    flex-wrap: wrap;
+}
+
+.color-picker-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
 .color-picker {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 3px solid rgba(255, 255, 255, 0.3);
     transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .color-picker:hover {
-    transform: scale(1.1);
+    transform: scale(1.15);
     border-color: rgba(20, 152, 0, 0.8);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.color-name {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.85em;
+    font-weight: bold;
+    text-align: center;
+    min-width: 60px;
+}
+
+/* Color Actions */
+.color-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-limpiar-colores {
+    background: linear-gradient(45deg, rgba(231, 76, 60, 0.8), rgba(231, 76, 60, 0.6));
+    color: white;
+    border: 2px solid rgba(231, 76, 60, 0.5);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-limpiar-colores:hover {
+    background: linear-gradient(45deg, rgba(231, 76, 60, 1), rgba(231, 76, 60, 0.8));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
 }
 
 /* Pedido Details View Styles */
@@ -655,36 +758,173 @@
 .detail-images {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 15px;
+    margin-top: 15px;
+    justify-content: center;
 }
 
 .detail-image {
-    width: 100px;
-    height: 100px;
-    border-radius: 8px;
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
     object-fit: cover;
-    border: 2px solid rgba(20, 152, 0, 0.3);
+    border: 3px solid rgba(20, 152, 0, 0.3);
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    animation: bounceIn 0.6s ease;
 }
 
 .detail-image:hover {
-    transform: scale(1.05);
+    transform: scale(1.1) rotate(2deg);
     border-color: rgba(20, 152, 0, 0.8);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    position: relative;
 }
+
+.detail-image:nth-child(1) { animation-delay: 0.1s; }
+.detail-image:nth-child(2) { animation-delay: 0.2s; }
+.detail-image:nth-child(3) { animation-delay: 0.3s; }
+.detail-image:nth-child(4) { animation-delay: 0.4s; }
 
 .detail-colors {
     display: flex;
-    gap: 10px;
-    margin-top: 5px;
+    gap: 15px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .detail-color {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    animation: bounceIn 0.6s ease;
+}
+
+.detail-color:hover {
+    transform: scale(1.2);
+    border-color: rgba(20, 152, 0, 0.8);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.detail-color::after {
+    content: attr(data-color-name);
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7em;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.detail-color:hover::after {
+    opacity: 1;
+}
+
+.detail-color:nth-child(1) { animation-delay: 0.1s; }
+.detail-color:nth-child(2) { animation-delay: 0.2s; }
+.detail-color:nth-child(3) { animation-delay: 0.3s; }
+.detail-color:nth-child(4) { animation-delay: 0.4s; }
+.detail-color:nth-child(5) { animation-delay: 0.5s; }
+
+/* Status Selector Styles */
+.status-selector {
+    padding: 6px 12px;
+    border: 2px solid rgba(20, 152, 0, 0.3);
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 0.9em;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.status-selector:focus {
+    outline: none;
+    border-color: rgba(20, 152, 0, 0.85);
+    box-shadow: 0 0 10px rgba(20, 152, 0, 0.35);
+}
+
+.status-selector option {
+    background-color: #333;
+    color: white;
+    padding: 8px;
+}
+
+/* Status Selector Modal */
+.status-selector-modal {
+    padding: 8px 16px;
+    border: 2px solid rgba(20, 152, 0, 0.3);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.status-selector-modal:focus {
+    outline: none;
+    border-color: rgba(20, 152, 0, 0.85);
+    box-shadow: 0 0 10px rgba(20, 152, 0, 0.35);
+}
+
+.status-selector-modal option {
+    background-color: #333;
+    color: white;
+    padding: 8px;
+}
+
+/* Status Change Section */
+.status-change-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: auto;
+}
+
+.status-change-section label {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: bold;
+    font-size: 1em;
+    white-space: nowrap;
+}
+
+.btn-actualizar-estado {
+    background: linear-gradient(45deg, rgba(20, 152, 0, 0.8), rgba(20, 152, 0, 0.6));
+    color: white;
+    border: 2px solid rgba(20, 152, 0, 0.5);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn-actualizar-estado:hover {
+    background: linear-gradient(45deg, rgba(20, 152, 0, 1), rgba(20, 152, 0, 0.8));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(20, 152, 0, 0.4);
 }
 
 /* Status Badge in Details */
@@ -723,6 +963,17 @@
     to { opacity: 1; }
 }
 
+@keyframes fadeInEnhanced {
+    from { 
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to { 
+        opacity: 1;
+        backdrop-filter: blur(5px);
+    }
+}
+
 @keyframes slideIn {
     from { 
         opacity: 0;
@@ -731,6 +982,55 @@
     to { 
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes slideInFloating {
+    0% { 
+        opacity: 0;
+        transform: translateY(-100px) scale(0.8);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translateY(10px) scale(1.02);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 
@@ -827,4 +1127,72 @@
     .resumen-images {
         justify-content: center;
     }
+
+    .status-change-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    .status-change-section label {
+        text-align: center;
+    }
+
+    .status-selector-modal {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .btn-actualizar-estado {
+        width: 100%;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .status-selector {
+        min-width: 100px;
+        font-size: 0.8em;
+    }
+
+    .color-picker-container {
+        justify-content: center;
+    }
+
+    .color-picker-item {
+        margin-bottom: 10px;
+    }
+
+    .preset-colors {
+        justify-content: center;
+    }
+}
+
+/* Image Modal Styles */
+.image-modal {
+    z-index: 10001;
+}
+
+.image-modal-content {
+    max-width: 90vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+}
+
+.enlarged-image {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.image-modal .modal-body {
+    padding: 20px;
+    text-align: center;
+    background: transparent;
 }

@@ -17,6 +17,9 @@ function initPedidosPage() {
     // Configurar búsqueda
     setupSearch();
     
+    // Configurar selectores de estado
+    setupStatusSelectors();
+    
     console.log('Página de pedidos inicializada');
 }
 
@@ -37,18 +40,24 @@ function setupActionButtons() {
 }
 
 function getActionFromIcon(icon) {
+    console.log('Icono detectado:', icon);
+    console.log('Clases del icono:', icon.className);
     if (icon.classList.contains('fa-eye')) return 'view';
     if (icon.classList.contains('fa-edit')) return 'edit';
     if (icon.classList.contains('fa-trash')) return 'delete';
+    console.log('No se encontró acción para el icono');
     return null;
 }
 
 function handleAction(action, button) {
+    console.log('Acción detectada:', action);
     const row = button.closest('tr');
     const pedidoId = row.querySelector('td:first-child').textContent;
+    console.log('ID del pedido:', pedidoId);
     
     switch(action) {
         case 'view':
+            console.log('Ejecutando viewPedido...');
             viewPedido(pedidoId);
             break;
         case 'edit':
@@ -61,8 +70,10 @@ function handleAction(action, button) {
 }
 
 function viewPedido(pedidoId) {
+    console.log('Intentando ver pedido:', pedidoId);
     // Buscar datos del pedido en localStorage o en la tabla
     const pedidoData = getPedidoData(pedidoId);
+    console.log('Datos del pedido encontrados:', pedidoData);
     if (pedidoData) {
         showPedidoDetails(pedidoData);
     } else {
@@ -81,36 +92,85 @@ function getPedidoData(pedidoId) {
     }
     
     // Si no está en localStorage, obtener de la tabla
-    const row = document.querySelector(`tr:has(td:first-child:contains("${pedidoId}"))`);
-    if (row) {
+    const rows = document.querySelectorAll('.pedidos-table tbody tr');
+    for (let row of rows) {
         const cells = row.querySelectorAll('td');
-        return {
-            id: cells[0].textContent,
-            cliente: cells[1].textContent,
-            fecha: cells[2].textContent,
-            estado: cells[3].querySelector('.status').textContent.toLowerCase(),
-            total: cells[4].textContent
-        };
+        if (cells.length > 0 && cells[0].textContent.trim() === pedidoId.trim()) {
+            const estadoSelector = cells[3].querySelector('.status-selector');
+            const estado = estadoSelector ? estadoSelector.value : 'pendiente';
+            
+            return {
+                id: cells[0].textContent.trim(),
+                cliente: cells[1].textContent.trim(),
+                fecha: cells[2].textContent.trim(),
+                estado: estado,
+                total: cells[4].textContent.trim(),
+                // Datos adicionales por defecto para mostrar en el modal
+                canalVenta: 'No especificado',
+                categoriaProducto: 'No especificado',
+                tipoTrabajo: 'No especificado',
+                cantidad: '1',
+                precioUnitario: '0.00',
+                prioridad: 'normal',
+                telefono: 'No especificado',
+                email: 'No especificado',
+                usuario: 'No especificado',
+                direccion: 'No especificada',
+                fechaEntrega: 'No especificada',
+                especificaciones: 'No especificadas',
+                textoPersonalizado: 'No especificado',
+                observaciones: 'No especificado',
+                tamano: 'No especificado',
+                material: 'No especificado'
+            };
+        }
     }
     
     return null;
 }
 
 function showPedidoDetails(pedidoData) {
+    console.log('Mostrando detalles del pedido:', pedidoData);
     const modal = document.getElementById('modalVerPedido');
     const content = document.getElementById('pedidoDetailsContent');
+    const pedidoIdDisplay = document.getElementById('pedidoIdDisplay');
     
-    if (!modal || !content) return;
+    console.log('Modal encontrado:', modal);
+    console.log('Content encontrado:', content);
+    
+    if (!modal || !content) {
+        console.error('Modal o content no encontrado');
+        return;
+    }
+    
+    // Mostrar ID del pedido en el header
+    if (pedidoIdDisplay) {
+        pedidoIdDisplay.textContent = `ID: ${pedidoData.id}`;
+    }
     
     // Generar HTML con los detalles del pedido
     content.innerHTML = generatePedidoDetailsHTML(pedidoData);
     
+    // Configurar el selector de estado en el modal
+    const estadoSelector = document.getElementById('estadoPedido');
+    if (estadoSelector && pedidoData.estado) {
+        estadoSelector.value = pedidoData.estado;
+    }
+    
     // Configurar event listeners para el modal de detalles
     setupDetailsModal();
     
-    // Mostrar modal
+    // Configurar imágenes para hacer clic y ampliar
+    setupImageClickHandlers();
+    
+    // Mostrar modal con animación
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
+    
+    // Agregar clase de animación al contenido
+    setTimeout(() => {
+        content.style.animation = 'bounceIn 0.6s ease';
+    }, 100);
 }
 
 function generatePedidoDetailsHTML(data) {
@@ -239,9 +299,23 @@ function generatePedidoDetailsHTML(data) {
 
 function generateColorsHTML(data) {
     const colors = [];
-    if (data.colorPicker1) colors.push(data.colorPicker1);
-    if (data.colorPicker2) colors.push(data.colorPicker2);
-    if (data.colorPicker3) colors.push(data.colorPicker3);
+    
+    // Recopilar colores
+    if (data.colorPicker1 && data.colorPicker1 !== '#000000') {
+        colors.push(data.colorPicker1);
+    }
+    if (data.colorPicker2 && data.colorPicker2 !== '#000000') {
+        colors.push(data.colorPicker2);
+    }
+    if (data.colorPicker3 && data.colorPicker3 !== '#000000') {
+        colors.push(data.colorPicker3);
+    }
+    if (data.colorPicker4 && data.colorPicker4 !== '#000000') {
+        colors.push(data.colorPicker4);
+    }
+    if (data.colorPicker5 && data.colorPicker5 !== '#000000') {
+        colors.push(data.colorPicker5);
+    }
     
     if (colors.length === 0) return '';
     
@@ -249,7 +323,12 @@ function generateColorsHTML(data) {
         <div class="detail-item">
             <span class="detail-label">Colores Seleccionados:</span>
             <div class="detail-colors">
-                ${colors.map(color => `<div class="detail-color" style="background-color: ${color}"></div>`).join('')}
+                ${colors.map((color, index) => 
+                    `<div class="detail-color" 
+                         style="background-color: ${color}" 
+                         data-color-name="${color.toUpperCase()}"
+                         title="${color.toUpperCase()}"></div>`
+                ).join('')}
             </div>
         </div>
     `;
@@ -270,17 +349,31 @@ function generateImagesHTML(data) {
 
 function setupDetailsModal() {
     const modal = document.getElementById('modalVerPedido');
+    if (!modal) return;
+    
     const closeBtn = modal.querySelector('.close');
     const cancelBtn = modal.querySelector('.btn-cancelar');
     
-    closeBtn.addEventListener('click', closeDetailsModal);
-    cancelBtn.addEventListener('click', closeDetailsModal);
+    // Remover event listeners existentes para evitar duplicados
+    if (closeBtn) {
+        closeBtn.removeEventListener('click', closeDetailsModal);
+        closeBtn.addEventListener('click', closeDetailsModal);
+    }
     
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeDetailsModal();
-        }
-    });
+    if (cancelBtn) {
+        cancelBtn.removeEventListener('click', closeDetailsModal);
+        cancelBtn.addEventListener('click', closeDetailsModal);
+    }
+    
+    // Remover event listener existente del modal
+    modal.removeEventListener('click', handleModalClick);
+    modal.addEventListener('click', handleModalClick);
+}
+
+function handleModalClick(e) {
+    if (e.target === e.currentTarget) {
+        closeDetailsModal();
+    }
 }
 
 function closeDetailsModal() {
@@ -290,8 +383,14 @@ function closeDetailsModal() {
 }
 
 function editPedido(pedidoId) {
-    alert(`Editar pedido ${pedidoId}`);
-    // Aquí se implementaría la lógica para editar
+    console.log('Editando pedido:', pedidoId);
+    // Buscar datos del pedido
+    const pedidoData = getPedidoData(pedidoId);
+    if (pedidoData) {
+        showEditModal(pedidoData);
+    } else {
+        showNotification('No se encontraron los datos del pedido para editar', 'error');
+    }
 }
 
 function deletePedido(pedidoId, row) {
@@ -721,7 +820,14 @@ function createNewPedido(data, pedidoId) {
         <td>${pedidoId}</td>
         <td>${data.cliente}</td>
         <td>${fecha}</td>
-        <td><span class="status ${estadoClass}">${estado.charAt(0).toUpperCase() + estado.slice(1)}</span></td>
+        <td>
+            <select class="status-selector" data-pedido-id="${pedidoId}">
+                <option value="pendiente" ${estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                <option value="procesando" ${estado === 'procesando' ? 'selected' : ''}>Procesando</option>
+                <option value="enviado" ${estado === 'enviado' ? 'selected' : ''}>Enviado</option>
+                <option value="entregado" ${estado === 'entregado' ? 'selected' : ''}>Entregado</option>
+            </select>
+        </td>
         <td>$${total.toFixed(2)}</td>
         <td>
             <button class="btn-action" title="Ver detalles"><i class="fa-solid fa-eye"></i></button>
@@ -740,6 +846,15 @@ function createNewPedido(data, pedidoId) {
     
     // Reconfigurar los event listeners para los nuevos botones
     setupActionButtons();
+    
+    // Reconfigurar selectores de estado
+    reconfigureStatusSelectors();
+    
+    // Aplicar estilo inicial al selector
+    const newSelector = newRow.querySelector('.status-selector');
+    if (newSelector) {
+        updateSelectorStyle(newSelector, estado);
+    }
     
     // Guardar datos en localStorage (opcional)
     savePedidoToStorage(pedidoId, data);
@@ -1240,4 +1355,731 @@ function updateProductDetailsSummary() {
     
     resumenContenido.innerHTML = resumenHTML;
     resumenDetalles.style.display = 'block';
+}
+
+// Funciones para manejo de cambio de estado
+function setupStatusSelectors() {
+    // Configurar selectores de estado en la tabla
+    const statusSelectors = document.querySelectorAll('.status-selector');
+    statusSelectors.forEach(selector => {
+        selector.addEventListener('change', function() {
+            const pedidoId = this.getAttribute('data-pedido-id');
+            const nuevoEstado = this.value;
+            updatePedidoStatus(pedidoId, nuevoEstado, this);
+        });
+    });
+    
+    // Configurar botón de actualizar estado en el modal
+    const btnActualizarEstado = document.querySelector('.btn-actualizar-estado');
+    if (btnActualizarEstado) {
+        btnActualizarEstado.addEventListener('click', function() {
+            const estadoSelector = document.getElementById('estadoPedido');
+            const nuevoEstado = estadoSelector.value;
+            const pedidoId = getCurrentPedidoId();
+            
+            if (pedidoId && nuevoEstado) {
+                updatePedidoStatusFromModal(pedidoId, nuevoEstado);
+            }
+        });
+    }
+}
+
+function updatePedidoStatus(pedidoId, nuevoEstado, selector) {
+    // Actualizar el selector visualmente
+    updateSelectorStyle(selector, nuevoEstado);
+    
+    // Actualizar localStorage
+    updatePedidoStatusInStorage(pedidoId, nuevoEstado);
+    
+    // Mostrar notificación
+    showNotification(`Estado del pedido ${pedidoId} actualizado a: ${nuevoEstado.charAt(0).toUpperCase() + nuevoEstado.slice(1)}`, 'success');
+    
+    // Actualizar filtros si están activos
+    const filterSelect = document.querySelector('.filter-select');
+    if (filterSelect && filterSelect.value !== '') {
+        filterPedidosByStatus(filterSelect.value);
+    }
+}
+
+function updatePedidoStatusFromModal(pedidoId, nuevoEstado) {
+    // Actualizar en la tabla
+    const selector = document.querySelector(`[data-pedido-id="${pedidoId}"]`);
+    if (selector) {
+        selector.value = nuevoEstado;
+        updateSelectorStyle(selector, nuevoEstado);
+    }
+    
+    // Actualizar localStorage
+    updatePedidoStatusInStorage(pedidoId, nuevoEstado);
+    
+    // Actualizar el modal de detalles si está abierto
+    updateModalStatusDisplay(nuevoEstado);
+    
+    // Mostrar notificación
+    showNotification(`Estado del pedido ${pedidoId} actualizado a: ${nuevoEstado.charAt(0).toUpperCase() + nuevoEstado.slice(1)}`, 'success');
+}
+
+function updateSelectorStyle(selector, estado) {
+    // Remover clases de estado anteriores
+    selector.classList.remove('pendiente', 'procesando', 'enviado', 'entregado');
+    
+    // Agregar nueva clase de estado
+    selector.classList.add(estado);
+    
+    // Aplicar estilos específicos según el estado
+    const colors = {
+        'pendiente': 'rgba(255, 193, 7, 0.2)',
+        'procesando': 'rgba(0, 123, 255, 0.2)',
+        'enviado': 'rgba(40, 167, 69, 0.2)',
+        'entregado': 'rgba(108, 117, 125, 0.2)'
+    };
+    
+    const textColors = {
+        'pendiente': '#ffc107',
+        'procesando': '#007bff',
+        'enviado': '#28a745',
+        'entregado': '#6c757d'
+    };
+    
+    selector.style.backgroundColor = colors[estado] || colors['pendiente'];
+    selector.style.color = textColors[estado] || textColors['pendiente'];
+    selector.style.borderColor = textColors[estado] || textColors['pendiente'];
+}
+
+function updatePedidoStatusInStorage(pedidoId, nuevoEstado) {
+    try {
+        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+        const pedidoIndex = pedidos.findIndex(p => p.id === pedidoId);
+        
+        if (pedidoIndex !== -1) {
+            pedidos[pedidoIndex].estado = nuevoEstado;
+            pedidos[pedidoIndex].fechaActualizacion = new Date().toISOString();
+            localStorage.setItem('pedidos', JSON.stringify(pedidos));
+        }
+    } catch (error) {
+        console.error('Error al actualizar estado en localStorage:', error);
+    }
+}
+
+function updateModalStatusDisplay(nuevoEstado) {
+    // Actualizar el selector en el modal
+    const estadoSelector = document.getElementById('estadoPedido');
+    if (estadoSelector) {
+        estadoSelector.value = nuevoEstado;
+    }
+    
+    // Actualizar el display del estado en los detalles
+    const statusDisplay = document.querySelector('.detail-status');
+    if (statusDisplay) {
+        statusDisplay.textContent = nuevoEstado.charAt(0).toUpperCase() + nuevoEstado.slice(1);
+        statusDisplay.className = `detail-status ${nuevoEstado}`;
+    }
+}
+
+function getCurrentPedidoId() {
+    // Obtener el ID del pedido actualmente visible en el modal
+    const modal = document.getElementById('modalVerPedido');
+    if (modal && modal.style.display === 'block') {
+        const content = document.getElementById('pedidoDetailsContent');
+        if (content) {
+            const idElement = content.querySelector('.detail-value');
+            if (idElement) {
+                return idElement.textContent.trim();
+            }
+        }
+    }
+    return null;
+}
+
+// Función para reconfigurar selectores después de agregar nuevos pedidos
+function reconfigureStatusSelectors() {
+    // Remover event listeners existentes
+    const existingSelectors = document.querySelectorAll('.status-selector');
+    existingSelectors.forEach(selector => {
+        selector.replaceWith(selector.cloneNode(true));
+    });
+    
+    // Reconfigurar selectores
+    setupStatusSelectors();
+}
+
+// Funciones para manejo de colores mejorado
+function getColorName(hexColor) {
+    const colorMap = {
+        '#3498db': 'Azul marino',
+        '#e74c3c': 'Rojo coral',
+        '#2ecc71': 'Verde esmeralda',
+        '#f39c12': 'Naranja dorado',
+        '#9b59b6': 'Morado real',
+        '#34495e': 'Gris oscuro',
+        '#ecf0f1': 'Gris claro',
+        '#1abc9c': 'Turquesa',
+        '#e67e22': 'Naranja',
+        '#95a5a6': 'Gris plata',
+        '#f1c40f': 'Amarillo dorado',
+        '#8e44ad': 'Morado violeta',
+        '#16a085': 'Verde azulado',
+        '#27ae60': 'Verde bosque',
+        '#2980b9': 'Azul cielo',
+        '#c0392b': 'Rojo oscuro',
+        '#d35400': 'Naranja oscuro',
+        '#7f8c8d': 'Gris azulado'
+    };
+    
+    return colorMap[hexColor.toLowerCase()] || hexColor;
+}
+
+function setupColorPickers() {
+    const colorPickers = document.querySelectorAll('.color-picker');
+    const coloresInput = document.getElementById('colores');
+    
+    colorPickers.forEach((picker, index) => {
+        picker.addEventListener('change', function() {
+            updateColorName(this, index + 1);
+            updateColoresInput();
+        });
+    });
+    
+    // Configurar botón de limpiar colores
+    setupClearColorsButton();
+    
+    if (coloresInput) {
+        coloresInput.addEventListener('input', function() {
+            // Opcional: actualizar los color pickers basado en el texto
+        });
+    }
+}
+
+function setupClearColorsButton() {
+    const clearButton = document.querySelector('.btn-limpiar-colores');
+    if (clearButton) {
+        clearButton.addEventListener('click', function() {
+            const colorPickers = document.querySelectorAll('.color-picker');
+            colorPickers.forEach((picker, index) => {
+                picker.value = '#000000';
+                updateColorName(picker, index + 1);
+            });
+            updateColoresInput();
+            
+            // Efecto visual
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+            
+            showNotification('Colores limpiados', 'success');
+        });
+    }
+}
+
+function updateColorName(picker, index) {
+    const colorName = document.getElementById(`colorName${index}`);
+    if (colorName) {
+        const color = picker.value;
+        if (color === '#000000') {
+            colorName.textContent = `Color ${index}`;
+            colorName.style.color = 'rgba(255, 255, 255, 0.6)';
+        } else {
+            colorName.textContent = color.toUpperCase();
+            colorName.style.color = color;
+        }
+    }
+}
+
+function updateColoresInput() {
+    const colorPickers = document.querySelectorAll('.color-picker');
+    const coloresInput = document.getElementById('colores');
+    
+    if (!coloresInput) return;
+    
+    const colors = [];
+    colorPickers.forEach((picker, index) => {
+        if (picker.value && picker.value !== '#000000') {
+            colors.push(picker.value.toUpperCase());
+        }
+    });
+    
+    if (colors.length > 0) {
+        coloresInput.value = colors.join(', ');
+    } else {
+        coloresInput.value = '';
+    }
+}
+
+// Funciones para manejo de imágenes
+function setupImageClickHandlers() {
+    const images = document.querySelectorAll('.detail-image');
+    images.forEach(image => {
+        image.addEventListener('click', function() {
+            showImageModal(this.src, this.alt);
+        });
+    });
+}
+
+function showImageModal(src, alt) {
+    // Crear modal para imagen ampliada
+    const imageModal = document.createElement('div');
+    imageModal.className = 'modal image-modal';
+    imageModal.innerHTML = `
+        <div class="modal-content image-modal-content">
+            <div class="modal-header">
+                <h3>Imagen de Referencia</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <img src="${src}" alt="${alt}" class="enlarged-image">
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(imageModal);
+    imageModal.style.display = 'block';
+    
+    // Configurar cierre del modal
+    const closeBtn = imageModal.querySelector('.close');
+    closeBtn.addEventListener('click', () => {
+        imageModal.remove();
+    });
+    
+    imageModal.addEventListener('click', (e) => {
+        if (e.target === imageModal) {
+            imageModal.remove();
+        }
+    });
+}
+
+// Funciones para el modal de edición
+function showEditModal(pedidoData) {
+    console.log('Mostrando modal de edición para:', pedidoData);
+    const modal = document.getElementById('modalEditarPedido');
+    const pedidoIdDisplay = document.getElementById('editarPedidoIdDisplay');
+    
+    if (!modal) {
+        console.error('Modal de edición no encontrado');
+        return;
+    }
+    
+    // Mostrar ID del pedido en el header
+    if (pedidoIdDisplay) {
+        pedidoIdDisplay.textContent = `ID: ${pedidoData.id}`;
+    }
+    
+    // Llenar el formulario con los datos existentes
+    fillEditForm(pedidoData);
+    
+    // Configurar event listeners para el modal de edición
+    setupEditModal();
+    
+    // Configurar color pickers del modal de edición
+    setupEditColorPickers();
+    
+    // Configurar subida de imágenes del modal de edición
+    setupEditImageUpload();
+    
+    // Mostrar modal con animación
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    // Enfocar el primer campo
+    const firstInput = modal.querySelector('input[required]');
+    if (firstInput) {
+        setTimeout(() => firstInput.focus(), 100);
+    }
+}
+
+function fillEditForm(data) {
+    // Llenar campos básicos
+    const fields = {
+        'editarCliente': data.cliente,
+        'editarTelefono': data.telefono,
+        'editarUsuario': data.usuario,
+        'editarFechaEntrega': data.fechaEntrega,
+        'editarCanalVenta': data.canalVenta,
+        'editarPrecioUnitario': data.precioUnitario,
+        'editarCantidad': data.cantidad,
+        'editarPrioridad': data.prioridad,
+        'editarCategoriaProducto': data.categoriaProducto,
+        'editarTamano': data.tamano,
+        'editarMaterial': data.material,
+        'editarDireccion': data.direccion,
+        'editarTextoPersonalizado': data.textoPersonalizado,
+        'editarEspecificaciones': data.especificaciones,
+        'editarObservaciones': data.observaciones
+    };
+    
+    // Llenar campos del formulario
+    Object.keys(fields).forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && fields[fieldId]) {
+            field.value = fields[fieldId];
+        }
+    });
+    
+    // Llenar colores
+    for (let i = 1; i <= 5; i++) {
+        const colorPicker = document.getElementById(`editarColorPicker${i}`);
+        if (colorPicker && data[`colorPicker${i}`]) {
+            colorPicker.value = data[`colorPicker${i}`];
+            updateEditColorName(colorPicker, i);
+        }
+    }
+    
+    // Actualizar campo de colores
+    updateEditColoresInput();
+    
+    // Cargar imágenes existentes si las hay
+    if (data.imagenes && data.imagenes.length > 0) {
+        displayEditExistingImages(data.imagenes);
+    }
+}
+
+function setupEditModal() {
+    const modal = document.getElementById('modalEditarPedido');
+    if (!modal) return;
+    
+    const closeBtn = modal.querySelector('.close');
+    const cancelBtn = modal.querySelector('.btn-cancelar');
+    const saveBtn = document.getElementById('btnGuardarEdicion');
+    
+    // Remover event listeners existentes para evitar duplicados
+    if (closeBtn) {
+        closeBtn.removeEventListener('click', closeEditModal);
+        closeBtn.addEventListener('click', closeEditModal);
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.removeEventListener('click', closeEditModal);
+        cancelBtn.addEventListener('click', closeEditModal);
+    }
+    
+    if (saveBtn) {
+        saveBtn.removeEventListener('click', saveEditChanges);
+        saveBtn.addEventListener('click', saveEditChanges);
+    }
+    
+    // Remover event listener existente del modal
+    modal.removeEventListener('click', handleEditModalClick);
+    modal.addEventListener('click', handleEditModalClick);
+}
+
+function handleEditModalClick(e) {
+    if (e.target === e.currentTarget) {
+        closeEditModal();
+    }
+}
+
+function closeEditModal() {
+    const modal = document.getElementById('modalEditarPedido');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Limpiar formulario
+        const form = document.getElementById('formEditarPedido');
+        if (form) {
+            form.reset();
+        }
+    }
+}
+
+function saveEditChanges() {
+    console.log('Guardando cambios de edición...');
+    
+    const form = document.getElementById('formEditarPedido');
+    if (!form) return;
+    
+    // Validar campos requeridos
+    const requiredFields = form.querySelectorAll('[required]');
+    let isFormValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            isFormValid = false;
+            showFieldError(field, 'Este campo es obligatorio');
+        } else {
+            clearFieldError(field);
+        }
+    });
+    
+    if (!isFormValid) {
+        showNotification('Por favor, complete todos los campos obligatorios', 'error');
+        return;
+    }
+    
+    // Recopilar datos del formulario
+    const formData = new FormData(form);
+    const updatedData = {};
+    
+    for (let [key, value] of formData.entries()) {
+        updatedData[key] = value;
+    }
+    
+    // Agregar colores seleccionados
+    const colorPickers = form.querySelectorAll('.color-picker');
+    colorPickers.forEach((picker, index) => {
+        if (picker.value && picker.value !== '#000000') {
+            updatedData[`colorPicker${index + 1}`] = picker.value;
+        }
+    });
+    
+    // Obtener ID del pedido
+    const pedidoIdDisplay = document.getElementById('editarPedidoIdDisplay');
+    const pedidoId = pedidoIdDisplay ? pedidoIdDisplay.textContent.replace('ID: ', '') : null;
+    
+    if (!pedidoId) {
+        showNotification('Error: No se pudo identificar el pedido', 'error');
+        return;
+    }
+    
+    // Actualizar pedido
+    updatePedidoInTable(pedidoId, updatedData);
+    updatePedidoInStorage(pedidoId, updatedData);
+    
+    // Cerrar modal
+    closeEditModal();
+    
+    // Mostrar notificación de éxito
+    showNotification('Pedido actualizado exitosamente', 'success');
+}
+
+function updatePedidoInTable(pedidoId, updatedData) {
+    // Buscar la fila en la tabla
+    const rows = document.querySelectorAll('.pedidos-table tbody tr');
+    for (let row of rows) {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 0 && cells[0].textContent.trim() === pedidoId.trim()) {
+            // Actualizar datos visibles en la tabla
+            if (cells[1] && updatedData.cliente) {
+                cells[1].textContent = updatedData.cliente;
+            }
+            
+            // El total se puede recalcular si se cambió precio o cantidad
+            if (updatedData.precioUnitario && updatedData.cantidad) {
+                const total = parseFloat(updatedData.precioUnitario) * parseFloat(updatedData.cantidad);
+                if (cells[4]) {
+                    cells[4].textContent = `$${total.toFixed(2)}`;
+                }
+            }
+            
+            break;
+        }
+    }
+}
+
+function updatePedidoInStorage(pedidoId, updatedData) {
+    try {
+        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+        const pedidoIndex = pedidos.findIndex(p => p.id === pedidoId);
+        
+        if (pedidoIndex !== -1) {
+            // Actualizar datos existentes
+            pedidos[pedidoIndex] = {
+                ...pedidos[pedidoIndex],
+                ...updatedData,
+                fechaActualizacion: new Date().toISOString()
+            };
+            
+            localStorage.setItem('pedidos', JSON.stringify(pedidos));
+        }
+    } catch (error) {
+        console.error('Error al actualizar pedido en localStorage:', error);
+    }
+}
+
+// Funciones para manejo de colores en el modal de edición
+function setupEditColorPickers() {
+    const colorPickers = document.querySelectorAll('#formEditarPedido .color-picker');
+    const coloresInput = document.getElementById('editarColores');
+    
+    colorPickers.forEach((picker, index) => {
+        picker.addEventListener('change', function() {
+            updateEditColorName(this, index + 1);
+            updateEditColoresInput();
+        });
+    });
+    
+    // Configurar botón de limpiar colores del modal de edición
+    setupEditClearColorsButton();
+}
+
+function setupEditClearColorsButton() {
+    const clearButton = document.querySelector('#formEditarPedido .btn-limpiar-colores');
+    if (clearButton) {
+        clearButton.addEventListener('click', function() {
+            const colorPickers = document.querySelectorAll('#formEditarPedido .color-picker');
+            colorPickers.forEach((picker, index) => {
+                picker.value = '#000000';
+                updateEditColorName(picker, index + 1);
+            });
+            updateEditColoresInput();
+            
+            // Efecto visual
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+            
+            showNotification('Colores limpiados', 'success');
+        });
+    }
+}
+
+function updateEditColorName(picker, index) {
+    const colorName = document.getElementById(`editarColorName${index}`);
+    if (colorName) {
+        const color = picker.value;
+        if (color === '#000000') {
+            colorName.textContent = `Color ${index}`;
+            colorName.style.color = 'rgba(255, 255, 255, 0.6)';
+        } else {
+            colorName.textContent = color.toUpperCase();
+            colorName.style.color = color;
+        }
+    }
+}
+
+function updateEditColoresInput() {
+    const colorPickers = document.querySelectorAll('#formEditarPedido .color-picker');
+    const coloresInput = document.getElementById('editarColores');
+    
+    if (!coloresInput) return;
+    
+    const colors = [];
+    colorPickers.forEach((picker, index) => {
+        if (picker.value && picker.value !== '#000000') {
+            colors.push(picker.value.toUpperCase());
+        }
+    });
+    
+    if (colors.length > 0) {
+        coloresInput.value = colors.join(', ');
+    } else {
+        coloresInput.value = '';
+    }
+}
+
+// Funciones para manejo de imágenes en el modal de edición
+function setupEditImageUpload() {
+    const fileInput = document.getElementById('editarImagenReferencia');
+    const previewContainer = document.getElementById('editarImagePreviewContainer');
+    
+    if (!fileInput || !previewContainer) return;
+    
+    // Configurar drag and drop
+    previewContainer.addEventListener('dragover', handleDragOver);
+    previewContainer.addEventListener('drop', handleEditDrop);
+    previewContainer.addEventListener('click', () => fileInput.click());
+    
+    // Configurar selección de archivos
+    fileInput.addEventListener('change', handleEditFileSelect);
+}
+
+function handleEditDrop(e) {
+    e.preventDefault();
+    e.currentTarget.style.borderColor = 'rgba(20, 152, 0, 0.3)';
+    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+    
+    const files = Array.from(e.dataTransfer.files);
+    handleEditFiles(files);
+}
+
+function handleEditFileSelect(e) {
+    const files = Array.from(e.target.files);
+    handleEditFiles(files);
+}
+
+function handleEditFiles(files) {
+    const previewContainer = document.getElementById('editarImagePreviewContainer');
+    const validFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (validFiles.length === 0) {
+        showNotification('Por favor selecciona solo archivos de imagen', 'error');
+        return;
+    }
+    
+    // Limpiar preview anterior
+    const existingPreview = previewContainer.querySelector('.image-preview');
+    if (existingPreview) {
+        existingPreview.remove();
+    }
+    
+    // Crear contenedor de preview
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'image-preview';
+    
+    validFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imageItem = document.createElement('div');
+            imageItem.className = 'image-preview-item';
+            
+            imageItem.innerHTML = `
+                <img src="${e.target.result}" alt="Preview ${index + 1}">
+                <button type="button" class="remove-image" onclick="removeEditImage(this)">×</button>
+            `;
+            
+            previewDiv.appendChild(imageItem);
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    previewContainer.appendChild(previewDiv);
+    
+    // Ocultar placeholder
+    const placeholder = previewContainer.querySelector('.upload-placeholder');
+    if (placeholder) {
+        placeholder.style.display = 'none';
+    }
+}
+
+function displayEditExistingImages(images) {
+    const previewContainer = document.getElementById('editarImagePreviewContainer');
+    if (!previewContainer) return;
+    
+    // Limpiar preview anterior
+    const existingPreview = previewContainer.querySelector('.image-preview');
+    if (existingPreview) {
+        existingPreview.remove();
+    }
+    
+    // Crear contenedor de preview
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'image-preview';
+    
+    images.forEach((imageSrc, index) => {
+        const imageItem = document.createElement('div');
+        imageItem.className = 'image-preview-item';
+        
+        imageItem.innerHTML = `
+            <img src="${imageSrc}" alt="Preview ${index + 1}">
+            <button type="button" class="remove-image" onclick="removeEditImage(this)">×</button>
+        `;
+        
+        previewDiv.appendChild(imageItem);
+    });
+    
+    previewContainer.appendChild(previewDiv);
+    
+    // Ocultar placeholder
+    const placeholder = previewContainer.querySelector('.upload-placeholder');
+    if (placeholder) {
+        placeholder.style.display = 'none';
+    }
+}
+
+// Función global para remover imágenes en el modal de edición
+function removeEditImage(button) {
+    const imageItem = button.parentElement;
+    imageItem.remove();
+    
+    // Mostrar placeholder si no hay más imágenes
+    const previewContainer = document.getElementById('editarImagePreviewContainer');
+    const remainingImages = previewContainer.querySelectorAll('.image-preview-item');
+    
+    if (remainingImages.length === 0) {
+        const placeholder = previewContainer.querySelector('.upload-placeholder');
+        if (placeholder) {
+            placeholder.style.display = 'block';
+        }
+    }
 }

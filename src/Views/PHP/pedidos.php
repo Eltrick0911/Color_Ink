@@ -48,7 +48,14 @@
                             <td>#001</td>
                             <td>Juan Pérez</td>
                             <td>2024-01-15</td>
-                            <td><span class="status pendiente">Pendiente</span></td>
+                            <td>
+                                <select class="status-selector" data-pedido-id="#001">
+                                    <option value="pendiente" selected>Pendiente</option>
+                                    <option value="procesando">Procesando</option>
+                                    <option value="enviado">Enviado</option>
+                                    <option value="entregado">Entregado</option>
+                                </select>
+                            </td>
                             <td>$150.00</td>
                             <td>
                                 <button class="btn-action"><i class="fa-solid fa-eye"></i></button>
@@ -60,7 +67,14 @@
                             <td>#002</td>
                             <td>María García</td>
                             <td>2024-01-14</td>
-                            <td><span class="status procesando">Procesando</span></td>
+                            <td>
+                                <select class="status-selector" data-pedido-id="#002">
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="procesando" selected>Procesando</option>
+                                    <option value="enviado">Enviado</option>
+                                    <option value="entregado">Entregado</option>
+                                </select>
+                            </td>
                             <td>$275.50</td>
                             <td>
                                 <button class="btn-action"><i class="fa-solid fa-eye"></i></button>
@@ -72,7 +86,14 @@
                             <td>#003</td>
                             <td>Carlos López</td>
                             <td>2024-01-13</td>
-                            <td><span class="status enviado">Enviado</span></td>
+                            <td>
+                                <select class="status-selector" data-pedido-id="#003">
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="procesando">Procesando</option>
+                                    <option value="enviado" selected>Enviado</option>
+                                    <option value="entregado">Entregado</option>
+                                </select>
+                            </td>
                             <td>$89.99</td>
                             <td>
                                 <button class="btn-action"><i class="fa-solid fa-eye"></i></button>
@@ -87,17 +108,39 @@
     </main>
 
     <!-- Modal para Ver Detalles del Pedido -->
-    <div id="modalVerPedido" class="modal">
-        <div class="modal-content modal-large">
+    <div id="modalVerPedido" class="modal modal-enhanced">
+        <div class="modal-content modal-large modal-floating">
             <div class="modal-header">
-                <h2>Detalles del Pedido</h2>
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h2>Detalles del Pedido</h2>
+                        <span class="pedido-id-display" id="pedidoIdDisplay"></span>
+                    </div>
+                </div>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body" id="pedidoDetailsContent">
                 <!-- El contenido se llenará dinámicamente -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-cancelar">Cerrar</button>
+                <div class="status-change-section">
+                    <label for="estadoPedido">Cambiar Estado:</label>
+                    <select id="estadoPedido" class="status-selector-modal">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="procesando">Procesando</option>
+                        <option value="enviado">Enviado</option>
+                        <option value="entregado">Entregado</option>
+                    </select>
+                    <button type="button" class="btn-actualizar-estado">
+                        <i class="fa-solid fa-sync-alt"></i> Actualizar
+                    </button>
+                </div>
+                <button type="button" class="btn-cancelar">
+                    <i class="fa-solid fa-times"></i> Cerrar
+                </button>
             </div>
         </div>
     </div>
@@ -155,23 +198,7 @@
                             <label for="precioUnitario">Cantidad</label>
                             <input type="number" id="precioUnitario" name="precioUnitario" step="0.01" min="0">
                         </div>
-                        <div class="form-group">
-                            <label for="prioridad">Prioridad</label>
-                            <select id="prioridad" name="prioridad">
-                                <option value="normal">Normal</option>
-                                <option value="alta">Alta</option>
-                                <option value="urgente">Urgente</option>
-                            </select>
-                        </div>
 
-                         <div class="form-group">
-                            <label for="prioridad">Estado</label>
-                            <select id="prioridad" name="prioridad">
-                                <option value="normal">Pendiente</option>
-                                <option value="alta">Proceso</option>
-                                <option value="urgente">Entregado</option>
-                            </select>
-                        </div>
                     </div>
 
                     <!-- Botón para abrir detalles del producto -->
@@ -239,33 +266,35 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="estiloLetra">Estilo de Letra</label>
-                        <select id="estiloLetra" name="estiloLetra">
-                            <option value="">Seleccionar estilo</option>
-                            <option value="arial">Arial</option>
-                            <option value="times">Times New Roman</option>
-                            <option value="helvetica">Helvetica</option>
-                            <option value="calibri">Calibri</option>
-                            <option value="comic-sans">Comic Sans MS</option>
-                            <option value="courier">Courier New</option>
-                            <option value="georgia">Georgia</option>
-                            <option value="verdana">Verdana</option>
-                            <option value="impact">Impact</option>
-                            <option value="trebuchet">Trebuchet MS</option>
-                            <option value="personalizado">Personalizado</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
                         <label for="colores">Paleta de Colores</label>
                         <div class="color-selection">
-                            <input type="text" id="colores" name="colores" placeholder="Ej: Azul, Rojo, Verde">
+                            <input type="text" id="colores" name="colores" placeholder="Selecciona los colores que deseas usar" readonly>
                             <div class="color-picker-container">
-                                <input type="color" id="colorPicker1" class="color-picker" title="Color 1">
-                                <input type="color" id="colorPicker2" class="color-picker" title="Color 2">
-                                <input type="color" id="colorPicker3" class="color-picker" title="Color 3">
-                                <input type="color" id="colorPicker4" class="color-picker" title="Color 4">
-                                <input type="color" id="colorPicker5" class="color-picker" title="Color 5">
+                                <div class="color-picker-item">
+                                    <input type="color" id="colorPicker1" class="color-picker" title="Color 1" value="#000000">
+                                    <span class="color-name" id="colorName1">Color 1</span>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="colorPicker2" class="color-picker" title="Color 2" value="#000000">
+                                    <span class="color-name" id="colorName2">Color 2</span>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="colorPicker3" class="color-picker" title="Color 3" value="#000000">
+                                    <span class="color-name" id="colorName3">Color 3</span>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="colorPicker4" class="color-picker" title="Color 4" value="#000000">
+                                    <span class="color-name" id="colorName4">Color 4</span>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="colorPicker5" class="color-picker" title="Color 5" value="#000000">
+                                    <span class="color-name" id="colorName5">Color 5</span>
+                                </div>
+                            </div>
+                            <div class="color-actions">
+                                <button type="button" class="btn-limpiar-colores">
+                                    <i class="fa-solid fa-eraser"></i> Limpiar Colores
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -279,6 +308,186 @@
             <div class="modal-footer">
                 <button type="button" class="btn-cancelar">Cancelar</button>
                 <button type="button" class="btn-guardar" id="guardarDetalles">Guardar Detalles</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Pedido -->
+    <div id="modalEditarPedido" class="modal modal-enhanced">
+        <div class="modal-content modal-large modal-floating">
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-edit"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h2>Editar Pedido</h2>
+                        <span class="pedido-id-display" id="editarPedidoIdDisplay"></span>
+                    </div>
+                </div>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarPedido" class="pedido-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editarCliente">Cliente *</label>
+                            <input type="text" id="editarCliente" name="cliente" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editarTelefono">Teléfono</label>
+                            <input type="tel" id="editarTelefono" name="telefono">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editarUsuario">Usuario</label>
+                            <input type="text" id="editarUsuario" name="usuario">
+                        </div>
+                        <div class="form-group">
+                            <label for="editarFechaEntrega">Fecha de Entrega</label>
+                            <input type="date" id="editarFechaEntrega" name="fechaEntrega">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editarCanalVenta">Canal de Venta *</label>
+                        <select id="editarCanalVenta" name="canalVenta" required>
+                            <option value="">Seleccionar canal</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="tienda">Tienda Física</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="telefono">Teléfono</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editarPrecioUnitario">Precio Personalizado</label>
+                            <input type="number" id="editarPrecioUnitario" name="precioUnitario" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="editarCantidad">Cantidad</label>
+                            <input type="number" id="editarCantidad" name="cantidad" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="editarPrioridad">Prioridad</label>
+                            <select id="editarPrioridad" name="prioridad">
+                                <option value="normal">Normal</option>
+                                <option value="alta">Alta</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editarCategoriaProducto">Categoría de Producto</label>
+                            <select id="editarCategoriaProducto" name="categoriaProducto">
+                                <option value="">Seleccionar categoría</option>
+                                <option value="camisas">Camisas/Playeras</option>
+                                <option value="retratos">Retratos</option>
+                                <option value="arreglos-florales">Arreglos Florales</option>
+                                <option value="vinil">Vinil Adhesivo</option>
+                                <option value="banner">Banner</option>
+                                <option value="tarjetas">Tarjetas de Presentación</option>
+                                <option value="volantes">Volantes</option>
+                                <option value="invitaciones">Invitaciones</option>
+                                <option value="decoracion">Decoración</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editarTamano">Tamaño</label>
+                            <input type="text" id="editarTamano" name="tamano" placeholder="Ej: A4, 30x40cm">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editarMaterial">Material</label>
+                            <input type="text" id="editarMaterial" name="material" placeholder="Ej: Papel, Vinil, Tela">
+                        </div>
+                        <div class="form-group">
+                            <label for="editarDireccion">Dirección de Entrega</label>
+                            <input type="text" id="editarDireccion" name="direccion" placeholder="Dirección completa">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editarTextoPersonalizado">Texto Personalizado</label>
+                        <textarea id="editarTextoPersonalizado" name="textoPersonalizado" rows="3" placeholder="Texto que se imprimirá o incluirá en el diseño"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editarEspecificaciones">Especificaciones Técnicas</label>
+                        <textarea id="editarEspecificaciones" name="especificaciones" rows="4" placeholder="Tamaño específico, acabados, técnicas de impresión, talla etc."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editarObservaciones">Observaciones</label>
+                        <textarea id="editarObservaciones" name="observaciones" rows="3" placeholder="Observaciones adicionales"></textarea>
+                    </div>
+
+                    <!-- Sección de colores -->
+                    <div class="form-group">
+                        <label for="editarColores">Paleta de Colores</label>
+                        <div class="color-selection">
+                            <input type="text" id="editarColores" name="colores" placeholder="Selecciona los colores que deseas usar" readonly>
+                            <div class="color-picker-container">
+                                <div class="color-picker-item">
+                                    <input type="color" id="editarColorPicker1" class="color-picker" title="Color 1" value="#000000">
+                                    <span class="color-name" id="editarColorName1">Color 1</span>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="editarColorPicker2" class="color-picker" title="Color 2" value="#000000">
+                                    <span class="color-name" id="editarColorName2">Color 2</span>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="editarColorPicker3" class="color-picker" title="Color 3" value="#000000">
+                                    <span class="color-name" id="editarColorName3">Color 3</span>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="editarColorPicker4" class="color-picker" title="Color 4" value="#000000">
+                                    <span class="color-name" id="editarColorName4">Color 4</span>
+                                </div>
+                                <div class="color-picker-item">
+                                    <input type="color" id="editarColorPicker5" class="color-picker" title="Color 5" value="#000000">
+                                    <span class="color-name" id="editarColorName5">Color 5</span>
+                                </div>
+                            </div>
+                            <div class="color-actions">
+                                <button type="button" class="btn-limpiar-colores">
+                                    <i class="fa-solid fa-eraser"></i> Limpiar Colores
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección de imágenes -->
+                    <div class="form-group">
+                        <label for="editarImagenReferencia">Imagen de Referencia</label>
+                        <div class="image-upload-container">
+                            <input type="file" id="editarImagenReferencia" name="imagenReferencia" accept="image/*" multiple>
+                            <div class="image-preview-container" id="editarImagePreviewContainer">
+                                <div class="upload-placeholder">
+                                    <i class="fa-solid fa-cloud-upload-alt"></i>
+                                    <p>Arrastra imágenes aquí o haz clic para seleccionar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar">
+                    <i class="fa-solid fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn-guardar" id="btnGuardarEdicion">
+                    <i class="fa-solid fa-save"></i> Guardar Cambios
+                </button>
             </div>
         </div>
     </div>
