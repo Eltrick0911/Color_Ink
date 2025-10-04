@@ -55,7 +55,7 @@ class SidebarManager {
         userIcon.className = 'fa-solid fa-user user-icon';
         userIcon.title = 'Gestión de Usuarios';
         userIcon.onclick = () => {
-            window.location.href = 'gestion_usu.html';
+            window.location.href = 'gestion_usu.php';
         };
 
         // Crear el contenedor de iconos - Replica exacta
@@ -76,17 +76,17 @@ class SidebarManager {
             },
             { 
                 class: 'fa-truck-ramp-box', 
-                onclick: () => this.handleOtherClick('pedidos.html'),
+                onclick: () => this.handleOtherClick('pedidos.php'),
                 title: 'Pedidos'
             },
             { 
                 class: 'fa-truck', 
-                onclick: () => this.handleOtherClick('inve.html'),
+                onclick: () => this.handleOtherClick('inve.php'),
                 title: 'Inventario'
             },
             { 
                 class: 'fa-credit-card', 
-                onclick: () => this.handleOtherClick('ventas.html'),
+                onclick: () => this.handleOtherClick('ventas.php'),
                 title: 'Ventas'
             }
         ];
@@ -102,7 +102,7 @@ class SidebarManager {
 
         // Crear el icono de salida - Replica exacta
         const exitLink = document.createElement('a');
-        exitLink.href = 'login.html';
+        exitLink.href = 'login.php';
         const exitIcon = document.createElement('i');
         exitIcon.className = 'fa-solid fa-arrow-right user-icon';
         exitIcon.title = 'Salir';
@@ -133,7 +133,7 @@ class SidebarManager {
             this.resetBarPosition();
         } else {
             // Si estamos en otra página, navegar a index
-            window.location.href = 'index.html';
+            window.location.href = 'index.php';
         }
     }
 

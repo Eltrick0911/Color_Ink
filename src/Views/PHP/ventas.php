@@ -97,5 +97,3 @@
     <script src="../JS/ventas.js"></script>
 </body>
 </html>
-
-
