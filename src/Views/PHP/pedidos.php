@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedidos - Color Ink</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../CSS/sidebar.css">
-    <link rel="stylesheet" href="../CSS/pedidos.css">
-    <link rel="icon" href="../IMG/LOGO.png" type="image/png">
+    <link rel="stylesheet" href="/Color_Ink/src/Views/CSS/sidebar.css">
+    <link rel="stylesheet" href="/Color_Ink/src/Views/CSS/pedidos.css">
+    <link rel="icon" href="/Color_Ink/src/Views/IMG/LOGO.png" type="image/png">
 </head>
 <body>
     <main class="sidebar-content">
@@ -283,7 +283,7 @@
         </div>
     </div>
 
-    <script src="../JS/sidebar.js"></script>
-    <script src="../JS/pedidos.js"></script>
+    <script src="/Color_Ink/src/Views/JS/sidebar.js"></script>
+    <script src="/Color_Ink/src/Views/JS/pedidos.js"></script>
 </body>
 </html>
