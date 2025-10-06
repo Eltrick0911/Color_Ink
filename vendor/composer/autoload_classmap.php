@@ -10,6 +10,7 @@ return array(
     'App\\Config\\errorlogs' => $baseDir . '/src/Config/errorlogs.php',
     'App\\Config\\responseHTTP' => $baseDir . '/src/Config/responseHTTP.php',
     'App\\DB\\connectionDB' => $baseDir . '/src/DB/connectionDB.php',
+    'App\\DB\\sql' => $baseDir . '/src/DB/sql.php',
     'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'Dotenv\\Dotenv' => $vendorDir . '/vlucas/phpdotenv/src/Dotenv.php',
