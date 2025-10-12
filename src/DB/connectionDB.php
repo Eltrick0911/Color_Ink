@@ -30,7 +30,7 @@ class connectionDB{
             return $pdo;
         }catch(\PDOException $e){
             error_log("Error en la conexión a la BD! ERROR: ".$e);
-            die(json_encode(resposeHTTP::status500()));
+            die(json_encode(responseHTTP::status500()));
 
         }
     }

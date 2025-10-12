@@ -150,3 +150,99 @@ Stack trace:
 [27-Feb-2025 08:53:04 America/Tegucigalpa] Conexión exitosa
 [27-Feb-2025 08:53:04 America/Tegucigalpa] Conexión exitosa
 [27-Feb-2025 08:53:04 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:43:24 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: SQLSTATE[HY000] [1049] Unknown database 'colorink_bd' in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('mysql:host=127....', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#4 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#5 {main}
+[12-Oct-2025 09:43:24 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#2 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#3 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#4 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[12-Oct-2025 09:43:46 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: SQLSTATE[HY000] [1049] Unknown database 'colorink_bd' in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('mysql:host=127....', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#4 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#5 {main}
+[12-Oct-2025 09:43:46 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#2 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#3 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#4 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[12-Oct-2025 09:43:48 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: SQLSTATE[HY000] [1049] Unknown database 'colorink_bd' in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('mysql:host=127....', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#4 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#5 {main}
+[12-Oct-2025 09:43:48 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#2 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#3 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#4 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[12-Oct-2025 09:44:10 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: SQLSTATE[HY000] [1049] Unknown database 'colorink_bd' in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('mysql:host=127....', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#4 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#5 {main}
+[12-Oct-2025 09:44:10 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#2 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#3 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#4 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[12-Oct-2025 09:46:48 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:46:48 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: , SubAction: , SubID: 
+[12-Oct-2025 09:46:48 America/Tegucigalpa] PedidosRoute - Input: []
+[12-Oct-2025 09:46:48 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[12-Oct-2025 09:46:48 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-12 09:46:48"}
+[12-Oct-2025 09:46:57 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:46:57 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: , SubAction: , SubID: 
+[12-Oct-2025 09:46:57 America/Tegucigalpa] PedidosRoute - Input: []
+[12-Oct-2025 09:46:57 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[12-Oct-2025 09:46:57 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-12 09:46:57"}
+[12-Oct-2025 09:47:29 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:47:29 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: , SubAction: , SubID: 
+[12-Oct-2025 09:47:29 America/Tegucigalpa] PedidosRoute - Input: []
+[12-Oct-2025 09:47:29 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[12-Oct-2025 09:47:29 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-12 09:47:29"}
+[12-Oct-2025 09:47:44 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:47:44 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: , SubAction: , SubID: 
+[12-Oct-2025 09:47:44 America/Tegucigalpa] PedidosRoute - Input: []
+[12-Oct-2025 09:47:44 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[12-Oct-2025 09:47:44 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-12 09:47:44"}
+[12-Oct-2025 09:48:04 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:48:04 America/Tegucigalpa] PedidosRoute - Method: POST, Action: , ID: , SubAction: , SubID: 
+[12-Oct-2025 09:48:04 America/Tegucigalpa] PedidosRoute - Input: {"numero_pedido":"PED-001","fecha_compromiso":"2025-12-31","observaciones":"Pedido de prueba desde Postman","id_usuario":1}
+[12-Oct-2025 09:48:04 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[12-Oct-2025 09:48:04 America/Tegucigalpa] PedidosController - Headers recibidos: {"Content-Type":"application\/json","User-Agent":"PostmanRuntime\/7.39.1","Accept":"*\/*","Cache-Control":"no-cache","Postman-Token":"22319596-87b7-4bfd-bfa5-5f1f29bf0bdb","Host":"localhost","Accept-Encoding":"gzip, deflate, br","Connection":"keep-alive","Content-Length":"145","Cookie":"PHPSESSID=o4382pnkdj2jsn9l17v41qc7av"}
+[12-Oct-2025 09:48:04 America/Tegucigalpa] PedidosController - Intentando validar JWT local
+[12-Oct-2025 10:13:01 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 10:13:01 America/Tegucigalpa] PedidosRoute - Method: POST, Action: , ID: , SubAction: , SubID: 
+[12-Oct-2025 10:13:01 America/Tegucigalpa] PedidosRoute - Input: []
+[12-Oct-2025 10:14:06 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 10:14:06 America/Tegucigalpa] PedidosRoute - Method: POST, Action: , ID: , SubAction: , SubID: 
+[12-Oct-2025 10:14:06 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"numero_pedido":"PED-2025-001","fecha_compromiso":"2025-01-15","observaciones":"Pedido de prueba para testing","id_estado":1}
