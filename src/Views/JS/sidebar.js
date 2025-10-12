@@ -9,40 +9,12 @@ class SidebarManager {
         this.body = null;
         this.isInitialized = false;
         this.currentPage = this.getCurrentPage();
-        this.baseUrl = this.getBaseUrl();
-    }
-
-    /**
-     * Obtiene la URL base del proyecto
-     */
-    getBaseUrl() {
-        // Detecta automáticamente la URL base
-        const path = window.location.pathname;
-        const pathSegments = path.split('/');
-        
-        // Buscar el segmento 'public' en la URL
-        const publicIndex = pathSegments.findIndex(segment => segment === 'public');
-        
-        if (publicIndex !== -1) {
-            // Si encontramos 'public', construir la URL base hasta ese punto
-            return pathSegments.slice(0, publicIndex + 1).join('/');
-        }
-        
-        // Fallback: usar la estructura conocida
-        return '/Color_Ink/public';
     }
 
     /**
      * Obtiene la página actual basada en el nombre del archivo
      */
     getCurrentPage() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const route = urlParams.get('route');
-        
-        if (route) {
-            return route;
-        }
-        
         const path = window.location.pathname;
         const page = path.split('/').pop().split('.')[0];
         return page || 'index';
@@ -56,11 +28,6 @@ class SidebarManager {
             console.warn('Sidebar ya está inicializada');
             return;
         }
-
-        console.log('Inicializando sidebar...');
-        console.log('URL base detectada:', this.baseUrl);
-        console.log('Página actual:', this.currentPage);
-        console.log('URL actual:', window.location.href);
 
         this.createSidebar();
         this.attachEventListeners();
@@ -86,14 +53,10 @@ class SidebarManager {
         // Crear el icono de usuario - Replica exacta
         const userIcon = document.createElement('i');
         userIcon.className = 'fa-solid fa-user user-icon';
-<<<<<<< Updated upstream
-        userIcon.onclick = () => this.resetBarPosition();
-=======
         userIcon.title = 'Gestión de Usuarios';
         userIcon.onclick = () => {
-            window.location.href = `${this.baseUrl}/gestion_usu`;
+            window.location.href = '/Color_Ink/public/gestion_usu';
         };
->>>>>>> Stashed changes
 
         // Crear el contenedor de iconos - Replica exacta
         const iconContainer = document.createElement('div');
@@ -112,34 +75,19 @@ class SidebarManager {
                 title: 'Inicio'
             },
             { 
-<<<<<<< Updated upstream
                 class: 'fa-truck-ramp-box', 
-                onclick: () => this.handleOtherClick('inve.html'),
-=======
-                 class: 'fa-truck-ramp-box', 
-                onclick: () => this.handleOtherClick(`${this.baseUrl}/pedidos`),
+                onclick: () => this.handleOtherClick('/Color_Ink/public/pedidos'),
                 title: 'Pedidos'
             },
             { 
                 class: 'fa-truck', 
-                onclick: () => this.handleOtherClick(`${this.baseUrl}/inve`),
->>>>>>> Stashed changes
+                onclick: () => this.handleOtherClick('/Color_Ink/public/inve'),
                 title: 'Inventario'
             },
             { 
-                class: 'fa-truck', 
-                onclick: () => this.handleOtherClick('pedidos.html'),
-                title: 'Pedidos'
-            },
-            { 
                 class: 'fa-credit-card', 
-<<<<<<< Updated upstream
-                onclick: () => this.handleOtherClick('gestion_usu.html'),
-                title: 'Gestión de Usuarios'
-=======
-                onclick: () => this.handleOtherClick(`${this.baseUrl}/ventas`),
+                onclick: () => this.handleOtherClick('/Color_Ink/public/ventas'),
                 title: 'Ventas'
->>>>>>> Stashed changes
             }
         ];
 
@@ -154,11 +102,7 @@ class SidebarManager {
 
         // Crear el icono de salida - Replica exacta
         const exitLink = document.createElement('a');
-<<<<<<< Updated upstream
-        exitLink.href = 'login.html';
-=======
-        exitLink.href = `${this.baseUrl}/login`;
->>>>>>> Stashed changes
+        exitLink.href = '/Color_Ink/public/login';
         const exitIcon = document.createElement('i');
         exitIcon.className = 'fa-solid fa-arrow-right user-icon';
         exitIcon.title = 'Salir';
@@ -189,28 +133,20 @@ class SidebarManager {
             this.resetBarPosition();
         } else {
             // Si estamos en otra página, navegar a index
-<<<<<<< Updated upstream
-            window.location.href = 'index.html';
+            window.location.href = '/Color_Ink/public/index';
         }
     }
-=======
-            window.location.href = `${this.baseUrl}/index`;
-    }}
->>>>>>> Stashed changes
 
     /**
      * Maneja el click en otros iconos - Replica exacta de index.html
      */
-    handleOtherClick(url) {
-        // Extraer el nombre de la página de la URL
-        const pageName = url.split('/').pop();
-        
-        if (this.currentPage === pageName) {
+    handleOtherClick(page) {
+        if (this.currentPage === page.split('.')[0]) {
             // Si estamos en la misma página, solo resetear la barra
             this.resetBarPosition();
         } else {
             // Si estamos en otra página, navegar
-            window.location.href = url;
+            window.location.href = page;
         }
     }
 
