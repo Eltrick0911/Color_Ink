@@ -129,7 +129,7 @@ function redirectToLogin() {
     }
     
     // Redirigir al login
-    window.location.href = 'login.html';
+    window.location.href = 'login.php';
 }
 
 /**
@@ -179,7 +179,7 @@ async function checkAuthAndInit() {
             console.log('- access_token:', sessionStorage.getItem('access_token') ? 'Presente' : 'No presente');
             console.log('- user:', sessionStorage.getItem('user'));
             
-            window.location.href = 'login.html';
+            window.location.href = 'login.php';
             return;
         }
         
@@ -257,7 +257,7 @@ async function getCurrentUser() {
         if (firebaseToken) {
             console.log('🔍 GESTIÓN: Token Firebase presente, haciendo petición...');
             try {
-                const response = await fetch(`${getApiBase()}/public/index.php?route=firebase&action=me`, {
+                const response = await fetch(`${getApiBase()}/public/index.php?route=firebase&caso=1&action=me`, {
                     headers: { 'Authorization': `Bearer ${firebaseToken}` }
                 });
                 console.log('🔍 GESTIÓN: Respuesta Firebase:', response.status, response.statusText);
@@ -283,7 +283,7 @@ async function getCurrentUser() {
         if (jwtToken) {
             console.log('🔍 GESTIÓN: Token JWT presente, haciendo petición...');
             try {
-                const response = await fetch(`${getApiBase()}/public/index.php?route=auth&action=me`, {
+                const response = await fetch(`${getApiBase()}/public/index.php?route=auth&caso=1&action=me`, {
                     headers: { 'Authorization': `Bearer ${jwtToken}` }
                 });
                 console.log('🔍 GESTIÓN: Respuesta JWT:', response.status, response.statusText);
@@ -405,7 +405,7 @@ async function getUserById(userId) {
         const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
         const authHeader = token ? `Bearer ${token}` : '';
         
-        const response = await fetch(`${getApiBase()}/public/index.php?route=user&action=get&id=${userId}`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=get&id=${userId}`, {
             headers: { 'Authorization': authHeader }
         });
         
@@ -436,7 +436,7 @@ async function loadUsersFromAPI() {
         
         console.log('🔍 GESTIÓN: Token para API:', jwtToken ? 'JWT' : firebaseToken ? 'Firebase' : 'Ninguno');
         
-        const response = await fetch(`${getApiBase()}/public/index.php?route=user&action=list`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=list`, {
             headers: { 'Authorization': authHeader }
         });
         
@@ -741,7 +741,7 @@ async function deleteUsuario(userId, userName, row) {
             const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
             const authHeader = token ? `Bearer ${token}` : '';
             
-            const response = await fetch(`${getApiBase()}/public/index.php?route=user&action=delete&id=${userId}`, {
+            const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=delete&id=${userId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': authHeader }
             });
@@ -1052,7 +1052,7 @@ async function saveUserChanges(button) {
         const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
         const authHeader = token ? `Bearer ${token}` : '';
         
-        const response = await fetch(`${getApiBase()}/public/index.php?route=user&action=update&id=${userId}`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=update&id=${userId}`, {
             method: 'POST',
             headers: { 
                 'Authorization': authHeader,
@@ -1166,7 +1166,7 @@ async function createNewUser(e) {
         const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
         const authHeader = token ? `Bearer ${token}` : '';
         
-        const response = await fetch(`${getApiBase()}/public/index.php?route=auth&action=register`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=auth&caso=1&action=register`, {
             method: 'POST',
             headers: { 
                 'Authorization': authHeader,

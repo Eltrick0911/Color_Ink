@@ -26,7 +26,7 @@ async function checkAuthAndSetupUI() {
             sessionStorage.removeItem('firebase_id_token');
             sessionStorage.removeItem('access_token');
             sessionStorage.removeItem('user');
-            window.location.href = 'login.html';
+            window.location.href = 'login.php';
             return;
         }
         
@@ -38,7 +38,7 @@ async function checkAuthAndSetupUI() {
             sessionStorage.removeItem('firebase_id_token');
             sessionStorage.removeItem('access_token');
             sessionStorage.removeItem('user');
-            window.location.href = 'login.html';
+            window.location.href = 'login.php';
             return;
         }
         
@@ -47,7 +47,7 @@ async function checkAuthAndSetupUI() {
         
     } catch (error) {
         console.error('❌ Error verificando autenticación en dashboard:', error);
-        window.location.href = 'login.html';
+        window.location.href = 'login.php';
     }
 }
 
@@ -73,7 +73,7 @@ async function getCurrentUser() {
         if (firebaseToken) {
             console.log('🔍 Intentando con token Firebase...');
             try {
-                const response = await fetch(`${getApiBase()}/public/index.php?route=firebase&action=me`, {
+                const response = await fetch(`${getApiBase()}/public/index.php?route=firebase&caso=1&action=me`, {
                     headers: { 'Authorization': `Bearer ${firebaseToken}` }
                 });
                 console.log('Respuesta Firebase:', response.status, response.statusText);
@@ -96,7 +96,7 @@ async function getCurrentUser() {
         if (jwtToken) {
             console.log('🔍 Intentando con token JWT...');
             try {
-                const response = await fetch(`${getApiBase()}/public/index.php?route=auth&action=me`, {
+                const response = await fetch(`${getApiBase()}/public/index.php?route=auth&caso=1&action=me`, {
                     headers: { 'Authorization': `Bearer ${jwtToken}` }
                 });
                 console.log('Respuesta JWT:', response.status, response.statusText);

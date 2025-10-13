@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return '/' + (parts[1] || '');
     })();
     const apiEntry = `${projectBase}/public/index.php`;
-    const dashboardUrl = `${projectBase}/src/Views/PHP/index.html`;
+    const dashboardUrl = `${projectBase}/src/Views/PHP/index.php`;
 
     // Navegación a registro
     const goRegister = document.querySelector('#goRegister');
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.log('🔍 Firebase SDK no disponible, usando login tradicional...');
                 // Fallback al endpoint local (JWT propio) si no hay Firebase SDK
-                const resLocal = await fetch(`${apiEntry}?route=auth&action=login`, {
+                const resLocal = await fetch(`${apiEntry}?route=auth&caso=1&action=login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ usuario: email, contrasena: pass })
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Enviar idToken al backend para sesión
             console.log('🔍 Enviando ID Token al backend...');
-            const res = await fetch(`${apiEntry}?route=firebase&action=login`, {
+            const res = await fetch(`${apiEntry}?route=firebase&caso=1&action=login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
                 body: JSON.stringify({ idToken })
