@@ -8,7 +8,7 @@
    
     $url = explode('/',$_GET['route']);
     
-    $lista = ['auth', 'user', 'login', 'index', 'pedidos', 'ventas', 'gestion_usu', 'inve']; // lista de rutas permitidas
+    $lista = ['auth', 'user', 'login', 'index', 'pedidos', 'ventas', 'gestion_usu', 'inve', 'firebase']; // lista de rutas permitidas
     $caso = filter_input(INPUT_GET, "caso");
     $file = "";
     if($caso != ""){
