@@ -114,7 +114,8 @@ class UserController
     }
 
 
-    public function list(array $headers): void
+    // Nota: evitar nombre reservado 'list' en PHP
+    public function listUsersAction(array $headers): void
     {
         $auth = $this->authorize($headers, [1]); // solo admin
         if (!$auth) return;

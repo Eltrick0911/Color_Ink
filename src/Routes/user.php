@@ -1,22 +1,45 @@
 <?php
-use App\Controllers\userController;
+use App\Controllers\UserController;
 use App\Config\responseHTTP;
 
-$method = strtolower($_SERVER['REQUEST_METHOD']); //capturamos el metodo que se envia
-$route = $_GET['route']; //capturamos la ruta 
-$params = explode('/', $route); // hacemos un explode de route ya que si nos envian user/email/clave tendriamos un array 
-$data = json_decode(file_get_contents("php://input"),true); //contendra la data que enviemos por cualquier metodo excepto el get, array asociativo 
-$headers = getallheaders(); //capturando todas las cabeceras que nos envian
+header('Content-Type: application/json');
 
+$controller = new UserController();
+$method = $_SERVER['REQUEST_METHOD'];
+$headers = function_exists('getallheaders') ? getallheaders() : [];
+$action = $_GET['action'] ?? '';
 
-//print_r($route);
-$app = new userController($method,$route,$params,$data,$headers); //instancia clase user controlador 
-//$app->getAll('user/'); //getAll trearemos todos los usuarios registrados
-//$app->post('user/'); //llamada al metodo post con la ruta al recurso
-$app->getUser("user/{$params[1]}/"); //traemos la info de un usuario en particular
-//$app->patchPassword("user/password/"); //metodo para actualizar la contraseña
+switch ($method) {
+    case 'GET':
+        if ($action === 'list') {
+            $controller->listUsersAction($headers);
+        } elseif ($action === 'get') {
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $controller->getById($headers, $id);
+        } else {
+            echo json_encode(['status' => 'ERROR', 'message' => 'Acción no válida']);
+        }
+        break;
+    case 'POST':
+        if ($action === 'update') {
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+            $controller->update($headers, $id, $input);
+        } else {
+            echo json_encode(['status' => 'ERROR', 'message' => 'Acción no válida']);
+        }
+        break;
+    case 'DELETE':
+        if ($action === 'delete') {
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $controller->delete($headers, $id);
+        } else {
+            echo json_encode(['status' => 'ERROR', 'message' => 'Acción no válida']);
+        }
+        break;
+    default:
+        echo json_encode(['status' => 'ERROR', 'message' => 'Método no permitido']);
+}
 
-
-
-//echo json_encode(responseHTTP::status404()); //imprimamos un error en caso de no encuentre la ruta
+?>
 
