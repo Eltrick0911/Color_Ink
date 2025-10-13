@@ -18,7 +18,8 @@
                 <img src="/Color_Ink/src/Views/IMG/COLOR INK.gif" alt="Color Ink Logo">
             </div>
             
-            <form class="login-form" action="login.php" method="POST">
+            <!-- ===== FORMULARIO CON FUNCIONALIDADES COMPLETAS (Fusionado de ambas APIs) ===== -->
+            <form class="login-form" id="loginForm" action="login.php" method="POST">
                 <div class="form-group">
                     <label for="email">Correo Electrónico</label>
                     <input type="email" id="email" name="email" required>
@@ -43,10 +44,50 @@
                 </div>
                 
                 <button type="submit" class="login-btn">INGRESAR</button>
+                
+                <!-- ===== ENLACES ADICIONALES (Agregados de la API ACTUAL) ===== -->
+                <div style="text-align:center;margin-top:12px;">
+                    <a id="goRegister" href="#">¿No tienes cuenta? Regístrate</a>
+                    &nbsp;|&nbsp;
+                    <a id="forgotPassword" href="#">¿Olvidaste tu contraseña?</a>
+                </div>
             </form>
         </div>
     </div>
     
-    <script src="/Color_Ink/src/Views/JS/login.js"></script>
+    <!-- ===== FIREBASE SDK Y CONFIGURACIÓN (Agregado de la API ACTUAL) ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=20250923"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js?v=20250923"></script>
+    <script>
+        // Rellena con tu configuración real de Firebase
+        const firebaseConfig = {
+         apiKey: "AIzaSyBM1Wj1JSqHRHKoCwId-vhJ7eisM7ieTAY",
+         authDomain: "miappwebinkproject.firebaseapp.com",
+         projectId: "miappwebinkproject",
+         storageBucket: "miappwebinkproject.appspot.com",
+         messagingSenderId: "463926899015",
+         appId: "1:463926899015:web:ce74827067d65ccc255c62",
+         measurementId: "G-NBMVZPB4DR"
+         };
+        
+        console.log('🔍 Inicializando Firebase...');
+        console.log('Firebase disponible:', typeof firebase !== 'undefined');
+        
+        if (typeof firebase !== 'undefined') {
+            console.log('Firebase apps:', firebase.apps);
+            if (firebase.apps?.length === 0) {
+                console.log('✅ Inicializando Firebase...');
+                firebase.initializeApp(firebaseConfig);
+                console.log('✅ Firebase inicializado correctamente');
+            } else {
+                console.log('✅ Firebase ya estaba inicializado');
+            }
+        } else {
+            console.log('❌ Firebase SDK no está disponible');
+        }
+    </script>
+    
+    <!-- ===== SCRIPT DE LOGIN FUSIONADO ===== -->
+    <script src="/Color_Ink/src/Views/JS/login.js?v=20250923"></script>
 </body>
 </html>
