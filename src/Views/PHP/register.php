@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
-    <link rel="stylesheet" href="../CSS/login.css">
+    <link rel="stylesheet" href="/Color_Ink/src/Views/CSS/login.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="../IMG/LOGO.png" type="image/png">
+    <link rel="icon" href="/Color_Ink/src/Views/IMG/LOGO.png" type="image/png">
 </head>
 <body>
     <div class="container">
         <div class="login-box">
             <div class="login-header">
                 <h1>Crear cuenta</h1>
-                <img src="../IMG/COLOR INK.gif" alt="Color Ink Logo">
+                <img src="/Color_Ink/src/Views/IMG/COLOR INK.gif" alt="Color Ink Logo">
             </div>
             <form id="registerForm" action="#" method="POST">
                 <div class="form-group">
@@ -61,12 +61,20 @@
     <script>
         (function(){
             const parts = window.location.pathname.split('/');
-            const idx = parts.indexOf('src');
-            const base = idx > 1 ? '/' + parts.slice(1, idx).join('/') : '/' + (parts[1]||'');
+            let base;
+            // Si estamos en /Color_Ink/public/register, devolver /Color_Ink
+            if (parts.includes('public')) {
+                const publicIdx = parts.indexOf('public');
+                base = '/' + parts.slice(1, publicIdx).join('/');
+            } else {
+                // Fallback para rutas con 'src'
+                const idx = parts.indexOf('src');
+                base = idx > 1 ? '/' + parts.slice(1, idx).join('/') : '/' + (parts[1]||'');
+            }
 
             document.querySelector('#goLogin').addEventListener('click', (e)=>{
                 e.preventDefault();
-                window.location.href = `${base}/src/Views/PHP/login.html`;
+                window.location.href = `${base}/public/login`;
             });
 
             document.querySelector('#registerForm').addEventListener('submit', async (e)=>{
@@ -86,7 +94,7 @@
                     // Cerrar sesión para forzar flujo de login
                     await firebase.auth().signOut();
                     alert('Registro exitoso. Ahora inicia sesión con tus credenciales.');
-                    window.location.href = `${base}/src/Views/PHP/login.html`;
+                    window.location.href = `${base}/public/login`;
                 }catch(err){
                     alert(err.message || 'Error en registro');
                 }

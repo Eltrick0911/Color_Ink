@@ -47,9 +47,12 @@
                 
                 <!-- ===== ENLACES ADICIONALES (Agregados de la API ACTUAL) ===== -->
                 <div style="text-align:center;margin-top:12px;">
-                    <a id="goRegister" href="#">¿No tienes cuenta? Regístrate</a>
-                    &nbsp;|&nbsp;
-                    <a id="forgotPassword" href="#">¿Olvidaste tu contraseña?</a>
+                    <div style="margin-bottom:8px;">
+                        <a id="goRegister" href="#">¿No tienes cuenta? Regístrate</a>
+                    </div>
+                    <div>
+                        <a id="forgotPassword" href="#">¿Olvidaste tu contraseña?</a>
+                    </div>
                 </div>
             </form>
         </div>
