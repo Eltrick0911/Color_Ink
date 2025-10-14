@@ -211,7 +211,7 @@ async function checkAuthAndInit() {
         
     } catch (error) {
         console.error('❌ Error verificando autenticación:', error);
-        window.location.href = 'login.html';
+        window.location.href = 'login';
     }
 }
 
@@ -333,10 +333,10 @@ function showAccessDenied() {
             <p>No tienes permisos para acceder a esta página.</p>
             <p>Solo los administradores pueden gestionar usuarios.</p>
             <div style="margin-top: 1rem;">
-                <button onclick="window.location.href='index.html'" style="padding: 10px 20px; margin-right: 10px;">
+                <button onclick="window.location.href='index'" style="padding: 10px 20px; margin-right: 10px;">
                     Volver al Dashboard
                 </button>
-                <button onclick="window.location.href='perfil.html'" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px;">
+                <button onclick="window.location.href='perfil'" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px;">
                     Ver Mi Perfil
                 </button>
             </div>

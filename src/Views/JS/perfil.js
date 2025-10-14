@@ -31,7 +31,7 @@ async function checkAuthAndLoadProfile() {
             console.log('- access_token:', sessionStorage.getItem('access_token') ? 'Presente' : 'No presente');
             console.log('- user:', sessionStorage.getItem('user'));
             
-            window.location.href = 'login.html';
+            window.location.href = 'login';
             return;
         }
         

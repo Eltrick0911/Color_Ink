@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (goRegister) {
         goRegister.addEventListener('click', (e) => {
             e.preventDefault();
-            window.location.href = `${projectBase}/src/Views/PHP/register.html`;
+            window.location.href = `${projectBase}/public/register`;
         });
     }
 
