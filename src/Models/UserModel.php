@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\DB\connectionDB;
 use App\Config\responseHTTP;
+use App\Config\Security as ConfigSecurity;
 use PDO;
 
 class UserModel
@@ -137,8 +138,27 @@ class UserModel
             // Limpiar cursores adicionales de CALL
             while ($stmt->nextRowset()) { /* noop */ }
             
+<<<<<<< Updated upstream
             if ($result && isset($result['id_usuario'])) {
                 // Login exitoso
+=======
+            // Verificar si el usuario está bloqueado
+            if ($user['bloqueado_hasta'] && strtotime($user['bloqueado_hasta']) > time()) {
+                return [
+                    'success' => false,
+                    'message' => 'Usuario bloqueado temporalmente'
+                ];
+            }
+            
+            // Verificar la contraseña usando el hash
+            if (ConfigSecurity::validatePassword($contrasena, $user['contrasena'])) {
+                // Login exitoso - actualizar último acceso y resetear intentos
+                $updateSql = "UPDATE usuario SET ultimo_acceso = NOW(), intentos_fallidos = 0 WHERE id_usuario = :id";
+                $updateStmt = $this->db->prepare($updateSql);
+                $updateStmt->bindParam(':id', $user['id_usuario'], PDO::PARAM_INT);
+                $updateStmt->execute();
+                
+>>>>>>> Stashed changes
                 return [
                     'success' => true,
                     'user' => [

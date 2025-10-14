@@ -11,5 +11,7 @@ deny from all
 #de php también, etc.
 AddType application/x-httpd-php .nas
 
-#URL amigable con un solo parametro
-RewriteRule ^([0-9a-zA-Z-_@./]+)$ index.php?route=$1 [QSA]
+# URL amigable - captura todas las solicitudes y las redirige a index.php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ index.php?route=$1 [QSA,L]

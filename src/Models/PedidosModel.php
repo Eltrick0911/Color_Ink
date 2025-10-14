@@ -41,6 +41,11 @@ class PedidosModel
     public function getAllPedidos(): array
     {
         try {
+<<<<<<< Updated upstream
+=======
+            error_log("PedidosModel - Iniciando consulta getAllPedidos");
+            
+>>>>>>> Stashed changes
             $sql = "SELECT 
                         p.id_pedido,
                         p.numero_pedido,
@@ -60,8 +65,20 @@ class PedidosModel
                              p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
                     ORDER BY p.fecha_pedido DESC";
             
+<<<<<<< Updated upstream
             $stmt = $this->connection->query($sql);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
+=======
+            error_log("PedidosModel - SQL: " . $sql);
+            
+            $stmt = $this->connection->query($sql);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            error_log("PedidosModel - Resultado: " . json_encode($result));
+            error_log("PedidosModel - Número de registros: " . count($result));
+            
+            return $result;
+>>>>>>> Stashed changes
         } catch (PDOException $e) {
             error_log("Error obteniendo pedidos: " . $e->getMessage());
             return [];
@@ -109,12 +126,27 @@ class PedidosModel
     public function getPedidoById(int $idPedido): ?array
     {
         try {
+<<<<<<< Updated upstream
             // Obtener información básica del pedido
             $stmt = $this->connection->prepare("CALL sp_obtener_pedido(?)");
             $stmt->execute([$idPedido]);
             $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if (!$pedido) {
+=======
+            error_log("PedidosModel - getPedidoById: Buscando pedido con ID: " . $idPedido);
+            
+            // Obtener información básica del pedido
+            $stmt = $this->connection->prepare("CALL sp_obtener_pedido(?)");
+            error_log("PedidosModel - getPedidoById: Ejecutando sp_obtener_pedido");
+            $stmt->execute([$idPedido]);
+            $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            error_log("PedidosModel - getPedidoById: Resultado del procedimiento: " . ($pedido ? json_encode($pedido) : "null"));
+            
+            if (!$pedido) {
+                error_log("PedidosModel - getPedidoById: No se encontró el pedido con ID: " . $idPedido);
+>>>>>>> Stashed changes
                 return null;
             }
 
@@ -148,10 +180,27 @@ class PedidosModel
     public function updatePedido(int $idPedido, int $idUsuario, string $fechaPedido, ?string $fechaEntrega, int $idEstado): bool
     {
         try {
+<<<<<<< Updated upstream
             $stmt = $this->connection->prepare("CALL sp_actualizar_pedido(?, ?, ?, ?, ?)");
             return $stmt->execute([$idPedido, $idUsuario, $fechaPedido, $fechaEntrega, $idEstado]);
         } catch (PDOException $e) {
             error_log("Error actualizando pedido: " . $e->getMessage());
+=======
+            error_log("PedidosModel - updatePedido: Ejecutando sp_actualizar_pedido con parámetros: " .
+                      "idPedido=" . $idPedido . ", idUsuario=" . $idUsuario . 
+                      ", fechaPedido=" . $fechaPedido . ", fechaEntrega=" . ($fechaEntrega ?? 'null') . 
+                      ", idEstado=" . $idEstado);
+                      
+            $stmt = $this->connection->prepare("CALL sp_actualizar_pedido(?, ?, ?, ?, ?)");
+            $result = $stmt->execute([$idPedido, $idUsuario, $fechaPedido, $fechaEntrega, $idEstado]);
+            
+            error_log("PedidosModel - updatePedido: Resultado de la ejecución: " . ($result ? "Éxito" : "Fallo"));
+            
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Error actualizando pedido: " . $e->getMessage());
+            error_log("Error completo: " . $e->getTraceAsString());
+>>>>>>> Stashed changes
             return false;
         }
     }
@@ -192,8 +241,26 @@ class PedidosModel
     public function createDetallePedido(array $detalleData): bool
     {
         try {
+<<<<<<< Updated upstream
             $stmt = $this->connection->prepare("CALL sp_crear_detalle_pedido(?, ?, ?, ?, ?, ?, ?, ?)");
             return $stmt->execute([
+=======
+            error_log("PedidosModel - createDetallePedido: Iniciando creación de detalle con datos: " . json_encode($detalleData));
+            
+            // Verificar que todos los campos requeridos estén presentes
+            $requiredFields = ['producto_solicitado', 'precio_unitario', 'descuento', 'impuesto', 'id_pedido', 'id_producto', 'cantidad', 'id_usuario'];
+            foreach ($requiredFields as $field) {
+                if (!isset($detalleData[$field])) {
+                    error_log("PedidosModel - createDetallePedido: Campo requerido faltante: " . $field);
+                    throw new Exception("Campo requerido faltante: " . $field);
+                }
+            }
+            
+            error_log("PedidosModel - createDetallePedido: Preparando llamada a sp_crear_detalle_pedido");
+            $stmt = $this->connection->prepare("CALL sp_crear_detalle_pedido(?, ?, ?, ?, ?, ?, ?, ?)");
+            
+            $params = [
+>>>>>>> Stashed changes
                 $detalleData['producto_solicitado'],
                 $detalleData['precio_unitario'],
                 $detalleData['descuento'],
@@ -202,10 +269,27 @@ class PedidosModel
                 $detalleData['id_producto'],
                 $detalleData['cantidad'],
                 $detalleData['id_usuario']
+<<<<<<< Updated upstream
             ]);
         } catch (PDOException $e) {
             error_log("Error creando detalle de pedido: " . $e->getMessage());
             throw new Exception("Error al crear detalle: " . $e->getMessage());
+=======
+            ];
+            
+            error_log("PedidosModel - createDetallePedido: Ejecutando sp_crear_detalle_pedido con parámetros: " . json_encode($params));
+            $result = $stmt->execute($params);
+            
+            error_log("PedidosModel - createDetallePedido: Resultado: " . ($result ? "Éxito" : "Fallo"));
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Error creando detalle de pedido: " . $e->getMessage());
+            error_log("Error completo: " . $e->getTraceAsString());
+            throw new Exception("Error al crear detalle: " . $e->getMessage());
+        } catch (Exception $e) {
+            error_log("Excepción en createDetallePedido: " . $e->getMessage());
+            throw $e;
+>>>>>>> Stashed changes
         }
     }
 

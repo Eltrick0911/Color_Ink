@@ -191,12 +191,27 @@ class PedidosController
     public function findOne(array $headers, int $id): void
     {
         try {
+<<<<<<< Updated upstream
             $pedido = $this->pedidosModel->getPedidoById($id);
             
             if (!$pedido) {
                 echo json_encode(responseHTTP::status404('Pedido no encontrado'));
                 return;
             }
+=======
+            error_log("PedidosController - findOne: Buscando pedido con ID: " . $id);
+            
+            $pedido = $this->pedidosModel->getPedidoById($id);
+            error_log("PedidosController - findOne: Resultado de la consulta: " . ($pedido ? "Encontrado" : "No encontrado"));
+            
+            if (!$pedido) {
+                error_log("PedidosController - findOne: Pedido no encontrado");
+                echo json_encode(responseHTTP::status404('Pedido no encontrado'));
+                return;
+            }
+            
+            error_log("PedidosController - findOne: Pedido encontrado: " . json_encode($pedido));
+>>>>>>> Stashed changes
 
             echo json_encode(responseHTTP::status200('OK') + ['data' => $pedido]);
         } catch (\Exception $e) {
@@ -210,8 +225,18 @@ class PedidosController
     public function update(array $headers, int $id, array $input): void
     {
         try {
+<<<<<<< Updated upstream
             // Verificar que el pedido existe
             $pedido = $this->pedidosModel->getPedidoById($id);
+=======
+            error_log("PedidosController - update: Actualizando pedido con ID: " . $id);
+            error_log("PedidosController - update: Datos recibidos: " . json_encode($input));
+            
+            // Verificar que el pedido existe
+            $pedido = $this->pedidosModel->getPedidoById($id);
+            error_log("PedidosController - update: Pedido encontrado: " . ($pedido ? "SI" : "NO"));
+            
+>>>>>>> Stashed changes
             if (!$pedido) {
                 echo json_encode(responseHTTP::status404('Pedido no encontrado'));
                 return;
@@ -222,7 +247,14 @@ class PedidosController
             $fechaEntrega = $input['fecha_entrega'] ?? null;
             $idEstado = (int)($input['id_estado'] ?? $pedido['id_estado']);
 
+<<<<<<< Updated upstream
             $success = $this->pedidosModel->updatePedido($id, $idUsuario, $fechaPedido, $fechaEntrega, $idEstado);
+=======
+            error_log("PedidosController - update: Parámetros para actualizar: id=" . $id . ", idUsuario=" . $idUsuario . ", fechaPedido=" . $fechaPedido . ", fechaEntrega=" . ($fechaEntrega ?? 'null') . ", idEstado=" . $idEstado);
+            
+            $success = $this->pedidosModel->updatePedido($id, $idUsuario, $fechaPedido, $fechaEntrega, $idEstado);
+            error_log("PedidosController - update: Resultado de actualización: " . ($success ? "Éxito" : "Fallo"));
+>>>>>>> Stashed changes
             
             if ($success) {
                 echo json_encode(responseHTTP::status200('Pedido actualizado exitosamente'));
@@ -298,8 +330,18 @@ class PedidosController
     public function crearDetalle(array $headers, int $idPedido, array $input): void
     {
         try {
+<<<<<<< Updated upstream
             // Verificar que el pedido existe
             $pedido = $this->pedidosModel->getPedidoById($idPedido);
+=======
+            error_log("PedidosController - crearDetalle: Intentando crear detalle para pedido ID: " . $idPedido);
+            error_log("PedidosController - crearDetalle: Datos recibidos: " . json_encode($input));
+            
+            // Verificar que el pedido existe
+            $pedido = $this->pedidosModel->getPedidoById($idPedido);
+            error_log("PedidosController - crearDetalle: Pedido encontrado: " . ($pedido ? "SI" : "NO"));
+            
+>>>>>>> Stashed changes
             if (!$pedido) {
                 echo json_encode(responseHTTP::status404('Pedido no encontrado'));
                 return;
