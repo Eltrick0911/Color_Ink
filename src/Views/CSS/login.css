@@ -279,3 +279,18 @@ body {
         width: 80px;
     }
 }
+
+
+#goRegister {
+    color: #710064; /* Un gris oscuro */
+    font-family: 'Playfair Display', serif; /* Fuente elegante */
+    font-size: 16px; /* Un poco más grande */
+    font-weight: 700; /* Negrita */
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#goRegister:hover {
+    color: #650062; 
+    opacity: 0.8; 
+}
