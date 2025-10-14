@@ -136,7 +136,7 @@ async function loadUserProfile(user) {
         
         console.log('🔍 PERFIL: Token para API:', jwtToken ? 'JWT' : firebaseToken ? 'Firebase' : 'Ninguno');
         
-        const response = await fetch(`${getApiBase()}/public/index.php?route=user&action=getById&id=${user.id_usuario}`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=getById&id=${user.id_usuario}`, {
             headers: { 'Authorization': authHeader }
         });
         
@@ -240,7 +240,7 @@ async function saveProfile(e) {
         const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
         const authHeader = token ? `Bearer ${token}` : '';
         
-        const response = await fetch(`${getApiBase()}/public/index.php?route=user&action=update&id=${user.id_usuario}`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=update&id=${user.id_usuario}`, {
             method: 'POST',
             headers: { 
                 'Authorization': authHeader,
@@ -267,6 +267,12 @@ async function saveProfile(e) {
 // Función para obtener la base de la API
 function getApiBase() {
     const parts = window.location.pathname.split('/');
+    // Si estamos en /Color_Ink/public/perfil, devolver /Color_Ink
+    if (parts.includes('public')) {
+        const publicIdx = parts.indexOf('public');
+        return '/' + parts.slice(1, publicIdx).join('/');
+    }
+    // Fallback para rutas con 'src'
     const idx = parts.indexOf('src');
     if (idx > 1) {
         return '/' + parts.slice(1, idx).join('/');

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\DB\connectionDB;
 use App\Config\responseHTTP;
-use App\Config\Security;
 use PDO;
 
 class UserModel
@@ -77,12 +76,24 @@ class UserModel
     public function getUserById(int $idUsuario): ?array
     {
         try {
-            $stmt = $this->db->prepare("CALL sp_obtener_usuario(:id)");
+            $stmt = $this->db->prepare("
+                SELECT 
+                    u.id_usuario, 
+                    u.nombre_usuario, 
+                    u.correo, 
+                    u.telefono, 
+                    u.fecha_ingreso, 
+                    u.ultimo_acceso, 
+                    u.id_rol, 
+                    u.bloqueado_hasta,
+                    r.descripcion AS nombre_rol
+                FROM usuario u
+                LEFT JOIN rol r ON u.id_rol = r.id_rol
+                WHERE u.id_usuario = :id
+            ");
             $stmt->bindParam(':id', $idUsuario, PDO::PARAM_INT);
             $stmt->execute();
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            // Limpiar cursores adicionales de CALL
-            while ($stmt->nextRowset()) { /* noop */ }
             return $user ?: null;
         } catch (\Throwable $e) {
             error_log('Error getUserById: ' . $e->getMessage());
