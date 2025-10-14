@@ -127,7 +127,7 @@ function setupUIForUser(user) {
     console.log('Usuario autenticado:', user);
     
     // Configurar iconos según el rol
-    const userManagementIcon = document.querySelector('a[href="gestion_usu.html"]');
+    const userManagementIcon = document.querySelector('a[href="gestion_usu.php"]');
     if (userManagementIcon) {
         if (user.id_rol === 1) {
             // Administrador: mostrar gestión de usuarios
@@ -136,7 +136,7 @@ function setupUIForUser(user) {
             userManagementIcon.innerHTML = '<i class="fa-solid fa-users" onclick="moveBar()" title="Gestión de Usuarios"></i>';
         } else {
             // Usuario común: mostrar perfil personal
-            userManagementIcon.href = 'perfil.html';
+            userManagementIcon.href = 'perfil';
             userManagementIcon.style.display = 'block';
             userManagementIcon.title = 'Mi Perfil';
             userManagementIcon.innerHTML = '<i class="fa-solid fa-user" onclick="moveBar()" title="Mi Perfil"></i>';

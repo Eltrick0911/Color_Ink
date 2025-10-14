@@ -22,13 +22,13 @@
         <i class="fa-solid fa-user user-icon" onclick="resetBarPosition()"></i>
         <div class="icon-bar-container" id="iconBarContainer">
             <div class="icon-bar">
-                <a href="index.php"><i class="fa-solid fa-house" onclick="resetBarPosition()" title="Inicio"></i></a>
-                <a href="pedidos.php"><i class="fa-solid fa-truck-ramp-box" onclick="moveBar()" title="Pedidos"></i></a>
-                <a href="inve.php"><i class="fa-solid fa-truck" onclick="moveBar()" title="Inventario"></i></a>
-                <a href="gestion_usu.php"><i class="fa-solid fa-credit-card" onclick="moveBar()" title="Gestión de Usuarios"></i></a>
+                <a href="index"><i class="fa-solid fa-house" onclick="resetBarPosition()" title="Inicio"></i></a>
+                <a href="pedidos"><i class="fa-solid fa-truck-ramp-box" onclick="moveBar()" title="Pedidos"></i></a>
+                <a href="inve"><i class="fa-solid fa-truck" onclick="moveBar()" title="Inventario"></i></a>
+                <a href="gestion_usu"><i class="fa-solid fa-credit-card" onclick="moveBar()" title="Gestión de Usuarios"></i></a>
             </div>
         </div>
-      <a href="login.php"> <i class="fa-solid fa-arrow-right user-icon" title="Salir" ></i></a> 
+      <a href="login"> <i class="fa-solid fa-arrow-right user-icon" title="Salir" ></i></a> 
     </header>
 
     <!-- ===== CONTENIDO PRINCIPAL (Conservado de la API NUEVA) ===== -->

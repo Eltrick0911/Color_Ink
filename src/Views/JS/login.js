@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return '/' + (parts[1] || '');
     })();
     const apiEntry = `${projectBase}/public/index.php`;
-    const dashboardUrl = `${projectBase}/src/Views/PHP/index.php`;
+    const dashboardUrl = `${projectBase}/public/index`;
 
     // Navegación a registro
     const goRegister = document.querySelector('#goRegister');
@@ -178,6 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
 window.authGuard = function() {
     const token = sessionStorage.getItem('firebase_id_token') || sessionStorage.getItem('access_token');
     if (!token) {
-        window.location.href = '/src/Views/PHP/login.html';
+        window.location.href = '/Color_Ink/public/login';
     }
 }
