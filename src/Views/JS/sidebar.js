@@ -53,7 +53,10 @@ class SidebarManager {
         // Crear el icono de usuario - Replica exacta
         const userIcon = document.createElement('i');
         userIcon.className = 'fa-solid fa-user user-icon';
-        userIcon.onclick = () => this.resetBarPosition();
+        userIcon.title = 'Gestión de Usuarios';
+        userIcon.onclick = () => {
+            window.location.href = '/Color_Ink/public/gestion_usu';
+        };
 
         // Crear el contenedor de iconos - Replica exacta
         const iconContainer = document.createElement('div');
@@ -73,18 +76,18 @@ class SidebarManager {
             },
             { 
                 class: 'fa-truck-ramp-box', 
-                onclick: () => this.handleOtherClick('inve.html'),
-                title: 'Inventario'
-            },
-            { 
-                class: 'fa-truck', 
-                onclick: () => this.handleOtherClick('pedidos.html'),
+                onclick: () => this.handleOtherClick('/Color_Ink/public/pedidos'),
                 title: 'Pedidos'
             },
             { 
+                class: 'fa-truck', 
+                onclick: () => this.handleOtherClick('/Color_Ink/public/inve'),
+                title: 'Inventario'
+            },
+            { 
                 class: 'fa-credit-card', 
-                onclick: () => this.handleOtherClick('gestion_usu.html'),
-                title: 'Gestión de Usuarios'
+                onclick: () => this.handleOtherClick('/Color_Ink/public/ventas'),
+                title: 'Ventas'
             }
         ];
 
@@ -99,7 +102,7 @@ class SidebarManager {
 
         // Crear el icono de salida - Replica exacta
         const exitLink = document.createElement('a');
-        exitLink.href = 'login.html';
+        exitLink.href = '/Color_Ink/public/login';
         const exitIcon = document.createElement('i');
         exitIcon.className = 'fa-solid fa-arrow-right user-icon';
         exitIcon.title = 'Salir';
@@ -130,7 +133,7 @@ class SidebarManager {
             this.resetBarPosition();
         } else {
             // Si estamos en otra página, navegar a index
-            window.location.href = 'index.html';
+            window.location.href = '/Color_Ink/public/index';
         }
     }
 

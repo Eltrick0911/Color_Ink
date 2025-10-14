@@ -96,9 +96,9 @@ header.sidebar .icon-bar {
 }
 
 .icon-bar i.fa-truck-ramp-box:hover {
-    color: #149800;
+    color: #309800;
     transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(4, 228, 34, 0.616);
+    box-shadow: 0 4px 8px rgba(4, 228, 71, 0.616);
 }
 
 .icon-bar i.fa-truck:hover {
