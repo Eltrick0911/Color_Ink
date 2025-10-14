@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\DB\connectionDB;
 use App\Config\responseHTTP;
+use App\Config\Security;
 use PDO;
 
 class UserModel
