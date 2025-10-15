@@ -14,27 +14,56 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Obtener parámetros de la URL
 $url = explode('/', $_GET['route']);
-<<<<<<< Updated upstream
-$action = $url[1] ?? null;
-$id = isset($url[2]) ? (int)$url[2] : null;
-$subaction = $url[3] ?? null;
-$subid = isset($url[4]) ? (int)$url[4] : null;
-=======
 
-// Comprobar si el primer segmento es 'pedidos' y ajustar los índices en consecuencia
-if ($url[0] === 'pedidos') {
-    $action = $url[1] ?? null;
-    $id = isset($url[2]) ? (int)$url[2] : null;
-    $subaction = $url[3] ?? null;
-    $subid = isset($url[4]) ? (int)$url[4] : null;
-} else {
-    // Si la ruta no comienza con 'pedidos', asumimos que es la estructura antigua
-    $action = $url[0] ?? null;
-    $id = isset($url[1]) ? (int)$url[1] : null;
-    $subaction = $url[2] ?? null;
-    $subid = isset($url[3]) ? (int)$url[3] : null;
+// Debugging para ver la ruta exacta
+error_log("PedidosRoute - URL raw: " . $_GET['route']);
+error_log("PedidosRoute - URL segments: " . implode(', ', $url));
+
+// Nueva lógica mejorada para determinar action, id, etc.
+if (count($url) > 0) {
+    // Si el primer segmento es 'pedidos', ajustar índices
+    if ($url[0] === 'pedidos') {
+        // Caso: pedidos/accion/id o pedidos/id
+        if (isset($url[1])) {
+            if (is_numeric($url[1])) {
+                // Es un ID: pedidos/123
+                $action = null;
+                $id = (int)$url[1];
+            } else {
+                // Es una acción: pedidos/accion
+                $action = $url[1];
+                $id = isset($url[2]) ? (int)$url[2] : null;
+            }
+        } else {
+            // Solo 'pedidos'
+            $action = null;
+            $id = null;
+        }
+    } else if (is_numeric($url[0])) {
+        // Caso directo con ID: /123
+        $action = null;
+        $id = (int)$url[0];
+    } else {
+        // Caso: accion/id
+        $action = $url[0];
+        $id = isset($url[1]) ? (int)$url[1] : null;
+    }
+    
+    // Subacción y subid
+    if ($action !== null && $id !== null) {
+        $subaction = $url[3] ?? null;
+        $subid = isset($url[4]) ? (int)$url[4] : null;
+    } else if ($action !== null) {
+        $subaction = $url[2] ?? null;
+        $subid = isset($url[3]) ? (int)$url[3] : null;
+    } else if ($id !== null) {
+        $subaction = $url[1] ?? null;
+        $subid = isset($url[2]) ? (int)$url[2] : null;
+    } else {
+        $subaction = null;
+        $subid = null;
+    }
 }
->>>>>>> Stashed changes
 
 // Obtener datos del cuerpo de la petición
 $input = [];
@@ -49,12 +78,8 @@ if (in_array($method, ['POST', 'PUT', 'PATCH'])) {
 }
 
 // Logging para debugging
-<<<<<<< Updated upstream
-=======
-error_log("PedidosRoute - Raw route: " . $_GET['route']);
-error_log("PedidosRoute - URL array: " . json_encode($url));
->>>>>>> Stashed changes
-error_log("PedidosRoute - Method: $method, Action: $action, ID: $id, SubAction: $subaction, SubID: $subid");
+error_log("PedidosRoute - Method: $method, Action: " . ($action ?? "null") . ", ID: " . ($id ?? "null") . ", SubAction: " . ($subaction ?? "null") . ", SubID: " . ($subid ?? "null"));
+error_log("PedidosRoute - Original URL: " . $_GET['route']);
 error_log("PedidosRoute - Input: " . json_encode($input));
 
 try {
@@ -90,24 +115,10 @@ try {
             break;
 
         case 'POST':
-<<<<<<< Updated upstream
-=======
-            error_log("POST request - action: " . ($action ?? 'null') . ", id: " . ($id ?? 'null'));
-            error_log("POST request - input: " . json_encode($input));
-
->>>>>>> Stashed changes
             if ($id && $action === 'detalle') {
                 // POST /pedidos/{id_pedido}/detalle
                 $pedidosController->crearDetalle($headers, $id, $input);
                 
-<<<<<<< Updated upstream
-=======
-            } elseif ($action === 'detalle' && !$id && isset($input['id_pedido'])) {
-                // POST /pedidos/detalle (con id_pedido en el JSON)
-                error_log("POST request - Creando detalle con id_pedido desde JSON: " . $input['id_pedido']);
-                $pedidosController->crearDetalle($headers, (int)$input['id_pedido'], $input);
-                
->>>>>>> Stashed changes
             } elseif (!$action && !$id) {
                 // POST /pedidos
                 $pedidosController->create($headers, $input);
@@ -118,39 +129,19 @@ try {
             break;
 
         case 'PUT':
-<<<<<<< Updated upstream
             if ($action === 'detalle' && $id) {
-=======
-            error_log("PUT request - action: " . ($action ?? 'null') . ", id: " . ($id ?? 'null'));
-            error_log("PUT request - input: " . json_encode($input));
-            
-            if ($action === 'detalle' && $id) {
-                error_log("PUT request - Ejecutando actualizarDetalle para detalle con ID: " . $id);
->>>>>>> Stashed changes
                 // PUT /pedidos/detalle/{id_detalle}
                 $pedidosController->actualizarDetalle($headers, $id, $input);
                 
             } elseif ($id && $action === 'cambiar-estado') {
-<<<<<<< Updated upstream
-=======
-                error_log("PUT request - Ejecutando cambiarEstado para pedido con ID: " . $id);
->>>>>>> Stashed changes
                 // PUT /pedidos/{id}/cambiar-estado
                 $pedidosController->cambiarEstado($headers, $id, $input);
                 
             } elseif ($id && !$action) {
-<<<<<<< Updated upstream
-=======
-                error_log("PUT request - Ejecutando update para pedido con ID: " . $id);
->>>>>>> Stashed changes
                 // PUT /pedidos/{id}
                 $pedidosController->update($headers, $id, $input);
                 
             } else {
-<<<<<<< Updated upstream
-=======
-                error_log("PUT request - Endpoint no encontrado");
->>>>>>> Stashed changes
                 echo json_encode(responseHTTP::status404('Endpoint no encontrado'));
             }
             break;

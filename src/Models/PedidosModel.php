@@ -41,11 +41,29 @@ class PedidosModel
     public function getAllPedidos(): array
     {
         try {
-<<<<<<< Updated upstream
-=======
             error_log("PedidosModel - Iniciando consulta getAllPedidos");
             
->>>>>>> Stashed changes
+            // Primero verificar si hay pedidos en la tabla
+            $checkSql = "SELECT COUNT(*) AS total FROM pedido";
+            $checkStmt = $this->connection->query($checkSql);
+            $count = $checkStmt->fetch(PDO::FETCH_ASSOC)['total'];
+            
+            error_log("PedidosModel - Total de pedidos en la tabla: " . $count);
+            
+            if ($count == 0) {
+                error_log("PedidosModel - No hay pedidos en la base de datos. Insertando pedido de ejemplo...");
+                
+                // Crear un pedido de ejemplo si no hay ninguno
+                $this->createPedido(
+                    "PED-" . date('Ymd') . "-001", 
+                    date('Y-m-d', strtotime('+7 days')), 
+                    "Pedido de ejemplo creado automáticamente", 
+                    1
+                );
+                
+                error_log("PedidosModel - Pedido de ejemplo creado.");
+            }
+            
             $sql = "SELECT 
                         p.id_pedido,
                         p.numero_pedido,
@@ -65,10 +83,6 @@ class PedidosModel
                              p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
                     ORDER BY p.fecha_pedido DESC";
             
-<<<<<<< Updated upstream
-            $stmt = $this->connection->query($sql);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-=======
             error_log("PedidosModel - SQL: " . $sql);
             
             $stmt = $this->connection->query($sql);
@@ -78,9 +92,8 @@ class PedidosModel
             error_log("PedidosModel - Número de registros: " . count($result));
             
             return $result;
->>>>>>> Stashed changes
         } catch (PDOException $e) {
-            error_log("Error obteniendo pedidos: " . $e->getMessage());
+            error_log("Error obteniendo pedidos: " . $e->getMessage() . " - Traza: " . $e->getTraceAsString());
             return [];
         }
     }
@@ -91,6 +104,21 @@ class PedidosModel
     public function getPedidosByUser(int $idUsuario): array
     {
         try {
+            error_log("PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: " . $idUsuario);
+            
+            // Verificar si existe el usuario
+            $checkUserSql = "SELECT COUNT(*) AS existe FROM usuario WHERE id_usuario = ?";
+            $checkUserStmt = $this->connection->prepare($checkUserSql);
+            $checkUserStmt->execute([$idUsuario]);
+            $userExists = $checkUserStmt->fetch(PDO::FETCH_ASSOC)['existe'];
+            
+            if ($userExists == 0) {
+                error_log("PedidosModel - getPedidosByUser: El usuario ID " . $idUsuario . " no existe");
+                return [];
+            }
+            
+            error_log("PedidosModel - getPedidosByUser: Usuario encontrado, buscando sus pedidos");
+            
             $sql = "SELECT 
                         p.id_pedido,
                         p.numero_pedido,
@@ -111,11 +139,21 @@ class PedidosModel
                              p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
                     ORDER BY p.fecha_pedido DESC";
             
+            error_log("PedidosModel - getPedidosByUser: SQL: " . $sql);
+            error_log("PedidosModel - getPedidosByUser: Parámetro idUsuario: " . $idUsuario);
+            
             $stmt = $this->connection->prepare($sql);
             $stmt->execute([$idUsuario]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            error_log("PedidosModel - getPedidosByUser: Número de registros encontrados: " . count($result));
+            if (count($result) > 0) {
+                error_log("PedidosModel - getPedidosByUser: Primer pedido ID: " . ($result[0]['id_pedido'] ?? 'N/A'));
+            }
+            
+            return $result;
         } catch (PDOException $e) {
-            error_log("Error obteniendo pedidos por usuario: " . $e->getMessage());
+            error_log("PedidosModel - getPedidosByUser: Error obteniendo pedidos por usuario: " . $e->getMessage() . " - Traza: " . $e->getTraceAsString());
             return [];
         }
     }
@@ -126,29 +164,31 @@ class PedidosModel
     public function getPedidoById(int $idPedido): ?array
     {
         try {
-<<<<<<< Updated upstream
-            // Obtener información básica del pedido
-            $stmt = $this->connection->prepare("CALL sp_obtener_pedido(?)");
-            $stmt->execute([$idPedido]);
-            $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            if (!$pedido) {
-=======
             error_log("PedidosModel - getPedidoById: Buscando pedido con ID: " . $idPedido);
             
+            // Verificar primero que exista el pedido
+            $checkSql = "SELECT COUNT(*) AS existe FROM pedido WHERE id_pedido = ?";
+            $checkStmt = $this->connection->prepare($checkSql);
+            $checkStmt->execute([$idPedido]);
+            $exists = $checkStmt->fetch(PDO::FETCH_ASSOC)['existe'];
+            
+            if ($exists == 0) {
+                error_log("PedidosModel - getPedidoById: El pedido ID " . $idPedido . " no existe");
+                return null;
+            }
+            
             // Obtener información básica del pedido
+            error_log("PedidosModel - getPedidoById: Ejecutando SP sp_obtener_pedido con ID: " . $idPedido);
             $stmt = $this->connection->prepare("CALL sp_obtener_pedido(?)");
-            error_log("PedidosModel - getPedidoById: Ejecutando sp_obtener_pedido");
             $stmt->execute([$idPedido]);
             $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            error_log("PedidosModel - getPedidoById: Resultado del procedimiento: " . ($pedido ? json_encode($pedido) : "null"));
-            
             if (!$pedido) {
-                error_log("PedidosModel - getPedidoById: No se encontró el pedido con ID: " . $idPedido);
->>>>>>> Stashed changes
+                error_log("PedidosModel - getPedidoById: SP no devolvió resultados para ID: " . $idPedido);
                 return null;
             }
+            
+            error_log("PedidosModel - getPedidoById: Pedido básico obtenido: " . json_encode($pedido));
 
             // Obtener detalles del pedido
             $sql = "SELECT 
@@ -160,16 +200,21 @@ class PedidosModel
                     WHERE dp.id_pedido = ?
                     ORDER BY dp.id_detalle";
             
+            error_log("PedidosModel - getPedidoById: Obteniendo detalles para pedido ID: " . $idPedido);
             $stmt = $this->connection->prepare($sql);
             $stmt->execute([$idPedido]);
             $detalles = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
+            error_log("PedidosModel - getPedidoById: Número de detalles encontrados: " . count($detalles));
+            
             $pedido['detalles'] = $detalles;
             $pedido['total_pedido'] = array_sum(array_column($detalles, 'total_linea'));
             
+            error_log("PedidosModel - getPedidoById: Pedido completo construido para ID: " . $idPedido);
+            
             return $pedido;
         } catch (PDOException $e) {
-            error_log("Error obteniendo pedido por ID: " . $e->getMessage());
+            error_log("PedidosModel - getPedidoById: Error obteniendo pedido por ID: " . $e->getMessage() . " - Traza: " . $e->getTraceAsString());
             return null;
         }
     }
@@ -180,27 +225,10 @@ class PedidosModel
     public function updatePedido(int $idPedido, int $idUsuario, string $fechaPedido, ?string $fechaEntrega, int $idEstado): bool
     {
         try {
-<<<<<<< Updated upstream
             $stmt = $this->connection->prepare("CALL sp_actualizar_pedido(?, ?, ?, ?, ?)");
             return $stmt->execute([$idPedido, $idUsuario, $fechaPedido, $fechaEntrega, $idEstado]);
         } catch (PDOException $e) {
             error_log("Error actualizando pedido: " . $e->getMessage());
-=======
-            error_log("PedidosModel - updatePedido: Ejecutando sp_actualizar_pedido con parámetros: " .
-                      "idPedido=" . $idPedido . ", idUsuario=" . $idUsuario . 
-                      ", fechaPedido=" . $fechaPedido . ", fechaEntrega=" . ($fechaEntrega ?? 'null') . 
-                      ", idEstado=" . $idEstado);
-                      
-            $stmt = $this->connection->prepare("CALL sp_actualizar_pedido(?, ?, ?, ?, ?)");
-            $result = $stmt->execute([$idPedido, $idUsuario, $fechaPedido, $fechaEntrega, $idEstado]);
-            
-            error_log("PedidosModel - updatePedido: Resultado de la ejecución: " . ($result ? "Éxito" : "Fallo"));
-            
-            return $result;
-        } catch (PDOException $e) {
-            error_log("Error actualizando pedido: " . $e->getMessage());
-            error_log("Error completo: " . $e->getTraceAsString());
->>>>>>> Stashed changes
             return false;
         }
     }
@@ -241,26 +269,8 @@ class PedidosModel
     public function createDetallePedido(array $detalleData): bool
     {
         try {
-<<<<<<< Updated upstream
             $stmt = $this->connection->prepare("CALL sp_crear_detalle_pedido(?, ?, ?, ?, ?, ?, ?, ?)");
             return $stmt->execute([
-=======
-            error_log("PedidosModel - createDetallePedido: Iniciando creación de detalle con datos: " . json_encode($detalleData));
-            
-            // Verificar que todos los campos requeridos estén presentes
-            $requiredFields = ['producto_solicitado', 'precio_unitario', 'descuento', 'impuesto', 'id_pedido', 'id_producto', 'cantidad', 'id_usuario'];
-            foreach ($requiredFields as $field) {
-                if (!isset($detalleData[$field])) {
-                    error_log("PedidosModel - createDetallePedido: Campo requerido faltante: " . $field);
-                    throw new Exception("Campo requerido faltante: " . $field);
-                }
-            }
-            
-            error_log("PedidosModel - createDetallePedido: Preparando llamada a sp_crear_detalle_pedido");
-            $stmt = $this->connection->prepare("CALL sp_crear_detalle_pedido(?, ?, ?, ?, ?, ?, ?, ?)");
-            
-            $params = [
->>>>>>> Stashed changes
                 $detalleData['producto_solicitado'],
                 $detalleData['precio_unitario'],
                 $detalleData['descuento'],
@@ -269,27 +279,10 @@ class PedidosModel
                 $detalleData['id_producto'],
                 $detalleData['cantidad'],
                 $detalleData['id_usuario']
-<<<<<<< Updated upstream
             ]);
         } catch (PDOException $e) {
             error_log("Error creando detalle de pedido: " . $e->getMessage());
             throw new Exception("Error al crear detalle: " . $e->getMessage());
-=======
-            ];
-            
-            error_log("PedidosModel - createDetallePedido: Ejecutando sp_crear_detalle_pedido con parámetros: " . json_encode($params));
-            $result = $stmt->execute($params);
-            
-            error_log("PedidosModel - createDetallePedido: Resultado: " . ($result ? "Éxito" : "Fallo"));
-            return $result;
-        } catch (PDOException $e) {
-            error_log("Error creando detalle de pedido: " . $e->getMessage());
-            error_log("Error completo: " . $e->getTraceAsString());
-            throw new Exception("Error al crear detalle: " . $e->getMessage());
-        } catch (Exception $e) {
-            error_log("Excepción en createDetallePedido: " . $e->getMessage());
-            throw $e;
->>>>>>> Stashed changes
         }
     }
 

@@ -3,13 +3,6 @@
     use App\Config\responseHTTP;
     use App\Config\Security;
     require dirname(__DIR__).'\vendor\autoload.php';
-<<<<<<< Updated upstream
-    
-    $url = explode('/',$_GET['route']);
-    $lista = ['auth', 'user', 'pedidos']; // lista de rutas permitidas
-    $file = dirname(__DIR__) . '/src/Routes/' . $url[0] . '.php'; 
-    errorlogs::activa_error_logs(); //activamos los errors    
-=======
     //print_r($_POST);
     //print_r($_GET);
    
@@ -38,7 +31,6 @@
         $file = dirname(__DIR__) . '/src/Views/PHP/' . $url[0] . '.php';   
     }
     
->>>>>>> Stashed changes
     if(isset($_GET['route'])){
         if(!in_array($url[0], $lista)){
             //echo "La ruta no existe";

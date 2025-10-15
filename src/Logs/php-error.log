@@ -246,3 +246,351 @@ Stack trace:
 [12-Oct-2025 10:14:06 America/Tegucigalpa] Conexión exitosa
 [12-Oct-2025 10:14:06 America/Tegucigalpa] PedidosRoute - Method: POST, Action: , ID: , SubAction: , SubID: 
 [12-Oct-2025 10:14:06 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"numero_pedido":"PED-2025-001","fecha_compromiso":"2025-01-15","observaciones":"Pedido de prueba para testing","id_estado":1}
+[14-Oct-2025 17:34:02 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:34:02 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: , SubAction: , SubID: 
+[14-Oct-2025 17:34:02 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:34:02 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[14-Oct-2025 17:34:02 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-14 17:34:02"}
+[14-Oct-2025 17:34:12 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:34:12 America/Tegucigalpa] PedidosRoute - Method: GET, Action: , ID: , SubAction: , SubID: 
+[14-Oct-2025 17:34:12 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:36:48 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:36:48 America/Tegucigalpa] PedidosRoute - Method: GET, Action: 1, ID: , SubAction: , SubID: 
+[14-Oct-2025 17:36:48 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:37:11 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:37:11 America/Tegucigalpa] PedidosRoute - Method: PUT, Action: 1, ID: , SubAction: , SubID: 
+[14-Oct-2025 17:37:11 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"fecha_pedido":"2025-10-14 12:00:00","fecha_entrega":"2025-10-21 18:00:00","id_estado":2}
+[14-Oct-2025 17:39:08 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:39:08 America/Tegucigalpa] PedidosRoute - Method: PUT, Action: 1, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:39:08 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/1
+[14-Oct-2025 17:39:08 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"fecha_pedido":"2025-10-14 12:00:00","fecha_entrega":"2025-10-21 18:00:00","id_estado":2}
+[14-Oct-2025 17:39:14 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:39:14 America/Tegucigalpa] PedidosRoute - Method: PUT, Action: 1, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:39:14 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/1
+[14-Oct-2025 17:39:14 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"fecha_pedido":"2025-10-14 12:00:00","fecha_entrega":"2025-10-21 18:00:00","id_estado":2}
+[14-Oct-2025 17:43:22 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/test-connection
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, test-connection
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/test-connection
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-14 17:43:22"}
+[14-Oct-2025 17:43:31 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:43:31 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:43:31 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:43:31 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:43:31 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:43:31 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:45:43 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:45:43 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:45:43 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:45:43 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:45:43 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:45:43 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:46:39 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:46:39 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:49:11 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosModel - Iniciando consulta getAllPedidos
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosModel - Total de pedidos en la tabla: 6
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosModel - SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosModel - Resultado: [{"id_pedido":3,"numero_pedido":"PED-001","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"290.00"},{"id_pedido":4,"numero_pedido":"PED-003","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":6,"numero_pedido":"PED-004","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":7,"numero_pedido":"PED-005","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":1,"numero_pedido":"","fecha_pedido":"0000-00-00","fecha_compromiso":null,"fecha_entrega":"0000-00-00","observaciones":null,"nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"},{"id_pedido":2,"numero_pedido":"PED-002","fecha_pedido":"0000-00-00","fecha_compromiso":"2025-12-31","fecha_entrega":"0000-00-00","observaciones":"Pedido de prueba desde Postman2","nombre_usuario":"Patrick","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"21.00"}]
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosModel - Número de registros: 6
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosController - findAll: Se encontraron 6 pedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosModel - Iniciando consulta getAllPedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosModel - Total de pedidos en la tabla: 6
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosModel - SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosModel - Resultado: [{"id_pedido":3,"numero_pedido":"PED-001","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"290.00"},{"id_pedido":4,"numero_pedido":"PED-003","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":6,"numero_pedido":"PED-004","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":7,"numero_pedido":"PED-005","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":1,"numero_pedido":"","fecha_pedido":"0000-00-00","fecha_compromiso":null,"fecha_entrega":"0000-00-00","observaciones":null,"nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"},{"id_pedido":2,"numero_pedido":"PED-002","fecha_pedido":"0000-00-00","fecha_compromiso":"2025-12-31","fecha_entrega":"0000-00-00","observaciones":"Pedido de prueba desde Postman2","nombre_usuario":"Patrick","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"21.00"}]
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosModel - Número de registros: 6
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosController - findAll: Se encontraron 6 pedidos
+[14-Oct-2025 17:53:03 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:53:03 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/3
+[14-Oct-2025 17:53:03 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 3
+[14-Oct-2025 17:53:03 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 3, SubAction: 3, SubID: null
+[14-Oct-2025 17:53:03 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/3
+[14-Oct-2025 17:53:03 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:53:11 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:53:11 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/2
+[14-Oct-2025 17:53:11 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 2
+[14-Oct-2025 17:53:11 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 2, SubAction: 2, SubID: null
+[14-Oct-2025 17:53:11 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/2
+[14-Oct-2025 17:53:11 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:53:38 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:53:38 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 17:53:38 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 17:53:38 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 17:53:38 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 17:53:38 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:54:49 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:54:49 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/2
+[14-Oct-2025 17:54:49 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 2
+[14-Oct-2025 17:54:49 America/Tegucigalpa] PedidosRoute - Method: PUT, Action: null, ID: 2, SubAction: 2, SubID: null
+[14-Oct-2025 17:54:49 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/2
+[14-Oct-2025 17:54:49 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"fecha_pedido":"2025-10-14","fecha_entrega":"2025-10-28","id_estado":3}
+[14-Oct-2025 18:00:57 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:00:57 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 18:00:57 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 18:00:57 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 18:00:57 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 18:00:57 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:08:53 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosController - findByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: Usuario encontrado, buscando sus pedidos
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    WHERE p.id_usuario = ?
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: Parámetro idUsuario: 1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: Número de registros encontrados: 6
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: Primer pedido ID: 2
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosController - findByUser: Se encontraron 6 pedidos para el usuario
+[14-Oct-2025 18:20:29 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:20:29 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/2
+[14-Oct-2025 18:20:29 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 2
+[14-Oct-2025 18:20:29 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 2, SubAction: 2, SubID: null
+[14-Oct-2025 18:20:29 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/2
+[14-Oct-2025 18:20:29 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:20:46 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosController - findByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: Usuario encontrado, buscando sus pedidos
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    WHERE p.id_usuario = ?
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: Parámetro idUsuario: 1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: Número de registros encontrados: 6
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: Primer pedido ID: 2
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosController - findByUser: Se encontraron 6 pedidos para el usuario
+[14-Oct-2025 18:21:19 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosModel - Iniciando consulta getAllPedidos
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosModel - Total de pedidos en la tabla: 6
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosModel - SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosModel - Resultado: [{"id_pedido":2,"numero_pedido":"PED-002","fecha_pedido":"2025-10-14","fecha_compromiso":"2025-12-31","fecha_entrega":"2025-10-28","observaciones":"Pedido de prueba desde Postman2","nombre_usuario":"Patrick","estado_nombre":"En Proceso","estado_codigo":"PROCESO","total_pedido":"21.00"},{"id_pedido":3,"numero_pedido":"PED-001","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"290.00"},{"id_pedido":4,"numero_pedido":"PED-003","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":6,"numero_pedido":"PED-004","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":7,"numero_pedido":"PED-005","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":1,"numero_pedido":"","fecha_pedido":"0000-00-00","fecha_compromiso":null,"fecha_entrega":"0000-00-00","observaciones":null,"nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"}]
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosModel - Número de registros: 6
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosController - findAll: Se encontraron 6 pedidos
+[14-Oct-2025 18:21:35 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:21:35 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/3
+[14-Oct-2025 18:21:35 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 3
+[14-Oct-2025 18:21:35 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 3, SubAction: 3, SubID: null
+[14-Oct-2025 18:21:35 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/3
+[14-Oct-2025 18:21:35 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:22:26 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:22:26 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/3
+[14-Oct-2025 18:22:26 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 3
+[14-Oct-2025 18:22:26 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 3, SubAction: 3, SubID: null
+[14-Oct-2025 18:22:26 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/3
+[14-Oct-2025 18:22:26 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:23:43 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 3, SubAction: 3, SubID: null
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosController - findOne: Buscando pedido con ID: 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Buscando pedido con ID: 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Ejecutando SP sp_obtener_pedido con ID: 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido básico obtenido: {"id_pedido":3,"numero_pedido":"PED-001","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","id_estado":1,"estado_nombre":"Entregado","estado_codigo":"ENTRG","id_usuario":1,"nombre_usuario":"Patrick"}
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo detalles para pedido ID: 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Número de detalles encontrados: 1
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido completo construido para ID: 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosController - findOne: Pedido encontrado con ID: 3
+[14-Oct-2025 18:28:59 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosController - findByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: Usuario encontrado, buscando sus pedidos
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    WHERE p.id_usuario = ?
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: Parámetro idUsuario: 1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: Número de registros encontrados: 6
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: Primer pedido ID: 2
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosController - findByUser: Se encontraron 6 pedidos para el usuario
+[14-Oct-2025 18:29:03 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 3, SubAction: 3, SubID: null
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosController - findOne: Buscando pedido con ID: 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Buscando pedido con ID: 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Ejecutando SP sp_obtener_pedido con ID: 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido básico obtenido: {"id_pedido":3,"numero_pedido":"PED-001","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","id_estado":1,"estado_nombre":"Entregado","estado_codigo":"ENTRG","id_usuario":1,"nombre_usuario":"Patrick"}
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo detalles para pedido ID: 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Número de detalles encontrados: 1
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido completo construido para ID: 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosController - findOne: Pedido encontrado con ID: 3
+[14-Oct-2025 18:29:07 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosController - findByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: Usuario encontrado, buscando sus pedidos
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    WHERE p.id_usuario = ?
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: Parámetro idUsuario: 1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: Número de registros encontrados: 6
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: Primer pedido ID: 2
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosController - findByUser: Se encontraron 6 pedidos para el usuario
