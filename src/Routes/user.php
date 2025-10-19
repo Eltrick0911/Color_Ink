@@ -33,6 +33,12 @@ switch ($method) {
         if ($action === 'delete') {
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $controller->delete($headers, $id);
+        } elseif ($action === 'block') {
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $controller->block($headers, $id);
+        } elseif ($action === 'unblock') {
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $controller->unblock($headers, $id);
         } else {
             echo json_encode(['status' => 'ERROR', 'message' => 'Acción no válida']);
         }

@@ -16,6 +16,36 @@ class AuthController
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+        
+        // Cargar variables de entorno si no están cargadas
+        $this->loadEnvVariables();
+    }
+    
+    private function loadEnvVariables(): void
+    {
+        if (empty($_ENV['FIREBASE_PROJECT_ID'])) {
+            // Intentar cargar desde .env primero
+            $envFile = dirname(__DIR__, 2) . '/.env';
+            if (file_exists($envFile)) {
+                $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                foreach ($lines as $line) {
+                    if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
+                        list($key, $value) = explode('=', $line, 2);
+                        $_ENV[trim($key)] = trim($value);
+                    }
+                }
+            }
+            
+            // Si aún no están las variables, cargar desde firebase_config.php
+            if (empty($_ENV['FIREBASE_PROJECT_ID'])) {
+                $configFile = dirname(__DIR__) . '/Config/firebase_config.php';
+                if (file_exists($configFile)) {
+                    $config = require $configFile;
+                    $_ENV['FIREBASE_PROJECT_ID'] = $config['project_id'];
+                    $_ENV['FIREBASE_WEB_API_KEY'] = $config['web_api_key'];
+                }
+            }
+        }
     }
 
     public function register(array $input): void
@@ -54,18 +84,33 @@ class AuthController
         // Crear hash de la contraseña
         $hash = Security::createPassword($contrasena);
         
-        // Crear el usuario
+        // Crear el usuario en la base de datos
         $res = $this->userModel->createUser($nombreUsuario, $correo, $hash, $telefono, $idRol);
         
         if (isset($res['status']) && $res['status'] === 'OK') {
-            // Crear respuesta personalizada con status 201
-            http_response_code(201);
-            $response = [
-                'status' => 'OK',
-                'message' => 'Usuario creado exitosamente',
-                'data' => $res['data']
-            ];
-            echo json_encode($response);
+            // Crear el usuario también en Firebase
+            $firebaseResult = $this->createFirebaseUser($correo, $contrasena, $nombreUsuario);
+            
+            if ($firebaseResult['success']) {
+                // Usuario creado exitosamente en BD y Firebase
+                http_response_code(201);
+                $response = [
+                    'status' => 'OK',
+                    'message' => 'Usuario creado exitosamente en BD y Firebase',
+                    'data' => $res['data']
+                ];
+                echo json_encode($response);
+            } else {
+                // Usuario creado en BD pero falló en Firebase
+                error_log('AuthController - Error creando usuario en Firebase: ' . $firebaseResult['message']);
+                http_response_code(201);
+                $response = [
+                    'status' => 'OK',
+                    'message' => 'Usuario creado en BD, pero hubo un problema con Firebase',
+                    'data' => $res['data']
+                ];
+                echo json_encode($response);
+            }
         } else {
             echo json_encode(responseHTTP::status500());
         }
@@ -188,6 +233,101 @@ class AuthController
             error_log('Error getUserRole: ' . $e->getMessage());
             // En caso de error, asignar como usuario común por seguridad
             return 2;
+        }
+    }
+
+    /**
+     * Crea un usuario en Firebase usando la REST API
+     */
+    private function createFirebaseUser(string $email, string $password, string $displayName): array
+    {
+        try {
+            // Obtener el project ID desde las variables de entorno
+            $projectId = $_ENV['FIREBASE_PROJECT_ID'] ?? '';
+            $webApiKey = $_ENV['FIREBASE_WEB_API_KEY'] ?? '';
+            
+            // Si no están en $_ENV, intentar cargar desde .env
+            if (empty($projectId) || empty($webApiKey)) {
+                $this->loadEnvVariables();
+                $projectId = $_ENV['FIREBASE_PROJECT_ID'] ?? '';
+                $webApiKey = $_ENV['FIREBASE_WEB_API_KEY'] ?? '';
+            }
+            
+            if (empty($projectId)) {
+                return [
+                    'success' => false,
+                    'message' => 'FIREBASE_PROJECT_ID no configurado'
+                ];
+            }
+            
+            if (empty($webApiKey)) {
+                return [
+                    'success' => false,
+                    'message' => 'FIREBASE_WEB_API_KEY no configurado'
+                ];
+            }
+
+            // URL de la Firebase Auth REST API
+            $url = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=" . $webApiKey;
+
+            // Datos para crear el usuario
+            $data = [
+                'email' => $email,
+                'password' => $password,
+                'displayName' => $displayName,
+                'returnSecureToken' => true
+            ];
+
+            // Configurar la petición HTTP
+            $options = [
+                'http' => [
+                    'header' => "Content-Type: application/json\r\n",
+                    'method' => 'POST',
+                    'content' => json_encode($data),
+                    'timeout' => 10
+                ]
+            ];
+
+            $context = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+
+            if ($result === false) {
+                return [
+                    'success' => false,
+                    'message' => 'Error de conexión con Firebase'
+                ];
+            }
+
+            $response = json_decode($result, true);
+
+            if (isset($response['error'])) {
+                error_log('Firebase Auth Error: ' . json_encode($response['error']));
+                return [
+                    'success' => false,
+                    'message' => 'Firebase: ' . ($response['error']['message'] ?? 'Error desconocido')
+                ];
+            }
+
+            if (isset($response['localId'])) {
+                error_log('AuthController - Usuario creado en Firebase: ' . $email);
+                return [
+                    'success' => true,
+                    'message' => 'Usuario creado en Firebase',
+                    'uid' => $response['localId']
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Respuesta inesperada de Firebase'
+            ];
+
+        } catch (\Throwable $e) {
+            error_log('Error createFirebaseUser: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error interno: ' . $e->getMessage()
+            ];
         }
     }
 }

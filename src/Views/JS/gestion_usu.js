@@ -391,12 +391,30 @@ function setupAdminInterface() {
 
 // Función para obtener la base de la API
 function getApiBase() {
-    const parts = window.location.pathname.split('/');
+    // Obtener la URL base desde la ubicación actual
+    const currentPath = window.location.pathname;
+    
+    // Si estamos en /Color_Ink/public/gestion_usu, la base es /Color_Ink
+    if (currentPath.includes('/public/')) {
+        const parts = currentPath.split('/public/');
+        return parts[0]; // Retorna /Color_Ink
+    }
+    
+    // Fallback: usar la lógica anterior
+    const parts = currentPath.split('/');
     const idx = parts.indexOf('src');
     if (idx > 1) {
         return '/' + parts.slice(1, idx).join('/');
     }
     return '/' + (parts[1] || '');
+}
+
+// Función para obtener el token actual
+function getCurrentToken() {
+    // Priorizar JWT, luego Firebase
+    const jwtToken = sessionStorage.getItem('access_token');
+    const firebaseToken = sessionStorage.getItem('firebase_id_token');
+    return jwtToken || firebaseToken || '';
 }
 
 // Función para obtener un usuario por ID
@@ -495,10 +513,16 @@ function createUserRow(user) {
     const roleText = user.id_rol === 1 ? 'Administrador' : 'Usuario';
     const roleClass = user.id_rol === 1 ? 'admin' : 'empleado';
     
-    // Determinar estado basado en bloqueado_hasta
+    // Determinar estado basado en bloqueado_hasta y Lista Negra
     let statusText = 'Activo';
     let statusClass = 'activo';
     if (user.bloqueado_hasta && new Date(user.bloqueado_hasta) > new Date()) {
+        statusText = 'Bloqueado';
+        statusClass = 'bloqueado';
+    }
+    
+    // Verificar si el usuario está en la Lista Negra
+    if (user.is_blacklisted) {
         statusText = 'Bloqueado';
         statusClass = 'bloqueado';
     }
@@ -696,42 +720,87 @@ function editUsuario(userId, userName) {
 
 function blockUsuario(userId, userName, row) {
     if (confirm(`¿Estás seguro de que quieres bloquear al usuario "${userName}" (${userId})?`)) {
-        const statusCell = row.querySelector('.status');
-        const lockButton = row.querySelector('.fa-lock').parentElement;
-        const unlockButton = row.querySelector('.fa-unlock').parentElement;
-        
-        // Cambiar estado a bloqueado
-        statusCell.textContent = 'Bloqueado';
-        statusCell.className = 'status bloqueado';
-        
-        // Cambiar icono de bloqueo
-        if (lockButton) {
-            lockButton.innerHTML = '<i class="fa-solid fa-unlock"></i>';
-            lockButton.title = 'Desbloquear';
-        }
-        
-        updateStats();
-        showNotification(`Usuario ${userName} bloqueado correctamente`, 'success');
+        // Llamar al backend para bloquear usuario
+        const apiUrl = `${getApiBase()}/public/index.php?route=user&caso=1&action=block&id=${userId}`;
+        console.log('🔍 URL de bloqueo:', apiUrl);
+        fetch(apiUrl, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${getCurrentToken()}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'OK') {
+                const statusCell = row.querySelector('.status');
+                const lockButton = row.querySelector('.fa-lock')?.parentElement;
+                
+                // Cambiar estado a bloqueado
+                if (statusCell) {
+                    statusCell.textContent = 'Bloqueado';
+                    statusCell.className = 'status bloqueado';
+                }
+                
+                // Cambiar icono de bloqueo
+                if (lockButton) {
+                    lockButton.innerHTML = '<i class="fa-solid fa-unlock"></i>';
+                    lockButton.title = 'Desbloquear';
+                }
+                
+                updateStats();
+                showNotification(`Usuario ${userName} bloqueado correctamente`, 'success');
+            } else {
+                showNotification(`Error bloqueando usuario: ${data.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error bloqueando usuario:', error);
+            showNotification('Error bloqueando usuario', 'error');
+        });
     }
 }
 
 function unblockUsuario(userId, userName, row) {
     if (confirm(`¿Estás seguro de que quieres desbloquear al usuario "${userName}" (${userId})?`)) {
-        const statusCell = row.querySelector('.status');
-        const unlockButton = row.querySelector('.fa-unlock').parentElement;
-        
-        // Cambiar estado a activo
-        statusCell.textContent = 'Activo';
-        statusCell.className = 'status activo';
-        
-        // Cambiar icono de desbloqueo
-        if (unlockButton) {
-            unlockButton.innerHTML = '<i class="fa-solid fa-lock"></i>';
-            unlockButton.title = 'Bloquear';
-        }
-        
-        updateStats();
-        showNotification(`Usuario ${userName} desbloqueado correctamente`, 'success');
+        // Llamar al backend para desbloquear usuario
+        const apiUrl = `${getApiBase()}/public/index.php?route=user&caso=1&action=unblock&id=${userId}`;
+        console.log('🔍 URL de desbloqueo:', apiUrl);
+        fetch(apiUrl, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${getCurrentToken()}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'OK') {
+                const statusCell = row.querySelector('.status');
+                const unlockButton = row.querySelector('.fa-unlock')?.parentElement;
+                
+                // Cambiar estado a activo
+                if (statusCell) {
+                    statusCell.textContent = 'Activo';
+                    statusCell.className = 'status activo';
+                }
+                
+                // Cambiar icono de desbloqueo
+                if (unlockButton) {
+                    unlockButton.innerHTML = '<i class="fa-solid fa-lock"></i>';
+                    unlockButton.title = 'Bloquear';
+                }
+                
+                updateStats();
+                showNotification(`Usuario ${userName} desbloqueado correctamente`, 'success');
+            } else {
+                showNotification(`Error desbloqueando usuario: ${data.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error desbloqueando usuario:', error);
+            showNotification('Error desbloqueando usuario', 'error');
+        });
     }
 }
 
@@ -741,7 +810,9 @@ async function deleteUsuario(userId, userName, row) {
             const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
             const authHeader = token ? `Bearer ${token}` : '';
             
-            const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=delete&id=${userId}`, {
+            const apiUrl = `${getApiBase()}/public/index.php?route=user&caso=1&action=delete&id=${userId}`;
+            console.log('🔍 URL de eliminación:', apiUrl);
+            const response = await fetch(apiUrl, {
                 method: 'DELETE',
                 headers: { 'Authorization': authHeader }
             });

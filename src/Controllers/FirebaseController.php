@@ -40,7 +40,23 @@ class FirebaseController
         $telefono = null;
         $userModel = new UserModel();
         $user = $correo ? $userModel->getUserByEmailOrPhone($correo) : null;
+        
+        // Verificar si el usuario está en la lista negra (eliminado)
+        if ($correo && $this->isUserBlacklisted($correo)) {
+            error_log('FirebaseController - Usuario eliminado intentando login: ' . $correo);
+            echo json_encode(responseHTTP::status401('Usuario eliminado'));
+            return;
+        } else {
+            error_log('FirebaseController - Usuario NO está en lista negra: ' . $correo);
+        }
+        
         if (!$user && $correo) {
+            // Validar formato de email
+            if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+                echo json_encode(responseHTTP::status400('Email inválido'));
+                return;
+            }
+            
             // Determinar el rol: primer usuario = administrador, resto = usuario común
             $idRol = $this->getUserRole();
             
@@ -48,8 +64,21 @@ class FirebaseController
             $randomPass = bin2hex(random_bytes(8));
             $hash = Security::createPassword($randomPass);
             $createRes = $userModel->createUser($nombre, $correo, $hash, $telefono, $idRol);
+            
+            // Verificar si la creación fue exitosa
+            if (!isset($createRes['status']) || $createRes['status'] !== 'OK') {
+                error_log('FirebaseController - Error creando usuario: ' . json_encode($createRes));
+                echo json_encode(responseHTTP::status500('Error creando usuario en BD'));
+                return;
+            }
+            
             // Intentar leerlo de nuevo
             $user = $userModel->getUserByEmailOrPhone($correo);
+            if (!$user) {
+                error_log('FirebaseController - Usuario creado pero no encontrado después');
+                echo json_encode(responseHTTP::status500('Error sincronizando usuario'));
+                return;
+            }
         }
 
         // Actualizar último acceso para usuarios existentes (Firebase login exitoso)
@@ -115,6 +144,12 @@ class FirebaseController
             return $claims;
         } catch (\Throwable $e) {
             error_log('Firebase verify error: ' . $e->getMessage());
+            
+            // Si el token expiró, intentar manejar de manera más elegante
+            if (strpos($e->getMessage(), 'expired') !== false || strpos($e->getMessage(), 'exp') !== false) {
+                error_log('FirebaseController - Token expirado, requiere renovación');
+            }
+            
             return null;
         }
     }
@@ -195,6 +230,29 @@ class FirebaseController
             return 2;
         }
     }
+
+    /**
+     * Verifica si un usuario está en la lista negra usando procedimiento almacenado
+     */
+    private function isUserBlacklisted(string $email): bool
+    {
+        try {
+            $db = \App\DB\connectionDB::getConnection();
+            $stmt = $db->prepare("CALL sp_verificar_lista_negra(:email)");
+            $stmt->bindParam(':email', $email, \PDO::PARAM_STR);
+            $stmt->execute();
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            
+            // Limpiar cursores adicionales de CALL
+            while ($stmt->nextRowset()) { /* noop */ }
+            
+            return isset($result['en_lista_negra']) && $result['en_lista_negra'] == 1;
+        } catch (\Throwable $e) {
+            error_log('Error isUserBlacklisted: ' . $e->getMessage());
+            return false;
+        }
+    }
+
 }
 
 
