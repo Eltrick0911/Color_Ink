@@ -21,7 +21,10 @@ switch ($method) {
         }
         break;
     case 'POST':
-        if ($action === 'update') {
+        if ($action === 'create') {
+            $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+            $controller->create($headers, $input);
+        } elseif ($action === 'update') {
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             $controller->update($headers, $id, $input);

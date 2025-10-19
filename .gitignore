@@ -1,5 +1,5 @@
 # Archivos de configuración sensibles
-src/Config/firebase_config.php
+# src/Config/firebase_config.php  # Temporalmente comentado para funcionar en otros dispositivos
 .env
 *.env
 

@@ -242,28 +242,37 @@ class AuthController
     private function createFirebaseUser(string $email, string $password, string $displayName): array
     {
         try {
-            // Obtener el project ID desde las variables de entorno
-            $projectId = $_ENV['FIREBASE_PROJECT_ID'] ?? '';
-            $webApiKey = $_ENV['FIREBASE_WEB_API_KEY'] ?? '';
-            
-            // Si no están en $_ENV, intentar cargar desde .env
-            if (empty($projectId) || empty($webApiKey)) {
-                $this->loadEnvVariables();
-                $projectId = $_ENV['FIREBASE_PROJECT_ID'] ?? '';
-                $webApiKey = $_ENV['FIREBASE_WEB_API_KEY'] ?? '';
+            // Cargar configuración desde firebase_config.php
+            $configPath = __DIR__ . '/../Config/firebase_config.php';
+            if (!file_exists($configPath)) {
+                return [
+                    'success' => false,
+                    'message' => 'Archivo firebase_config.php no encontrado'
+                ];
             }
+            
+            $config = require_once $configPath;
+            $projectId = $config['project_id'] ?? '';
+            $webApiKey = $config['web_api_key'] ?? '';
+            
+            error_log('AuthController - createFirebaseUser: Config cargado: ' . json_encode($config));
+            error_log('AuthController - createFirebaseUser: Project ID: ' . $projectId);
+            error_log('AuthController - createFirebaseUser: Web API Key: ' . (empty($webApiKey) ? 'VACÍO' : 'CONFIGURADO'));
+            
+            error_log('AuthController - createFirebaseUser: Project ID: ' . $projectId);
+            error_log('AuthController - createFirebaseUser: Web API Key: ' . (empty($webApiKey) ? 'VACÍO' : 'CONFIGURADO'));
             
             if (empty($projectId)) {
                 return [
                     'success' => false,
-                    'message' => 'FIREBASE_PROJECT_ID no configurado'
+                    'message' => 'project_id no configurado en firebase_config.php'
                 ];
             }
             
             if (empty($webApiKey)) {
                 return [
                     'success' => false,
-                    'message' => 'FIREBASE_WEB_API_KEY no configurado'
+                    'message' => 'web_api_key no configurado en firebase_config.php'
                 ];
             }
 

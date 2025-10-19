@@ -240,10 +240,10 @@ async function getCurrentUser() {
         console.log('🔍 GESTIÓN getCurrentUser: Iniciando...');
         
         // PRIMERO: Intentar obtener desde sessionStorage (más rápido y confiable)
-        const storedUser = sessionStorage.getItem('user');
-        if (storedUser) {
+        const storedUserData = sessionStorage.getItem('user');
+        if (storedUserData) {
             try {
-                const user = JSON.parse(storedUser);
+                const user = JSON.parse(storedUserData);
                 console.log('✅ GESTIÓN: Usuario obtenido desde sessionStorage:', user);
                 return user;
             } catch (parseError) {
@@ -303,19 +303,14 @@ async function getCurrentUser() {
             console.log('🔍 GESTIÓN: No hay token JWT');
         }
         
-        console.log('❌ No se pudo obtener usuario con ningún método');
-        
         // Fallback: intentar obtener usuario desde sessionStorage si está disponible
-        const storedUserFallback = sessionStorage.getItem('user');
-        if (storedUserFallback) {
-            try {
-                const user = JSON.parse(storedUserFallback);
-                console.log('✅ Usuario obtenido desde sessionStorage (fallback):', user);
-                return user;
-            } catch (parseError) {
-                console.log('❌ Error parseando usuario desde sessionStorage (fallback):', parseError);
-            }
+        const storedUser = getStoredUser();
+        if (storedUser) {
+            console.log('✅ Usuario obtenido desde sessionStorage (fallback):', storedUser);
+            return storedUser;
         }
+        
+        console.log('❌ No se pudo obtener usuario con ningún método');
         
         return null;
     } catch (error) {
@@ -415,6 +410,19 @@ function getCurrentToken() {
     const jwtToken = sessionStorage.getItem('access_token');
     const firebaseToken = sessionStorage.getItem('firebase_id_token');
     return jwtToken || firebaseToken || '';
+}
+
+// Función para obtener usuario desde sessionStorage
+function getStoredUser() {
+    try {
+        const userStr = sessionStorage.getItem('user');
+        if (userStr) {
+            return JSON.parse(userStr);
+        }
+    } catch (e) {
+        console.log('Error parseando usuario:', e);
+    }
+    return null;
 }
 
 // Función para obtener un usuario por ID
@@ -733,23 +741,23 @@ function blockUsuario(userId, userName, row) {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'OK') {
-                const statusCell = row.querySelector('.status');
+        const statusCell = row.querySelector('.status');
                 const lockButton = row.querySelector('.fa-lock')?.parentElement;
-                
-                // Cambiar estado a bloqueado
+        
+        // Cambiar estado a bloqueado
                 if (statusCell) {
-                    statusCell.textContent = 'Bloqueado';
-                    statusCell.className = 'status bloqueado';
+        statusCell.textContent = 'Bloqueado';
+        statusCell.className = 'status bloqueado';
                 }
-                
-                // Cambiar icono de bloqueo
-                if (lockButton) {
-                    lockButton.innerHTML = '<i class="fa-solid fa-unlock"></i>';
-                    lockButton.title = 'Desbloquear';
-                }
-                
-                updateStats();
-                showNotification(`Usuario ${userName} bloqueado correctamente`, 'success');
+        
+        // Cambiar icono de bloqueo
+        if (lockButton) {
+            lockButton.innerHTML = '<i class="fa-solid fa-unlock"></i>';
+            lockButton.title = 'Desbloquear';
+        }
+        
+        updateStats();
+        showNotification(`Usuario ${userName} bloqueado correctamente`, 'success');
             } else {
                 showNotification(`Error bloqueando usuario: ${data.message}`, 'error');
             }
@@ -776,23 +784,23 @@ function unblockUsuario(userId, userName, row) {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'OK') {
-                const statusCell = row.querySelector('.status');
+        const statusCell = row.querySelector('.status');
                 const unlockButton = row.querySelector('.fa-unlock')?.parentElement;
-                
-                // Cambiar estado a activo
+        
+        // Cambiar estado a activo
                 if (statusCell) {
-                    statusCell.textContent = 'Activo';
-                    statusCell.className = 'status activo';
+        statusCell.textContent = 'Activo';
+        statusCell.className = 'status activo';
                 }
-                
-                // Cambiar icono de desbloqueo
-                if (unlockButton) {
-                    unlockButton.innerHTML = '<i class="fa-solid fa-lock"></i>';
-                    unlockButton.title = 'Bloquear';
-                }
-                
-                updateStats();
-                showNotification(`Usuario ${userName} desbloqueado correctamente`, 'success');
+        
+        // Cambiar icono de desbloqueo
+        if (unlockButton) {
+            unlockButton.innerHTML = '<i class="fa-solid fa-lock"></i>';
+            unlockButton.title = 'Bloquear';
+        }
+        
+        updateStats();
+        showNotification(`Usuario ${userName} desbloqueado correctamente`, 'success');
             } else {
                 showNotification(`Error desbloqueando usuario: ${data.message}`, 'error');
             }
@@ -1237,7 +1245,7 @@ async function createNewUser(e) {
         const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
         const authHeader = token ? `Bearer ${token}` : '';
         
-        const response = await fetch(`${getApiBase()}/public/index.php?route=auth&caso=1&action=register`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=create`, {
             method: 'POST',
             headers: { 
                 'Authorization': authHeader,

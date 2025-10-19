@@ -27,15 +27,15 @@ class UserModel
                 return responseHTTP::status500();
             }
             
-            // Usar procedimiento almacenado sp_crear_usuario
-            $stmt = $this->db->prepare("CALL sp_crear_usuario(:nombre, :correo, :contrasena, :telefono, :id_rol)");
-            $stmt->bindParam(':nombre', $nombreUsuario, PDO::PARAM_STR);
-            $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
-            $stmt->bindParam(':contrasena', $contrasenaHash, PDO::PARAM_STR);
-            $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
-            $stmt->bindParam(':id_rol', $idRol, PDO::PARAM_INT);
+            // Usar consulta directa para obtener ID correctamente
+            $stmt = $this->db->prepare("INSERT INTO usuario (nombre_usuario, correo, contrasena, password_updated_at, telefono, fecha_ingreso, ultimo_acceso, id_rol) VALUES (?, ?, ?, NOW(), ?, NOW(), NOW(), ?)");
+            $stmt->bindParam(1, $nombreUsuario, PDO::PARAM_STR);
+            $stmt->bindParam(2, $correo, PDO::PARAM_STR);
+            $stmt->bindParam(3, $contrasenaHash, PDO::PARAM_STR);
+            $stmt->bindParam(4, $telefono, PDO::PARAM_STR);
+            $stmt->bindParam(5, $idRol, PDO::PARAM_INT);
             
-            error_log('UserModel - createUser: Ejecutando procedimiento almacenado sp_crear_usuario');
+            error_log('UserModel - createUser: Ejecutando consulta directa');
             $result = $stmt->execute();
             error_log('UserModel - createUser: Resultado de execute: ' . ($result ? 'true' : 'false'));
 
