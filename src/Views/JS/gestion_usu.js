@@ -322,20 +322,207 @@ async function getCurrentUser() {
 // Función para mostrar acceso denegado
 function showAccessDenied() {
     document.body.innerHTML = `
-        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
-            <i class="fa-solid fa-lock" style="font-size: 4rem; color: #e74c3c; margin-bottom: 1rem;"></i>
-            <h2>Acceso Denegado</h2>
-            <p>No tienes permisos para acceder a esta página.</p>
-            <p>Solo los administradores pueden gestionar usuarios.</p>
-            <div style="margin-top: 1rem;">
-                <button onclick="window.location.href='index'" style="padding: 10px 20px; margin-right: 10px;">
-                    Volver al Dashboard
-                </button>
-                <button onclick="window.location.href='perfil'" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px;">
-                    Ver Mi Perfil
-                </button>
+        <div style="
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            flex-direction: column;
+            background: #000000;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        ">
+            <!-- Ondas abstractas de fondo -->
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 1;
+                pointer-events: none;
+            ">
+                <!-- Onda superior -->
+                <div style="
+                    position: absolute;
+                    top: -50px;
+                    left: -10%;
+                    width: 120%;
+                    height: 200px;
+                    background: linear-gradient(45deg, #8b5cf6, #a855f7, #c084fc);
+                    border-radius: 50% 50% 0 0;
+                    opacity: 0.3;
+                    transform: rotate(-5deg);
+                    filter: blur(20px);
+                "></div>
+                
+                <!-- Onda media superior -->
+                <div style="
+                    position: absolute;
+                    top: 100px;
+                    right: -20%;
+                    width: 80%;
+                    height: 300px;
+                    background: linear-gradient(135deg, #7c3aed, #8b5cf6, #a855f7);
+                    border-radius: 0 0 50% 50%;
+                    opacity: 0.4;
+                    transform: rotate(10deg);
+                    filter: blur(15px);
+                "></div>
+                
+                <!-- Onda central -->
+                <div style="
+                    position: absolute;
+                    top: 200px;
+                    left: -30%;
+                    width: 100%;
+                    height: 250px;
+                    background: linear-gradient(90deg, #6d28d9, #7c3aed, #8b5cf6);
+                    border-radius: 50%;
+                    opacity: 0.2;
+                    transform: rotate(-15deg);
+                    filter: blur(25px);
+                "></div>
+                
+                <!-- Onda inferior -->
+                <div style="
+                    position: absolute;
+                    bottom: -100px;
+                    left: -10%;
+                    width: 120%;
+                    height: 300px;
+                    background: linear-gradient(45deg, #4c1d95, #6d28d9, #7c3aed);
+                    border-radius: 50% 50% 0 0;
+                    opacity: 0.3;
+                    transform: rotate(5deg);
+                    filter: blur(20px);
+                "></div>
+                
+                <!-- Onda lateral derecha -->
+                <div style="
+                    position: absolute;
+                    top: 300px;
+                    right: -50%;
+                    width: 100%;
+                    height: 200px;
+                    background: linear-gradient(180deg, #3b82f6, #6366f1, #8b5cf6);
+                    border-radius: 0 50% 50% 0;
+                    opacity: 0.25;
+                    transform: rotate(-20deg);
+                    filter: blur(18px);
+                "></div>
+            </div>
+            <div style="
+                background: linear-gradient(135deg, #6a0dad 0%, #4a0080 50%, #8b5cf6 100%);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 40px;
+                box-shadow: 0 8px 32px rgba(106, 13, 173, 0.4);
+                border: 1px solid rgba(139, 92, 246, 0.3);
+                max-width: 500px;
+                width: 100%;
+                position: relative;
+                z-index: 10;
+            ">
+                <div style="
+                    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                    width: 120px;
+                    height: 120px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 30px;
+                    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+                    animation: pulse 2s infinite;
+                ">
+                    <i class="fa-solid fa-lock" style="font-size: 3rem; color: white;"></i>
+                </div>
+                
+                <h1 style="
+                    font-size: 2.5rem;
+                    margin: 0 0 20px 0;
+                    background: linear-gradient(45deg, #ff6b6b, #ffa726);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    font-weight: 700;
+                ">Acceso Restringido</h1>
+                
+                <p style="
+                    font-size: 1.2rem;
+                    margin: 0 0 10px 0;
+                    opacity: 0.9;
+                    line-height: 1.6;
+                ">🚫 No tienes permisos para acceder a esta página</p>
+                
+                <p style="
+                    font-size: 1rem;
+                    margin: 0 0 30px 0;
+                    opacity: 0.8;
+                    line-height: 1.5;
+                ">Solo los administradores pueden gestionar usuarios del sistema</p>
+                
+                <div style="
+                    display: flex;
+                    gap: 15px;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                ">
+                    <button onclick="window.location.href='index'" style="
+                        padding: 15px 30px;
+                        background: linear-gradient(45deg, #667eea, #764ba2);
+                        color: white;
+                        border: none;
+                        border-radius: 25px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
+                        <i class="fa-solid fa-home"></i>
+                        Volver al Dashboard
+                    </button>
+                    
+                    <button onclick="window.location.href='perfil'" style="
+                        padding: 15px 30px;
+                        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                        color: white;
+                        border: none;
+                        border-radius: 25px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.6)'" 
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.4)'">
+                        <i class="fa-solid fa-user"></i>
+                        Ver Mi Perfil
+                    </button>
+                </div>
             </div>
         </div>
+        
+        <style>
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        </style>
     `;
 }
 
@@ -1096,6 +1283,7 @@ function showUserModal(user, mode) {
             <label>Último Acceso:</label>
             <input type="text" value="${user.ultimo_acceso || 'Nunca'}" readonly style="width: 100%; padding: 8px; margin: 5px 0;">
         </div>
+        ${mode === 'edit' ? `<input type="hidden" name="id_usuario" value="${user.id_usuario}">` : ''}
         <div style="text-align: right; margin-top: 20px;">
             <button onclick="this.closest('.user-modal').remove()" style="padding: 8px 16px; margin-right: 10px;">Cerrar</button>
             ${mode === 'edit' ? '<button onclick="saveUserChanges(this)" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px;">Guardar</button>' : ''}
@@ -1125,7 +1313,11 @@ async function saveUserChanges(button) {
         id_rol: parseInt(inputs[3].value)
     };
     
-    const userId = button.getAttribute('data-user-id');
+    // Obtener el ID del usuario desde el modal
+    const userId = modal.querySelector('[data-user-id]')?.getAttribute('data-user-id') || 
+                   modal.querySelector('input[name="id_usuario"]')?.value;
+    
+    console.log('🔍 ID del usuario a actualizar:', userId);
     
     try {
         const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');

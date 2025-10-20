@@ -13,7 +13,7 @@ switch ($method) {
     case 'GET':
         if ($action === 'list') {
             $controller->listUsersAction($headers);
-        } elseif ($action === 'get') {
+        } elseif ($action === 'get' || $action === 'getById') {
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $controller->getById($headers, $id);
         } else {
