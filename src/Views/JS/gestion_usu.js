@@ -8,6 +8,104 @@
 let tokenRenewalInterval = null;
 let isRenewingToken = false;
 
+// Configuración global de SweetAlert2
+Swal.mixin({
+    customClass: {
+        popup: 'swal-custom-popup',
+        title: 'swal-custom-title',
+        content: 'swal-custom-content',
+        confirmButton: 'swal-custom-confirm',
+        cancelButton: 'swal-custom-cancel',
+        actions: 'swal-custom-actions'
+    },
+    buttonsStyling: false,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, continuar',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true,
+    focusCancel: true
+});
+
+// Agregar estilos personalizados
+const style = document.createElement('style');
+style.textContent = `
+    .swal-custom-popup {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
+        border: 2px solid rgba(106, 13, 173, 0.3) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+        backdrop-filter: blur(10px) !important;
+    }
+    
+    .swal-custom-title {
+        color: #ff6b6b !important;
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .swal-custom-content {
+        color: #ffffff !important;
+        font-size: 1.1rem !important;
+        line-height: 1.6 !important;
+    }
+    
+    .swal-custom-confirm {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24) !important;
+        border: none !important;
+        border-radius: 25px !important;
+        padding: 12px 30px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .swal-custom-confirm:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6) !important;
+    }
+    
+    .swal-custom-cancel {
+        background: linear-gradient(45deg, #667eea, #764ba2) !important;
+        border: none !important;
+        border-radius: 25px !important;
+        padding: 12px 30px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .swal-custom-cancel:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+    }
+    
+    .swal-custom-actions {
+        gap: 15px !important;
+        margin-top: 25px !important;
+    }
+    
+    .swal2-icon {
+        border-color: #ff6b6b !important;
+        color: #ff6b6b !important;
+    }
+    
+    .swal2-icon.swal2-warning {
+        border-color: #ffa726 !important;
+        color: #ffa726 !important;
+    }
+    
+    .swal2-icon.swal2-success {
+        border-color: #4caf50 !important;
+        color: #4caf50 !important;
+    }
+`;
+document.head.appendChild(style);
+
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar autenticación y autorización antes de inicializar
     checkAuthAndInit();
@@ -913,8 +1011,19 @@ function editUsuario(userId, userName) {
     });
 }
 
-function blockUsuario(userId, userName, row) {
-    if (confirm(`¿Estás seguro de que quieres bloquear al usuario "${userName}" (${userId})?`)) {
+async function blockUsuario(userId, userName, row) {
+    const result = await Swal.fire({
+        title: '¿Bloquear Usuario?',
+        html: `¿Estás seguro de que quieres <strong>bloquear</strong> al usuario <br><strong>"${userName}"</strong> (ID: ${userId})?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, bloquear',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#ff6b6b',
+        cancelButtonColor: '#667eea'
+    });
+    
+    if (result.isConfirmed) {
         // Llamar al backend para bloquear usuario
         const apiUrl = `${getApiBase()}/public/index.php?route=user&caso=1&action=block&id=${userId}`;
         console.log('🔍 URL de bloqueo:', apiUrl);
@@ -956,8 +1065,19 @@ function blockUsuario(userId, userName, row) {
     }
 }
 
-function unblockUsuario(userId, userName, row) {
-    if (confirm(`¿Estás seguro de que quieres desbloquear al usuario "${userName}" (${userId})?`)) {
+async function unblockUsuario(userId, userName, row) {
+    const result = await Swal.fire({
+        title: '¿Desbloquear Usuario?',
+        html: `¿Estás seguro de que quieres <strong>desbloquear</strong> al usuario <br><strong>"${userName}"</strong> (ID: ${userId})?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, desbloquear',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#4caf50',
+        cancelButtonColor: '#667eea'
+    });
+    
+    if (result.isConfirmed) {
         // Llamar al backend para desbloquear usuario
         const apiUrl = `${getApiBase()}/public/index.php?route=user&caso=1&action=unblock&id=${userId}`;
         console.log('🔍 URL de desbloqueo:', apiUrl);
@@ -1000,7 +1120,19 @@ function unblockUsuario(userId, userName, row) {
 }
 
 async function deleteUsuario(userId, userName, row) {
-    if (confirm(`¿Estás seguro de que quieres eliminar al usuario "${userName}" (${userId})?\n\nEsta acción no se puede deshacer.`)) {
+    const result = await Swal.fire({
+        title: '⚠️ Eliminar Usuario',
+        html: `¿Estás seguro de que quieres <strong>ELIMINAR</strong> al usuario <br><strong>"${userName}"</strong> (ID: ${userId})?<br><br><span style="color: #ff6b6b; font-weight: bold;">⚠️ Esta acción NO se puede deshacer</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#667eea',
+        focusCancel: true
+    });
+    
+    if (result.isConfirmed) {
         try {
             const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
             const authHeader = token ? `Bearer ${token}` : '';
@@ -1174,9 +1306,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const nuevoUsuarioBtn = document.querySelector('.btn-nuevo-usuario');
     
     if (nuevoUsuarioBtn) {
-        nuevoUsuarioBtn.addEventListener('click', function() {
-            // Aquí se implementaría la lógica para crear un nuevo usuario
-            alert('Funcionalidad de nuevo usuario - Por implementar');
+        // Remover cualquier event listener existente
+        nuevoUsuarioBtn.replaceWith(nuevoUsuarioBtn.cloneNode(true));
+        const newBtn = document.querySelector('.btn-nuevo-usuario');
+        
+        newBtn.addEventListener('click', function() {
+            // Llamar a la funcionalidad real de crear usuario
+            showNewUserModal();
         });
     }
 });
@@ -1355,7 +1491,7 @@ function showNewUserModal() {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0,0,0,0.7);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -1364,44 +1500,131 @@ function showNewUserModal() {
     
     const modalContent = document.createElement('div');
     modalContent.style.cssText = `
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        padding: 30px;
+        border-radius: 20px;
         max-width: 500px;
         width: 90%;
         max-height: 80vh;
         overflow-y: auto;
+        border: 2px solid rgba(106, 13, 173, 0.3);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        color: white;
     `;
     
     modalContent.innerHTML = `
-        <h3>Crear Nuevo Usuario</h3>
+        <div style="text-align: center; margin-bottom: 25px;">
+            <div style="
+                background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 15px;
+                box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+            ">
+                <i class="fa-solid fa-user-plus" style="font-size: 1.5rem; color: white;"></i>
+            </div>
+            <h3 style="color: #ff6b6b; margin: 0; font-size: 1.8rem; font-weight: 700;">Crear Nuevo Usuario</h3>
+        </div>
         <form id="newUserForm">
-            <div style="margin: 15px 0;">
-                <label>Nombre Completo:</label>
-                <input type="text" name="nombre_usuario" required style="width: 100%; padding: 8px; margin: 5px 0;">
+            <div style="margin: 20px 0;">
+                <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Nombre Completo:</label>
+                <input type="text" name="nombre_usuario" required style="
+                    width: 100%; 
+                    padding: 12px 15px; 
+                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 1rem;
+                " placeholder="Ingresa el nombre completo">
             </div>
-            <div style="margin: 15px 0;">
-                <label>Email:</label>
-                <input type="email" name="correo" required style="width: 100%; padding: 8px; margin: 5px 0;">
+            <div style="margin: 20px 0;">
+                <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Email:</label>
+                <input type="email" name="correo" required style="
+                    width: 100%; 
+                    padding: 12px 15px; 
+                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 1rem;
+                " placeholder="usuario@ejemplo.com">
             </div>
-            <div style="margin: 15px 0;">
-                <label>Teléfono:</label>
-                <input type="text" name="telefono" style="width: 100%; padding: 8px; margin: 5px 0;">
+            <div style="margin: 20px 0;">
+                <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Teléfono:</label>
+                <input type="text" name="telefono" style="
+                    width: 100%; 
+                    padding: 12px 15px; 
+                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 1rem;
+                " placeholder="1234-5678">
             </div>
-            <div style="margin: 15px 0;">
-                <label>Contraseña:</label>
-                <input type="password" name="contrasena" required style="width: 100%; padding: 8px; margin: 5px 0;">
+            <div style="margin: 20px 0;">
+                <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Contraseña:</label>
+                <input type="password" name="contrasena" required style="
+                    width: 100%; 
+                    padding: 12px 15px; 
+                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 1rem;
+                " placeholder="Mínimo 6 caracteres">
             </div>
-            <div style="margin: 15px 0;">
-                <label>Rol:</label>
-                <select name="id_rol" style="width: 100%; padding: 8px; margin: 5px 0;">
-                    <option value="2">Usuario</option>
-                    <option value="1">Administrador</option>
+            <div style="margin: 20px 0;">
+                <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Rol:</label>
+                <select name="id_rol" style="
+                    width: 100%; 
+                    padding: 12px 15px; 
+                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 1rem;
+                ">
+                    <option value="2" style="background: #1a1a2e; color: white;">Usuario</option>
+                    <option value="1" style="background: #1a1a2e; color: white;">Administrador</option>
                 </select>
             </div>
-            <div style="text-align: right; margin-top: 20px;">
-                <button type="button" onclick="this.closest('.user-modal').remove()" style="padding: 8px 16px; margin-right: 10px;">Cancelar</button>
-                <button type="submit" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px;">Crear Usuario</button>
+            <div style="text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+                <button type="button" onclick="this.closest('.user-modal').remove()" style="
+                    padding: 12px 25px;
+                    background: linear-gradient(45deg, #667eea, #764ba2);
+                    color: white;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
+                    Cancelar
+                </button>
+                <button type="submit" style="
+                    padding: 12px 25px;
+                    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                    color: white;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.6)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.4)'">
+                    Crear Usuario
+                </button>
             </div>
         </form>
     `;

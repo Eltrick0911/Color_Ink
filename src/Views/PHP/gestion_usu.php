@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="/Color_Ink/src/Views/CSS/sidebar.css">
     <link rel="stylesheet" href="/Color_Ink/src/Views/CSS/gestion_usu.css">
     <link rel="icon" href="/Color_Ink/src/Views/IMG/LOGO.png" type="image/png">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- ===== SISTEMA DE AUTENTICACIÓN (Agregado de la API ACTUAL) ===== -->
