@@ -1385,44 +1385,135 @@ function showUserModal(user, mode) {
     
     const modalContent = document.createElement('div');
     modalContent.style.cssText = `
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        padding: 30px;
+        border-radius: 20px;
         max-width: 500px;
         width: 90%;
         max-height: 80vh;
         overflow-y: auto;
+        border: 2px solid rgba(106, 13, 173, 0.3);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        color: white;
     `;
     
     modalContent.innerHTML = `
-        <h3>${mode === 'view' ? 'Ver Usuario' : 'Editar Usuario'}</h3>
-        <div style="margin: 15px 0;">
-            <label>Nombre:</label>
-            <input type="text" value="${user.nombre_usuario}" ${mode === 'view' ? 'readonly' : ''} style="width: 100%; padding: 8px; margin: 5px 0;">
+        <div style="text-align: center; margin-bottom: 25px;">
+            <div style="
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 15px;
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            ">
+                <i class="fa-solid fa-user" style="font-size: 1.5rem; color: white;"></i>
+            </div>
+            <h3 style="color: #667eea; margin: 0; font-size: 1.8rem; font-weight: 700;">
+                ${mode === 'view' ? '👤 Ver Usuario' : '✏️ Editar Usuario'}
+            </h3>
         </div>
-        <div style="margin: 15px 0;">
-            <label>Email:</label>
-            <input type="email" value="${user.correo}" ${mode === 'view' ? 'readonly' : ''} style="width: 100%; padding: 8px; margin: 5px 0;">
+        <div style="margin: 20px 0;">
+            <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Nombre:</label>
+            <input type="text" value="${user.nombre_usuario}" ${mode === 'view' ? 'readonly' : ''} style="
+                width: 100%; 
+                padding: 12px 15px; 
+                border: 2px solid rgba(106, 13, 173, 0.3);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 1rem;
+            " placeholder="Nombre del usuario">
         </div>
-        <div style="margin: 15px 0;">
-            <label>Teléfono:</label>
-            <input type="text" value="${user.telefono || ''}" ${mode === 'view' ? 'readonly' : ''} style="width: 100%; padding: 8px; margin: 5px 0;">
+        <div style="margin: 20px 0;">
+            <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Email:</label>
+            <input type="email" value="${user.correo}" ${mode === 'view' ? 'readonly' : ''} style="
+                width: 100%; 
+                padding: 12px 15px; 
+                border: 2px solid rgba(106, 13, 173, 0.3);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 1rem;
+            " placeholder="usuario@ejemplo.com">
         </div>
-        <div style="margin: 15px 0;">
-            <label>Rol:</label>
-            <select ${mode === 'view' ? 'disabled' : ''} style="width: 100%; padding: 8px; margin: 5px 0;">
-                <option value="1" ${user.id_rol === 1 ? 'selected' : ''}>Administrador</option>
-                <option value="2" ${user.id_rol === 2 ? 'selected' : ''}>Usuario</option>
+        <div style="margin: 20px 0;">
+            <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Teléfono:</label>
+            <input type="text" value="${user.telefono || ''}" ${mode === 'view' ? 'readonly' : ''} style="
+                width: 100%; 
+                padding: 12px 15px; 
+                border: 2px solid rgba(106, 13, 173, 0.3);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 1rem;
+            " placeholder="1234-5678">
+        </div>
+        <div style="margin: 20px 0;">
+            <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Rol:</label>
+            <select ${mode === 'view' ? 'disabled' : ''} style="
+                width: 100%; 
+                padding: 12px 15px; 
+                border: 2px solid rgba(106, 13, 173, 0.3);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 1rem;
+            ">
+                <option value="1" ${user.id_rol === 1 ? 'selected' : ''} style="background: #1a1a2e; color: white;">Administrador</option>
+                <option value="2" ${user.id_rol === 2 ? 'selected' : ''} style="background: #1a1a2e; color: white;">Usuario</option>
             </select>
         </div>
-        <div style="margin: 15px 0;">
-            <label>Último Acceso:</label>
-            <input type="text" value="${user.ultimo_acceso || 'Nunca'}" readonly style="width: 100%; padding: 8px; margin: 5px 0;">
+        <div style="margin: 20px 0;">
+            <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Último Acceso:</label>
+            <input type="text" value="${user.ultimo_acceso || 'Nunca'}" readonly style="
+                width: 100%; 
+                padding: 12px 15px; 
+                border: 2px solid rgba(106, 13, 173, 0.3);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 1rem;
+            " placeholder="Fecha de último acceso">
         </div>
         ${mode === 'edit' ? `<input type="hidden" name="id_usuario" value="${user.id_usuario}">` : ''}
-        <div style="text-align: right; margin-top: 20px;">
-            <button onclick="this.closest('.user-modal').remove()" style="padding: 8px 16px; margin-right: 10px;">Cerrar</button>
-            ${mode === 'edit' ? '<button onclick="saveUserChanges(this)" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px;">Guardar</button>' : ''}
+        <div style="text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+            <button onclick="this.closest('.user-modal').remove()" style="
+                padding: 12px 25px;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                border: none;
+                border-radius: 25px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
+                Cerrar
+            </button>
+            ${mode === 'edit' ? `
+                <button onclick="saveUserChanges(this)" style="
+                    padding: 12px 25px;
+                    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                    color: white;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.6)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.4)'">
+                    Guardar
+                </button>
+            ` : ''}
         </div>
     `;
     
