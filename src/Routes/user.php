@@ -13,7 +13,7 @@ switch ($method) {
     case 'GET':
         if ($action === 'list') {
             $controller->listUsersAction($headers);
-        } elseif ($action === 'get') {
+        } elseif ($action === 'get' || $action === 'getById') {
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $controller->getById($headers, $id);
         } else {
@@ -21,7 +21,10 @@ switch ($method) {
         }
         break;
     case 'POST':
-        if ($action === 'update') {
+        if ($action === 'create') {
+            $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+            $controller->create($headers, $input);
+        } elseif ($action === 'update') {
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             $controller->update($headers, $id, $input);
@@ -33,6 +36,12 @@ switch ($method) {
         if ($action === 'delete') {
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $controller->delete($headers, $id);
+        } elseif ($action === 'block') {
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $controller->block($headers, $id);
+        } elseif ($action === 'unblock') {
+            $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $controller->unblock($headers, $id);
         } else {
             echo json_encode(['status' => 'ERROR', 'message' => 'Acción no válida']);
         }

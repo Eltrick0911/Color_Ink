@@ -8,6 +8,104 @@
 let tokenRenewalInterval = null;
 let isRenewingToken = false;
 
+// Configuración global de SweetAlert2
+Swal.mixin({
+    customClass: {
+        popup: 'swal-custom-popup',
+        title: 'swal-custom-title',
+        content: 'swal-custom-content',
+        confirmButton: 'swal-custom-confirm',
+        cancelButton: 'swal-custom-cancel',
+        actions: 'swal-custom-actions'
+    },
+    buttonsStyling: false,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, continuar',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true,
+    focusCancel: true
+});
+
+// Agregar estilos personalizados
+const style = document.createElement('style');
+style.textContent = `
+    .swal-custom-popup {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
+        border: 2px solid rgba(106, 13, 173, 0.3) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+        backdrop-filter: blur(10px) !important;
+    }
+    
+    .swal-custom-title {
+        color: #ff6b6b !important;
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .swal-custom-content {
+        color: #ffffff !important;
+        font-size: 1.1rem !important;
+        line-height: 1.6 !important;
+    }
+    
+    .swal-custom-confirm {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24) !important;
+        border: none !important;
+        border-radius: 25px !important;
+        padding: 12px 30px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .swal-custom-confirm:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6) !important;
+    }
+    
+    .swal-custom-cancel {
+        background: linear-gradient(45deg, #667eea, #764ba2) !important;
+        border: none !important;
+        border-radius: 25px !important;
+        padding: 12px 30px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .swal-custom-cancel:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+    }
+    
+    .swal-custom-actions {
+        gap: 15px !important;
+        margin-top: 25px !important;
+    }
+    
+    .swal2-icon {
+        border-color: #ff6b6b !important;
+        color: #ff6b6b !important;
+    }
+    
+    .swal2-icon.swal2-warning {
+        border-color: #ffa726 !important;
+        color: #ffa726 !important;
+    }
+    
+    .swal2-icon.swal2-success {
+        border-color: #4caf50 !important;
+        color: #4caf50 !important;
+    }
+`;
+document.head.appendChild(style);
+
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar autenticación y autorización antes de inicializar
     checkAuthAndInit();
@@ -240,10 +338,10 @@ async function getCurrentUser() {
         console.log('🔍 GESTIÓN getCurrentUser: Iniciando...');
         
         // PRIMERO: Intentar obtener desde sessionStorage (más rápido y confiable)
-        const storedUser = sessionStorage.getItem('user');
-        if (storedUser) {
+        const storedUserData = sessionStorage.getItem('user');
+        if (storedUserData) {
             try {
-                const user = JSON.parse(storedUser);
+                const user = JSON.parse(storedUserData);
                 console.log('✅ GESTIÓN: Usuario obtenido desde sessionStorage:', user);
                 return user;
             } catch (parseError) {
@@ -303,19 +401,14 @@ async function getCurrentUser() {
             console.log('🔍 GESTIÓN: No hay token JWT');
         }
         
-        console.log('❌ No se pudo obtener usuario con ningún método');
-        
         // Fallback: intentar obtener usuario desde sessionStorage si está disponible
-        const storedUserFallback = sessionStorage.getItem('user');
-        if (storedUserFallback) {
-            try {
-                const user = JSON.parse(storedUserFallback);
-                console.log('✅ Usuario obtenido desde sessionStorage (fallback):', user);
-                return user;
-            } catch (parseError) {
-                console.log('❌ Error parseando usuario desde sessionStorage (fallback):', parseError);
-            }
+        const storedUser = getStoredUser();
+        if (storedUser) {
+            console.log('✅ Usuario obtenido desde sessionStorage (fallback):', storedUser);
+            return storedUser;
         }
+        
+        console.log('❌ No se pudo obtener usuario con ningún método');
         
         return null;
     } catch (error) {
@@ -327,20 +420,207 @@ async function getCurrentUser() {
 // Función para mostrar acceso denegado
 function showAccessDenied() {
     document.body.innerHTML = `
-        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
-            <i class="fa-solid fa-lock" style="font-size: 4rem; color: #e74c3c; margin-bottom: 1rem;"></i>
-            <h2>Acceso Denegado</h2>
-            <p>No tienes permisos para acceder a esta página.</p>
-            <p>Solo los administradores pueden gestionar usuarios.</p>
-            <div style="margin-top: 1rem;">
-                <button onclick="window.location.href='index'" style="padding: 10px 20px; margin-right: 10px;">
-                    Volver al Dashboard
-                </button>
-                <button onclick="window.location.href='perfil'" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px;">
-                    Ver Mi Perfil
-                </button>
+        <div style="
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            flex-direction: column;
+            background: #000000;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        ">
+            <!-- Ondas abstractas de fondo -->
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 1;
+                pointer-events: none;
+            ">
+                <!-- Onda superior -->
+                <div style="
+                    position: absolute;
+                    top: -50px;
+                    left: -10%;
+                    width: 120%;
+                    height: 200px;
+                    background: linear-gradient(45deg, #8b5cf6, #a855f7, #c084fc);
+                    border-radius: 50% 50% 0 0;
+                    opacity: 0.3;
+                    transform: rotate(-5deg);
+                    filter: blur(20px);
+                "></div>
+                
+                <!-- Onda media superior -->
+                <div style="
+                    position: absolute;
+                    top: 100px;
+                    right: -20%;
+                    width: 80%;
+                    height: 300px;
+                    background: linear-gradient(135deg, #7c3aed, #8b5cf6, #a855f7);
+                    border-radius: 0 0 50% 50%;
+                    opacity: 0.4;
+                    transform: rotate(10deg);
+                    filter: blur(15px);
+                "></div>
+                
+                <!-- Onda central -->
+                <div style="
+                    position: absolute;
+                    top: 200px;
+                    left: -30%;
+                    width: 100%;
+                    height: 250px;
+                    background: linear-gradient(90deg, #6d28d9, #7c3aed, #8b5cf6);
+                    border-radius: 50%;
+                    opacity: 0.2;
+                    transform: rotate(-15deg);
+                    filter: blur(25px);
+                "></div>
+                
+                <!-- Onda inferior -->
+                <div style="
+                    position: absolute;
+                    bottom: -100px;
+                    left: -10%;
+                    width: 120%;
+                    height: 300px;
+                    background: linear-gradient(45deg, #4c1d95, #6d28d9, #7c3aed);
+                    border-radius: 50% 50% 0 0;
+                    opacity: 0.3;
+                    transform: rotate(5deg);
+                    filter: blur(20px);
+                "></div>
+                
+                <!-- Onda lateral derecha -->
+                <div style="
+                    position: absolute;
+                    top: 300px;
+                    right: -50%;
+                    width: 100%;
+                    height: 200px;
+                    background: linear-gradient(180deg, #3b82f6, #6366f1, #8b5cf6);
+                    border-radius: 0 50% 50% 0;
+                    opacity: 0.25;
+                    transform: rotate(-20deg);
+                    filter: blur(18px);
+                "></div>
+            </div>
+            <div style="
+                background: linear-gradient(135deg, #6a0dad 0%, #4a0080 50%, #8b5cf6 100%);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 40px;
+                box-shadow: 0 8px 32px rgba(106, 13, 173, 0.4);
+                border: 1px solid rgba(139, 92, 246, 0.3);
+                max-width: 500px;
+                width: 100%;
+                position: relative;
+                z-index: 10;
+            ">
+                <div style="
+                    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                    width: 120px;
+                    height: 120px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 30px;
+                    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+                    animation: pulse 2s infinite;
+                ">
+                    <i class="fa-solid fa-lock" style="font-size: 3rem; color: white;"></i>
+                </div>
+                
+                <h1 style="
+                    font-size: 2.5rem;
+                    margin: 0 0 20px 0;
+                    background: linear-gradient(45deg, #ff6b6b, #ffa726);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    font-weight: 700;
+                ">Acceso Restringido</h1>
+                
+                <p style="
+                    font-size: 1.2rem;
+                    margin: 0 0 10px 0;
+                    opacity: 0.9;
+                    line-height: 1.6;
+                ">🚫 No tienes permisos para acceder a esta página</p>
+                
+                <p style="
+                    font-size: 1rem;
+                    margin: 0 0 30px 0;
+                    opacity: 0.8;
+                    line-height: 1.5;
+                ">Solo los administradores pueden gestionar usuarios del sistema</p>
+                
+                <div style="
+                    display: flex;
+                    gap: 15px;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                ">
+                    <button onclick="window.location.href='index'" style="
+                        padding: 15px 30px;
+                        background: linear-gradient(45deg, #667eea, #764ba2);
+                        color: white;
+                        border: none;
+                        border-radius: 25px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
+                        <i class="fa-solid fa-home"></i>
+                        Volver al Dashboard
+                    </button>
+                    
+                    <button onclick="window.location.href='perfil'" style="
+                        padding: 15px 30px;
+                        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                        color: white;
+                        border: none;
+                        border-radius: 25px;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.6)'" 
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.4)'">
+                        <i class="fa-solid fa-user"></i>
+                        Ver Mi Perfil
+                    </button>
+                </div>
             </div>
         </div>
+        
+        <style>
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        </style>
     `;
 }
 
@@ -391,12 +671,43 @@ function setupAdminInterface() {
 
 // Función para obtener la base de la API
 function getApiBase() {
-    const parts = window.location.pathname.split('/');
+    // Obtener la URL base desde la ubicación actual
+    const currentPath = window.location.pathname;
+    
+    // Si estamos en /Color_Ink/public/gestion_usu, la base es /Color_Ink
+    if (currentPath.includes('/public/')) {
+        const parts = currentPath.split('/public/');
+        return parts[0]; // Retorna /Color_Ink
+    }
+    
+    // Fallback: usar la lógica anterior
+    const parts = currentPath.split('/');
     const idx = parts.indexOf('src');
     if (idx > 1) {
         return '/' + parts.slice(1, idx).join('/');
     }
     return '/' + (parts[1] || '');
+}
+
+// Función para obtener el token actual
+function getCurrentToken() {
+    // Priorizar JWT, luego Firebase
+    const jwtToken = sessionStorage.getItem('access_token');
+    const firebaseToken = sessionStorage.getItem('firebase_id_token');
+    return jwtToken || firebaseToken || '';
+}
+
+// Función para obtener usuario desde sessionStorage
+function getStoredUser() {
+    try {
+        const userStr = sessionStorage.getItem('user');
+        if (userStr) {
+            return JSON.parse(userStr);
+        }
+    } catch (e) {
+        console.log('Error parseando usuario:', e);
+    }
+    return null;
 }
 
 // Función para obtener un usuario por ID
@@ -495,10 +806,16 @@ function createUserRow(user) {
     const roleText = user.id_rol === 1 ? 'Administrador' : 'Usuario';
     const roleClass = user.id_rol === 1 ? 'admin' : 'empleado';
     
-    // Determinar estado basado en bloqueado_hasta
+    // Determinar estado basado en bloqueado_hasta y Lista Negra
     let statusText = 'Activo';
     let statusClass = 'activo';
     if (user.bloqueado_hasta && new Date(user.bloqueado_hasta) > new Date()) {
+        statusText = 'Bloqueado';
+        statusClass = 'bloqueado';
+    }
+    
+    // Verificar si el usuario está en la Lista Negra
+    if (user.is_blacklisted) {
         statusText = 'Bloqueado';
         statusClass = 'bloqueado';
     }
@@ -694,15 +1011,40 @@ function editUsuario(userId, userName) {
     });
 }
 
-function blockUsuario(userId, userName, row) {
-    if (confirm(`¿Estás seguro de que quieres bloquear al usuario "${userName}" (${userId})?`)) {
+async function blockUsuario(userId, userName, row) {
+    const result = await Swal.fire({
+        title: '¿Bloquear Usuario?',
+        html: `¿Estás seguro de que quieres <strong>bloquear</strong> al usuario <br><strong>"${userName}"</strong> (ID: ${userId})?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, bloquear',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#ff6b6b',
+        cancelButtonColor: '#667eea'
+    });
+    
+    if (result.isConfirmed) {
+        // Llamar al backend para bloquear usuario
+        const apiUrl = `${getApiBase()}/public/index.php?route=user&caso=1&action=block&id=${userId}`;
+        console.log('🔍 URL de bloqueo:', apiUrl);
+        fetch(apiUrl, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${getCurrentToken()}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'OK') {
         const statusCell = row.querySelector('.status');
-        const lockButton = row.querySelector('.fa-lock').parentElement;
-        const unlockButton = row.querySelector('.fa-unlock').parentElement;
+                const lockButton = row.querySelector('.fa-lock')?.parentElement;
         
         // Cambiar estado a bloqueado
+                if (statusCell) {
         statusCell.textContent = 'Bloqueado';
         statusCell.className = 'status bloqueado';
+                }
         
         // Cambiar icono de bloqueo
         if (lockButton) {
@@ -712,17 +1054,51 @@ function blockUsuario(userId, userName, row) {
         
         updateStats();
         showNotification(`Usuario ${userName} bloqueado correctamente`, 'success');
+            } else {
+                showNotification(`Error bloqueando usuario: ${data.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error bloqueando usuario:', error);
+            showNotification('Error bloqueando usuario', 'error');
+        });
     }
 }
 
-function unblockUsuario(userId, userName, row) {
-    if (confirm(`¿Estás seguro de que quieres desbloquear al usuario "${userName}" (${userId})?`)) {
+async function unblockUsuario(userId, userName, row) {
+    const result = await Swal.fire({
+        title: '¿Desbloquear Usuario?',
+        html: `¿Estás seguro de que quieres <strong>desbloquear</strong> al usuario <br><strong>"${userName}"</strong> (ID: ${userId})?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, desbloquear',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#4caf50',
+        cancelButtonColor: '#667eea'
+    });
+    
+    if (result.isConfirmed) {
+        // Llamar al backend para desbloquear usuario
+        const apiUrl = `${getApiBase()}/public/index.php?route=user&caso=1&action=unblock&id=${userId}`;
+        console.log('🔍 URL de desbloqueo:', apiUrl);
+        fetch(apiUrl, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${getCurrentToken()}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'OK') {
         const statusCell = row.querySelector('.status');
-        const unlockButton = row.querySelector('.fa-unlock').parentElement;
+                const unlockButton = row.querySelector('.fa-unlock')?.parentElement;
         
         // Cambiar estado a activo
+                if (statusCell) {
         statusCell.textContent = 'Activo';
         statusCell.className = 'status activo';
+                }
         
         // Cambiar icono de desbloqueo
         if (unlockButton) {
@@ -732,16 +1108,38 @@ function unblockUsuario(userId, userName, row) {
         
         updateStats();
         showNotification(`Usuario ${userName} desbloqueado correctamente`, 'success');
+            } else {
+                showNotification(`Error desbloqueando usuario: ${data.message}`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error desbloqueando usuario:', error);
+            showNotification('Error desbloqueando usuario', 'error');
+        });
     }
 }
 
 async function deleteUsuario(userId, userName, row) {
-    if (confirm(`¿Estás seguro de que quieres eliminar al usuario "${userName}" (${userId})?\n\nEsta acción no se puede deshacer.`)) {
+    const result = await Swal.fire({
+        title: '⚠️ Eliminar Usuario',
+        html: `¿Estás seguro de que quieres <strong>ELIMINAR</strong> al usuario <br><strong>"${userName}"</strong> (ID: ${userId})?<br><br><span style="color: #ff6b6b; font-weight: bold;">⚠️ Esta acción NO se puede deshacer</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#667eea',
+        focusCancel: true
+    });
+    
+    if (result.isConfirmed) {
         try {
             const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
             const authHeader = token ? `Bearer ${token}` : '';
             
-            const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=delete&id=${userId}`, {
+            const apiUrl = `${getApiBase()}/public/index.php?route=user&caso=1&action=delete&id=${userId}`;
+            console.log('🔍 URL de eliminación:', apiUrl);
+            const response = await fetch(apiUrl, {
                 method: 'DELETE',
                 headers: { 'Authorization': authHeader }
             });
@@ -908,9 +1306,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const nuevoUsuarioBtn = document.querySelector('.btn-nuevo-usuario');
     
     if (nuevoUsuarioBtn) {
-        nuevoUsuarioBtn.addEventListener('click', function() {
-            // Aquí se implementaría la lógica para crear un nuevo usuario
-            alert('Funcionalidad de nuevo usuario - Por implementar');
+        // Remover cualquier event listener existente
+        nuevoUsuarioBtn.replaceWith(nuevoUsuarioBtn.cloneNode(true));
+        const newBtn = document.querySelector('.btn-nuevo-usuario');
+        
+        newBtn.addEventListener('click', function() {
+            // Llamar a la funcionalidad real de crear usuario
+            showNewUserModal();
         });
     }
 });
@@ -983,43 +1385,135 @@ function showUserModal(user, mode) {
     
     const modalContent = document.createElement('div');
     modalContent.style.cssText = `
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        padding: 30px;
+        border-radius: 20px;
         max-width: 500px;
         width: 90%;
         max-height: 80vh;
         overflow-y: auto;
+        border: 2px solid rgba(106, 13, 173, 0.3);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        color: white;
     `;
     
     modalContent.innerHTML = `
-        <h3>${mode === 'view' ? 'Ver Usuario' : 'Editar Usuario'}</h3>
-        <div style="margin: 15px 0;">
-            <label>Nombre:</label>
-            <input type="text" value="${user.nombre_usuario}" ${mode === 'view' ? 'readonly' : ''} style="width: 100%; padding: 8px; margin: 5px 0;">
+        <div style="text-align: center; margin-bottom: 25px;">
+            <div style="
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 15px;
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            ">
+                <i class="fa-solid fa-user" style="font-size: 1.5rem; color: white;"></i>
+            </div>
+            <h3 style="color: #667eea; margin: 0; font-size: 1.8rem; font-weight: 700;">
+                ${mode === 'view' ? '👤 Ver Usuario' : '✏️ Editar Usuario'}
+            </h3>
         </div>
-        <div style="margin: 15px 0;">
-            <label>Email:</label>
-            <input type="email" value="${user.correo}" ${mode === 'view' ? 'readonly' : ''} style="width: 100%; padding: 8px; margin: 5px 0;">
+        <div style="margin: 20px 0;">
+            <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Nombre:</label>
+            <input type="text" value="${user.nombre_usuario}" ${mode === 'view' ? 'readonly' : ''} style="
+                width: 100%; 
+                padding: 12px 15px; 
+                border: 2px solid rgba(106, 13, 173, 0.3);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 1rem;
+            " placeholder="Nombre del usuario">
         </div>
-        <div style="margin: 15px 0;">
-            <label>Teléfono:</label>
-            <input type="text" value="${user.telefono || ''}" ${mode === 'view' ? 'readonly' : ''} style="width: 100%; padding: 8px; margin: 5px 0;">
+        <div style="margin: 20px 0;">
+            <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Email:</label>
+            <input type="email" value="${user.correo}" ${mode === 'view' ? 'readonly' : ''} style="
+                width: 100%; 
+                padding: 12px 15px; 
+                border: 2px solid rgba(106, 13, 173, 0.3);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 1rem;
+            " placeholder="usuario@ejemplo.com">
         </div>
-        <div style="margin: 15px 0;">
-            <label>Rol:</label>
-            <select ${mode === 'view' ? 'disabled' : ''} style="width: 100%; padding: 8px; margin: 5px 0;">
-                <option value="1" ${user.id_rol === 1 ? 'selected' : ''}>Administrador</option>
-                <option value="2" ${user.id_rol === 2 ? 'selected' : ''}>Usuario</option>
+        <div style="margin: 20px 0;">
+            <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Teléfono:</label>
+            <input type="text" value="${user.telefono || ''}" ${mode === 'view' ? 'readonly' : ''} style="
+                width: 100%; 
+                padding: 12px 15px; 
+                border: 2px solid rgba(106, 13, 173, 0.3);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 1rem;
+            " placeholder="1234-5678">
+        </div>
+        <div style="margin: 20px 0;">
+            <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Rol:</label>
+            <select ${mode === 'view' ? 'disabled' : ''} style="
+                width: 100%; 
+                padding: 12px 15px; 
+                border: 2px solid rgba(106, 13, 173, 0.3);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 1rem;
+            ">
+                <option value="1" ${user.id_rol === 1 ? 'selected' : ''} style="background: #1a1a2e; color: white;">Administrador</option>
+                <option value="2" ${user.id_rol === 2 ? 'selected' : ''} style="background: #1a1a2e; color: white;">Usuario</option>
             </select>
         </div>
-        <div style="margin: 15px 0;">
-            <label>Último Acceso:</label>
-            <input type="text" value="${user.ultimo_acceso || 'Nunca'}" readonly style="width: 100%; padding: 8px; margin: 5px 0;">
+        <div style="margin: 20px 0;">
+            <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Último Acceso:</label>
+            <input type="text" value="${user.ultimo_acceso || 'Nunca'}" readonly style="
+                width: 100%; 
+                padding: 12px 15px; 
+                border: 2px solid rgba(106, 13, 173, 0.3);
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                font-size: 1rem;
+            " placeholder="Fecha de último acceso">
         </div>
-        <div style="text-align: right; margin-top: 20px;">
-            <button onclick="this.closest('.user-modal').remove()" style="padding: 8px 16px; margin-right: 10px;">Cerrar</button>
-            ${mode === 'edit' ? '<button onclick="saveUserChanges(this)" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px;">Guardar</button>' : ''}
+        ${mode === 'edit' ? `<input type="hidden" name="id_usuario" value="${user.id_usuario}">` : ''}
+        <div style="text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+            <button onclick="this.closest('.user-modal').remove()" style="
+                padding: 12px 25px;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                border: none;
+                border-radius: 25px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
+                Cerrar
+            </button>
+            ${mode === 'edit' ? `
+                <button onclick="saveUserChanges(this)" style="
+                    padding: 12px 25px;
+                    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                    color: white;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.6)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.4)'">
+                    Guardar
+                </button>
+            ` : ''}
         </div>
     `;
     
@@ -1046,7 +1540,11 @@ async function saveUserChanges(button) {
         id_rol: parseInt(inputs[3].value)
     };
     
-    const userId = button.getAttribute('data-user-id');
+    // Obtener el ID del usuario desde el modal
+    const userId = modal.querySelector('[data-user-id]')?.getAttribute('data-user-id') || 
+                   modal.querySelector('input[name="id_usuario"]')?.value;
+    
+    console.log('🔍 ID del usuario a actualizar:', userId);
     
     try {
         const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
@@ -1084,7 +1582,7 @@ function showNewUserModal() {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0,0,0,0.7);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -1093,44 +1591,131 @@ function showNewUserModal() {
     
     const modalContent = document.createElement('div');
     modalContent.style.cssText = `
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        padding: 30px;
+        border-radius: 20px;
         max-width: 500px;
         width: 90%;
         max-height: 80vh;
         overflow-y: auto;
+        border: 2px solid rgba(106, 13, 173, 0.3);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        color: white;
     `;
     
     modalContent.innerHTML = `
-        <h3>Crear Nuevo Usuario</h3>
+        <div style="text-align: center; margin-bottom: 25px;">
+            <div style="
+                background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 15px;
+                box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+            ">
+                <i class="fa-solid fa-user-plus" style="font-size: 1.5rem; color: white;"></i>
+            </div>
+            <h3 style="color: #ff6b6b; margin: 0; font-size: 1.8rem; font-weight: 700;">Crear Nuevo Usuario</h3>
+        </div>
         <form id="newUserForm">
-            <div style="margin: 15px 0;">
-                <label>Nombre Completo:</label>
-                <input type="text" name="nombre_usuario" required style="width: 100%; padding: 8px; margin: 5px 0;">
+            <div style="margin: 20px 0;">
+                <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Nombre Completo:</label>
+                <input type="text" name="nombre_usuario" required style="
+                    width: 100%; 
+                    padding: 12px 15px; 
+                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 1rem;
+                " placeholder="Ingresa el nombre completo">
             </div>
-            <div style="margin: 15px 0;">
-                <label>Email:</label>
-                <input type="email" name="correo" required style="width: 100%; padding: 8px; margin: 5px 0;">
+            <div style="margin: 20px 0;">
+                <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Email:</label>
+                <input type="email" name="correo" required style="
+                    width: 100%; 
+                    padding: 12px 15px; 
+                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 1rem;
+                " placeholder="usuario@ejemplo.com">
             </div>
-            <div style="margin: 15px 0;">
-                <label>Teléfono:</label>
-                <input type="text" name="telefono" style="width: 100%; padding: 8px; margin: 5px 0;">
+            <div style="margin: 20px 0;">
+                <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Teléfono:</label>
+                <input type="text" name="telefono" style="
+                    width: 100%; 
+                    padding: 12px 15px; 
+                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 1rem;
+                " placeholder="1234-5678">
             </div>
-            <div style="margin: 15px 0;">
-                <label>Contraseña:</label>
-                <input type="password" name="contrasena" required style="width: 100%; padding: 8px; margin: 5px 0;">
+            <div style="margin: 20px 0;">
+                <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Contraseña:</label>
+                <input type="password" name="contrasena" required style="
+                    width: 100%; 
+                    padding: 12px 15px; 
+                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 1rem;
+                " placeholder="Mínimo 6 caracteres">
             </div>
-            <div style="margin: 15px 0;">
-                <label>Rol:</label>
-                <select name="id_rol" style="width: 100%; padding: 8px; margin: 5px 0;">
-                    <option value="2">Usuario</option>
-                    <option value="1">Administrador</option>
+            <div style="margin: 20px 0;">
+                <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Rol:</label>
+                <select name="id_rol" style="
+                    width: 100%; 
+                    padding: 12px 15px; 
+                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    font-size: 1rem;
+                ">
+                    <option value="2" style="background: #1a1a2e; color: white;">Usuario</option>
+                    <option value="1" style="background: #1a1a2e; color: white;">Administrador</option>
                 </select>
             </div>
-            <div style="text-align: right; margin-top: 20px;">
-                <button type="button" onclick="this.closest('.user-modal').remove()" style="padding: 8px 16px; margin-right: 10px;">Cancelar</button>
-                <button type="submit" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px;">Crear Usuario</button>
+            <div style="text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+                <button type="button" onclick="this.closest('.user-modal').remove()" style="
+                    padding: 12px 25px;
+                    background: linear-gradient(45deg, #667eea, #764ba2);
+                    color: white;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
+                    Cancelar
+                </button>
+                <button type="submit" style="
+                    padding: 12px 25px;
+                    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                    color: white;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.6)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.4)'">
+                    Crear Usuario
+                </button>
             </div>
         </form>
     `;
@@ -1166,7 +1751,7 @@ async function createNewUser(e) {
         const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
         const authHeader = token ? `Bearer ${token}` : '';
         
-        const response = await fetch(`${getApiBase()}/public/index.php?route=auth&caso=1&action=register`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=create`, {
             method: 'POST',
             headers: { 
                 'Authorization': authHeader,

@@ -148,6 +148,12 @@ class FirebaseController
             return $claims;
         } catch (\Throwable $e) {
             error_log('Firebase verify error: ' . $e->getMessage());
+            
+            // Si el token expiró, intentar manejar de manera más elegante
+            if (strpos($e->getMessage(), 'expired') !== false || strpos($e->getMessage(), 'exp') !== false) {
+                error_log('FirebaseController - Token expirado, requiere renovación');
+            }
+            
             return null;
         }
     }
@@ -228,6 +234,29 @@ class FirebaseController
             return 2;
         }
     }
+
+    /**
+     * Verifica si un usuario está en la lista negra usando procedimiento almacenado
+     */
+    private function isUserBlacklisted(string $email): bool
+    {
+        try {
+            $db = \App\DB\connectionDB::getConnection();
+            $stmt = $db->prepare("CALL sp_verificar_lista_negra(:email)");
+            $stmt->bindParam(':email', $email, \PDO::PARAM_STR);
+            $stmt->execute();
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            
+            // Limpiar cursores adicionales de CALL
+            while ($stmt->nextRowset()) { /* noop */ }
+            
+            return isset($result['en_lista_negra']) && $result['en_lista_negra'] == 1;
+        } catch (\Throwable $e) {
+            error_log('Error isUserBlacklisted: ' . $e->getMessage());
+            return false;
+        }
+    }
+
 }
 
 
