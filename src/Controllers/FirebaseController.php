@@ -38,18 +38,44 @@ class FirebaseController
         $correo = $claims['email'] ?? null;
         $nombre = $claims['name'] ?? ($claims['email'] ?? 'Usuario');
         $telefono = null;
+        
+        if (!$correo) {
+            error_log('FirebaseController - No hay email en el token');
+            echo json_encode(responseHTTP::status400('Email requerido en el token'));
+            return;
+        }
+        
         $userModel = new UserModel();
-        $user = $correo ? $userModel->getUserByEmailOrPhone($correo) : null;
-        if (!$user && $correo) {
+        $user = $userModel->getUserByEmailOrPhone($correo);
+        
+        if (!$user) {
+            error_log('FirebaseController - Usuario no existe en BD, creando...');
             // Determinar el rol: primer usuario = administrador, resto = usuario común
             $idRol = $this->getUserRole();
             
             // Crear usuario con rol determinado automáticamente
             $randomPass = bin2hex(random_bytes(8));
             $hash = Security::createPassword($randomPass);
+            
+            error_log("FirebaseController - Creando usuario: $nombre, $correo, rol: $idRol");
             $createRes = $userModel->createUser($nombre, $correo, $hash, $telefono, $idRol);
+            
+            if (!isset($createRes['status']) || $createRes['status'] !== 'OK') {
+                error_log('FirebaseController - Error al crear usuario: ' . json_encode($createRes));
+                echo json_encode(responseHTTP::status500() + ['debug' => 'Error al crear usuario en BD']);
+                return;
+            }
+            
+            error_log('FirebaseController - Usuario creado exitosamente: ' . json_encode($createRes));
+            
             // Intentar leerlo de nuevo
             $user = $userModel->getUserByEmailOrPhone($correo);
+            
+            if (!$user) {
+                error_log('FirebaseController - Error: Usuario no se pudo recuperar después de crearlo');
+                echo json_encode(responseHTTP::status500() + ['debug' => 'Usuario creado pero no recuperable']);
+                return;
+            }
         }
 
         // Actualizar último acceso para usuarios existentes (Firebase login exitoso)
@@ -69,15 +95,20 @@ class FirebaseController
         error_log('FirebaseController - Payload a enviar: ' . json_encode($payload));
         error_log('FirebaseController - User desde BD: ' . json_encode($user));
 
-        $_SESSION['firebase_token'] = $idToken;
-        $_SESSION['firebase_user'] = $payload;
+    $_SESSION['firebase_token'] = $idToken;
+    $_SESSION['firebase_user'] = $payload;
+
+    // Generar JWT propio del backend con los datos y permisos de la BD
+    $token = Security::createTokenJwt(Security::secretKey(), $payload);
+    $_SESSION['token'] = $token;
         
         // Construir respuesta correctamente
         $response = [
             'status' => 'OK',
             'message' => 'Login Firebase OK',
             'data' => [
-                'user' => $payload
+                'user' => $payload,
+                'token' => $token
             ]
         ];
         
@@ -104,6 +135,8 @@ class FirebaseController
     public function verifyIdToken(string $idToken): ?array
     {
         try {
+            // Permitir una pequeña tolerancia por desfase de reloj entre cliente y servidor
+            \Firebase\JWT\JWT::$leeway = 60; // segundos
             $jwks = $this->fetchJwks();
             $keys = JWK::parseKeySet($jwks);
             // Firebase ID Tokens están firmados con RS256

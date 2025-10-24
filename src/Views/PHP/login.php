@@ -63,15 +63,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js?v=20250923"></script>
     <script>
         // Rellena con tu configuración real de Firebase
-        const firebaseConfig = {
-         apiKey: "AIzaSyBM1Wj1JSqHRHKoCwId-vhJ7eisM7ieTAY",
-         authDomain: "miappwebinkproject.firebaseapp.com",
-         projectId: "miappwebinkproject",
-         storageBucket: "miappwebinkproject.appspot.com",
-         messagingSenderId: "463926899015",
-         appId: "1:463926899015:web:ce74827067d65ccc255c62",
-         measurementId: "G-NBMVZPB4DR"
-         };
+const firebaseConfig = {
+  apiKey: "AIzaSyAn66xkpFEzcdkmkp3iX4VrEUZCd3sI4sk",
+  authDomain: "colorink-a3c91.firebaseapp.com",
+  projectId: "colorink-a3c91",
+  storageBucket: "colorink-a3c91.firebasestorage.app",
+  messagingSenderId: "676988193109",
+  appId: "1:676988193109:web:21e1b37ffdc6e2cb12c7dc"
+};
         
         console.log('🔍 Inicializando Firebase...');
         console.log('Firebase disponible:', typeof firebase !== 'undefined');

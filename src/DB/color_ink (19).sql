@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-10-2025 a las 04:35:49
+-- Tiempo de generación: 24-10-2025 a las 02:01:52
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -17,9 +17,6 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
---
--- Base de datos: `color_ink`
---
 CREATE DATABASE IF NOT EXISTS `color_ink` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `color_ink`;
 
@@ -27,6 +24,14 @@ DELIMITER $$
 --
 -- Procedimientos
 --
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertar_cliente_usuario` (IN `p_nombre_usuario` VARCHAR(100), IN `p_telefono` VARCHAR(20))   BEGIN
+    INSERT INTO usuario (
+        nombre_usuario, correo, contrasena, telefono, fecha_ingreso, id_rol
+    ) VALUES (
+        p_nombre_usuario, NULL, NULL, p_telefono, CURDATE(), 3 -- Asumiendo id_rol 3 es Cliente
+    );
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_categoria` (IN `p_id_categoria` INT, IN `p_descripcion` VARCHAR(100))   BEGIN
     UPDATE categoriaproducto SET descripcion = p_descripcion WHERE id_categoria = p_id_categoria;
 END$$
@@ -115,11 +120,18 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_pedido` (IN `p_id_pedido` INT, IN `p_id_usuario` INT, IN `p_fecha_pedido` DATETIME, IN `p_fecha_entrega` DATETIME, IN `p_id_estado` INT)   BEGIN
     UPDATE pedido
-    SET id_usuario = p_id_usuario,
+    SET 
+        id_usuario = p_id_usuario,
         fecha_pedido = p_fecha_pedido,
         fecha_entrega = p_fecha_entrega,
         id_estado = p_id_estado
     WHERE id_pedido = p_id_pedido;
+    
+    -- Devolver una confirmación de éxito
+    SELECT 
+        'Pedido actualizado correctamente' AS mensaje, 
+        p_id_pedido AS id_pedido,
+        ROW_COUNT() AS rows_affected;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_producto` (IN `p_id_producto` INT, IN `p_nombre_producto` VARCHAR(255), IN `p_descripcion` TEXT, IN `p_precio` DECIMAL(10,2), IN `p_stock` INT, IN `p_id_proveedor` INT, IN `p_id_categoria` INT)   BEGIN
@@ -135,6 +147,73 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_rol` (IN `p_id_rol` INT, IN `p_descripcion` VARCHAR(100), IN `p_estado` VARCHAR(20))   BEGIN
     UPDATE rol SET descripcion = p_descripcion, estado = p_estado WHERE id_rol = p_id_rol;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_usuario` (IN `p_id_usuario` INT, IN `p_nombre_usuario` VARCHAR(100), IN `p_correo` VARCHAR(100), IN `p_contrasena` VARCHAR(255), IN `p_telefono` VARCHAR(20), IN `p_id_rol` INT, IN `p_actualizar_password` TINYINT(1))   BEGIN
+    -- Validar que el usuario existe
+    IF NOT EXISTS (SELECT 1 FROM usuario WHERE id_usuario = p_id_usuario) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El usuario no existe';
+    END IF;
+
+    -- Validar que el correo no esté duplicado (excepto para el usuario actual)
+    IF EXISTS (SELECT 1 FROM usuario WHERE correo = p_correo AND id_usuario != p_id_usuario) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El correo ya está registrado por otro usuario';
+    END IF;
+
+    -- Validar que el rol existe
+    IF NOT EXISTS (SELECT 1 FROM rol WHERE id_rol = p_id_rol) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El rol especificado no existe';
+    END IF;
+
+    -- Actualizar usuario
+    IF p_actualizar_password = 1 THEN
+        -- Actualizar incluyendo la contraseña
+        UPDATE usuario 
+        SET 
+            nombre_usuario = p_nombre_usuario,
+            correo = p_correo,
+            contrasena = p_contrasena,
+            password_updated_at = NOW(),
+            telefono = p_telefono,
+            id_rol = p_id_rol,
+            intentos_fallidos = 0, -- Resetear intentos fallidos al actualizar
+            bloqueado_hasta = NULL -- Desbloquear usuario al actualizar
+        WHERE id_usuario = p_id_usuario;
+    ELSE
+        -- Actualizar sin cambiar la contraseña
+        UPDATE usuario 
+        SET 
+            nombre_usuario = p_nombre_usuario,
+            correo = p_correo,
+            telefono = p_telefono,
+            id_rol = p_id_rol
+        WHERE id_usuario = p_id_usuario;
+    END IF;
+
+    -- Devolver confirmación
+    SELECT 'Usuario actualizado correctamente' AS mensaje, p_id_usuario AS id_usuario;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_agregar_lista_negra` (IN `p_email` VARCHAR(100), IN `p_eliminado_por` INT, IN `p_razon` TEXT)   BEGIN
+    DECLARE v_existe INT DEFAULT 0;
+    
+    -- Verificar si el email ya existe
+    SELECT COUNT(*) INTO v_existe FROM usuarios_eliminados WHERE email = p_email;
+    
+    IF v_existe = 0 THEN
+        -- Agregar a lista negra
+        INSERT INTO usuarios_eliminados (email, eliminado_por, razon) 
+        VALUES (p_email, p_eliminado_por, p_razon);
+        
+        SELECT 'Usuario agregado a lista negra' AS mensaje;
+    ELSE
+        -- Actualizar razón si ya existe
+        UPDATE usuarios_eliminados 
+        SET razon = p_razon, eliminado_por = p_eliminado_por, fecha_eliminacion = NOW()
+        WHERE email = p_email;
+        
+        SELECT 'Usuario actualizado en lista negra' AS mensaje;
+    END IF;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_alerta_stock_minimo` ()   BEGIN
@@ -201,59 +280,42 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_categoria` (IN `p_descripc
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_detalle_pedido` (IN `p_producto_solicitado` VARCHAR(255), IN `p_precio_unitario` DECIMAL(10,2), IN `p_descuento` DECIMAL(10,2), IN `p_impuesto` DECIMAL(10,2), IN `p_id_pedido` INT, IN `p_id_producto` INT, IN `p_cantidad` INT, IN `p_id_usuario` INT)   BEGIN
-    DECLARE v_idmovimiento INT;
-    DECLARE v_total_bruto DECIMAL(12,2);
-    DECLARE v_total_neto DECIMAL(12,2);
-    DECLARE v_stock_actual INT;
-    DECLARE v_nueva_cantidad INT;
-
-    -- 1. VALIDACIÓN DE STOCK
-    SELECT stock INTO v_stock_actual FROM producto WHERE id_producto = p_id_producto;
-    SET v_nueva_cantidad = v_stock_actual - p_cantidad;
-
-    IF v_nueva_cantidad < 0 THEN
-        -- Evitar stock negativo en SALIDA
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Stock insuficiente para crear el detalle del pedido.';
-    ELSE
-        -- 2. Cálculo del total de la línea
-        SET v_total_bruto = p_cantidad * p_precio_unitario; 
-        SET v_total_neto = (v_total_bruto - p_descuento) * (1 + p_impuesto);
-
-        -- 3. Inserta el movimiento de inventario (USANDO NUEVA ESTRUCTURA)
-        INSERT INTO movimientoinventario (
-            id_producto, 
-            tipo_movimiento, 
-            origen, 
-            id_origen, 
-            fecha_movimiento, 
-            cantidad, 
-            id_usuario
-        ) VALUES (
-            p_id_producto, 
-            'SALIDA', 
-            'PEDIDO', 
-            p_id_pedido, -- Se enlaza directamente al ID del pedido
-            NOW(), 
-            p_cantidad, -- Cantidad positiva, el tipo_movimiento define la acción
-            p_id_usuario
-        );
-
-        SET v_idmovimiento = LAST_INSERT_ID();
-
-        -- 4. Inserta el detalle del pedido (Sin cambios, solo para referencia)
-        INSERT INTO detallepedido (
-            producto_solicitado, precio_unitario, descuento, impuesto, total_linea,
-            id_pedido, id_producto, cantidad, id_movimiento
-        ) VALUES (
-            p_producto_solicitado, p_precio_unitario, p_descuento, p_impuesto, v_total_neto,
-            p_id_pedido, p_id_producto, p_cantidad, v_idmovimiento
-        );
-
-        -- 5. Actualiza el stock del producto
-        UPDATE producto
-        SET stock = v_nueva_cantidad
-        WHERE id_producto = p_id_producto;
-    END IF;
+    DECLARE v_total_linea DECIMAL(10,2);
+    DECLARE v_id_detalle INT;
+    
+    -- Calcular el total de la línea
+    SET v_total_linea = (p_precio_unitario * p_cantidad) * (1 - (p_descuento / 100)) * (1 + (p_impuesto / 100));
+    
+    -- Establecer el ID de usuario para auditoría
+    SET @usuario_id = p_id_usuario;
+    
+    -- Insertar el detalle del pedido
+    INSERT INTO detallepedido (
+        producto_solicitado,
+        cantidad,
+        precio_unitario,
+        descuento,
+        impuesto,
+        total_linea,
+        id_pedido,
+        id_producto
+    ) VALUES (
+        p_producto_solicitado,
+        p_cantidad,
+        p_precio_unitario,
+        p_descuento,
+        p_impuesto,
+        v_total_linea,
+        p_id_pedido,
+        p_id_producto
+    );
+    
+    -- Obtener el ID del detalle insertado
+    SET v_id_detalle = LAST_INSERT_ID();
+    
+    -- Retornar el ID del detalle insertado
+    SELECT v_id_detalle AS id_detalle_creado;
+    
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_estado` (IN `p_proceso` VARCHAR(50), IN `p_entregado` TINYINT(1), IN `p_cancelado` TINYINT(1))   BEGIN
@@ -361,6 +423,36 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_usuario` (IN `p_nombre_usu
     );
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_venta` (IN `p_id_pedido` INT, IN `p_id_usuario` INT, IN `p_monto_cobrado` DECIMAL(12,2), IN `p_metodo_pago` VARCHAR(50), IN `p_nota` TEXT)   BEGIN
+  DECLARE v_costo_total DECIMAL(12,2) DEFAULT 0.00;
+  DECLARE v_estado_pedido VARCHAR(50);
+
+  -- 1. Verificar el estado del pedido
+  SELECT ep.nombre INTO v_estado_pedido
+  FROM pedido p
+  JOIN cat_estado_pedido ep ON p.id_estado = ep.id_estado
+  WHERE p.id_pedido = p_id_pedido;
+
+  IF v_estado_pedido <> 'Entregado' THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El pedido no está en estado ENTREGADO para ser cerrado en VENTA.';
+  END IF;
+
+  -- 2. Calcular costo total (usando el costo unitario actual del producto)
+  SELECT 
+    SUM(p.costo_unitario * dp.cantidad) INTO v_costo_total
+  FROM detallepedido dp
+  JOIN producto p ON dp.id_producto = p.id_producto
+  WHERE dp.id_pedido = p_id_pedido;
+
+  -- 3. Inserción de la Venta
+  INSERT INTO venta (
+    id_pedido, id_usuario, monto_cobrado, costo_total, metodo_pago, nota
+  ) VALUES (
+    p_id_pedido, p_id_usuario, p_monto_cobrado, v_costo_total, p_metodo_pago, p_nota
+  );
+  
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_categoria` (IN `p_id_categoria` INT)   BEGIN
     DELETE FROM categoriaproducto WHERE id_categoria = p_id_categoria;
 END$$
@@ -393,39 +485,33 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_usuario` (IN `p_id` INT
     DELETE FROM usuario WHERE id_usuario = p_id;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_login_usuario` (IN `p_usuario` VARCHAR(100), IN `p_contrasena` VARCHAR(255))   BEGIN
-    DECLARE v_id_usuario INT;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_login_usuario` (IN `p_usuario` VARCHAR(100), IN `p_contrasena` VARCHAR(255))   BEGIN 
+    DECLARE v_id_usuario INT; 
 
-    -- Intentamos encontrar un usuario que no esté bloqueado y coincida con el usuario/teléfono
-    SELECT id_usuario INTO v_id_usuario
-    FROM usuario
-    WHERE (correo = p_usuario OR telefono = p_usuario)
+    SELECT id_usuario INTO v_id_usuario 
+    FROM usuario 
+    WHERE (correo = p_usuario OR telefono = p_usuario) 
       AND contrasena = p_contrasena 
-      AND (bloqueado_hasta IS NULL OR bloqueado_hasta < NOW())
-    LIMIT 1;
+      AND (bloqueado_hasta IS NULL OR bloqueado_hasta < NOW()) 
+    LIMIT 1; 
 
-    IF v_id_usuario IS NOT NULL THEN
-        -- Login Exitoso
-        UPDATE usuario
-        SET 
-            ultimo_acceso = NOW(), 
-            intentos_fallidos = 0 -- Resetea intentos fallidos
-        WHERE id_usuario = v_id_usuario;
+    IF v_id_usuario IS NOT NULL THEN 
+        -- Login Exitoso 
+        UPDATE usuario 
+        SET ultimo_acceso = NOW(), 
+            intentos_fallidos = 0
+        WHERE id_usuario = v_id_usuario; 
+        
+        SELECT id_usuario, nombre_usuario, id_rol FROM usuario WHERE id_usuario = v_id_usuario; 
+    ELSE 
+        -- Login Fallido: Incrementa intentos y potencialmente bloquea (a los 5 intentos, 30 min)
+        UPDATE usuario 
+        SET intentos_fallidos = intentos_fallidos + 1, 
+            bloqueado_hasta = IF(intentos_fallidos >= 5, DATE_ADD(NOW(), INTERVAL 30 MINUTE), NULL) 
+        WHERE correo = p_usuario OR telefono = p_usuario; 
 
-        SELECT id_usuario, nombre_usuario, id_rol
-        FROM usuario
-        WHERE id_usuario = v_id_usuario;
-    ELSE
-        -- Login Fallido: Incrementa intentos y potencialmente bloquea.
-        UPDATE usuario
-        SET 
-            intentos_fallidos = intentos_fallidos + 1,
-            -- Bloquea por 2 minutos si los intentos fallidos superan un umbral (ej. 5)
-            bloqueado_hasta = IF(intentos_fallidos + 1 >= 5, DATE_ADD(NOW(), INTERVAL 2 MINUTE), bloqueado_hasta) 
-        WHERE (correo = p_usuario OR telefono = p_usuario);
-
-        SELECT 'ERROR' AS mensaje;
-    END IF;
+        SELECT NULL AS id_usuario, 'Credenciales inválidas o usuario bloqueado' AS nombre_usuario, NULL AS id_rol;
+    END IF; 
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_categoria` (IN `p_id_categoria` INT)   BEGIN
@@ -452,15 +538,34 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_estado` (IN `p_id_estado
     SELECT * FROM estadopedido WHERE id_estado = p_id_estado;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_lista_negra` ()   BEGIN
+    SELECT 
+        id,
+        email,
+        fecha_eliminacion,
+        eliminado_por,
+        razon
+    FROM usuarios_eliminados 
+    ORDER BY fecha_eliminacion DESC;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_pedido` (IN `p_id_pedido` INT)   BEGIN
     SELECT
-        pe.*,
-        u.nombre_usuario,
-        e.proceso AS estado_proceso
-    FROM pedido pe
-    JOIN usuario u ON pe.id_usuario = u.id_usuario
-    JOIN estadopedido e ON pe.id_estado = e.id_estado
-    WHERE pe.id_pedido = p_id_pedido;
+        p.id_pedido,
+        p.numero_pedido,
+        p.fecha_pedido,
+        p.fecha_compromiso,
+        p.fecha_entrega,
+        p.observaciones,
+        p.id_estado,
+        e.nombre as estado_nombre,
+        e.codigo as estado_codigo,
+        p.id_usuario,
+        u.nombre_usuario
+    FROM pedido p
+    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+    WHERE p.id_pedido = p_id_pedido;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_producto` (IN `p_id_producto` INT)   BEGIN
@@ -487,6 +592,48 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_usuario` (IN `p_id_usuar
     WHERE u.id_usuario = p_id_usuario;
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_purgar_auditoria` ()   BEGIN
+    -- Eliminar registros de auditoría más antiguos de 6 meses
+    DELETE FROM usuario_aud WHERE fecha_accion < DATE_SUB(NOW(), INTERVAL 6 MONTH);
+    DELETE FROM producto_aud WHERE fecha_accion < DATE_SUB(NOW(), INTERVAL 6 MONTH);
+    DELETE FROM pedido_aud WHERE fecha_accion < DATE_SUB(NOW(), INTERVAL 6 MONTH);
+    DELETE FROM venta_aud WHERE fecha_accion < DATE_SUB(NOW(), INTERVAL 6 MONTH);
+    DELETE FROM detallepedido_aud WHERE fecha_accion < DATE_SUB(NOW(), INTERVAL 6 MONTH);
+    DELETE FROM proveedor_aud WHERE fecha_accion < DATE_SUB(NOW(), INTERVAL 6 MONTH);
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_remover_lista_negra` (IN `p_email` VARCHAR(100))   BEGIN
+    DECLARE v_afectadas INT DEFAULT 0;
+    
+    -- Remover de lista negra
+    DELETE FROM usuarios_eliminados WHERE email = p_email;
+    
+    -- Obtener filas afectadas
+    SET v_afectadas = ROW_COUNT();
+    
+    IF v_afectadas > 0 THEN
+        SELECT 'Usuario removido de lista negra' AS mensaje;
+    ELSE
+        SELECT 'Usuario no encontrado en lista negra' AS mensaje;
+    END IF;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_verificar_lista_negra` (IN `p_email` VARCHAR(100))   BEGIN
+    DECLARE v_existe INT DEFAULT 0;
+    DECLARE v_razon TEXT;
+    
+    -- Verificar si existe en lista negra
+    SELECT COUNT(*), COALESCE(razon, '') INTO v_existe, v_razon 
+    FROM usuarios_eliminados 
+    WHERE email = p_email;
+    
+    IF v_existe > 0 THEN
+        SELECT 1 AS en_lista_negra, v_razon AS razon;
+    ELSE
+        SELECT 0 AS en_lista_negra, '' AS razon;
+    END IF;
+END$$
+
 DELIMITER ;
 
 -- --------------------------------------------------------
@@ -495,16 +642,14 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `alerta_stock`
 --
 
-CREATE TABLE IF NOT EXISTS `alerta_stock` (
-  `id_alerta` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `alerta_stock` (
+  `id_alerta` int(11) NOT NULL,
   `id_producto` int(11) NOT NULL,
   `stock_actual` int(11) NOT NULL,
   `stock_minimo_establecido` int(11) NOT NULL,
   `mensaje` varchar(255) NOT NULL,
   `fecha_alerta` datetime NOT NULL,
-  `atendida` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0=Pendiente, 1=Atendida/Revisada',
-  PRIMARY KEY (`id_alerta`),
-  KEY `fk_alerta_producto` (`id_producto`)
+  `atendida` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0=Pendiente, 1=Atendida/Revisada'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -513,12 +658,10 @@ CREATE TABLE IF NOT EXISTS `alerta_stock` (
 -- Estructura de tabla para la tabla `categoriaproducto`
 --
 
-CREATE TABLE IF NOT EXISTS `categoriaproducto` (
-  `id_categoria` int(11) NOT NULL AUTO_INCREMENT,
-  `descripcion` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`id_categoria`),
-  UNIQUE KEY `idx_categoria_descripcion` (`descripcion`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `categoriaproducto` (
+  `id_categoria` int(11) NOT NULL,
+  `descripcion` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `categoriaproducto`
@@ -534,15 +677,13 @@ INSERT INTO `categoriaproducto` (`id_categoria`, `descripcion`) VALUES
 -- Estructura de tabla para la tabla `cat_estado_pedido`
 --
 
-CREATE TABLE IF NOT EXISTS `cat_estado_pedido` (
-  `id_estado` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `cat_estado_pedido` (
+  `id_estado` int(11) NOT NULL,
   `codigo` varchar(10) NOT NULL,
   `nombre` varchar(50) NOT NULL,
   `es_final` tinyint(1) DEFAULT 0 COMMENT '1 si es un estado final (Entregado o Cancelado), 0 en caso contrario',
-  `orden` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id_estado`),
-  UNIQUE KEY `codigo` (`codigo`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `orden` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `cat_estado_pedido`
@@ -559,8 +700,8 @@ INSERT INTO `cat_estado_pedido` (`id_estado`, `codigo`, `nombre`, `es_final`, `o
 -- Estructura de tabla para la tabla `detallepedido`
 --
 
-CREATE TABLE IF NOT EXISTS `detallepedido` (
-  `id_detalle` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `detallepedido` (
+  `id_detalle` int(11) NOT NULL,
   `producto_solicitado` varchar(100) DEFAULT NULL,
   `cantidad` int(11) NOT NULL,
   `precio_unitario` decimal(10,2) DEFAULT NULL,
@@ -569,12 +710,8 @@ CREATE TABLE IF NOT EXISTS `detallepedido` (
   `total_linea` decimal(12,2) NOT NULL,
   `id_pedido` int(11) DEFAULT NULL,
   `id_producto` int(11) DEFAULT NULL,
-  `id_movimiento` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id_detalle`),
-  KEY `fk_detalle_pedido` (`id_pedido`),
-  KEY `fk_detalle_producto` (`id_producto`),
-  KEY `fk_detalle_movimiento` (`id_movimiento`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id_movimiento` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `detallepedido`
@@ -586,7 +723,9 @@ INSERT INTO `detallepedido` (`id_detalle`, `producto_solicitado`, `cantidad`, `p
 (6, 'Camisa', 1, 15.00, 0.00, 0.00, 0.00, 1, 1, NULL),
 (7, 'Camisa', 1, 15.00, 0.00, 0.00, 0.00, 1, 1, NULL),
 (8, 'Camisa', 1, 15.00, 0.00, 0.00, 0.00, 1, 1, 1),
-(10, 'Camisa', 1, 20.00, 0.00, 0.00, 40.00, 1, 1, 3);
+(10, 'Camisa', 1, 20.00, 0.00, 0.00, 40.00, 1, 1, 3),
+(26, 'Camisa', 1, 20.00, 0.00, 5.00, 21.00, 2, 1, NULL),
+(27, 'Tinta Negra', 1, 250.00, 0.00, 16.00, 290.00, 3, 1, NULL);
 
 --
 -- Disparadores `detallepedido`
@@ -594,15 +733,29 @@ INSERT INTO `detallepedido` (`id_detalle`, `producto_solicitado`, `cantidad`, `p
 DELIMITER $$
 CREATE TRIGGER `tr_detallepedido_after_delete` AFTER DELETE ON `detallepedido` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 1;
-    SET v_usuario_accion = IFNULL(@usuario_id, 1); -- MODIFICADO
+    SET v_usuario_accion = IFNULL(@usuario_id, 1);
+    
     INSERT INTO detallepedido_aud (
-        id_detalle, accion, fecha_accion, usuario_accion, json_antes 
+        id_detalle, 
+        accion, 
+        fecha_accion, 
+        usuario_accion, 
+        json_antes
     ) VALUES (
-        OLD.id_detalle, 'DELETE', NOW(), v_usuario_accion,
+        OLD.id_detalle, 
+        'DELETE', 
+        NOW(), 
+        v_usuario_accion,
         JSON_OBJECT(
-            'id_detalle', OLD.id_detalle, 'producto_solicitado', OLD.producto_solicitado, 'cantidad', OLD.cantidad,
-            'precio_unitario', OLD.precio_unitario, 'descuento', OLD.descuento, 'impuesto', OLD.impuesto,
-            'total_linea', OLD.total_linea, 'id_pedido', OLD.id_pedido, 'id_producto', OLD.id_producto,
+            'id_detalle', OLD.id_detalle, 
+            'producto_solicitado', OLD.producto_solicitado, 
+            'cantidad', OLD.cantidad,
+            'precio_unitario', OLD.precio_unitario, 
+            'descuento', OLD.descuento, 
+            'impuesto', OLD.impuesto,
+            'total_linea', OLD.total_linea, 
+            'id_pedido', OLD.id_pedido, 
+            'id_producto', OLD.id_producto,
             'id_movimiento', OLD.id_movimiento
         )
     );
@@ -612,15 +765,29 @@ DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `tr_detallepedido_after_insert` AFTER INSERT ON `detallepedido` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 1;
-    SET v_usuario_accion = IFNULL(@usuario_id, 1); -- MODIFICADO
+    SET v_usuario_accion = IFNULL(@usuario_id, 1);
+    
     INSERT INTO detallepedido_aud (
-        id_detalle, accion, fecha_accion, usuario_accion, json_despues 
+        id_detalle, 
+        accion, 
+        fecha_accion, 
+        usuario_accion, 
+        json_despues
     ) VALUES (
-        NEW.id_detalle, 'INSERT', NOW(), v_usuario_accion,
+        NEW.id_detalle, 
+        'INSERT', 
+        NOW(), 
+        v_usuario_accion,
         JSON_OBJECT(
-            'id_detalle', NEW.id_detalle, 'producto_solicitado', NEW.producto_solicitado, 'cantidad', NEW.cantidad,
-            'precio_unitario', NEW.precio_unitario, 'descuento', NEW.descuento, 'impuesto', NEW.impuesto,
-            'total_linea', NEW.total_linea, 'id_pedido', NEW.id_pedido, 'id_producto', NEW.id_producto,
+            'id_detalle', NEW.id_detalle, 
+            'producto_solicitado', NEW.producto_solicitado, 
+            'cantidad', NEW.cantidad,
+            'precio_unitario', NEW.precio_unitario, 
+            'descuento', NEW.descuento, 
+            'impuesto', NEW.impuesto,
+            'total_linea', NEW.total_linea, 
+            'id_pedido', NEW.id_pedido, 
+            'id_producto', NEW.id_producto,
             'id_movimiento', NEW.id_movimiento
         )
     );
@@ -630,31 +797,45 @@ DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `tr_detallepedido_after_update` AFTER UPDATE ON `detallepedido` FOR EACH ROW BEGIN
     DECLARE v_usuario_accion INT DEFAULT 1;
-    SET v_usuario_accion = IFNULL(@usuario_id, 1); -- MODIFICADO
+    SET v_usuario_accion = IFNULL(@usuario_id, 1);
+    
     INSERT INTO detallepedido_aud (
-        id_detalle, accion, fecha_accion, usuario_accion, json_antes, json_despues
+        id_detalle, 
+        accion, 
+        fecha_accion, 
+        usuario_accion, 
+        json_antes, 
+        json_despues
     ) VALUES (
-        OLD.id_detalle, 'UPDATE', NOW(), v_usuario_accion,
+        OLD.id_detalle, 
+        'UPDATE', 
+        NOW(), 
+        v_usuario_accion,
         JSON_OBJECT(
-            'id_detalle', OLD.id_detalle, 'producto_solicitado', OLD.producto_solicitado, 'cantidad', OLD.cantidad,
-            'precio_unitario', OLD.precio_unitario, 'descuento', OLD.descuento, 'impuesto', OLD.impuesto,
-            'total_linea', OLD.total_linea, 'id_pedido', OLD.id_pedido, 'id_producto', OLD.id_producto,
+            'id_detalle', OLD.id_detalle, 
+            'producto_solicitado', OLD.producto_solicitado, 
+            'cantidad', OLD.cantidad,
+            'precio_unitario', OLD.precio_unitario, 
+            'descuento', OLD.descuento, 
+            'impuesto', OLD.impuesto,
+            'total_linea', OLD.total_linea, 
+            'id_pedido', OLD.id_pedido, 
+            'id_producto', OLD.id_producto,
             'id_movimiento', OLD.id_movimiento
         ),
         JSON_OBJECT(
-            'id_detalle', NEW.id_detalle, 'producto_solicitado', NEW.producto_solicitado, 'cantidad', NEW.cantidad,
-            'precio_unitario', NEW.precio_unitario, 'descuento', NEW.descuento, 'impuesto', NEW.impuesto,
-            'total_linea', NEW.total_linea, 'id_pedido', NEW.id_pedido, 'id_producto', NEW.id_producto,
+            'id_detalle', NEW.id_detalle, 
+            'producto_solicitado', NEW.producto_solicitado, 
+            'cantidad', NEW.cantidad,
+            'precio_unitario', NEW.precio_unitario, 
+            'descuento', NEW.descuento, 
+            'impuesto', NEW.impuesto,
+            'total_linea', NEW.total_linea, 
+            'id_pedido', NEW.id_pedido, 
+            'id_producto', NEW.id_producto,
             'id_movimiento', NEW.id_movimiento
         )
     );
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trg_detallepedido_delete` AFTER DELETE ON `detallepedido` FOR EACH ROW BEGIN
-    INSERT INTO detallepedido_aud (id_detalle, id_pedido, id_producto, accion, usuario_accion)
-    VALUES (OLD.id_detalle, OLD.id_pedido, OLD.id_producto, 'DELETE', 1);
 END
 $$
 DELIMITER ;
@@ -665,18 +846,23 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `detallepedido_aud`
 --
 
-CREATE TABLE IF NOT EXISTS `detallepedido_aud` (
-  `id_aud` int(11) NOT NULL AUTO_INCREMENT,
-  `id_detalle` int(11) DEFAULT NULL,
-  `id_pedido` int(11) DEFAULT NULL,
-  `id_producto` int(11) DEFAULT NULL,
-  `cantidad` int(11) DEFAULT NULL,
-  `fecha_accion` datetime DEFAULT current_timestamp(),
-  `accion` enum('INSERT','UPDATE','DELETE') DEFAULT NULL,
-  `usuario_accion` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id_aud`),
-  KEY `fk_aud_usuario_accion_detallepedido` (`usuario_accion`)
+CREATE TABLE `detallepedido_aud` (
+  `id_aud` int(11) NOT NULL,
+  `id_detalle` int(11) NOT NULL,
+  `accion` enum('INSERT','UPDATE','DELETE') NOT NULL,
+  `fecha_accion` datetime NOT NULL DEFAULT current_timestamp(),
+  `usuario_accion` int(11) NOT NULL DEFAULT 1,
+  `json_antes` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`json_antes`)),
+  `json_despues` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`json_despues`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `detallepedido_aud`
+--
+
+INSERT INTO `detallepedido_aud` (`id_aud`, `id_detalle`, `accion`, `fecha_accion`, `usuario_accion`, `json_antes`, `json_despues`) VALUES
+(1, 26, 'INSERT', '2025-10-14 11:11:38', 1, NULL, '{\"id_detalle\": 26, \"producto_solicitado\": \"Camisa\", \"cantidad\": 1, \"precio_unitario\": 20.00, \"descuento\": 0.00, \"impuesto\": 5.00, \"total_linea\": 21.00, \"id_pedido\": 2, \"id_producto\": 1, \"id_movimiento\": null}'),
+(2, 27, 'INSERT', '2025-10-14 11:15:26', 1, NULL, '{\"id_detalle\": 27, \"producto_solicitado\": \"Tinta Negra\", \"cantidad\": 1, \"precio_unitario\": 250.00, \"descuento\": 0.00, \"impuesto\": 16.00, \"total_linea\": 290.00, \"id_pedido\": 3, \"id_producto\": 1, \"id_movimiento\": null}');
 
 -- --------------------------------------------------------
 
@@ -684,19 +870,16 @@ CREATE TABLE IF NOT EXISTS `detallepedido_aud` (
 -- Estructura de tabla para la tabla `movimientoinventario`
 --
 
-CREATE TABLE IF NOT EXISTS `movimientoinventario` (
-  `id_movimiento` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `movimientoinventario` (
+  `id_movimiento` int(11) NOT NULL,
   `tipo_movimiento` enum('ENTRADA','SALIDA','AJUSTE') NOT NULL,
   `origen` enum('PEDIDO','COMPRA','AJUSTE','TRANSFERENCIA') NOT NULL,
   `id_origen` int(11) DEFAULT NULL,
   `fecha_movimiento` date DEFAULT NULL,
   `cantidad` int(11) NOT NULL,
   `id_usuario` int(11) DEFAULT NULL,
-  `id_producto` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id_movimiento`),
-  KEY `fk_movimiento_usuario` (`id_usuario`),
-  KEY `fk_movimiento_producto` (`id_producto`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id_producto` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `movimientoinventario`
@@ -705,7 +888,22 @@ CREATE TABLE IF NOT EXISTS `movimientoinventario` (
 INSERT INTO `movimientoinventario` (`id_movimiento`, `tipo_movimiento`, `origen`, `id_origen`, `fecha_movimiento`, `cantidad`, `id_usuario`, `id_producto`) VALUES
 (1, 'ENTRADA', 'PEDIDO', NULL, '2025-08-09', 10, 1, 1),
 (2, 'ENTRADA', 'PEDIDO', NULL, '2025-09-27', 2, 1, 1),
-(3, 'ENTRADA', 'PEDIDO', NULL, '2025-09-27', 2, 1, 1);
+(3, 'ENTRADA', 'PEDIDO', NULL, '2025-09-27', 2, 1, 1),
+(4, 'SALIDA', 'PEDIDO', 1, '2025-10-13', 2, 1, 1),
+(5, 'SALIDA', 'PEDIDO', 2, '2025-10-13', 2, 1, 1),
+(6, 'SALIDA', 'PEDIDO', 2, '2025-10-13', 2, 1, 1),
+(7, 'SALIDA', 'PEDIDO', 2, '2025-10-13', 2, 1, 1),
+(8, 'SALIDA', 'PEDIDO', 2, '2025-10-13', 2, 1, 1),
+(9, 'SALIDA', 'PEDIDO', 2, '2025-10-13', 2, 1, 1),
+(10, 'SALIDA', 'PEDIDO', 2, '2025-10-13', 2, 1, 1),
+(11, 'SALIDA', 'PEDIDO', 2, '2025-10-13', 2, 1, 1),
+(12, 'SALIDA', 'PEDIDO', 2, '2025-10-13', 2, 1, 1),
+(13, 'SALIDA', 'PEDIDO', 2, '2025-10-13', 2, 1, 1),
+(14, 'SALIDA', 'PEDIDO', 2, '2025-10-14', 2, 1, 1),
+(15, 'SALIDA', 'PEDIDO', 2, '2025-10-14', 2, 1, 1),
+(16, 'SALIDA', 'PEDIDO', 2, '2025-10-14', 2, 1, 1),
+(17, 'SALIDA', 'PEDIDO', 2, '2025-10-14', 2, 1, 1),
+(18, 'SALIDA', 'PEDIDO', 2, '2025-10-14', 1, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -713,35 +911,38 @@ INSERT INTO `movimientoinventario` (`id_movimiento`, `tipo_movimiento`, `origen`
 -- Estructura de tabla para la tabla `pedido`
 --
 
-CREATE TABLE IF NOT EXISTS `pedido` (
-  `id_pedido` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `pedido` (
+  `id_pedido` int(11) NOT NULL,
   `numero_pedido` varchar(50) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `fecha_pedido` date DEFAULT NULL,
   `fecha_compromiso` date DEFAULT NULL,
   `observaciones` text DEFAULT NULL,
   `fecha_entrega` date DEFAULT NULL,
-  `id_estado` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id_pedido`),
-  UNIQUE KEY `numero_pedido` (`numero_pedido`),
-  KEY `fk_pedido_usuario` (`id_usuario`),
-  KEY `fk_pedido_estado` (`id_estado`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id_estado` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `pedido`
 --
 
 INSERT INTO `pedido` (`id_pedido`, `numero_pedido`, `id_usuario`, `fecha_pedido`, `fecha_compromiso`, `observaciones`, `fecha_entrega`, `id_estado`) VALUES
-(1, '', 1, '0000-00-00', NULL, NULL, '0000-00-00', 1);
+(1, '', 1, '0000-00-00', NULL, NULL, '0000-00-00', 1),
+(2, 'PED-002', 1, '2025-10-14', '2025-12-31', 'Pedido de prueba desde Postman2', '2025-10-28', 3),
+(3, 'PED-001', 1, '2025-10-13', '2025-10-25', 'Pedido de prueba desde Postman', NULL, 1),
+(4, 'PED-003', 1, '2025-10-13', '2025-10-25', 'Pedido de prueba desde Postman', NULL, 1),
+(6, 'PED-004', 1, '2025-10-13', '2025-10-30', 'Pedido urgente para cliente VIP', NULL, 1),
+(7, 'PED-005', 1, '2025-10-13', '2025-10-30', 'Pedido urgente para cliente VIP', NULL, 1),
+(10, 'PED-006', 1, '2025-10-21', '2025-12-31', 'Pedido de prueba desde Postman', NULL, 1),
+(11, 'PED-007', 1, '2025-10-21', '2025-12-31', 'Pedido de prueba desde Postman', NULL, 1);
 
 --
 -- Disparadores `pedido`
 --
 DELIMITER $$
 CREATE TRIGGER `tr_pedido_after_delete` AFTER DELETE ON `pedido` FOR EACH ROW BEGIN
-    DECLARE v_usuario_accion INT DEFAULT 0;
-    SET v_usuario_accion = IFNULL(@usuario_id, 0); 
+    DECLARE v_usuario_accion INT DEFAULT 1; -- CORREGIDO: default 1
+    SET v_usuario_accion = IFNULL(@usuario_id, 1); 
     INSERT INTO pedido_aud (
         id_pedido, accion, fecha_accion, usuario_accion, json_antes 
     )
@@ -756,7 +957,6 @@ CREATE TRIGGER `tr_pedido_after_delete` AFTER DELETE ON `pedido` FOR EACH ROW BE
             'fecha_pedido', OLD.fecha_pedido,
             'fecha_compromiso', OLD.fecha_compromiso, 
             'observaciones', OLD.observaciones, 
-            -- Campo de total ELIMINADO
             'id_estado', OLD.id_estado, 
             'id_usuario', OLD.id_usuario
         )
@@ -766,8 +966,8 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `tr_pedido_after_insert` AFTER INSERT ON `pedido` FOR EACH ROW BEGIN
-    DECLARE v_usuario_accion INT DEFAULT 0;
-    SET v_usuario_accion = IFNULL(@usuario_id, 0); 
+    DECLARE v_usuario_accion INT DEFAULT 1; -- CORREGIDO: default 1
+    SET v_usuario_accion = IFNULL(@usuario_id, 1); 
     INSERT INTO pedido_aud (
         id_pedido, accion, fecha_accion, usuario_accion, json_despues 
     )
@@ -782,7 +982,6 @@ CREATE TRIGGER `tr_pedido_after_insert` AFTER INSERT ON `pedido` FOR EACH ROW BE
             'fecha_pedido', NEW.fecha_pedido,
             'fecha_compromiso', NEW.fecha_compromiso, 
             'observaciones', NEW.observaciones, 
-            -- Campo de total ELIMINADO
             'id_estado', NEW.id_estado, 
             'id_usuario', NEW.id_usuario
         )
@@ -792,8 +991,8 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `tr_pedido_after_update` AFTER UPDATE ON `pedido` FOR EACH ROW BEGIN
-    DECLARE v_usuario_accion INT DEFAULT 0;
-    SET v_usuario_accion = IFNULL(@usuario_id, 0); 
+    DECLARE v_usuario_accion INT DEFAULT 1; -- CORREGIDO: default 1
+    SET v_usuario_accion = IFNULL(@usuario_id, 1); 
     INSERT INTO pedido_aud (
         id_pedido, accion, fecha_accion, usuario_accion, json_antes, json_despues
     )
@@ -808,7 +1007,6 @@ CREATE TRIGGER `tr_pedido_after_update` AFTER UPDATE ON `pedido` FOR EACH ROW BE
             'fecha_pedido', OLD.fecha_pedido,
             'fecha_compromiso', OLD.fecha_compromiso, 
             'observaciones', OLD.observaciones, 
-            -- Campo de total ELIMINADO
             'id_estado', OLD.id_estado, 
             'id_usuario', OLD.id_usuario
         ),
@@ -818,18 +1016,10 @@ CREATE TRIGGER `tr_pedido_after_update` AFTER UPDATE ON `pedido` FOR EACH ROW BE
             'fecha_pedido', NEW.fecha_pedido,
             'fecha_compromiso', NEW.fecha_compromiso, 
             'observaciones', NEW.observaciones, 
-            -- Campo de total ELIMINADO
             'id_estado', NEW.id_estado, 
             'id_usuario', NEW.id_usuario
         )
     );
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trg_pedido_delete` AFTER DELETE ON `pedido` FOR EACH ROW BEGIN
-    INSERT INTO pedido_aud (id_pedido, id_usuario, id_estado, fecha_pedido, accion, usuario_accion)
-    VALUES (OLD.id_pedido, OLD.id_usuario, OLD.id_estado, OLD.fecha_pedido, 'DELETE', 1);
 END
 $$
 DELIMITER ;
@@ -840,8 +1030,8 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `pedido_aud`
 --
 
-CREATE TABLE IF NOT EXISTS `pedido_aud` (
-  `id_aud` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `pedido_aud` (
+  `id_aud` int(11) NOT NULL,
   `fecha_accion` datetime NOT NULL,
   `usuario_accion` int(11) NOT NULL,
   `json_antes` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`json_antes`)),
@@ -849,10 +1039,23 @@ CREATE TABLE IF NOT EXISTS `pedido_aud` (
   `id_pedido` int(11) DEFAULT NULL,
   `id_estado` int(11) DEFAULT NULL,
   `fecha_pedido` datetime DEFAULT NULL,
-  `accion` enum('INSERT','UPDATE','DELETE') DEFAULT NULL,
-  PRIMARY KEY (`id_aud`),
-  KEY `fk_aud_usuario_accion_pedido` (`usuario_accion`)
+  `accion` enum('INSERT','UPDATE','DELETE') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `pedido_aud`
+--
+
+INSERT INTO `pedido_aud` (`id_aud`, `fecha_accion`, `usuario_accion`, `json_antes`, `json_despues`, `id_pedido`, `id_estado`, `fecha_pedido`, `accion`) VALUES
+(1, '2025-10-13 22:00:40', 1, NULL, '{\"id_pedido\": 2, \"numero_pedido\": \"PED-002\", \"fecha_pedido\": \"2025-10-13\", \"fecha_compromiso\": \"2025-12-31\", \"observaciones\": \"Pedido de prueba desde Postman2\", \"id_estado\": 1, \"id_usuario\": 1}', 2, NULL, NULL, 'INSERT'),
+(2, '2025-10-13 22:06:26', 1, NULL, '{\"id_pedido\": 3, \"numero_pedido\": \"PED-001\", \"fecha_pedido\": \"2025-10-13\", \"fecha_compromiso\": \"2025-10-25\", \"observaciones\": \"Pedido de prueba desde Postman\", \"id_estado\": 1, \"id_usuario\": 1}', 3, NULL, NULL, 'INSERT'),
+(3, '2025-10-13 22:11:18', 1, NULL, '{\"id_pedido\": 4, \"numero_pedido\": \"PED-003\", \"fecha_pedido\": \"2025-10-13\", \"fecha_compromiso\": \"2025-10-25\", \"observaciones\": \"Pedido de prueba desde Postman\", \"id_estado\": 1, \"id_usuario\": 1}', 4, NULL, NULL, 'INSERT'),
+(4, '2025-10-13 22:27:41', 1, NULL, '{\"id_pedido\": 6, \"numero_pedido\": \"PED-004\", \"fecha_pedido\": \"2025-10-13\", \"fecha_compromiso\": \"2025-10-30\", \"observaciones\": \"Pedido urgente para cliente VIP\", \"id_estado\": 1, \"id_usuario\": 1}', 6, NULL, NULL, 'INSERT'),
+(5, '2025-10-13 22:41:26', 1, NULL, '{\"id_pedido\": 7, \"numero_pedido\": \"PED-005\", \"fecha_pedido\": \"2025-10-13\", \"fecha_compromiso\": \"2025-10-30\", \"observaciones\": \"Pedido urgente para cliente VIP\", \"id_estado\": 1, \"id_usuario\": 1}', 7, NULL, NULL, 'INSERT'),
+(6, '2025-10-14 11:02:07', 1, '{\"id_pedido\": 2, \"numero_pedido\": \"PED-002\", \"fecha_pedido\": \"2025-10-13\", \"fecha_compromiso\": \"2025-12-31\", \"observaciones\": \"Pedido de prueba desde Postman2\", \"id_estado\": 1, \"id_usuario\": 1}', '{\"id_pedido\": 2, \"numero_pedido\": \"PED-002\", \"fecha_pedido\": \"0000-00-00\", \"fecha_compromiso\": \"2025-12-31\", \"observaciones\": \"Pedido de prueba desde Postman2\", \"id_estado\": 2, \"id_usuario\": 1}', 2, NULL, NULL, 'UPDATE'),
+(7, '2025-10-14 17:54:49', 1, '{\"id_pedido\": 2, \"numero_pedido\": \"PED-002\", \"fecha_pedido\": \"0000-00-00\", \"fecha_compromiso\": \"2025-12-31\", \"observaciones\": \"Pedido de prueba desde Postman2\", \"id_estado\": 2, \"id_usuario\": 1}', '{\"id_pedido\": 2, \"numero_pedido\": \"PED-002\", \"fecha_pedido\": \"2025-10-14\", \"fecha_compromiso\": \"2025-12-31\", \"observaciones\": \"Pedido de prueba desde Postman2\", \"id_estado\": 3, \"id_usuario\": 1}', 2, NULL, NULL, 'UPDATE'),
+(8, '2025-10-21 20:07:00', 1, NULL, '{\"id_pedido\": 10, \"numero_pedido\": \"PED-006\", \"fecha_pedido\": \"2025-10-21\", \"fecha_compromiso\": \"2025-12-31\", \"observaciones\": \"Pedido de prueba desde Postman\", \"id_estado\": 1, \"id_usuario\": 1}', 10, NULL, NULL, 'INSERT'),
+(9, '2025-10-21 20:46:40', 1, NULL, '{\"id_pedido\": 11, \"numero_pedido\": \"PED-007\", \"fecha_pedido\": \"2025-10-21\", \"fecha_compromiso\": \"2025-12-31\", \"observaciones\": \"Pedido de prueba desde Postman\", \"id_estado\": 1, \"id_usuario\": 1}', 11, NULL, NULL, 'INSERT');
 
 -- --------------------------------------------------------
 
@@ -860,8 +1063,8 @@ CREATE TABLE IF NOT EXISTS `pedido_aud` (
 -- Estructura de tabla para la tabla `producto`
 --
 
-CREATE TABLE IF NOT EXISTS `producto` (
-  `id_producto` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `producto` (
+  `id_producto` int(11) NOT NULL,
   `sku` varchar(50) NOT NULL,
   `nombre_producto` varchar(100) DEFAULT NULL,
   `activo` tinyint(1) DEFAULT 1,
@@ -871,12 +1074,8 @@ CREATE TABLE IF NOT EXISTS `producto` (
   `stock_minimo` int(11) NOT NULL DEFAULT 3,
   `costo_unitario` decimal(12,2) DEFAULT 0.00,
   `id_proveedor` int(11) DEFAULT NULL,
-  `id_categoria` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id_producto`),
-  UNIQUE KEY `sku` (`sku`),
-  KEY `fk_producto_proveedor` (`id_proveedor`),
-  KEY `fk_producto_categoria` (`id_categoria`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id_categoria` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `producto`
@@ -890,8 +1089,8 @@ INSERT INTO `producto` (`id_producto`, `sku`, `nombre_producto`, `activo`, `desc
 --
 DELIMITER $$
 CREATE TRIGGER `tr_producto_after_delete` AFTER DELETE ON `producto` FOR EACH ROW BEGIN
-    DECLARE v_usuario_accion INT DEFAULT 1;
-    SET v_usuario_accion = IFNULL(@usuario_id, 1); -- MODIFICADO
+    DECLARE v_usuario_accion INT DEFAULT 1; -- CORREGIDO: default 1
+    SET v_usuario_accion = IFNULL(@usuario_id, 1);
     INSERT INTO producto_aud (
         id_producto, accion, fecha_accion, usuario_accion, json_antes 
     ) VALUES (
@@ -908,8 +1107,8 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `tr_producto_after_insert` AFTER INSERT ON `producto` FOR EACH ROW BEGIN
-    DECLARE v_usuario_accion INT DEFAULT 1;
-    SET v_usuario_accion = IFNULL(@usuario_id, 1); -- MODIFICADO
+    DECLARE v_usuario_accion INT DEFAULT 1; -- CORREGIDO: default 1
+    SET v_usuario_accion = IFNULL(@usuario_id, 1);
     INSERT INTO producto_aud (
         id_producto, accion, fecha_accion, usuario_accion, json_despues 
     ) VALUES (
@@ -926,8 +1125,8 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `tr_producto_after_update` AFTER UPDATE ON `producto` FOR EACH ROW BEGIN
-    DECLARE v_usuario_accion INT DEFAULT 1;
-    SET v_usuario_accion = IFNULL(@usuario_id, 1); -- MODIFICADO
+    DECLARE v_usuario_accion INT DEFAULT 1; -- CORREGIDO: default 1
+    SET v_usuario_accion = IFNULL(@usuario_id, 1);
     INSERT INTO producto_aud (
         id_producto, accion, fecha_accion, usuario_accion, json_antes, json_despues
     ) VALUES (
@@ -948,13 +1147,6 @@ CREATE TRIGGER `tr_producto_after_update` AFTER UPDATE ON `producto` FOR EACH RO
 END
 $$
 DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trg_producto_delete` AFTER DELETE ON `producto` FOR EACH ROW BEGIN
-    INSERT INTO producto_aud (id_producto, descripcion_producto, id_proveedor, id_categoria, stock, accion, usuario_accion)
-    VALUES (OLD.id_producto, OLD.descripcion, OLD.id_proveedor, OLD.id_categoria, OLD.stock, 'DELETE', 1);
-END
-$$
-DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -962,8 +1154,8 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `producto_aud`
 --
 
-CREATE TABLE IF NOT EXISTS `producto_aud` (
-  `id_aud` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `producto_aud` (
+  `id_aud` int(11) NOT NULL,
   `fecha_accion` datetime NOT NULL,
   `usuario_accion` int(11) NOT NULL,
   `json_antes` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`json_antes`)),
@@ -973,10 +1165,8 @@ CREATE TABLE IF NOT EXISTS `producto_aud` (
   `id_proveedor` int(11) DEFAULT NULL,
   `id_categoria` int(11) DEFAULT NULL,
   `stock` int(11) DEFAULT NULL,
-  `accion` enum('INSERT','UPDATE','DELETE') DEFAULT NULL,
-  PRIMARY KEY (`id_aud`),
-  KEY `fk_aud_usuario_accion_producto` (`usuario_accion`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `accion` enum('INSERT','UPDATE','DELETE') DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `producto_aud`
@@ -991,13 +1181,12 @@ INSERT INTO `producto_aud` (`id_aud`, `fecha_accion`, `usuario_accion`, `json_an
 -- Estructura de tabla para la tabla `proveedor`
 --
 
-CREATE TABLE IF NOT EXISTS `proveedor` (
-  `id_proveedor` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `proveedor` (
+  `id_proveedor` int(11) NOT NULL,
   `descripcion_proveedor` varchar(100) DEFAULT NULL,
   `forma_contacto` varchar(100) DEFAULT NULL,
-  `direccion` varchar(150) DEFAULT NULL,
-  PRIMARY KEY (`id_proveedor`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `direccion` varchar(150) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `proveedor`
@@ -1012,7 +1201,7 @@ INSERT INTO `proveedor` (`id_proveedor`, `descripcion_proveedor`, `forma_contact
 DELIMITER $$
 CREATE TRIGGER `trg_proveedor_delete` AFTER DELETE ON `proveedor` FOR EACH ROW BEGIN
     INSERT INTO proveedor_aud (id_proveedor, descripcion_proveedor, forma_contacto, direccion, accion, usuario_accion)
-    VALUES (OLD.id_proveedor, OLD.descripcion_proveedor, OLD.forma_contacto, OLD.direccion, 'DELETE', 1);
+    VALUES (OLD.id_proveedor, OLD.descripcion_proveedor, OLD.forma_contacto, OLD.direccion, 'DELETE', 1); -- CORREGIDO: default 1
 END
 $$
 DELIMITER ;
@@ -1023,16 +1212,15 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `proveedor_aud`
 --
 
-CREATE TABLE IF NOT EXISTS `proveedor_aud` (
-  `id_aud` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `proveedor_aud` (
+  `id_aud` int(11) NOT NULL,
   `id_proveedor` int(11) DEFAULT NULL,
   `descripcion_proveedor` varchar(100) DEFAULT NULL,
   `forma_contacto` varchar(100) DEFAULT NULL,
   `direccion` varchar(150) DEFAULT NULL,
   `fecha_accion` datetime DEFAULT current_timestamp(),
   `accion` enum('INSERT','UPDATE','DELETE') DEFAULT NULL,
-  `usuario_accion` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id_aud`)
+  `usuario_accion` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1041,16 +1229,14 @@ CREATE TABLE IF NOT EXISTS `proveedor_aud` (
 -- Estructura de tabla para la tabla `registroconsulta`
 --
 
-CREATE TABLE IF NOT EXISTS `registroconsulta` (
-  `id_consulta` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `registroconsulta` (
+  `id_consulta` int(11) NOT NULL,
   `tipo_consulta` varchar(50) DEFAULT NULL,
   `fecha_inicial` date DEFAULT NULL,
   `fecha_final` date DEFAULT NULL,
   `resultado_consulta` text DEFAULT NULL,
-  `id_usuario` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id_consulta`),
-  KEY `fk_registroconsulta_usuario` (`id_usuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id_usuario` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `registroconsulta`
@@ -1065,20 +1251,20 @@ INSERT INTO `registroconsulta` (`id_consulta`, `tipo_consulta`, `fecha_inicial`,
 -- Estructura de tabla para la tabla `rol`
 --
 
-CREATE TABLE IF NOT EXISTS `rol` (
-  `id_rol` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `rol` (
+  `id_rol` int(11) NOT NULL,
   `descripcion` varchar(100) NOT NULL,
-  `estado` varchar(20) NOT NULL,
-  PRIMARY KEY (`id_rol`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `estado` varchar(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `rol`
 --
 
 INSERT INTO `rol` (`id_rol`, `descripcion`, `estado`) VALUES
-(1, 'Administrador', 'Activo'),
-(2, 'Usuario', 'Activo');
+(1, 'Gerente', 'Activo'),
+(2, 'Administrador', 'Activo'),
+(3, 'Cliente', 'Activo');
 
 -- --------------------------------------------------------
 
@@ -1086,8 +1272,8 @@ INSERT INTO `rol` (`id_rol`, `descripcion`, `estado`) VALUES
 -- Estructura de tabla para la tabla `usuario`
 --
 
-CREATE TABLE IF NOT EXISTS `usuario` (
-  `id_usuario` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `usuario` (
+  `id_usuario` int(11) NOT NULL,
   `nombre_usuario` varchar(100) NOT NULL,
   `correo` varchar(100) NOT NULL,
   `contrasena` varchar(255) NOT NULL,
@@ -1097,21 +1283,17 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   `telefono` varchar(20) DEFAULT NULL,
   `fecha_ingreso` date NOT NULL,
   `ultimo_acceso` datetime DEFAULT NULL,
-  `id_rol` int(11) NOT NULL,
-  PRIMARY KEY (`id_usuario`),
-  UNIQUE KEY `uk_usuario_correo` (`correo`),
-  KEY `fk_usuario_rol` (`id_rol`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id_rol` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
 INSERT INTO `usuario` (`id_usuario`, `nombre_usuario`, `correo`, `contrasena`, `password_updated_at`, `intentos_fallidos`, `bloqueado_hasta`, `telefono`, `fecha_ingreso`, `ultimo_acceso`, `id_rol`) VALUES
-(1, 'Patrick', 'pat@gmail.com', 'prueba', '2025-09-27 10:49:54', 0, NULL, '98989890', '2025-08-08', '2025-10-01 22:56:36', 1),
+(1, 'Patrick', 'pat@gmail.com', 'prueba', '2025-09-27 10:49:54', 0, NULL, '98989890', '2025-08-08', '2025-08-08 21:46:14', 1),
 (2, 'nuevo_usuario', 'nuevo@email.com', '123456', '2025-09-27 10:49:54', 0, NULL, '123456789', '2025-09-27', '2025-09-27 00:39:15', 1),
-(3, 'SISTEMA/NO LOGUEADO', 'sistema@tuempresa.com', 'N/A', NULL, 0, NULL, NULL, '0000-00-00', NULL, 1),
-(4, 'Juan Pérez', 'juan@email.com', '123456', '2025-10-01 22:57:15', 0, NULL, '987654321', '2025-10-01', '2025-10-01 23:32:14', 1);
+(3, 'SISTEMA/NO LOGUEADO', 'sistema@tuempresa.com', 'N/A', NULL, 0, NULL, NULL, '0000-00-00', NULL, 1);
 
 --
 -- Disparadores `usuario`
@@ -1119,7 +1301,7 @@ INSERT INTO `usuario` (`id_usuario`, `nombre_usuario`, `correo`, `contrasena`, `
 DELIMITER $$
 CREATE TRIGGER `trg_usuario_delete` AFTER DELETE ON `usuario` FOR EACH ROW BEGIN
     INSERT INTO usuario_aud (id_usuario, nombre, correo, id_rol, accion, usuario_accion)
-    VALUES (OLD.id_usuario, OLD.nombre_usuario, OLD.correo, OLD.id_rol, 'DELETE', 1);
+    VALUES (OLD.id_usuario, OLD.nombre_usuario, OLD.correo, OLD.id_rol, 'DELETE', 1); -- CORREGIDO: default 1
 END
 $$
 DELIMITER ;
@@ -1127,27 +1309,316 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `usuarios_eliminados`
+--
+
+CREATE TABLE `usuarios_eliminados` (
+  `id_eliminado` int(11) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `fecha_eliminacion` datetime DEFAULT current_timestamp(),
+  `eliminado_por` int(11) DEFAULT NULL COMMENT 'ID del admin que elimina',
+  `razon` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `usuario_aud`
 --
 
-CREATE TABLE IF NOT EXISTS `usuario_aud` (
-  `id_aud` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `usuario_aud` (
+  `id_aud` int(11) NOT NULL,
   `id_usuario` int(11) DEFAULT NULL,
   `nombre` varchar(100) DEFAULT NULL,
   `correo` varchar(100) DEFAULT NULL,
   `id_rol` int(11) DEFAULT NULL,
   `fecha_accion` datetime DEFAULT current_timestamp(),
   `accion` enum('INSERT','UPDATE','DELETE') DEFAULT NULL,
-  `usuario_accion` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id_aud`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `usuario_accion` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 
 --
--- Volcado de datos para la tabla `usuario_aud`
+-- Estructura de tabla para la tabla `venta`
 --
 
-INSERT INTO `usuario_aud` (`id_aud`, `id_usuario`, `nombre`, `correo`, `id_rol`, `fecha_accion`, `accion`, `usuario_accion`) VALUES
-(1, 5, 'Test User', 'test@email.com', 1, '2025-10-02 20:33:51', 'DELETE', 1);
+CREATE TABLE `venta` (
+  `id_venta` int(11) NOT NULL,
+  `id_pedido` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL COMMENT 'Usuario que finaliza la venta',
+  `fecha_venta` datetime DEFAULT current_timestamp(),
+  `monto_cobrado` decimal(12,2) NOT NULL,
+  `costo_total` decimal(12,2) NOT NULL,
+  `utilidad` decimal(12,2) GENERATED ALWAYS AS (`monto_cobrado` - `costo_total`) STORED,
+  `utilidad_pct` decimal(5,2) GENERATED ALWAYS AS (case when `costo_total` > 0 then (`monto_cobrado` - `costo_total`) / `costo_total` * 100 else 0 end) STORED,
+  `metodo_pago` varchar(50) NOT NULL,
+  `nota` text DEFAULT NULL,
+  `estado` enum('REGISTRADA','ANULADA') NOT NULL DEFAULT 'REGISTRADA'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `venta_aud`
+--
+
+CREATE TABLE `venta_aud` (
+  `id_venta_aud` int(11) NOT NULL,
+  `id_venta_original` int(11) NOT NULL,
+  `id_pedido_original` int(11) NOT NULL,
+  `fecha_venta_original` datetime NOT NULL,
+  `monto_cobrado_original` decimal(12,2) NOT NULL,
+  `estado_original` enum('REGISTRADA','ANULADA') NOT NULL,
+  `accion` enum('ELIMINADA','ANULADA') NOT NULL,
+  `usuario_admin` int(11) NOT NULL,
+  `motivo` varchar(255) DEFAULT NULL,
+  `fecha_accion` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `alerta_stock`
+--
+ALTER TABLE `alerta_stock`
+  ADD PRIMARY KEY (`id_alerta`),
+  ADD KEY `fk_alerta_producto` (`id_producto`);
+
+--
+-- Indices de la tabla `categoriaproducto`
+--
+ALTER TABLE `categoriaproducto`
+  ADD PRIMARY KEY (`id_categoria`),
+  ADD UNIQUE KEY `idx_categoria_descripcion` (`descripcion`);
+
+--
+-- Indices de la tabla `cat_estado_pedido`
+--
+ALTER TABLE `cat_estado_pedido`
+  ADD PRIMARY KEY (`id_estado`),
+  ADD UNIQUE KEY `codigo` (`codigo`);
+
+--
+-- Indices de la tabla `detallepedido`
+--
+ALTER TABLE `detallepedido`
+  ADD PRIMARY KEY (`id_detalle`),
+  ADD KEY `fk_detalle_pedido` (`id_pedido`),
+  ADD KEY `fk_detalle_producto` (`id_producto`),
+  ADD KEY `fk_detalle_movimiento` (`id_movimiento`);
+
+--
+-- Indices de la tabla `detallepedido_aud`
+--
+ALTER TABLE `detallepedido_aud`
+  ADD PRIMARY KEY (`id_aud`),
+  ADD KEY `fk_aud_detalle` (`id_detalle`),
+  ADD KEY `fk_aud_usuario_accion_detallepedido` (`usuario_accion`);
+
+--
+-- Indices de la tabla `movimientoinventario`
+--
+ALTER TABLE `movimientoinventario`
+  ADD PRIMARY KEY (`id_movimiento`),
+  ADD KEY `fk_movimiento_usuario` (`id_usuario`),
+  ADD KEY `fk_movimiento_producto` (`id_producto`);
+
+--
+-- Indices de la tabla `pedido`
+--
+ALTER TABLE `pedido`
+  ADD PRIMARY KEY (`id_pedido`),
+  ADD UNIQUE KEY `numero_pedido` (`numero_pedido`),
+  ADD KEY `fk_pedido_usuario` (`id_usuario`),
+  ADD KEY `fk_pedido_estado` (`id_estado`);
+
+--
+-- Indices de la tabla `pedido_aud`
+--
+ALTER TABLE `pedido_aud`
+  ADD PRIMARY KEY (`id_aud`),
+  ADD KEY `fk_aud_usuario_accion_pedido` (`usuario_accion`);
+
+--
+-- Indices de la tabla `producto`
+--
+ALTER TABLE `producto`
+  ADD PRIMARY KEY (`id_producto`),
+  ADD UNIQUE KEY `sku` (`sku`),
+  ADD KEY `fk_producto_proveedor` (`id_proveedor`),
+  ADD KEY `fk_producto_categoria` (`id_categoria`);
+
+--
+-- Indices de la tabla `producto_aud`
+--
+ALTER TABLE `producto_aud`
+  ADD PRIMARY KEY (`id_aud`),
+  ADD KEY `fk_aud_usuario_accion_producto` (`usuario_accion`);
+
+--
+-- Indices de la tabla `proveedor`
+--
+ALTER TABLE `proveedor`
+  ADD PRIMARY KEY (`id_proveedor`);
+
+--
+-- Indices de la tabla `proveedor_aud`
+--
+ALTER TABLE `proveedor_aud`
+  ADD PRIMARY KEY (`id_aud`),
+  ADD KEY `fk_aud_usuario_accion_proveedor` (`usuario_accion`);
+
+--
+-- Indices de la tabla `registroconsulta`
+--
+ALTER TABLE `registroconsulta`
+  ADD PRIMARY KEY (`id_consulta`),
+  ADD KEY `fk_registroconsulta_usuario` (`id_usuario`);
+
+--
+-- Indices de la tabla `rol`
+--
+ALTER TABLE `rol`
+  ADD PRIMARY KEY (`id_rol`);
+
+--
+-- Indices de la tabla `usuario`
+--
+ALTER TABLE `usuario`
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD UNIQUE KEY `uk_usuario_correo` (`correo`),
+  ADD KEY `fk_usuario_rol` (`id_rol`);
+
+--
+-- Indices de la tabla `usuarios_eliminados`
+--
+ALTER TABLE `usuarios_eliminados`
+  ADD PRIMARY KEY (`id_eliminado`);
+
+--
+-- Indices de la tabla `usuario_aud`
+--
+ALTER TABLE `usuario_aud`
+  ADD PRIMARY KEY (`id_aud`),
+  ADD KEY `fk_aud_usuario_accion_usuario` (`usuario_accion`);
+
+--
+-- Indices de la tabla `venta`
+--
+ALTER TABLE `venta`
+  ADD PRIMARY KEY (`id_venta`),
+  ADD UNIQUE KEY `id_pedido` (`id_pedido`),
+  ADD KEY `fk_venta_usuario` (`id_usuario`);
+
+--
+-- Indices de la tabla `venta_aud`
+--
+ALTER TABLE `venta_aud`
+  ADD PRIMARY KEY (`id_venta_aud`),
+  ADD KEY `fk_venta_aud_usuario` (`usuario_admin`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `alerta_stock`
+--
+ALTER TABLE `alerta_stock`
+  MODIFY `id_alerta` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `categoriaproducto`
+--
+ALTER TABLE `categoriaproducto`
+  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `cat_estado_pedido`
+--
+ALTER TABLE `cat_estado_pedido`
+  MODIFY `id_estado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT de la tabla `detallepedido`
+--
+ALTER TABLE `detallepedido`
+  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+
+--
+-- AUTO_INCREMENT de la tabla `detallepedido_aud`
+--
+ALTER TABLE `detallepedido_aud`
+  MODIFY `id_aud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `movimientoinventario`
+--
+ALTER TABLE `movimientoinventario`
+  MODIFY `id_movimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT de la tabla `pedido`
+--
+ALTER TABLE `pedido`
+  MODIFY `id_pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT de la tabla `pedido_aud`
+--
+ALTER TABLE `pedido_aud`
+  MODIFY `id_aud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT de la tabla `producto`
+--
+ALTER TABLE `producto`
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `producto_aud`
+--
+ALTER TABLE `producto_aud`
+  MODIFY `id_aud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `proveedor`
+--
+ALTER TABLE `proveedor`
+  MODIFY `id_proveedor` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `proveedor_aud`
+--
+ALTER TABLE `proveedor_aud`
+  MODIFY `id_aud` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `registroconsulta`
+--
+ALTER TABLE `registroconsulta`
+  MODIFY `id_consulta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `rol`
+--
+ALTER TABLE `rol`
+  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `usuario`
+--
+ALTER TABLE `usuario`
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `usuario_aud`
+--
+ALTER TABLE `usuario_aud`
+  MODIFY `id_aud` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Restricciones para tablas volcadas
@@ -1207,6 +1678,12 @@ ALTER TABLE `producto_aud`
   ADD CONSTRAINT `fk_aud_usuario_accion_producto` FOREIGN KEY (`usuario_accion`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE;
 
 --
+-- Filtros para la tabla `proveedor_aud`
+--
+ALTER TABLE `proveedor_aud`
+  ADD CONSTRAINT `fk_aud_usuario_accion_proveedor` FOREIGN KEY (`usuario_accion`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE;
+
+--
 -- Filtros para la tabla `registroconsulta`
 --
 ALTER TABLE `registroconsulta`
@@ -1218,15 +1695,21 @@ ALTER TABLE `registroconsulta`
 ALTER TABLE `usuario`
   ADD CONSTRAINT `fk_usuario_rol` FOREIGN KEY (`id_rol`) REFERENCES `rol` (`id_rol`) ON UPDATE CASCADE;
 
+--
+-- Filtros para la tabla `usuario_aud`
+--
+ALTER TABLE `usuario_aud`
+  ADD CONSTRAINT `fk_aud_usuario_accion_usuario` FOREIGN KEY (`usuario_accion`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE;
+
 DELIMITER $$
 --
 -- Eventos
 --
-CREATE DEFINER=`root`@`localhost` EVENT `evt_alerta_stock_minimo` ON SCHEDULE EVERY 1 DAY STARTS '2025-09-28 00:00:00' ON COMPLETION NOT PRESERVE ENABLE DO CALL sp_alerta_stock_minimo()$$
-
 CREATE DEFINER=`root`@`localhost` EVENT `evt_purgado_auditoria` ON SCHEDULE EVERY 1 MONTH STARTS '2025-10-01 01:00:00' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
     CALL sp_purgar_auditoria();
 END$$
+
+CREATE DEFINER=`root`@`localhost` EVENT `evt_alerta_stock_minimo` ON SCHEDULE EVERY 1 DAY STARTS '2025-09-28 00:00:00' ON COMPLETION NOT PRESERVE ENABLE DO CALL sp_alerta_stock_minimo()$$
 
 DELIMITER ;
 COMMIT;

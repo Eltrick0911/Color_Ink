@@ -158,6 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             sessionStorage.setItem('firebase_id_token', idToken);
+            if (data?.data?.token) {
+                sessionStorage.setItem('access_token', data.data.token);
+                console.log('✅ JWT del backend guardado');
+            } else {
+                console.log('ℹ️ Backend no devolvió JWT propio, se usará solo el ID Token de Firebase');
+            }
             sessionStorage.setItem('user', JSON.stringify(data.data.user));
             
             console.log('✅ Datos guardados en sessionStorage:');

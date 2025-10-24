@@ -1,1 +1,660 @@
-
+[18-Feb-2025 10:15:08 America/Tegucigalpa] Esto es una prueba de error...
+[20-Feb-2025 08:17:08 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:2
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(25): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 2
+[20-Feb-2025 08:21:42 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:2
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(25): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 2
+[20-Feb-2025 08:24:12 America/Tegucigalpa] PHP Parse error:  Unclosed '{' on line 9 in C:\xampp\htdocs\api-rest-composer-0800\src\Config\Security.php on line 103
+[20-Feb-2025 08:27:01 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(25): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:28:22 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:28:23 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:13 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:14 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:14 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:14 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:15 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:15 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:15 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:30:15 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:32:13 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:42 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:43 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:43 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:43 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:43 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:44 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:53 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:53 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:53 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:53 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:54 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[20-Feb-2025 08:33:54 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "Security" not found in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php:4
+Stack trace:
+#0 C:\xampp\htdocs\api-rest-composer-0800\public\index.php(26): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 4
+[27-Feb-2025 08:35:26 America/Tegucigalpa] PHP Warning:  Undefined variable $AqfGgkqFeoj7qVLdTShX8e in C:\xampp\htdocs\api-rest-composer-0800\src\Routes\auth.php on line 7
+[27-Feb-2025 08:35:26 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:37:02 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:37:21 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:39:31 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:40:05 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:42:19 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:43:44 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:43:45 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:43:45 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:43:45 America/Tegucigalpa] La contraseña es incorrecta
+[27-Feb-2025 08:53:02 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:02 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:02 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:02 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:03 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:03 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:04 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:04 America/Tegucigalpa] Conexión exitosa
+[27-Feb-2025 08:53:04 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:43:24 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: SQLSTATE[HY000] [1049] Unknown database 'colorink_bd' in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('mysql:host=127....', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#4 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#5 {main}
+[12-Oct-2025 09:43:24 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#2 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#3 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#4 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[12-Oct-2025 09:43:46 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: SQLSTATE[HY000] [1049] Unknown database 'colorink_bd' in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('mysql:host=127....', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#4 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#5 {main}
+[12-Oct-2025 09:43:46 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#2 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#3 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#4 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[12-Oct-2025 09:43:48 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: SQLSTATE[HY000] [1049] Unknown database 'colorink_bd' in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('mysql:host=127....', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#4 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#5 {main}
+[12-Oct-2025 09:43:48 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#2 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#3 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#4 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[12-Oct-2025 09:44:10 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: SQLSTATE[HY000] [1049] Unknown database 'colorink_bd' in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('mysql:host=127....', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#4 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#5 {main}
+[12-Oct-2025 09:44:10 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Models\PedidosModel.php(16): App\DB\connectionDB::getConnection()
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(16): App\Models\PedidosModel->__construct()
+#2 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(10): App\Controllers\PedidosController->__construct()
+#3 C:\xampp\htdocs\Color_Ink\public\index.php(26): require('C:\\xampp\\htdocs...')
+#4 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[12-Oct-2025 09:46:48 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:46:48 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: , SubAction: , SubID: 
+[12-Oct-2025 09:46:48 America/Tegucigalpa] PedidosRoute - Input: []
+[12-Oct-2025 09:46:48 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[12-Oct-2025 09:46:48 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-12 09:46:48"}
+[12-Oct-2025 09:46:57 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:46:57 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: , SubAction: , SubID: 
+[12-Oct-2025 09:46:57 America/Tegucigalpa] PedidosRoute - Input: []
+[12-Oct-2025 09:46:57 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[12-Oct-2025 09:46:57 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-12 09:46:57"}
+[12-Oct-2025 09:47:29 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:47:29 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: , SubAction: , SubID: 
+[12-Oct-2025 09:47:29 America/Tegucigalpa] PedidosRoute - Input: []
+[12-Oct-2025 09:47:29 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[12-Oct-2025 09:47:29 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-12 09:47:29"}
+[12-Oct-2025 09:47:44 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:47:44 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: , SubAction: , SubID: 
+[12-Oct-2025 09:47:44 America/Tegucigalpa] PedidosRoute - Input: []
+[12-Oct-2025 09:47:44 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[12-Oct-2025 09:47:44 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-12 09:47:44"}
+[12-Oct-2025 09:48:04 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 09:48:04 America/Tegucigalpa] PedidosRoute - Method: POST, Action: , ID: , SubAction: , SubID: 
+[12-Oct-2025 09:48:04 America/Tegucigalpa] PedidosRoute - Input: {"numero_pedido":"PED-001","fecha_compromiso":"2025-12-31","observaciones":"Pedido de prueba desde Postman","id_usuario":1}
+[12-Oct-2025 09:48:04 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[12-Oct-2025 09:48:04 America/Tegucigalpa] PedidosController - Headers recibidos: {"Content-Type":"application\/json","User-Agent":"PostmanRuntime\/7.39.1","Accept":"*\/*","Cache-Control":"no-cache","Postman-Token":"22319596-87b7-4bfd-bfa5-5f1f29bf0bdb","Host":"localhost","Accept-Encoding":"gzip, deflate, br","Connection":"keep-alive","Content-Length":"145","Cookie":"PHPSESSID=o4382pnkdj2jsn9l17v41qc7av"}
+[12-Oct-2025 09:48:04 America/Tegucigalpa] PedidosController - Intentando validar JWT local
+[12-Oct-2025 10:13:01 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 10:13:01 America/Tegucigalpa] PedidosRoute - Method: POST, Action: , ID: , SubAction: , SubID: 
+[12-Oct-2025 10:13:01 America/Tegucigalpa] PedidosRoute - Input: []
+[12-Oct-2025 10:14:06 America/Tegucigalpa] Conexión exitosa
+[12-Oct-2025 10:14:06 America/Tegucigalpa] PedidosRoute - Method: POST, Action: , ID: , SubAction: , SubID: 
+[12-Oct-2025 10:14:06 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"numero_pedido":"PED-2025-001","fecha_compromiso":"2025-01-15","observaciones":"Pedido de prueba para testing","id_estado":1}
+[14-Oct-2025 17:34:02 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:34:02 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: , SubAction: , SubID: 
+[14-Oct-2025 17:34:02 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:34:02 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[14-Oct-2025 17:34:02 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-14 17:34:02"}
+[14-Oct-2025 17:34:12 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:34:12 America/Tegucigalpa] PedidosRoute - Method: GET, Action: , ID: , SubAction: , SubID: 
+[14-Oct-2025 17:34:12 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:36:48 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:36:48 America/Tegucigalpa] PedidosRoute - Method: GET, Action: 1, ID: , SubAction: , SubID: 
+[14-Oct-2025 17:36:48 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:37:11 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:37:11 America/Tegucigalpa] PedidosRoute - Method: PUT, Action: 1, ID: , SubAction: , SubID: 
+[14-Oct-2025 17:37:11 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"fecha_pedido":"2025-10-14 12:00:00","fecha_entrega":"2025-10-21 18:00:00","id_estado":2}
+[14-Oct-2025 17:39:08 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:39:08 America/Tegucigalpa] PedidosRoute - Method: PUT, Action: 1, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:39:08 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/1
+[14-Oct-2025 17:39:08 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"fecha_pedido":"2025-10-14 12:00:00","fecha_entrega":"2025-10-21 18:00:00","id_estado":2}
+[14-Oct-2025 17:39:14 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:39:14 America/Tegucigalpa] PedidosRoute - Method: PUT, Action: 1, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:39:14 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/1
+[14-Oct-2025 17:39:14 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"fecha_pedido":"2025-10-14 12:00:00","fecha_entrega":"2025-10-21 18:00:00","id_estado":2}
+[14-Oct-2025 17:43:22 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/test-connection
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, test-connection
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosRoute - Method: GET, Action: test-connection, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/test-connection
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosController - testConnection: Iniciando test
+[14-Oct-2025 17:43:22 America/Tegucigalpa] PedidosController - testConnection: Resultado: {"status":"Conexi\u00f3n exitosa","timestamp":"2025-10-14 17:43:22"}
+[14-Oct-2025 17:43:31 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:43:31 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:43:31 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:43:31 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:43:31 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:43:31 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:45:43 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:45:43 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:45:43 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:45:43 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:45:43 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:45:43 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:46:39 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:46:39 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:46:39 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:49:11 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosModel - Iniciando consulta getAllPedidos
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosModel - Total de pedidos en la tabla: 6
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosModel - SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosModel - Resultado: [{"id_pedido":3,"numero_pedido":"PED-001","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"290.00"},{"id_pedido":4,"numero_pedido":"PED-003","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":6,"numero_pedido":"PED-004","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":7,"numero_pedido":"PED-005","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":1,"numero_pedido":"","fecha_pedido":"0000-00-00","fecha_compromiso":null,"fecha_entrega":"0000-00-00","observaciones":null,"nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"},{"id_pedido":2,"numero_pedido":"PED-002","fecha_pedido":"0000-00-00","fecha_compromiso":"2025-12-31","fecha_entrega":"0000-00-00","observaciones":"Pedido de prueba desde Postman2","nombre_usuario":"Patrick","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"21.00"}]
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosModel - Número de registros: 6
+[14-Oct-2025 17:49:11 America/Tegucigalpa] PedidosController - findAll: Se encontraron 6 pedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosModel - Iniciando consulta getAllPedidos
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosModel - Total de pedidos en la tabla: 6
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosModel - SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosModel - Resultado: [{"id_pedido":3,"numero_pedido":"PED-001","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"290.00"},{"id_pedido":4,"numero_pedido":"PED-003","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":6,"numero_pedido":"PED-004","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":7,"numero_pedido":"PED-005","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":1,"numero_pedido":"","fecha_pedido":"0000-00-00","fecha_compromiso":null,"fecha_entrega":"0000-00-00","observaciones":null,"nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"},{"id_pedido":2,"numero_pedido":"PED-002","fecha_pedido":"0000-00-00","fecha_compromiso":"2025-12-31","fecha_entrega":"0000-00-00","observaciones":"Pedido de prueba desde Postman2","nombre_usuario":"Patrick","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"21.00"}]
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosModel - Número de registros: 6
+[14-Oct-2025 17:50:20 America/Tegucigalpa] PedidosController - findAll: Se encontraron 6 pedidos
+[14-Oct-2025 17:53:03 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:53:03 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/3
+[14-Oct-2025 17:53:03 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 3
+[14-Oct-2025 17:53:03 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 3, SubAction: 3, SubID: null
+[14-Oct-2025 17:53:03 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/3
+[14-Oct-2025 17:53:03 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:53:11 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:53:11 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/2
+[14-Oct-2025 17:53:11 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 2
+[14-Oct-2025 17:53:11 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 2, SubAction: 2, SubID: null
+[14-Oct-2025 17:53:11 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/2
+[14-Oct-2025 17:53:11 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:53:38 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:53:38 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 17:53:38 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 17:53:38 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 17:53:38 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 17:53:38 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 17:54:49 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 17:54:49 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/2
+[14-Oct-2025 17:54:49 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 2
+[14-Oct-2025 17:54:49 America/Tegucigalpa] PedidosRoute - Method: PUT, Action: null, ID: 2, SubAction: 2, SubID: null
+[14-Oct-2025 17:54:49 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/2
+[14-Oct-2025 17:54:49 America/Tegucigalpa] PedidosRoute - Input: {"id_usuario":1,"fecha_pedido":"2025-10-14","fecha_entrega":"2025-10-28","id_estado":3}
+[14-Oct-2025 18:00:57 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:00:57 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 18:00:57 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 18:00:57 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 18:00:57 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 18:00:57 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:08:53 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosController - findByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: Usuario encontrado, buscando sus pedidos
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    WHERE p.id_usuario = ?
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: Parámetro idUsuario: 1
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: Número de registros encontrados: 6
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosModel - getPedidosByUser: Primer pedido ID: 2
+[14-Oct-2025 18:08:53 America/Tegucigalpa] PedidosController - findByUser: Se encontraron 6 pedidos para el usuario
+[14-Oct-2025 18:20:29 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:20:29 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/2
+[14-Oct-2025 18:20:29 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 2
+[14-Oct-2025 18:20:29 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 2, SubAction: 2, SubID: null
+[14-Oct-2025 18:20:29 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/2
+[14-Oct-2025 18:20:29 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:20:46 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosController - findByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: Usuario encontrado, buscando sus pedidos
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    WHERE p.id_usuario = ?
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: Parámetro idUsuario: 1
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: Número de registros encontrados: 6
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosModel - getPedidosByUser: Primer pedido ID: 2
+[14-Oct-2025 18:20:46 America/Tegucigalpa] PedidosController - findByUser: Se encontraron 6 pedidos para el usuario
+[14-Oct-2025 18:21:19 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosRoute - URL raw: pedidos
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosRoute - URL segments: pedidos
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: null, SubAction: null, SubID: null
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosRoute - Original URL: pedidos
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosModel - Iniciando consulta getAllPedidos
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosModel - Total de pedidos en la tabla: 6
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosModel - SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosModel - Resultado: [{"id_pedido":2,"numero_pedido":"PED-002","fecha_pedido":"2025-10-14","fecha_compromiso":"2025-12-31","fecha_entrega":"2025-10-28","observaciones":"Pedido de prueba desde Postman2","nombre_usuario":"Patrick","estado_nombre":"En Proceso","estado_codigo":"PROCESO","total_pedido":"21.00"},{"id_pedido":3,"numero_pedido":"PED-001","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"290.00"},{"id_pedido":4,"numero_pedido":"PED-003","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":6,"numero_pedido":"PED-004","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":7,"numero_pedido":"PED-005","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-30","fecha_entrega":null,"observaciones":"Pedido urgente para cliente VIP","nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"0.00"},{"id_pedido":1,"numero_pedido":"","fecha_pedido":"0000-00-00","fecha_compromiso":null,"fecha_entrega":"0000-00-00","observaciones":null,"nombre_usuario":"Patrick","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"}]
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosModel - Número de registros: 6
+[14-Oct-2025 18:21:19 America/Tegucigalpa] PedidosController - findAll: Se encontraron 6 pedidos
+[14-Oct-2025 18:21:35 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:21:35 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/3
+[14-Oct-2025 18:21:35 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 3
+[14-Oct-2025 18:21:35 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 3, SubAction: 3, SubID: null
+[14-Oct-2025 18:21:35 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/3
+[14-Oct-2025 18:21:35 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:22:26 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:22:26 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/3
+[14-Oct-2025 18:22:26 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 3
+[14-Oct-2025 18:22:26 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 3, SubAction: 3, SubID: null
+[14-Oct-2025 18:22:26 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/3
+[14-Oct-2025 18:22:26 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:23:43 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 3, SubAction: 3, SubID: null
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosController - findOne: Buscando pedido con ID: 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Buscando pedido con ID: 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Ejecutando SP sp_obtener_pedido con ID: 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido básico obtenido: {"id_pedido":3,"numero_pedido":"PED-001","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","id_estado":1,"estado_nombre":"Entregado","estado_codigo":"ENTRG","id_usuario":1,"nombre_usuario":"Patrick"}
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo detalles para pedido ID: 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Número de detalles encontrados: 1
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido completo construido para ID: 3
+[14-Oct-2025 18:23:43 America/Tegucigalpa] PedidosController - findOne: Pedido encontrado con ID: 3
+[14-Oct-2025 18:28:59 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosController - findByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: Usuario encontrado, buscando sus pedidos
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    WHERE p.id_usuario = ?
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: Parámetro idUsuario: 1
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: Número de registros encontrados: 6
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosModel - getPedidosByUser: Primer pedido ID: 2
+[14-Oct-2025 18:28:59 America/Tegucigalpa] PedidosController - findByUser: Se encontraron 6 pedidos para el usuario
+[14-Oct-2025 18:29:03 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosRoute - Method: GET, Action: null, ID: 3, SubAction: 3, SubID: null
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosController - findOne: Buscando pedido con ID: 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Buscando pedido con ID: 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Ejecutando SP sp_obtener_pedido con ID: 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido básico obtenido: {"id_pedido":3,"numero_pedido":"PED-001","fecha_pedido":"2025-10-13","fecha_compromiso":"2025-10-25","fecha_entrega":null,"observaciones":"Pedido de prueba desde Postman","id_estado":1,"estado_nombre":"Entregado","estado_codigo":"ENTRG","id_usuario":1,"nombre_usuario":"Patrick"}
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo detalles para pedido ID: 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Número de detalles encontrados: 1
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido completo construido para ID: 3
+[14-Oct-2025 18:29:03 America/Tegucigalpa] PedidosController - findOne: Pedido encontrado con ID: 3
+[14-Oct-2025 18:29:07 America/Tegucigalpa] Conexión exitosa
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosRoute - URL raw: pedidos/usuario/1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosRoute - URL segments: pedidos, usuario, 1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosRoute - Method: GET, Action: usuario, ID: 1, SubAction: null, SubID: null
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosRoute - Original URL: pedidos/usuario/1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosRoute - Input: []
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosController - findByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: 1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: Usuario encontrado, buscando sus pedidos
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: SQL: SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.fecha_pedido,
+                        p.fecha_compromiso,
+                        p.fecha_entrega,
+                        p.observaciones,
+                        u.nombre_usuario,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    WHERE p.id_usuario = ?
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
+                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: Parámetro idUsuario: 1
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: Número de registros encontrados: 6
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosModel - getPedidosByUser: Primer pedido ID: 2
+[14-Oct-2025 18:29:07 America/Tegucigalpa] PedidosController - findByUser: Se encontraron 6 pedidos para el usuario
+[23-Oct-2025 18:53:24 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T18:53:26-0600
+[23-Oct-2025 19:40:27 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T19:40:29-0600
+[23-Oct-2025 19:43:48 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T19:43:50-0600
+[23-Oct-2025 19:44:51 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T19:44:53-0600
+[23-Oct-2025 19:44:57 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T19:44:59-0600
+[23-Oct-2025 19:47:29 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 19:47:29 America/Tegucigalpa] AuthController - register: Datos recibidos: {"nombre_usuario":"Juan P\u00e9rez","correo":"juan@example.com","contrasena":"MiPass123!","telefono":"98765432","id_rol":2}
+[23-Oct-2025 19:47:29 America/Tegucigalpa] AuthController - register: Datos procesados - Nombre: Juan Pérez, Email: juan@example.com, Rol: 2
+[23-Oct-2025 19:47:29 America/Tegucigalpa] UserModel - createUser: Iniciando creación de usuario
+[23-Oct-2025 19:47:29 America/Tegucigalpa] UserModel - createUser: Parámetros - Nombre: Juan Pérez, Email: juan@example.com, Rol: 2
+[23-Oct-2025 19:47:29 America/Tegucigalpa] UserModel - createUser: Ejecutando procedimiento almacenado
+[23-Oct-2025 19:47:29 America/Tegucigalpa] UserModel - createUser: Resultado de execute: true
+[23-Oct-2025 19:47:29 America/Tegucigalpa] UserModel - createUser: ID insertado: 4
+[23-Oct-2025 20:33:56 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T20:33:58-0600
+[23-Oct-2025 20:34:17 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T20:34:19-0600
+[23-Oct-2025 20:39:36 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 20:39:36 America/Tegucigalpa] AuthController - register: Datos recibidos: {"nombre_usuario":"Prueba ae","correo":"Prueba25@gmail.com","contrasena":"Prueba1@","telefono":null}
+[23-Oct-2025 20:39:36 America/Tegucigalpa] AuthController - register: Datos procesados - Nombre: Prueba ae, Email: Prueba25@gmail.com, Rol: 2
+[23-Oct-2025 20:39:36 America/Tegucigalpa] UserModel - createUser: Iniciando creación de usuario
+[23-Oct-2025 20:39:36 America/Tegucigalpa] UserModel - createUser: Parámetros - Nombre: Prueba ae, Email: Prueba25@gmail.com, Rol: 2
+[23-Oct-2025 20:39:36 America/Tegucigalpa] UserModel - createUser: Ejecutando procedimiento almacenado
+[23-Oct-2025 20:39:36 America/Tegucigalpa] UserModel - createUser: Resultado de execute: true
+[23-Oct-2025 20:39:36 America/Tegucigalpa] UserModel - createUser: ID insertado: 5
+[23-Oct-2025 20:39:54 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T20:39:56-0600
+[23-Oct-2025 20:40:04 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T20:40:06-0600
+[23-Oct-2025 20:46:55 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T20:46:57-0600
+[23-Oct-2025 20:47:04 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T20:47:06-0600
+[23-Oct-2025 20:50:54 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T20:50:55-0600
+[23-Oct-2025 20:55:27 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T20:55:29-0600
+[23-Oct-2025 20:55:32 America/Tegucigalpa] Firebase verify error: Cannot handle token prior to 2025-10-23T20:55:34-0600
+[23-Oct-2025 21:07:07 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 21:07:08 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 21:07:08 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 21:07:08 America/Tegucigalpa] FirebaseController - Payload a enviar: {"id_usuario":5,"nombre_usuario":"Prueba ae","id_rol":2,"email":"prueba25@gmail.com"}
+[23-Oct-2025 21:07:08 America/Tegucigalpa] FirebaseController - User desde BD: {"id_usuario":5,"nombre_usuario":"Prueba ae","correo":"Prueba25@gmail.com","contrasena":"$2y$10$LrGmV.iEyqMzVyThNOro7.kIGxMyW464sNmzMqfmoO9z1f\/uTtSyW","password_updated_at":null,"intentos_fallidos":0,"bloqueado_hasta":null,"telefono":null,"fecha_ingreso":"2025-10-24","ultimo_acceso":"2025-10-24 02:39:39","id_rol":2}
+[23-Oct-2025 21:07:08 America/Tegucigalpa] FirebaseController - Respuesta completa: {"status":"OK","message":"Login Firebase OK","data":{"user":{"id_usuario":5,"nombre_usuario":"Prueba ae","id_rol":2,"email":"prueba25@gmail.com"},"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NjEyNzUyMjgsImV4cCI6MTc2MTI5NjgyOCwiZGF0YSI6eyJpZF91c3VhcmlvIjo1LCJub21icmVfdXN1YXJpbyI6IlBydWViYSBhZSIsImlkX3JvbCI6MiwiZW1haWwiOiJwcnVlYmEyNUBnbWFpbC5jb20ifX0.xckN32br8bXUemARBFNBW7LFfVghECvuDxB-CHCOU-A"}}
+[23-Oct-2025 21:08:41 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 21:20:50 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 21:56:16 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 21:57:29 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 21:57:29 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 21:57:29 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 21:57:29 America/Tegucigalpa] FirebaseController - Payload a enviar: {"id_usuario":5,"nombre_usuario":"Prueba ae","id_rol":1,"email":"prueba25@gmail.com"}
+[23-Oct-2025 21:57:29 America/Tegucigalpa] FirebaseController - User desde BD: {"id_usuario":5,"nombre_usuario":"Prueba ae","correo":"Prueba25@gmail.com","contrasena":"$2y$10$LrGmV.iEyqMzVyThNOro7.kIGxMyW464sNmzMqfmoO9z1f\/uTtSyW","password_updated_at":null,"intentos_fallidos":0,"bloqueado_hasta":null,"telefono":null,"fecha_ingreso":"2025-10-24","ultimo_acceso":"2025-10-24 03:07:10","id_rol":1}
+[23-Oct-2025 21:57:29 America/Tegucigalpa] FirebaseController - Respuesta completa: {"status":"OK","message":"Login Firebase OK","data":{"user":{"id_usuario":5,"nombre_usuario":"Prueba ae","id_rol":1,"email":"prueba25@gmail.com"},"token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NjEyNzgyNDksImV4cCI6MTc2MTI5OTg0OSwiZGF0YSI6eyJpZF91c3VhcmlvIjo1LCJub21icmVfdXN1YXJpbyI6IlBydWViYSBhZSIsImlkX3JvbCI6MSwiZW1haWwiOiJwcnVlYmEyNUBnbWFpbC5jb20ifX0.p8h_5aKFYYFoKeJecbmVtCc-TNPfVb_9Ff53PstyR94"}}
+[23-Oct-2025 21:57:41 America/Tegucigalpa] Conexión exitosa
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - authorize: Iniciando autorización
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NjEyNzgyNDksImV4cCI6MTc2MTI5OTg0OSwiZGF0YSI6eyJpZF91c3VhcmlvIjo1LCJub21icmVfdXN1YXJpbyI6IlBydWViYSBhZSIsImlkX3JvbCI6MSwiZW1haWwiOiJwcnVlYmEyNUBnbWFpbC5jb20ifX0.p8h_5aKFYYFoKeJecbmVtCc-TNPfVb_9Ff53PstyR94","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/141.0.0.0 Safari\/537.36 Edg\/141.0.0.0","sec-ch-ua":"\"Microsoft Edge\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/gestion_usu","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-419,es;q=0.9,es-ES;q=0.8,en;q=0.7,en-GB;q=0.6,en-US;q=0.5,es-HN;q=0.4,es-MX;q=0.3","Cookie":"PHPSESSID=a9f3su4ts94mlchairj0n8f6fb"}
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - Firebase token extraído: Presente
+[23-Oct-2025 21:57:41 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - Firebase claims: null
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - Token Firebase expirado o inválido
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - Intentando validar JWT local
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - JWT válido, usuario: {"id_usuario":5,"nombre_usuario":"Prueba ae","id_rol":1,"email":"prueba25@gmail.com"}
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - Usuario autorizado: {"id_usuario":5,"nombre_usuario":"Prueba ae","id_rol":1,"email":"prueba25@gmail.com"}
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - Roles requeridos: [1]
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - Rol del usuario: 1
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - Autorización exitosa
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - list: Obteniendo lista de usuarios
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserModel - listUsers: Ejecutando consulta SQL
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserModel - listUsers: Usuarios encontrados: 5
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserModel - listUsers: Datos: [{"id_usuario":1,"nombre_usuario":"Patrick","correo":"pat@gmail.com","telefono":"98989890","fecha_ingreso":"2025-08-08","ultimo_acceso":"2025-08-08 21:46:14","id_rol":1,"bloqueado_hasta":null},{"id_usuario":2,"nombre_usuario":"nuevo_usuario","correo":"nuevo@email.com","telefono":"123456789","fecha_ingreso":"2025-09-27","ultimo_acceso":"2025-09-27 00:39:15","id_rol":1,"bloqueado_hasta":null},{"id_usuario":3,"nombre_usuario":"SISTEMA\/NO LOGUEADO","correo":"sistema@tuempresa.com","telefono":null,"fecha_ingreso":"0000-00-00","ultimo_acceso":null,"id_rol":1,"bloqueado_hasta":null},{"id_usuario":4,"nombre_usuario":"Juan P\u00e9rez","correo":"juan@example.com","telefono":"98765432","fecha_ingreso":"2025-10-24","ultimo_acceso":"2025-10-24 01:47:32","id_rol":2,"bloqueado_hasta":null},{"id_usuario":5,"nombre_usuario":"Prueba ae","correo":"Prueba25@gmail.com","telefono":null,"fecha_ingreso":"2025-10-24","ultimo_acceso":"2025-10-24 03:57:32","id_rol":1,"bloqueado_hasta":null}]
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - list: Usuarios obtenidos: [{"id_usuario":1,"nombre_usuario":"Patrick","correo":"pat@gmail.com","telefono":"98989890","fecha_ingreso":"2025-08-08","ultimo_acceso":"2025-08-08 21:46:14","id_rol":1,"bloqueado_hasta":null},{"id_usuario":2,"nombre_usuario":"nuevo_usuario","correo":"nuevo@email.com","telefono":"123456789","fecha_ingreso":"2025-09-27","ultimo_acceso":"2025-09-27 00:39:15","id_rol":1,"bloqueado_hasta":null},{"id_usuario":3,"nombre_usuario":"SISTEMA\/NO LOGUEADO","correo":"sistema@tuempresa.com","telefono":null,"fecha_ingreso":"0000-00-00","ultimo_acceso":null,"id_rol":1,"bloqueado_hasta":null},{"id_usuario":4,"nombre_usuario":"Juan P\u00e9rez","correo":"juan@example.com","telefono":"98765432","fecha_ingreso":"2025-10-24","ultimo_acceso":"2025-10-24 01:47:32","id_rol":2,"bloqueado_hasta":null},{"id_usuario":5,"nombre_usuario":"Prueba ae","correo":"Prueba25@gmail.com","telefono":null,"fecha_ingreso":"2025-10-24","ultimo_acceso":"2025-10-24 03:57:32","id_rol":1,"bloqueado_hasta":null}]
+[23-Oct-2025 21:57:41 America/Tegucigalpa] UserController - list: Respuesta final: {"status":"OK","message":"OK","data":[{"id_usuario":1,"nombre_usuario":"Patrick","correo":"pat@gmail.com","telefono":"98989890","fecha_ingreso":"2025-08-08","ultimo_acceso":"2025-08-08 21:46:14","id_rol":1,"bloqueado_hasta":null},{"id_usuario":2,"nombre_usuario":"nuevo_usuario","correo":"nuevo@email.com","telefono":"123456789","fecha_ingreso":"2025-09-27","ultimo_acceso":"2025-09-27 00:39:15","id_rol":1,"bloqueado_hasta":null},{"id_usuario":3,"nombre_usuario":"SISTEMA\/NO LOGUEADO","correo":"sistema@tuempresa.com","telefono":null,"fecha_ingreso":"0000-00-00","ultimo_acceso":null,"id_rol":1,"bloqueado_hasta":null},{"id_usuario":4,"nombre_usuario":"Juan P\u00e9rez","correo":"juan@example.com","telefono":"98765432","fecha_ingreso":"2025-10-24","ultimo_acceso":"2025-10-24 01:47:32","id_rol":2,"bloqueado_hasta":null},{"id_usuario":5,"nombre_usuario":"Prueba ae","correo":"Prueba25@gmail.com","telefono":null,"fecha_ingreso":"2025-10-24","ultimo_acceso":"2025-10-24 03:57:32","id_rol":1,"bloqueado_hasta":null}]}
