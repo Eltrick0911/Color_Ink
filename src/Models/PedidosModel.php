@@ -21,16 +21,42 @@ class PedidosModel
     /**
      * Crear un nuevo pedido
      */
-    public function createPedido(string $numeroPedido, string $fechaCompromiso, ?string $observaciones, int $idUsuario): ?int
+    public function createPedido(string $numeroPedido, ?string $observaciones, int $idUsuario, ?string $clienteNombre = null, ?string $clienteTelefono = null, ?string $canalVenta = null, ?string $prioridad = 'normal', ?string $detallesProducto = null): ?int
     {
         try {
-            $stmt = $this->connection->prepare("CALL sp_crear_pedido(?, ?, ?, 1, ?)");
-            $stmt->execute([$numeroPedido, $fechaCompromiso, $observaciones, $idUsuario]);
+            error_log("PedidosModel - createPedido: Creando pedido - Numero: $numeroPedido, Usuario: $idUsuario");
             
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result['id_pedido_creado'] ?? null;
+            // Usar SQL directo en lugar del stored procedure para mayor compatibilidad
+            $sql = "INSERT INTO pedido (
+                        numero_pedido, 
+                        id_usuario, 
+                        cliente_nombre,
+                        cliente_telefono,
+                        canal_venta,
+                        prioridad,
+                        observaciones, 
+                        detalles_producto,
+                        id_estado
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 3)";
+            
+            $stmt = $this->connection->prepare($sql);
+            $stmt->execute([
+                $numeroPedido, 
+                $idUsuario, 
+                $clienteNombre,
+                $clienteTelefono,
+                $canalVenta,
+                $prioridad,
+                $observaciones, 
+                $detallesProducto
+            ]);
+            
+            $idPedido = $this->connection->lastInsertId();
+            
+            error_log("PedidosModel - createPedido: Pedido creado con ID: " . ($idPedido ?? 'NULL'));
+            return $idPedido;
         } catch (PDOException $e) {
-            error_log("Error creando pedido: " . $e->getMessage());
+            error_log("ERROR PedidosModel - createPedido: " . $e->getMessage());
             throw new Exception("Error al crear pedido: " . $e->getMessage());
         }
     }
@@ -41,36 +67,19 @@ class PedidosModel
     public function getAllPedidos(): array
     {
         try {
-            error_log("PedidosModel - Iniciando consulta getAllPedidos");
-            
-            // Primero verificar si hay pedidos en la tabla
-            $checkSql = "SELECT COUNT(*) AS total FROM pedido";
-            $checkStmt = $this->connection->query($checkSql);
-            $count = $checkStmt->fetch(PDO::FETCH_ASSOC)['total'];
-            
-            error_log("PedidosModel - Total de pedidos en la tabla: " . $count);
-            
-            if ($count == 0) {
-                error_log("PedidosModel - No hay pedidos en la base de datos. Insertando pedido de ejemplo...");
-                
-                // Crear un pedido de ejemplo si no hay ninguno
-                $this->createPedido(
-                    "PED-" . date('Ymd') . "-001", 
-                    date('Y-m-d', strtotime('+7 days')), 
-                    "Pedido de ejemplo creado automáticamente", 
-                    1
-                );
-                
-                error_log("PedidosModel - Pedido de ejemplo creado.");
-            }
+            error_log("PedidosModel - getAllPedidos: Obteniendo todos los pedidos");
             
             $sql = "SELECT 
                         p.id_pedido,
                         p.numero_pedido,
                         p.fecha_pedido,
-                        p.fecha_compromiso,
                         p.fecha_entrega,
                         p.observaciones,
+                        p.cliente_nombre,
+                        p.cliente_telefono,
+                        p.canal_venta,
+                        p.prioridad,
+                        p.detalles_producto,
                         u.nombre_usuario,
                         e.nombre as estado_nombre,
                         e.codigo as estado_codigo,
@@ -79,21 +88,18 @@ class PedidosModel
                     LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
                     LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
                     LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
-                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
-                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
+                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, 
+                             p.fecha_entrega, p.observaciones, p.cliente_nombre, p.cliente_telefono,
+                             p.canal_venta, p.prioridad, p.detalles_producto, u.nombre_usuario, e.nombre, e.codigo
                     ORDER BY p.fecha_pedido DESC";
-            
-            error_log("PedidosModel - SQL: " . $sql);
             
             $stmt = $this->connection->query($sql);
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            error_log("PedidosModel - Resultado: " . json_encode($result));
-            error_log("PedidosModel - Número de registros: " . count($result));
-            
+            error_log("PedidosModel - getAllPedidos: Se encontraron " . count($result) . " pedidos");
             return $result;
         } catch (PDOException $e) {
-            error_log("Error obteniendo pedidos: " . $e->getMessage() . " - Traza: " . $e->getTraceAsString());
+            error_log("ERROR PedidosModel - getAllPedidos: " . $e->getMessage());
             return [];
         }
     }
@@ -104,20 +110,7 @@ class PedidosModel
     public function getPedidosByUser(int $idUsuario): array
     {
         try {
-            error_log("PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: " . $idUsuario);
-            
-            // Verificar si existe el usuario
-            $checkUserSql = "SELECT COUNT(*) AS existe FROM usuario WHERE id_usuario = ?";
-            $checkUserStmt = $this->connection->prepare($checkUserSql);
-            $checkUserStmt->execute([$idUsuario]);
-            $userExists = $checkUserStmt->fetch(PDO::FETCH_ASSOC)['existe'];
-            
-            if ($userExists == 0) {
-                error_log("PedidosModel - getPedidosByUser: El usuario ID " . $idUsuario . " no existe");
-                return [];
-            }
-            
-            error_log("PedidosModel - getPedidosByUser: Usuario encontrado, buscando sus pedidos");
+            error_log("PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: $idUsuario");
             
             $sql = "SELECT 
                         p.id_pedido,
@@ -139,21 +132,14 @@ class PedidosModel
                              p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
                     ORDER BY p.fecha_pedido DESC";
             
-            error_log("PedidosModel - getPedidosByUser: SQL: " . $sql);
-            error_log("PedidosModel - getPedidosByUser: Parámetro idUsuario: " . $idUsuario);
-            
             $stmt = $this->connection->prepare($sql);
             $stmt->execute([$idUsuario]);
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            error_log("PedidosModel - getPedidosByUser: Número de registros encontrados: " . count($result));
-            if (count($result) > 0) {
-                error_log("PedidosModel - getPedidosByUser: Primer pedido ID: " . ($result[0]['id_pedido'] ?? 'N/A'));
-            }
-            
+            error_log("PedidosModel - getPedidosByUser: Se encontraron " . count($result) . " pedidos para usuario $idUsuario");
             return $result;
         } catch (PDOException $e) {
-            error_log("PedidosModel - getPedidosByUser: Error obteniendo pedidos por usuario: " . $e->getMessage() . " - Traza: " . $e->getTraceAsString());
+            error_log("ERROR PedidosModel - getPedidosByUser: " . $e->getMessage());
             return [];
         }
     }
@@ -164,12 +150,15 @@ class PedidosModel
     public function getPedidoById(int $idPedido): ?array
     {
         try {
+            error_log("PedidosModel - getPedidoById: Obteniendo pedido ID: $idPedido");
+            
             // Obtener información básica del pedido
             $stmt = $this->connection->prepare("CALL sp_obtener_pedido(?)");
             $stmt->execute([$idPedido]);
             $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
             
             if (!$pedido) {
+                error_log("PedidosModel - getPedidoById: Pedido $idPedido no encontrado");
                 return null;
             }
 
@@ -190,23 +179,34 @@ class PedidosModel
             $pedido['detalles'] = $detalles;
             $pedido['total_pedido'] = array_sum(array_column($detalles, 'total_linea'));
             
+            error_log("PedidosModel - getPedidoById: Pedido $idPedido obtenido con " . count($detalles) . " detalles");
             return $pedido;
         } catch (PDOException $e) {
-            error_log("Error obteniendo pedido por ID: " . $e->getMessage());
+            error_log("ERROR PedidosModel - getPedidoById: " . $e->getMessage());
             return null;
         }
     }
 
     /**
-     * Actualizar pedido
+     * Actualizar pedido (SOLO fecha_entrega y estado - fecha_pedido INMUTABLE)
      */
-    public function updatePedido(int $idPedido, int $idUsuario, string $fechaPedido, ?string $fechaEntrega, int $idEstado): bool
+    public function updatePedido(int $idPedido, ?string $fechaEntrega, int $idEstado): bool
     {
         try {
-            $stmt = $this->connection->prepare("CALL sp_actualizar_pedido(?, ?, ?, ?, ?)");
-            return $stmt->execute([$idPedido, $idUsuario, $fechaPedido, $fechaEntrega, $idEstado]);
+            error_log("PedidosModel - updatePedido: Actualizando pedido $idPedido - FechaEntrega: $fechaEntrega, Estado: $idEstado");
+            
+            // Usar SQL directo en lugar del SP para mayor control
+            $sql = "UPDATE pedido 
+                    SET fecha_entrega = ?, id_estado = ? 
+                    WHERE id_pedido = ?";
+            
+            $stmt = $this->connection->prepare($sql);
+            $result = $stmt->execute([$fechaEntrega, $idEstado, $idPedido]);
+            
+            error_log("PedidosModel - updatePedido: Actualización " . ($result ? "exitosa" : "fallida"));
+            return $result;
         } catch (PDOException $e) {
-            error_log("Error actualizando pedido: " . $e->getMessage());
+            error_log("ERROR PedidosModel - updatePedido: " . $e->getMessage());
             return false;
         }
     }
@@ -217,10 +217,15 @@ class PedidosModel
     public function cambiarEstadoPedido(int $idPedido, int $idEstadoNuevo, int $idUsuario): bool
     {
         try {
+            error_log("PedidosModel - cambiarEstadoPedido: Cambiando estado pedido $idPedido a $idEstadoNuevo por usuario $idUsuario");
+            
             $stmt = $this->connection->prepare("CALL sp_cambiar_estado_pedido(?, ?, ?)");
-            return $stmt->execute([$idPedido, $idEstadoNuevo, $idUsuario]);
+            $result = $stmt->execute([$idPedido, $idEstadoNuevo, $idUsuario]);
+            
+            error_log("PedidosModel - cambiarEstadoPedido: Cambio de estado " . ($result ? "exitoso" : "fallido"));
+            return $result;
         } catch (PDOException $e) {
-            error_log("Error cambiando estado del pedido: " . $e->getMessage());
+            error_log("ERROR PedidosModel - cambiarEstadoPedido: " . $e->getMessage());
             throw new Exception("Error al cambiar estado: " . $e->getMessage());
         }
     }
@@ -231,10 +236,15 @@ class PedidosModel
     public function deletePedido(int $idPedido): bool
     {
         try {
+            error_log("PedidosModel - deletePedido: Eliminando pedido ID: $idPedido");
+            
             $stmt = $this->connection->prepare("CALL sp_eliminar_pedido(?)");
-            return $stmt->execute([$idPedido]);
+            $result = $stmt->execute([$idPedido]);
+            
+            error_log("PedidosModel - deletePedido: Eliminación " . ($result ? "exitosa" : "fallida"));
+            return $result;
         } catch (PDOException $e) {
-            error_log("Error eliminando pedido: " . $e->getMessage());
+            error_log("ERROR PedidosModel - deletePedido: " . $e->getMessage());
             return false;
         }
     }
@@ -247,8 +257,10 @@ class PedidosModel
     public function createDetallePedido(array $detalleData): bool
     {
         try {
+            error_log("PedidosModel - createDetallePedido: Creando detalle para pedido " . $detalleData['id_pedido']);
+            
             $stmt = $this->connection->prepare("CALL sp_crear_detalle_pedido(?, ?, ?, ?, ?, ?, ?, ?)");
-            return $stmt->execute([
+            $result = $stmt->execute([
                 $detalleData['producto_solicitado'],
                 $detalleData['precio_unitario'],
                 $detalleData['descuento'],
@@ -258,8 +270,11 @@ class PedidosModel
                 $detalleData['cantidad'],
                 $detalleData['id_usuario']
             ]);
+            
+            error_log("PedidosModel - createDetallePedido: Creación de detalle " . ($result ? "exitosa" : "fallida"));
+            return $result;
         } catch (PDOException $e) {
-            error_log("Error creando detalle de pedido: " . $e->getMessage());
+            error_log("ERROR PedidosModel - createDetallePedido: " . $e->getMessage());
             throw new Exception("Error al crear detalle: " . $e->getMessage());
         }
     }
@@ -270,11 +285,16 @@ class PedidosModel
     public function getDetalleById(int $idDetalle): ?array
     {
         try {
+            error_log("PedidosModel - getDetalleById: Obteniendo detalle ID: $idDetalle");
+            
             $stmt = $this->connection->prepare("CALL sp_obtener_detalle_pedido(?)");
             $stmt->execute([$idDetalle]);
-            return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            $detalle = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            error_log("PedidosModel - getDetalleById: Detalle " . ($detalle ? "encontrado" : "no encontrado"));
+            return $detalle ?: null;
         } catch (PDOException $e) {
-            error_log("Error obteniendo detalle: " . $e->getMessage());
+            error_log("ERROR PedidosModel - getDetalleById: " . $e->getMessage());
             return null;
         }
     }
@@ -285,8 +305,10 @@ class PedidosModel
     public function updateDetallePedido(int $idDetalle, array $detalleData): bool
     {
         try {
+            error_log("PedidosModel - updateDetallePedido: Actualizando detalle ID: $idDetalle");
+            
             $stmt = $this->connection->prepare("CALL sp_actualizar_detalle_pedido(?, ?, ?, ?, ?, ?, ?)");
-            return $stmt->execute([
+            $result = $stmt->execute([
                 $idDetalle,
                 $detalleData['producto_solicitado'],
                 $detalleData['cantidad_nueva'],
@@ -295,8 +317,11 @@ class PedidosModel
                 $detalleData['impuesto_nuevo'],
                 $detalleData['id_usuario']
             ]);
+            
+            error_log("PedidosModel - updateDetallePedido: Actualización " . ($result ? "exitosa" : "fallida"));
+            return $result;
         } catch (PDOException $e) {
-            error_log("Error actualizando detalle: " . $e->getMessage());
+            error_log("ERROR PedidosModel - updateDetallePedido: " . $e->getMessage());
             throw new Exception("Error al actualizar detalle: " . $e->getMessage());
         }
     }
@@ -307,10 +332,15 @@ class PedidosModel
     public function deleteDetallePedido(int $idDetalle): bool
     {
         try {
+            error_log("PedidosModel - deleteDetallePedido: Eliminando detalle ID: $idDetalle");
+            
             $stmt = $this->connection->prepare("CALL sp_eliminar_detalle_pedido(?)");
-            return $stmt->execute([$idDetalle]);
+            $result = $stmt->execute([$idDetalle]);
+            
+            error_log("PedidosModel - deleteDetallePedido: Eliminación " . ($result ? "exitosa" : "fallida"));
+            return $result;
         } catch (PDOException $e) {
-            error_log("Error eliminando detalle: " . $e->getMessage());
+            error_log("ERROR PedidosModel - deleteDetallePedido: " . $e->getMessage());
             return false;
         }
     }
@@ -323,11 +353,16 @@ class PedidosModel
     public function getEstados(): array
     {
         try {
+            error_log("PedidosModel - getEstados: Obteniendo estados disponibles");
+            
             $sql = "SELECT * FROM cat_estado_pedido ORDER BY orden ASC";
             $stmt = $this->connection->query($sql);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $estados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            error_log("PedidosModel - getEstados: Se encontraron " . count($estados) . " estados");
+            return $estados;
         } catch (PDOException $e) {
-            error_log("Error obteniendo estados: " . $e->getMessage());
+            error_log("ERROR PedidosModel - getEstados: " . $e->getMessage());
             return [];
         }
     }
@@ -338,11 +373,69 @@ class PedidosModel
     public function testConnection(): array
     {
         try {
-            $stmt = $this->connection->query("SELECT 'Conexión exitosa' as status, NOW() as timestamp");
-            return $stmt->fetch(PDO::FETCH_ASSOC) ?: ['status' => 'Error', 'timestamp' => null];
+            error_log("PedidosModel - testConnection: Probando conexión a BD");
+            
+            // Test simple de conexión
+            $stmt = $this->connection->query("SELECT 1 as connected, NOW() as timestamp");
+            if (!$stmt) {
+                throw new PDOException("No se pudo ejecutar la consulta de prueba");
+            }
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$result) {
+                throw new PDOException("No se obtuvieron resultados de la consulta de prueba");
+            }
+            
+            error_log("PedidosModel - testConnection: Conexión exitosa");
+            return [
+                'status' => 'OK',
+                'connected' => true,
+                'timestamp' => $result['timestamp'],
+                'server_info' => $this->connection->getAttribute(PDO::ATTR_SERVER_VERSION)
+            ];
         } catch (PDOException $e) {
-            error_log("Error en test de conexión: " . $e->getMessage());
-            return ['status' => 'Error: ' . $e->getMessage(), 'timestamp' => null];
+            error_log("ERROR PedidosModel - testConnection: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return [
+                'status' => 'ERROR',
+                'connected' => false,
+                'message' => $e->getMessage(),
+                'timestamp' => date('Y-m-d H:i:s')
+            ];
         }
+    }
+
+    /**
+     * Mapear estados del frontend a IDs de BD
+     */
+    public function mapEstadoFrontendToId(string $estadoFrontend): int
+    {
+        $map = [
+            'pendiente' => 3,    // PROCESO
+            'procesando' => 3,   // PROCESO  
+            'enviado' => 3,      // PROCESO
+            'entregado' => 1,    // ENTRG
+            'cancelado' => 2     // CANC
+        ];
+        
+        $idEstado = $map[strtolower($estadoFrontend)] ?? 3;
+        error_log("PedidosModel - mapEstadoFrontendToId: '$estadoFrontend' -> $idEstado");
+        return $idEstado;
+    }
+
+    /**
+     * Mapear IDs de BD a estados del frontend
+     */
+    public function mapEstadoIdToFrontend(int $idEstado): string
+    {
+        $map = [
+            1 => 'entregado',    // ENTRG
+            2 => 'cancelado',    // CANC
+            3 => 'procesando'    // PROCESO
+        ];
+        
+        $estadoFrontend = $map[$idEstado] ?? 'pendiente';
+        error_log("PedidosModel - mapEstadoIdToFrontend: $idEstado -> '$estadoFrontend'");
+        return $estadoFrontend;
     }
 }

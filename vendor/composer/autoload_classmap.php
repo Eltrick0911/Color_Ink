@@ -6,10 +6,18 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Config\\PedidosLogger' => $baseDir . '/src/Config/PedidosLogger.php',
     'App\\Config\\Security' => $baseDir . '/src/Config/Security.php',
     'App\\Config\\errorlogs' => $baseDir . '/src/Config/errorlogs.php',
     'App\\Config\\responseHTTP' => $baseDir . '/src/Config/responseHTTP.php',
+    'App\\Controllers\\AuthController' => $baseDir . '/src/Controllers/AuthController.php',
+    'App\\Controllers\\FirebaseController' => $baseDir . '/src/Controllers/FirebaseController.php',
+    'App\\Controllers\\PedidosController' => $baseDir . '/src/Controllers/PedidosController.php',
+    'App\\Controllers\\UserController' => $baseDir . '/src/Controllers/UserController.php',
     'App\\DB\\connectionDB' => $baseDir . '/src/DB/connectionDB.php',
+    'App\\DB\\sql' => $baseDir . '/src/DB/sql.php',
+    'App\\Models\\PedidosModel' => $baseDir . '/src/Models/PedidosModel.php',
+    'App\\Models\\UserModel' => $baseDir . '/src/Models/UserModel.php',
     'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'Dotenv\\Dotenv' => $vendorDir . '/vlucas/phpdotenv/src/Dotenv.php',

@@ -37,7 +37,8 @@
                         <tr>
                             <th>ID</th>
                             <th>Cliente</th>
-                            <th>Fecha</th>
+                            <th>Fecha del pedido</th>
+                            <th>Fecha de entrega</th>
                             <th>Estado</th>
                             <th>Total</th>
                             <th>Acciones</th>
@@ -47,6 +48,7 @@
                         <tr>
                             <td>#001</td>
                             <td>Juan Pérez</td>
+                            <td>2024-01-10</td>
                             <td>2024-01-15</td>
                             <td>
                                 <select class="status-selector" data-pedido-id="#001">
@@ -57,44 +59,6 @@
                                 </select>
                             </td>
                             <td>$150.00</td>
-                            <td>
-                                <button class="btn-action"><i class="fa-solid fa-eye"></i></button>
-                                <button class="btn-action"><i class="fa-solid fa-edit"></i></button>
-                                <button class="btn-action"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#002</td>
-                            <td>María García</td>
-                            <td>2024-01-14</td>
-                            <td>
-                                <select class="status-selector" data-pedido-id="#002">
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="procesando" selected>Procesando</option>
-                                    <option value="enviado">Enviado</option>
-                                    <option value="entregado">Entregado</option>
-                                </select>
-                            </td>
-                            <td>$275.50</td>
-                            <td>
-                                <button class="btn-action"><i class="fa-solid fa-eye"></i></button>
-                                <button class="btn-action"><i class="fa-solid fa-edit"></i></button>
-                                <button class="btn-action"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>#003</td>
-                            <td>Carlos López</td>
-                            <td>2024-01-13</td>
-                            <td>
-                                <select class="status-selector" data-pedido-id="#003">
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="procesando">Procesando</option>
-                                    <option value="enviado" selected>Enviado</option>
-                                    <option value="entregado">Entregado</option>
-                                </select>
-                            </td>
-                            <td>$89.99</td>
                             <td>
                                 <button class="btn-action"><i class="fa-solid fa-eye"></i></button>
                                 <button class="btn-action"><i class="fa-solid fa-edit"></i></button>
@@ -155,9 +119,9 @@
             <div class="modal-body">
                 <form id="formNuevoPedido" class="pedido-form">
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="cliente">Cliente *</label>
-                            <input type="text" id="cliente" name="cliente" required>
+                          <div class="form-group">
+                            <label for="email">Usuario</label>
+                            <input type="redes" id="redes" name="email">
                         </div>
                         <div class="form-group">
                             <label for="telefono">Teléfono</label>
@@ -167,16 +131,10 @@
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="email">Usuario</label>
-                            <input type="redes" id="redes" name="email">
-                        </div>
-                        <div class="form-group">
                             <label for="fechaEntrega">Fecha de Entrega</label>
                             <input type="date" id="fechaEntrega" name="fechaEntrega">
                         </div>
                     </div>
-
-
                     <div class="form-group">
                         <label for="canalVenta">Canal de Venta *</label>
                         <select id="canalVenta" name="canalVenta" required>
@@ -206,10 +164,6 @@
                         <button type="button" class="btn-detalles-producto" id="btnDetallesProducto">
                             <i class="fa-solid fa-cog"></i> Personalizado
                         </button>
-                        <div id="resumenDetalles" class="resumen-detalles" style="display: none;">
-                            <h4>Resumen de Detalles:</h4>
-                            <div id="resumenContenido"></div>
-                        </div>
                     </div>
 
                 </form>
@@ -259,12 +213,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="textoPersonalizado">Texto Personalizado</label>
-                        <textarea id="textoPersonalizado" name="textoPersonalizado" rows="3" placeholder="Texto que se imprimirá o incluirá en el diseño"></textarea>
-                    </div>
-
                     <div class="form-group">
                         <label for="colores">Paleta de Colores</label>
                         <div class="color-selection">
@@ -282,14 +230,6 @@
                                     <input type="color" id="colorPicker3" class="color-picker" title="Color 3" value="#000000">
                                     <span class="color-name" id="colorName3">Color 3</span>
                                 </div>
-                                <div class="color-picker-item">
-                                    <input type="color" id="colorPicker4" class="color-picker" title="Color 4" value="#000000">
-                                    <span class="color-name" id="colorName4">Color 4</span>
-                                </div>
-                                <div class="color-picker-item">
-                                    <input type="color" id="colorPicker5" class="color-picker" title="Color 5" value="#000000">
-                                    <span class="color-name" id="colorName5">Color 5</span>
-                                </div>
                             </div>
                             <div class="color-actions">
                                 <button type="button" class="btn-limpiar-colores">
@@ -300,7 +240,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="especificaciones">Especificaciones Técnicas</label>
+                        <label for="especificaciones">Especificaciones Técnicas/Detalles del producto</label>
                         <textarea id="especificaciones" name="especificaciones" rows="4" placeholder="Tamaño específico, acabados, técnicas de impresión,talla etc."></textarea>
                     </div>
                 </form>
@@ -331,8 +271,8 @@
                 <form id="formEditarPedido" class="pedido-form">
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="editarCliente">Cliente *</label>
-                            <input type="text" id="editarCliente" name="cliente" required>
+                            <label for="editarUsuario">Usuario</label>
+                            <input type="text" id="editarUsuario" name="usuario">
                         </div>
                         <div class="form-group">
                             <label for="editarTelefono">Teléfono</label>
@@ -341,10 +281,6 @@
                     </div>
                     
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="editarUsuario">Usuario</label>
-                            <input type="text" id="editarUsuario" name="usuario">
-                        </div>
                         <div class="form-group">
                             <label for="editarFechaEntrega">Fecha de Entrega</label>
                             <input type="date" id="editarFechaEntrega" name="fechaEntrega">
@@ -399,30 +335,10 @@
                                 <option value="otros">Otros</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="editarTamano">Tamaño</label>
-                            <input type="text" id="editarTamano" name="tamano" placeholder="Ej: A4, 30x40cm">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editarMaterial">Material</label>
-                            <input type="text" id="editarMaterial" name="material" placeholder="Ej: Papel, Vinil, Tela">
-                        </div>
-                        <div class="form-group">
-                            <label for="editarDireccion">Dirección de Entrega</label>
-                            <input type="text" id="editarDireccion" name="direccion" placeholder="Dirección completa">
-                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="editarTextoPersonalizado">Texto Personalizado</label>
-                        <textarea id="editarTextoPersonalizado" name="textoPersonalizado" rows="3" placeholder="Texto que se imprimirá o incluirá en el diseño"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editarEspecificaciones">Especificaciones Técnicas</label>
+                        <label for="editarEspecificaciones">Especificaciones Técnicas/Detalles del producto</label>
                         <textarea id="editarEspecificaciones" name="especificaciones" rows="4" placeholder="Tamaño específico, acabados, técnicas de impresión, talla etc."></textarea>
                     </div>
 
@@ -448,14 +364,6 @@
                                 <div class="color-picker-item">
                                     <input type="color" id="editarColorPicker3" class="color-picker" title="Color 3" value="#000000">
                                     <span class="color-name" id="editarColorName3">Color 3</span>
-                                </div>
-                                <div class="color-picker-item">
-                                    <input type="color" id="editarColorPicker4" class="color-picker" title="Color 4" value="#000000">
-                                    <span class="color-name" id="editarColorName4">Color 4</span>
-                                </div>
-                                <div class="color-picker-item">
-                                    <input type="color" id="editarColorPicker5" class="color-picker" title="Color 5" value="#000000">
-                                    <span class="color-name" id="editarColorName5">Color 5</span>
                                 </div>
                             </div>
                             <div class="color-actions">
@@ -494,5 +402,6 @@
 
     <script src="/Color_Ink/src/Views/JS/sidebar.js"></script>
     <script src="/Color_Ink/src/Views/JS/pedidos.js"></script>
+    <script src="/Color_Ink/src/Views/JS/pedidosmvc_new.js"></script>
 </body>
 </html>

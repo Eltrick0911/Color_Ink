@@ -78,10 +78,18 @@ class ComposerStaticInite875ae8441d070d7dda5f4b47a2117aa
     );
 
     public static $classMap = array (
+        'App\\Config\\PedidosLogger' => __DIR__ . '/../..' . '/src/Config/PedidosLogger.php',
         'App\\Config\\Security' => __DIR__ . '/../..' . '/src/Config/Security.php',
         'App\\Config\\errorlogs' => __DIR__ . '/../..' . '/src/Config/errorlogs.php',
         'App\\Config\\responseHTTP' => __DIR__ . '/../..' . '/src/Config/responseHTTP.php',
+        'App\\Controllers\\AuthController' => __DIR__ . '/../..' . '/src/Controllers/AuthController.php',
+        'App\\Controllers\\FirebaseController' => __DIR__ . '/../..' . '/src/Controllers/FirebaseController.php',
+        'App\\Controllers\\PedidosController' => __DIR__ . '/../..' . '/src/Controllers/PedidosController.php',
+        'App\\Controllers\\UserController' => __DIR__ . '/../..' . '/src/Controllers/UserController.php',
         'App\\DB\\connectionDB' => __DIR__ . '/../..' . '/src/DB/connectionDB.php',
+        'App\\DB\\sql' => __DIR__ . '/../..' . '/src/DB/sql.php',
+        'App\\Models\\PedidosModel' => __DIR__ . '/../..' . '/src/Models/PedidosModel.php',
+        'App\\Models\\UserModel' => __DIR__ . '/../..' . '/src/Models/UserModel.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Dotenv\\Dotenv' => __DIR__ . '/..' . '/vlucas/phpdotenv/src/Dotenv.php',

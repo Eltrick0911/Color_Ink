@@ -1,1 +1,411 @@
-
+[21-Oct-2025 02:35:47 America/Tegucigalpa] PHP Warning:  Undefined variable $non_existent_variable in C:\xampp\htdocs\Color_Ink\test_logging.php on line 36
+[21-Oct-2025 02:35:47 America/Tegucigalpa] PHP Warning:  Undefined array key "non_existent_key" in C:\xampp\htdocs\Color_Ink\test_logging.php on line 40
+[21-Oct-2025 02:45:50 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 02:45:50 America/Tegucigalpa] PedidosModel - testConnection: Probando conexión a BD
+[21-Oct-2025 02:45:50 America/Tegucigalpa] PedidosModel - testConnection: Resultado: Conexión exitosa
+[21-Oct-2025 02:45:50 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 02:45:51 America/Tegucigalpa] ERROR PedidosModel - getAllPedidos: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.fecha_compromiso' in 'field list'
+[21-Oct-2025 02:45:51 America/Tegucigalpa] PedidosModel - createPedido: Creando pedido - Numero: PED-WEB-20251021024551, Usuario: 1
+[21-Oct-2025 02:45:51 America/Tegucigalpa] ERROR PedidosModel - createPedido: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'fecha_compromiso' in 'field list'
+[21-Oct-2025 02:48:19 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 02:48:19 America/Tegucigalpa] PedidosModel - testConnection: Probando conexión a BD
+[21-Oct-2025 02:48:19 America/Tegucigalpa] PedidosModel - testConnection: Resultado: Conexión exitosa
+[21-Oct-2025 02:48:19 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 02:48:19 America/Tegucigalpa] ERROR PedidosModel - getAllPedidos: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.fecha_compromiso' in 'field list'
+[21-Oct-2025 02:48:19 America/Tegucigalpa] PedidosModel - createPedido: Creando pedido - Numero: PED-WEB-20251021024819, Usuario: 1
+[21-Oct-2025 02:48:19 America/Tegucigalpa] ERROR PedidosModel - createPedido: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'fecha_compromiso' in 'field list'
+[21-Oct-2025 02:49:24 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 02:49:24 America/Tegucigalpa] PedidosModel - testConnection: Probando conexión a BD
+[21-Oct-2025 02:49:24 America/Tegucigalpa] PedidosModel - testConnection: Resultado: Conexión exitosa
+[21-Oct-2025 02:49:24 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 02:49:24 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 6 pedidos
+[21-Oct-2025 02:49:24 America/Tegucigalpa] PedidosModel - createPedido: Creando pedido - Numero: PED-WEB-20251021024924, Usuario: 1
+[21-Oct-2025 02:49:24 America/Tegucigalpa] ERROR PedidosModel - createPedido: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'fecha_compromiso' in 'NEW'
+[21-Oct-2025 02:50:56 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 02:51:49 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:02:32 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:03:08 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - testConnection: Probando conexión a BD
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - testConnection: Resultado: Conexión exitosa
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 6 pedidos
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - createPedido: Creando pedido - Numero: PED-WEB-20251021030308, Usuario: 1
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - createPedido: Pedido creado con ID: 10
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 10
+[21-Oct-2025 03:03:08 America/Tegucigalpa] ERROR PedidosModel - getPedidoById: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.fecha_compromiso' in 'field list'
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - createDetallePedido: Creando detalle para pedido 10
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - createDetallePedido: Creación de detalle exitosa
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - updatePedido: Actualizando pedido 10 - FechaEntrega: 2025-10-31, Estado: 3
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - updatePedido: Actualización exitosa
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - cambiarEstadoPedido: Cambiando estado pedido 10 a 1 por usuario 1
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - cambiarEstadoPedido: Cambio de estado exitoso
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - getEstados: Obteniendo estados disponibles
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - getEstados: Se encontraron 3 estados
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 10
+[21-Oct-2025 03:03:08 America/Tegucigalpa] ERROR PedidosModel - getPedidoById: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.fecha_compromiso' in 'field list'
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - deletePedido: Eliminando pedido ID: 10
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - deletePedido: Eliminación exitosa
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 03:03:08 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 6 pedidos
+[21-Oct-2025 03:04:37 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:04:37 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 03:04:37 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[21-Oct-2025 03:04:37 America/Tegucigalpa] PedidosRoute - Method: GET
+[21-Oct-2025 03:04:37 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[21-Oct-2025 03:04:37 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[21-Oct-2025 03:04:37 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=, SubAction='', SubID=
+[21-Oct-2025 03:04:37 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[21-Oct-2025 03:04:37 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 03:04:37 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 03:04:37 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 03:04:37 America/Tegucigalpa] Token invalido o expiroInvalidArgumentException: Key may not be empty in C:\xampp\htdocs\Color_Ink\vendor\firebase\php-jwt\src\JWT.php:88
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Config\Security.php(82): Firebase\JWT\JWT::decode('token_temporal_...', '', Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(29): App\Config\Security::validateTokenJwt(Array, '')
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(182): App\Controllers\PedidosController->authorize(Array, Array)
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(89): App\Controllers\PedidosController->findAll(Array)
+#4 C:\xampp\htdocs\Color_Ink\test_api_mejorado.php(41): include('C:\\xampp\\htdocs...')
+#5 {main}
+[21-Oct-2025 03:05:10 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:05:10 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 03:05:10 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 6 pedidos
+[21-Oct-2025 03:05:10 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:05:10 America/Tegucigalpa] PedidosModel - createPedido: Creando pedido - Numero: PED-DIRECT-20251021030510, Usuario: 1
+[21-Oct-2025 03:05:10 America/Tegucigalpa] PedidosModel - createPedido: Pedido creado con ID: 11
+[21-Oct-2025 03:05:10 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 11
+[21-Oct-2025 03:05:10 America/Tegucigalpa] ERROR PedidosModel - getPedidoById: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.fecha_compromiso' in 'field list'
+[21-Oct-2025 03:05:10 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:05:10 America/Tegucigalpa] PedidosModel - getEstados: Obteniendo estados disponibles
+[21-Oct-2025 03:05:10 America/Tegucigalpa] PedidosModel - getEstados: Se encontraron 3 estados
+[21-Oct-2025 03:05:10 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:05:10 America/Tegucigalpa] PedidosModel - testConnection: Probando conexión a BD
+[21-Oct-2025 03:05:10 America/Tegucigalpa] PedidosModel - testConnection: Resultado: Conexión exitosa
+[21-Oct-2025 03:05:22 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - testConnection: Probando conexión a BD
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - testConnection: Resultado: Conexión exitosa
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 7 pedidos
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - createPedido: Creando pedido - Numero: PED-WEB-20251021030522, Usuario: 1
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - createPedido: Pedido creado con ID: 12
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 12
+[21-Oct-2025 03:05:22 America/Tegucigalpa] ERROR PedidosModel - getPedidoById: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.fecha_compromiso' in 'field list'
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - createDetallePedido: Creando detalle para pedido 12
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - createDetallePedido: Creación de detalle exitosa
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - updatePedido: Actualizando pedido 12 - FechaEntrega: 2025-10-31, Estado: 3
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - updatePedido: Actualización exitosa
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - cambiarEstadoPedido: Cambiando estado pedido 12 a 1 por usuario 1
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - cambiarEstadoPedido: Cambio de estado exitoso
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - getEstados: Obteniendo estados disponibles
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - getEstados: Se encontraron 3 estados
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 12
+[21-Oct-2025 03:05:22 America/Tegucigalpa] ERROR PedidosModel - getPedidoById: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.fecha_compromiso' in 'field list'
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - deletePedido: Eliminando pedido ID: 12
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - deletePedido: Eliminación exitosa
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 03:05:22 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 7 pedidos
+[21-Oct-2025 03:10:07 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:10:07 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:10:07 America/Tegucigalpa] PHP Warning:  Undefined variable $pedidoId in C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php on line 10
+[21-Oct-2025 03:10:07 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:10:07 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 03:10:07 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[21-Oct-2025 03:10:07 America/Tegucigalpa] PedidosRoute - Method: GET
+[21-Oct-2025 03:10:07 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[21-Oct-2025 03:10:07 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[21-Oct-2025 03:10:07 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=, SubAction='', SubID=
+[21-Oct-2025 03:10:07 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[21-Oct-2025 03:10:07 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 03:10:07 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 03:10:07 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 03:10:07 America/Tegucigalpa] Token invalido o expiroInvalidArgumentException: Key may not be empty in C:\xampp\htdocs\Color_Ink\vendor\firebase\php-jwt\src\JWT.php:88
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Config\Security.php(82): Firebase\JWT\JWT::decode('token_temporal_...', '', Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(29): App\Config\Security::validateTokenJwt(Array, '')
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(182): App\Controllers\PedidosController->authorize(Array, Array)
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(89): App\Controllers\PedidosController->findAll(Array)
+#4 C:\xampp\htdocs\Color_Ink\test_conexion_detallado.php(64): include('C:\\xampp\\htdocs...')
+#5 {main}
+[21-Oct-2025 03:12:55 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosControllerPublico.php on line 20
+[21-Oct-2025 03:12:55 America/Tegucigalpa] === PEDIDOS PUBLICO ROUTE ===
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Method: GET
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - URL: pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Segments: ["pedidos"]
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Parsed: Action='pedidos', ID=, SubAction=''
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Routing: GET /pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosControllerPublico - findAll: Obteniendo todos los pedidos (SIN AUTENTICACIÓN)
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 7 pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosControllerPublico - findAll: Procesados 7 pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\Color_Ink\test_ruta_publica.php:8) in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosControllerPublico.php on line 39
+[21-Oct-2025 03:12:55 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosControllerPublico.php on line 20
+[21-Oct-2025 03:12:55 America/Tegucigalpa] === PEDIDOS PUBLICO ROUTE ===
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Method: GET
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - URL: pedidos/estados
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Segments: ["pedidos","estados"]
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Parsed: Action='pedidos', ID=, SubAction=''
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Routing: GET /pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosControllerPublico - findAll: Obteniendo todos los pedidos (SIN AUTENTICACIÓN)
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 7 pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosControllerPublico - findAll: Procesados 7 pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\Color_Ink\test_ruta_publica.php:8) in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosControllerPublico.php on line 39
+[21-Oct-2025 03:12:55 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosControllerPublico.php on line 20
+[21-Oct-2025 03:12:55 America/Tegucigalpa] === PEDIDOS PUBLICO ROUTE ===
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Method: POST
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - URL: pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Segments: ["pedidos"]
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Input data: []
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Parsed: Action='pedidos', ID=, SubAction=''
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosPublicoRoute - Routing: POST /pedidos
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosControllerPublico - create: Iniciando creación de pedido (SIN AUTENTICACIÓN)
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosControllerPublico - create: Datos - Numero: , Cliente: , Usuario: 1
+[21-Oct-2025 03:12:55 America/Tegucigalpa] PedidosControllerPublico - create: Número de pedido requerido
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PHP Warning:  Undefined variable $pedidoId in C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php on line 10
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PHP Warning:  Undefined variable $pedidoId in C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php on line 10
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PHP Warning:  mkdir(): File exists in C:\xampp\htdocs\Color_Ink\src\Config\PedidosLogger.php on line 37
+[21-Oct-2025 03:16:11 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:16:11 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:16:11 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosRoute - Method: GET
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=, SubAction='', SubID=
+[21-Oct-2025 03:16:11 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosRoute - Method: GET
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=, SubAction='', SubID=
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 03:16:11 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 03:25:09 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:28:58 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:28:58 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 03:28:58 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Call to undefined function getallheaders() in C:\xampp\htdocs\Color_Ink\test_pedidos_mejorado.php:14
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\test_pedidos_mejorado.php on line 14
+[21-Oct-2025 03:29:24 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:29:24 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 03:29:24 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 03:29:24 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 03:29:24 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 03:29:24 America/Tegucigalpa] Token invalido o expiroUnexpectedValueException: Wrong number of segments in C:\xampp\htdocs\Color_Ink\vendor\firebase\php-jwt\src\JWT.php:92
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Config\Security.php(90): Firebase\JWT\JWT::decode('dummy-token-for...', '12345HOLAMUNDO/...', Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(29): App\Config\Security::validateTokenJwt(Array, '12345HOLAMUNDO/...')
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(182): App\Controllers\PedidosController->authorize(Array, Array)
+#3 C:\xampp\htdocs\Color_Ink\test_pedidos_mejorado.php(27): App\Controllers\PedidosController->findAll(Array)
+#4 {main}
+[21-Oct-2025 03:29:59 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:29:59 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:29:59 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 03:29:59 America/Tegucigalpa] PHP Warning:  Undefined variable $response in C:\xampp\htdocs\Color_Ink\test_pedidos_mejorado.php on line 56
+[21-Oct-2025 03:29:59 America/Tegucigalpa] PHP Deprecated:  json_decode(): Passing null to parameter #1 ($json) of type string is deprecated in C:\xampp\htdocs\Color_Ink\test_pedidos_mejorado.php on line 56
+[21-Oct-2025 03:29:59 America/Tegucigalpa] PedidosController - testConnection: Iniciando test de conexión
+[21-Oct-2025 03:29:59 America/Tegucigalpa] PedidosModel - testConnection: Probando conexión a BD
+[21-Oct-2025 03:29:59 America/Tegucigalpa] PedidosModel - testConnection: Resultado: Conexión exitosa
+[21-Oct-2025 03:29:59 America/Tegucigalpa] PedidosController - testConnection: Resultado - Conexión exitosa
+[21-Oct-2025 03:38:19 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:38:19 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:38:19 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 03:38:19 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 7 pedidos
+[21-Oct-2025 03:38:19 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:38:19 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 03:38:19 America/Tegucigalpa] PedidosController - testConnection: Iniciando test de conexión
+[21-Oct-2025 03:38:19 America/Tegucigalpa] PedidosModel - testConnection: Probando conexión a BD
+[21-Oct-2025 03:38:19 America/Tegucigalpa] PedidosModel - testConnection: Resultado: Conexión exitosa
+[21-Oct-2025 03:38:19 America/Tegucigalpa] PedidosController - testConnection: Resultado - Conexión exitosa
+[21-Oct-2025 03:38:19 America/Tegucigalpa] PHP Warning:  Undefined variable $pedidoId in C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php on line 10
+[21-Oct-2025 03:38:19 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Call to undefined function getallheaders() in C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php:18
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\test_conexion_detallado.php(68): require()
+#1 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php on line 18
+[21-Oct-2025 03:39:30 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:39:30 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 03:39:30 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[21-Oct-2025 03:39:30 America/Tegucigalpa] PedidosRoute - Method: GET
+[21-Oct-2025 03:39:30 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[21-Oct-2025 03:39:30 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[21-Oct-2025 03:39:30 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=, SubAction='', SubID=
+[21-Oct-2025 03:39:30 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[21-Oct-2025 03:39:30 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 03:39:30 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 03:39:30 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 03:39:30 America/Tegucigalpa] Token invalido o expiroUnexpectedValueException: Wrong number of segments in C:\xampp\htdocs\Color_Ink\vendor\firebase\php-jwt\src\JWT.php:92
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Config\Security.php(90): Firebase\JWT\JWT::decode('token_temporal_...', '12345HOLAMUNDO/...', Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(29): App\Config\Security::validateTokenJwt(Array, '12345HOLAMUNDO/...')
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(182): App\Controllers\PedidosController->authorize(Array, Array)
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(89): App\Controllers\PedidosController->findAll(Array)
+#4 C:\xampp\htdocs\Color_Ink\test_api_mejorado.php(41): include('C:\\xampp\\htdocs...')
+#5 {main}
+[21-Oct-2025 03:39:53 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:39:53 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 03:39:53 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 7 pedidos
+[21-Oct-2025 03:39:53 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:39:53 America/Tegucigalpa] PedidosModel - createPedido: Creando pedido - Numero: PED-DIRECT-20251021033953, Usuario: 1
+[21-Oct-2025 03:39:53 America/Tegucigalpa] PedidosModel - createPedido: Pedido creado con ID: 13
+[21-Oct-2025 03:39:53 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 13
+[21-Oct-2025 03:39:53 America/Tegucigalpa] ERROR PedidosModel - getPedidoById: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.fecha_compromiso' in 'field list'
+[21-Oct-2025 03:39:53 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:39:53 America/Tegucigalpa] PedidosModel - getEstados: Obteniendo estados disponibles
+[21-Oct-2025 03:39:53 America/Tegucigalpa] PedidosModel - getEstados: Se encontraron 3 estados
+[21-Oct-2025 03:39:53 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 03:39:53 America/Tegucigalpa] PedidosModel - testConnection: Probando conexión a BD
+[21-Oct-2025 03:39:53 America/Tegucigalpa] PedidosModel - testConnection: Resultado: Conexión exitosa
+[21-Oct-2025 04:49:20 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - authorize: JWT válido - Usuario ID: 1
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 8 pedidos
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - findAll: Procesados 8 pedidos
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\Color_Ink\test_auth_detallado.php:7) in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 197
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PHP Warning:  Undefined variable $pedidoId in C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php on line 10
+[21-Oct-2025 04:49:20 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 04:49:20 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosRoute - Method: GET
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=, SubAction='', SubID=
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - authorize: JWT válido - Usuario ID: 1
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 8 pedidos
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PedidosController - findAll: Procesados 8 pedidos
+[21-Oct-2025 04:49:20 America/Tegucigalpa] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\Color_Ink\test_auth_detallado.php:7) in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 197
+[21-Oct-2025 04:49:20 America/Tegucigalpa] Token invalido o expiroUnexpectedValueException: Wrong number of segments in C:\xampp\htdocs\Color_Ink\vendor\firebase\php-jwt\src\JWT.php:92
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Config\Security.php(90): Firebase\JWT\JWT::decode('token_temporal_...', '12345HOLAMUNDO/...', Array)
+#1 C:\xampp\htdocs\Color_Ink\test_auth_detallado.php(105): App\Config\Security::validateTokenJwt(Array, '12345HOLAMUNDO/...')
+#2 {main}
+[21-Oct-2025 04:50:53 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - authorize: JWT válido - Usuario ID: 1
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 8 pedidos
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - findAll: Procesados 8 pedidos
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\Color_Ink\test_auth_detallado.php:7) in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 197
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PHP Warning:  Undefined variable $pedidoId in C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php on line 10
+[21-Oct-2025 04:50:53 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PHP Warning:  session_start(): Session cannot be started after headers have already been sent in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 18
+[21-Oct-2025 04:50:53 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosRoute - Method: GET
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=, SubAction='', SubID=
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - authorize: JWT válido - Usuario ID: 1
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 8 pedidos
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PedidosController - findAll: Procesados 8 pedidos
+[21-Oct-2025 04:50:53 America/Tegucigalpa] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\Color_Ink\test_auth_detallado.php:7) in C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php on line 197
+[21-Oct-2025 04:50:53 America/Tegucigalpa] Token invalido o expiroUnexpectedValueException: Wrong number of segments in C:\xampp\htdocs\Color_Ink\vendor\firebase\php-jwt\src\JWT.php:92
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Config\Security.php(90): Firebase\JWT\JWT::decode('token_temporal_...', '12345HOLAMUNDO/...', Array)
+#1 C:\xampp\htdocs\Color_Ink\test_auth_detallado.php(105): App\Config\Security::validateTokenJwt(Array, '12345HOLAMUNDO/...')
+#2 {main}
+[21-Oct-2025 05:54:13 America/Tegucigalpa] PHP Warning:  Undefined array key "PASS" in C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php on line 20
+[21-Oct-2025 05:54:13 America/Tegucigalpa] PHP Warning:  Undefined array key "HOST" in C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php on line 21
+[21-Oct-2025 05:54:13 America/Tegucigalpa] PHP Deprecated:  PDO::__construct(): Passing null to parameter #1 ($dsn) of type string is deprecated in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 27
+[21-Oct-2025 05:54:13 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: PDO::__construct(): Argument #1 ($dsn) must be a valid data source name in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php(28): App\DB\connectionDB::getConnection()
+#2 {main}
+[21-Oct-2025 05:54:13 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php(28): App\DB\connectionDB::getConnection()
+#1 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[21-Oct-2025 05:54:16 America/Tegucigalpa] PHP Warning:  Undefined array key "PASS" in C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php on line 20
+[21-Oct-2025 05:54:16 America/Tegucigalpa] PHP Warning:  Undefined array key "HOST" in C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php on line 21
+[21-Oct-2025 05:54:16 America/Tegucigalpa] PHP Deprecated:  PDO::__construct(): Passing null to parameter #1 ($dsn) of type string is deprecated in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 27
+[21-Oct-2025 05:54:16 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: PDO::__construct(): Argument #1 ($dsn) must be a valid data source name in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php(28): App\DB\connectionDB::getConnection()
+#2 {main}
+[21-Oct-2025 05:54:16 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php(28): App\DB\connectionDB::getConnection()
+#1 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[21-Oct-2025 05:54:23 America/Tegucigalpa] PHP Warning:  Undefined array key "PASS" in C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php on line 20
+[21-Oct-2025 05:54:23 America/Tegucigalpa] PHP Warning:  Undefined array key "HOST" in C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php on line 21
+[21-Oct-2025 05:54:23 America/Tegucigalpa] PHP Deprecated:  PDO::__construct(): Passing null to parameter #1 ($dsn) of type string is deprecated in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 27
+[21-Oct-2025 05:54:23 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: PDO::__construct(): Argument #1 ($dsn) must be a valid data source name in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php(28): App\DB\connectionDB::getConnection()
+#2 {main}
+[21-Oct-2025 05:54:23 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php(28): App\DB\connectionDB::getConnection()
+#1 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[21-Oct-2025 05:54:28 America/Tegucigalpa] PHP Warning:  Undefined array key "PASS" in C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php on line 20
+[21-Oct-2025 05:54:28 America/Tegucigalpa] PHP Warning:  Undefined array key "HOST" in C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php on line 21
+[21-Oct-2025 05:54:28 America/Tegucigalpa] PHP Deprecated:  PDO::__construct(): Passing null to parameter #1 ($dsn) of type string is deprecated in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 27
+[21-Oct-2025 05:54:28 America/Tegucigalpa] Error en la conexión a la BD! ERROR: PDOException: PDO::__construct(): Argument #1 ($dsn) must be a valid data source name in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:27
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php(27): PDO->__construct('', 'root', Object(SensitiveParameterValue), Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php(28): App\DB\connectionDB::getConnection()
+#2 {main}
+[21-Oct-2025 05:54:28 America/Tegucigalpa] PHP Fatal error:  Uncaught Error: Class "App\DB\resposeHTTP" not found in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php:33
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Views\PHP\test_conexion_vista.php(28): App\DB\connectionDB::getConnection()
+#1 {main}
+  thrown in C:\xampp\htdocs\Color_Ink\src\DB\connectionDB.php on line 33
+[21-Oct-2025 05:57:33 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 11:22:33 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 11:22:33 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[21-Oct-2025 11:22:33 America/Tegucigalpa] PedidosRoute - Method: GET
+[21-Oct-2025 11:22:33 America/Tegucigalpa] PedidosRoute - URL: test-connection
+[21-Oct-2025 11:22:33 America/Tegucigalpa] PedidosRoute - Segments: ["test-connection"]
+[21-Oct-2025 11:22:33 America/Tegucigalpa] PedidosController - testConnection: Iniciando test de conexión
+[21-Oct-2025 11:22:33 America/Tegucigalpa] PedidosModel - testConnection: Probando conexión a BD
+[21-Oct-2025 11:22:33 America/Tegucigalpa] PedidosModel - testConnection: Conexión exitosa
+[21-Oct-2025 11:22:33 America/Tegucigalpa] PedidosController - testConnection: Resultado - OK
+[21-Oct-2025 11:22:34 America/Tegucigalpa] Conexión exitosa
+[21-Oct-2025 11:22:34 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[21-Oct-2025 11:22:34 America/Tegucigalpa] PedidosRoute - Method: GET
+[21-Oct-2025 11:22:34 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[21-Oct-2025 11:22:34 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[21-Oct-2025 11:22:34 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[21-Oct-2025 11:22:34 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[21-Oct-2025 11:22:34 America/Tegucigalpa] PedidosController - authorize: Iniciando autorización
+[21-Oct-2025 11:22:34 America/Tegucigalpa] PedidosController - authorize: Validando JWT local
+[21-Oct-2025 11:22:34 America/Tegucigalpa] Token invalido o expiroUnexpectedValueException: Wrong number of segments in C:\xampp\htdocs\Color_Ink\vendor\firebase\php-jwt\src\JWT.php:92
+Stack trace:
+#0 C:\xampp\htdocs\Color_Ink\src\Config\Security.php(90): Firebase\JWT\JWT::decode('token_temporal_...', '12345HOLAMUNDO/...', Array)
+#1 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(41): App\Config\Security::validateTokenJwt(Array, '12345HOLAMUNDO/...')
+#2 C:\xampp\htdocs\Color_Ink\src\Controllers\PedidosController.php(199): App\Controllers\PedidosController->authorize(Array, Array)
+#3 C:\xampp\htdocs\Color_Ink\src\Routes\pedidos.php(119): App\Controllers\PedidosController->findAll(Array)
+#4 {main}

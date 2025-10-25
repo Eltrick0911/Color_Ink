@@ -1,7 +1,6 @@
 <?php
 
-namespace App\Config; //nombre de espacios
-
+namespace App\Config; 
 use Dotenv\Dotenv; //variables de entorno https://github.com/vlucas/phpdotenv 
 use Firebase\JWT\JWT; //para generar nuestro JWT https://github.com/firebase/php-jwt
 //use Bulletproof\Image;
@@ -41,10 +40,6 @@ class Security {
         
     }
 
-    /*MEtodo para crear JWT*/
-    /*PARAM: 1.	SECRET_KEY
-             2.	ARRAY con la data que queremos encriptar*/
-
     final public static function createTokenJwt(string $key , array $data)
     {
         $payload = array ( //Cuerpo del JWT
@@ -56,19 +51,10 @@ class Security {
         
         //creamos el JWT recibe varios parametros pero nos interesa el payload y la key en el metodo encode de JWT
         $jwt = JWT::encode($payload,$key);
-       // print_r($jwt);
         return $jwt;
     }
-
-    /*Validamos que el JWT sea correcto*/
-    //recibimos dos parametros uno es un array y otro es la KEY para decifrar nuestro JWT
     final public static function validateTokenJwt(array $token, string $key)
     {
-       // print_r($token);
-        //usaremos el metodo getallheader() el que Recupera todas las cabeceras de petición HTTP
-        //buscaremos la cabecera Autorization, sino existe la detiene y manda un mensaje de error
-        //thunterClient autorization 
-        //postman Autorization
         if (!isset($token['Authorization'])) {
             //echo "El token de acceso en requerido";
             die(json_encode(ResponseHttp::status400("Para proceder el token de acceso es requerido!")));            
@@ -76,15 +62,9 @@ class Security {
         }
         try {
             //recibimos el token de acceso y creamos el array 
-            //se veria mas o menos asi 
-            // $token = "Bearer token"; posicion 0 y posicion 1
             $jwt = explode(" " ,$token['Authorization']);
             $data = JWT::decode($jwt[1],$key,array('HS256')); //param1: token, param2: clave, param3: metodo por defecto de encriptacion 
-            //necesitamos crear un array asociativo para poder retornarlo y que sea mas facil recorrerlo
-            //1. definimos el atributo 
-            //private static $jwt_data;//Propiedad para guardar los datos decodificados del JWT 
-
-            self::$jwt_data = $data; //le pasamos el jwt decodificado y lo retornamos
+            self::$jwt_data = $data; 
             return $data;
             exit;
         } catch (\Exception $e) {
