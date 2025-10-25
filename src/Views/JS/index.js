@@ -26,7 +26,7 @@ async function checkAuthAndSetupUI() {
             sessionStorage.removeItem('firebase_id_token');
             sessionStorage.removeItem('access_token');
             sessionStorage.removeItem('user');
-            window.location.href = 'login.php';
+            window.location.href = '/Color_Ink/public/login';
             return;
         }
         
