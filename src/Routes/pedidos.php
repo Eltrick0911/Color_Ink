@@ -98,8 +98,6 @@ try {
         $urlSegments = ['pedidos'];
     }
 
-    // Log de información de la petición
-    $logger = new PedidosLogger();
     $logger->info("Nueva petición - Método: $method, URL: $url");
     $logger->debug("Headers: " . json_encode($headers));
     
