@@ -10,14 +10,14 @@
      <link rel="icon" href="/Color_Ink/src/Views/IMG/LOGO.png" type="image/png">
 </head>
 <body>
-    <!-- ===== SISTEMA DE AUTENTICACIÓN (Agregado de la API ACTUAL) ===== -->
+  
     <script>
         if (typeof window.authGuard === 'function') {
             window.authGuard();
         }
     </script>
     
-    <!-- ===== HEADER CON NAVEGACIÓN (Agregado de la API ACTUAL) ===== -->
+    
     <header class="main">
         <i class="fa-solid fa-user user-icon" onclick="resetBarPosition()"></i>
         <div class="icon-bar-container" id="iconBarContainer">
@@ -31,13 +31,11 @@
       <a href="login"> <i class="fa-solid fa-arrow-right user-icon" title="Salir" ></i></a> 
     </header>
 
-    <!-- ===== CONTENIDO PRINCIPAL (Conservado de la API NUEVA) ===== -->
     <main class="login-section">
         <h1>COLOR INK</h1>
         <img src="/Color_Ink/src/Views/IMG/COLOR INK.gif" alt="Color Ink Logo"> <!-- Placeholder para el logo -->
     </main>
 
-<!-- ===== SCRIPTS FUSIONADOS ===== -->
 <script src="/Color_Ink/src/Views/JS/login.js"></script>
 <script src="/Color_Ink/src/Views/JS/index.js"></script>
 <script src="/Color_Ink/src/Views/JS/sidebar.js"></script>

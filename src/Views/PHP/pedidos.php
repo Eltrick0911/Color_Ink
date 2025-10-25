@@ -402,6 +402,6 @@
 
     <script src="/Color_Ink/src/Views/JS/sidebar.js"></script>
     <script src="/Color_Ink/src/Views/JS/pedidos.js"></script>
-    <script src="/Color_Ink/src/Views/JS/pedidosmvc_new.js"></script>
+    <script src="/Color_Ink/src/Views/JS/pedidosmvc.js"></script>
 </body>
 </html>
