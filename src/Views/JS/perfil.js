@@ -125,6 +125,40 @@ async function getCurrentUser() {
     }
 }
 
+// Función para cargar datos frescos del usuario desde el servidor
+async function loadFreshUserData(userId) {
+    try {
+        const token = sessionStorage.getItem('access_token') || sessionStorage.getItem('firebase_id_token');
+        const authHeader = token ? `Bearer ${token}` : '';
+        
+        console.log('🔄 PERFIL: Cargando datos frescos para ID:', userId);
+        
+        const response = await fetch(`${getApiBase()}/public/index.php?route=user&caso=1&action=getById&id=${userId}`, {
+            headers: { 'Authorization': authHeader }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ PERFIL: Datos frescos recibidos:', data);
+            // Verificar estructura de respuesta
+            if (data && data.data && typeof data.data === 'object') {
+                return data.data;
+            } else if (data && typeof data === 'object' && data.nombre_usuario) {
+                return data;
+            } else {
+                console.warn('⚠️ PERFIL: Estructura de datos frescos no válida');
+                return null;
+            }
+        } else {
+            console.warn('⚠️ PERFIL: Error obteniendo datos frescos');
+            return null;
+        }
+    } catch (error) {
+        console.error('❌ PERFIL: Error cargando datos frescos:', error);
+        return null;
+    }
+}
+
 // Función para cargar el perfil del usuario
 async function loadUserProfile(user) {
     try {
@@ -142,8 +176,22 @@ async function loadUserProfile(user) {
         
         if (response.ok) {
             const data = await response.json();
-            displayUserProfile(data.data);
+            console.log('✅ PERFIL: Datos recibidos del servidor:', data);
+            
+            // Verificar que data.data existe y tiene contenido
+            if (data && data.data && typeof data.data === 'object') {
+                displayUserProfile(data.data);
+            } else if (data && typeof data === 'object' && data.nombre_usuario) {
+                // Si data es directamente el usuario (sin .data anidado)
+                console.log('✅ PERFIL: Usando datos directos del servidor');
+                displayUserProfile(data);
+            } else {
+                console.warn('⚠️ PERFIL: Estructura de datos no válida, usando datos básicos');
+                console.log('🔍 PERFIL: Estructura recibida:', data);
+                displayUserProfile(user);
+            }
         } else {
+            console.warn('⚠️ PERFIL: Error en respuesta del servidor, usando datos básicos');
             // Si no se puede obtener información completa, usar la básica
             displayUserProfile(user);
         }
@@ -155,6 +203,25 @@ async function loadUserProfile(user) {
 
 // Función para mostrar el perfil del usuario
 function displayUserProfile(user) {
+    console.log('🔍 displayUserProfile - user recibido:', user);
+    
+    // Verificar que user existe y tiene datos
+    if (!user || typeof user !== 'object') {
+        console.error('❌ displayUserProfile: user es undefined o no es un objeto');
+        return;
+    }
+    
+    // Si el usuario no tiene datos completos, intentar cargar datos frescos
+    if (!user.nombre_usuario || !user.correo) {
+        console.log('🔄 PERFIL: Datos incompletos, cargando datos frescos...');
+        loadFreshUserData(user.id_usuario).then(freshData => {
+            if (freshData) {
+                displayUserProfile(freshData);
+            }
+        });
+        return;
+    }
+    
     // Actualizar información básica
     document.getElementById('userName').textContent = user.nombre_usuario || 'No disponible';
     document.getElementById('userEmail').textContent = user.correo || 'No disponible';
@@ -252,8 +319,16 @@ async function saveProfile(e) {
         if (response.ok) {
             showSuccess('Perfil actualizado exitosamente');
             hideEditForm();
-            // Recargar perfil
-            loadUserProfile(user);
+            // Recargar perfil con datos frescos desde el servidor
+            console.log('✅ PERFIL: Recargando perfil después de actualización');
+            const freshUserData = await loadFreshUserData(user.id_usuario);
+            if (freshUserData) {
+                displayUserProfile(freshUserData);
+            } else {
+                // Fallback: recargar página completa
+                console.warn('⚠️ PERFIL: No se pudieron obtener datos frescos, recargando página');
+                location.reload();
+            }
         } else {
             const errorData = await response.json();
             showError(errorData.message || 'Error actualizando perfil');

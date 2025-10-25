@@ -49,11 +49,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js?v=20250923"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js?v=20250923"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBM1Wj1JSqHRHKoCwId-vhJ7eisM7ieTAY",
-            authDomain: "miappwebinkproject.firebaseapp.com",
-            projectId: "miappwebinkproject"
-        };
+const firebaseConfig = {
+  apiKey: "AIzaSyAn66xkpFEzcdkmkp3iX4VrEUZCd3sI4sk",
+  authDomain: "colorink-a3c91.firebaseapp.com",
+  projectId: "colorink-a3c91",
+  storageBucket: "colorink-a3c91.firebasestorage.app",
+  messagingSenderId: "676988193109",
+  appId: "1:676988193109:web:21e1b37ffdc6e2cb12c7dc"
+};
         if (typeof firebase !== 'undefined' && firebase.apps?.length === 0) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -91,6 +94,22 @@
                     }
                     const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
                     await cred.user.updateProfile({ displayName: `${nombre} ${apellido}`.trim() });
+                    // También registrar en la BD privada
+                    const backendRes = await fetch(`${base}/public/index.php?route=auth&caso=1&action=register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nombre_usuario: `${nombre} ${apellido}`.trim(),
+                            correo: email,
+                            contrasena: pass,
+                            telefono: tel
+                        })
+                    });
+                    if (!backendRes.ok) {
+                        const errData = await backendRes.json().catch(()=>({message:'Error desconocido'}));
+                        alert('Error al registrar en la base de datos: ' + (errData.message || backendRes.statusText));
+                        return;
+                    }
                     // Cerrar sesión para forzar flujo de login
                     await firebase.auth().signOut();
                     alert('Registro exitoso. Ahora inicia sesión con tus credenciales.');

@@ -1,0 +1,15 @@
+# Archivos de configuración sensibles
+# src/Config/firebase_config.php  # Temporalmente comentado para funcionar en otros dispositivos
+.env
+*.env
+
+# Logs
+src/Logs/*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
