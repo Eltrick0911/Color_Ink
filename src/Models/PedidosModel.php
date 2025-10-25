@@ -16,7 +16,7 @@ class PedidosModel
         $this->connection = connectionDB::getConnection();
     }
 
-    // ===== MÉTODOS PARA PEDIDOS =====
+ 
 
     /**
      * Crear un nuevo pedido

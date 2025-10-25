@@ -1,8 +1,7 @@
 <?php
-// Prevenir cualquier salida antes de los headers
+
 ob_start();
 
-// Incluir el autoloader de Composer
 $autoloadPath = realpath(__DIR__ . '/../../vendor/autoload.php');
 if (!$autoloadPath || !file_exists($autoloadPath)) {
     header('Content-Type: application/json');

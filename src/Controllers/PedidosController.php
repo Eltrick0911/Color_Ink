@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Models\PedidosModel;
 use App\Config\Security;
 use App\Config\responseHTTP;
-use App\Config\PedidosLogger;
 use App\Controllers\FirebaseController;
 
 // Verificar que la clase existe
