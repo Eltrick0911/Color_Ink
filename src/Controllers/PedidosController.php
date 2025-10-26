@@ -98,25 +98,58 @@ class PedidosController
                 return;
             }
 
+            // Extraer y validar datos del formulario
             $numeroPedido = trim($input['numero_pedido'] ?? '');
-            $fechaCompromiso = $input['fecha_compromiso'] ?? '';
+            // Aceptar alias de campos para mayor robustez
+            $clienteNombre = trim($input['usuario'] ?? ($input['clienteNombre'] ?? '')) ?: null;
+            $clienteTelefono = trim($input['telefono'] ?? ($input['clienteTelefono'] ?? '')) ?: null;
+            $canalVenta = trim($input['canalVenta'] ?? ($input['canal_venta'] ?? '')) ?: null;
+            $prioridad = trim($input['prioridad'] ?? 'normal');
+            $fechaEntrega = trim($input['fechaEntrega'] ?? ($input['fecha_entrega'] ?? '')) ?: null;
             $observaciones = trim($input['observaciones'] ?? '') ?: null;
+            
+            // Construir detalles_producto desde el formulario personalizado
+            $detallesProducto = $this->construirDetallesProducto($input);
+            
             $idUsuario = $user['id_usuario']; // Usar usuario autenticado
 
-            error_log("PedidosController - create: Datos - Numero: $numeroPedido, FechaCompromiso: $fechaCompromiso, Usuario: $idUsuario");
+            error_log("PedidosController - create: Datos - Cliente: $clienteNombre, Canal: $canalVenta, Usuario: $idUsuario");
 
-            // Validar campos requeridos
-            if (empty($numeroPedido) || empty($fechaCompromiso)) {
-                error_log('PedidosController - create: Campos requeridos faltantes');
-                echo json_encode(responseHTTP::status400('Número de pedido y fecha de compromiso son requeridos'));
+            // Generar número de pedido si no viene
+            if (empty($numeroPedido)) {
+                $numeroPedido = 'PED-' . date('Ymd-His') . '-' . bin2hex(random_bytes(2));
+            }
+
+            // Validar fecha de entrega (requerida)
+            if (empty($fechaEntrega)) {
+                error_log('PedidosController - create: Fecha de entrega requerida');
+                echo json_encode(responseHTTP::status400('Fecha de entrega es requerida'));
                 return;
             }
 
-            $idPedido = $this->pedidosModel->createPedido($numeroPedido, $fechaCompromiso, $observaciones, $idUsuario);
+            $idPedido = $this->pedidosModel->createPedido(
+                $numeroPedido,
+                $idUsuario,
+                $clienteNombre,
+                $clienteTelefono,
+                $canalVenta,
+                $prioridad,
+                $observaciones,
+                $detallesProducto,
+                $fechaEntrega
+            );
             
             if ($idPedido) {
                 error_log("PedidosController - create: Pedido creado exitosamente - ID: $idPedido");
-                echo json_encode(responseHTTP::status200('Pedido creado exitosamente') + ['data' => ['id_pedido_creado' => $idPedido]]);
+                // Devolver el registro completo en la respuesta (JSON)
+                $pedidoCompleto = $this->pedidosModel->getPedidoById((int)$idPedido) ?? [];
+                $resp = responseHTTP::status200('Pedido creado exitosamente');
+                $resp['data'] = [
+                    'id_pedido_creado' => (int)$idPedido,
+                    'pedido' => $pedidoCompleto
+                ];
+                header('Content-Type: application/json');
+                echo json_encode($resp);
             } else {
                 error_log('PedidosController - create: Error al crear pedido - ID retornado NULL');
                 echo json_encode(responseHTTP::status500('Error al crear el pedido'));
@@ -128,17 +161,59 @@ class PedidosController
     }
 
     /**
+     * Construir el campo detalles_producto desde los datos del formulario personalizado
+     */
+    private function construirDetallesProducto(array $input): ?string
+    {
+        $detalles = [];
+        
+        // Categoría del producto
+        if (!empty($input['categoriaProducto'])) {
+            $detalles['categoria'] = $input['categoriaProducto'];
+        }
+        
+        // Colores (paleta)
+        if (!empty($input['colores'])) {
+            $detalles['colores'] = $input['colores'];
+        }
+        
+        // URL de imagen (si se subió)
+        if (!empty($input['imagenUrl'])) {
+            $detalles['imagen_url'] = $input['imagenUrl'];
+        }
+        
+        // Especificaciones técnicas
+        if (!empty($input['especificaciones'])) {
+            $detalles['especificaciones'] = $input['especificaciones'];
+        }
+        
+        // Precio y cantidad personalizados
+        if (!empty($input['precioUnitario'])) {
+            $detalles['precio_unitario'] = $input['precioUnitario'];
+        }
+        
+        if (!empty($input['cantidad'])) {
+            $detalles['cantidad'] = $input['cantidad'];
+        }
+        
+        return !empty($detalles) ? json_encode($detalles, JSON_UNESCAPED_UNICODE) : null;
+    }
+
+    /**
      * Listar todos los pedidos (CON autenticación)
      */
     public function findAll(array $headers): void
     {
         try {
             error_log("PedidosController - findAll: Iniciando obtención de todos los pedidos");
+            error_log("PedidosController - findAll: Headers recibidos: " . json_encode($headers));
             
             // AUTENTICACIÓN ACTIVADA
             $user = $this->authorize($headers, [1, 2]);
             if (!$user) {
                 error_log('PedidosController - findAll: Autorización fallida');
+                header('Content-Type: application/json');
+                echo json_encode(responseHTTP::status401('No autorizado'));
                 return;
             }
 
@@ -146,15 +221,19 @@ class PedidosController
             
             $pedidos = $this->pedidosModel->getAllPedidos();
             
-            error_log("PedidosController - findAll: Procesados " . count($pedidos) . " pedidos");
+            error_log("PedidosController - findAll: Se obtuvieron " . count($pedidos) . " pedidos de la BD");
+            error_log("PedidosController - findAll: Primer pedido: " . json_encode($pedidos[0] ?? []));
 
             $response = responseHTTP::status200('Pedidos obtenidos correctamente');
             $response['data'] = $pedidos;
+            
+            error_log("PedidosController - findAll: Enviando respuesta con " . count($pedidos) . " pedidos");
             
             header('Content-Type: application/json');
             echo json_encode($response);
         } catch (\Exception $e) {
             error_log("ERROR PedidosController - findAll: " . $e->getMessage());
+            error_log("ERROR PedidosController - findAll: Stack trace: " . $e->getTraceAsString());
             header('Content-Type: application/json');
             echo json_encode(responseHTTP::status500('Error: ' . $e->getMessage()));
         }
@@ -217,7 +296,9 @@ class PedidosController
             }
 
             error_log("PedidosController - findOne: Pedido $id obtenido exitosamente");
-            echo json_encode(responseHTTP::status200('OK') + ['data' => $pedido]);
+            $response = responseHTTP::status200('OK');
+            $response['data'] = $pedido;
+            echo json_encode($response);
         } catch (\Exception $e) {
             error_log("ERROR PedidosController - findOne: " . $e->getMessage());
             echo json_encode(responseHTTP::status500('Error: ' . $e->getMessage()));
@@ -372,6 +453,21 @@ class PedidosController
                 return;
             }
 
+            // Preparar detalles_personalizados: aceptar string JSON o construir desde campos sueltos
+            $detallesPersonalizados = $input['detalles_personalizados'] ?? null;
+            if (is_array($detallesPersonalizados)) {
+                $detallesPersonalizados = json_encode($detallesPersonalizados, JSON_UNESCAPED_UNICODE);
+            } elseif (!$detallesPersonalizados) {
+                // Intentar componer desde otros campos si existen
+                $dp = [];
+                if (!empty($input['categoria'])) $dp['categoria'] = $input['categoria'];
+                if (!empty($input['categoriaProducto'])) $dp['categoria'] = $input['categoriaProducto'];
+                if (!empty($input['colores'])) $dp['colores'] = $input['colores'];
+                if (!empty($input['especificaciones'])) $dp['especificaciones'] = $input['especificaciones'];
+                if (!empty($input['imagenes']) && is_array($input['imagenes'])) $dp['imagenes'] = $input['imagenes'];
+                if (!empty($dp)) $detallesPersonalizados = json_encode($dp, JSON_UNESCAPED_UNICODE);
+            }
+
             $detalleData = [
                 'producto_solicitado' => trim($input['producto_solicitado'] ?? ''),
                 'precio_unitario' => (float)($input['precio_unitario'] ?? 0),
@@ -380,13 +476,19 @@ class PedidosController
                 'id_pedido' => $idPedido,
                 'id_producto' => (int)($input['id_producto'] ?? 0),
                 'cantidad' => (int)($input['cantidad'] ?? 0),
-                'id_usuario' => $user['id_usuario'] // Usar usuario autenticado
+                'id_usuario' => $user['id_usuario'], // Usar usuario autenticado
+                'detalles_personalizados' => $detallesPersonalizados
             ];
 
-            // Validaciones básicas
-            if (empty($detalleData['producto_solicitado']) || $detalleData['cantidad'] <= 0 || $detalleData['id_producto'] <= 0) {
-                error_log("PedidosController - crearDetalle: Datos de detalle inválidos");
-                echo json_encode(responseHTTP::status400('Datos de detalle inválidos (producto_solicitado, cantidad, id_producto son requeridos)'));
+            // Normalizar id_producto: permitir productos personalizados (sin id de catálogo)
+            if ($detalleData['id_producto'] <= 0) {
+                $detalleData['id_producto'] = null; // La columna permite NULL
+            }
+
+            // Validaciones básicas: requerir al menos descripción, cantidad y precio válido
+            if (empty($detalleData['producto_solicitado']) || $detalleData['cantidad'] <= 0 || $detalleData['precio_unitario'] < 0) {
+                error_log("PedidosController - crearDetalle: Datos de detalle inválidos (producto_solicitado vacío o cantidad/precio inválidos)");
+                echo json_encode(responseHTTP::status400('Datos de detalle inválidos (producto_solicitado requerido, cantidad > 0, precio_unitario >= 0)'));
                 return;
             }
 
@@ -431,7 +533,9 @@ class PedidosController
             }
 
             error_log("PedidosController - obtenerDetalle: Detalle $idDetalle obtenido exitosamente");
-            echo json_encode(responseHTTP::status200('OK') + ['data' => $detalle]);
+            $response = responseHTTP::status200('OK');
+            $response['data'] = $detalle;
+            echo json_encode($response);
         } catch (\Exception $e) {
             error_log("ERROR PedidosController - obtenerDetalle: " . $e->getMessage());
             echo json_encode(responseHTTP::status500('Error: ' . $e->getMessage()));
@@ -537,7 +641,9 @@ class PedidosController
             $estados = $this->pedidosModel->getEstados();
             error_log("PedidosController - getEstados: Se obtuvieron " . count($estados) . " estados");
             
-            echo json_encode(responseHTTP::status200('OK') + ['data' => $estados]);
+            $response = responseHTTP::status200('OK');
+            $response['data'] = $estados;
+            echo json_encode($response);
         } catch (\Exception $e) {
             error_log("ERROR PedidosController - getEstados: " . $e->getMessage());
             echo json_encode(responseHTTP::status500('Error: ' . $e->getMessage()));

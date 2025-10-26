@@ -874,9 +874,11 @@
 }
 
 .status-selector option {
-    background-color: #333;
-    color: white;
-    padding: 8px;
+    background-color: #1f1f1f !important;
+    color: #f3f3f3 !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+    font-weight: normal !important;
 }
 
 /* Status Selector Modal */
@@ -899,9 +901,11 @@
 }
 
 .status-selector-modal option {
-    background-color: #333;
-    color: white;
-    padding: 8px;
+    background-color: #1f1f1f !important;
+    color: #f3f3f3 !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+    font-weight: normal !important;
 }
 
 /* Status Change Section */

@@ -19,42 +19,60 @@ class PedidosModel
  
 
     /**
-     * Crear un nuevo pedido
+     * Crear un nuevo pedido (con todos los campos de la BD actual)
      */
-    public function createPedido(string $numeroPedido, ?string $observaciones, int $idUsuario, ?string $clienteNombre = null, ?string $clienteTelefono = null, ?string $canalVenta = null, ?string $prioridad = 'normal', ?string $detallesProducto = null): ?int
+    public function createPedido(
+        string $numeroPedido, 
+        int $idUsuario,
+        ?string $clienteNombre = null,
+        ?string $clienteTelefono = null,
+        ?string $canalVenta = null,
+        ?string $prioridad = 'normal',
+        ?string $observaciones = null,
+        ?string $detallesProducto = null,
+        ?string $fechaEntrega = null
+    ): ?int
     {
         try {
             error_log("PedidosModel - createPedido: Creando pedido - Numero: $numeroPedido, Usuario: $idUsuario");
+
+            // La tabla pedido solo tiene: id_pedido, numero_pedido, id_usuario, fecha_pedido, fecha_compromiso, observaciones, fecha_entrega, id_estado
+            // Los datos adicionales (cliente_nombre, etc.) se guardarán en observaciones como JSON si es necesario
             
-            // Usar SQL directo en lugar del stored procedure para mayor compatibilidad
+            $observacionesCompletas = $observaciones;
+            if ($clienteNombre || $clienteTelefono || $canalVenta || $prioridad || $detallesProducto) {
+                $datosAdicionales = [
+                    'cliente_nombre' => $clienteNombre,
+                    'cliente_telefono' => $clienteTelefono,
+                    'canal_venta' => $canalVenta,
+                    'prioridad' => $prioridad,
+                    'detalles_producto' => $detallesProducto,
+                    'observaciones_originales' => $observaciones
+                ];
+                $observacionesCompletas = json_encode($datosAdicionales, JSON_UNESCAPED_UNICODE);
+            }
+
             $sql = "INSERT INTO pedido (
-                        numero_pedido, 
-                        id_usuario, 
-                        cliente_nombre,
-                        cliente_telefono,
-                        canal_venta,
-                        prioridad,
-                        observaciones, 
-                        detalles_producto,
+                        numero_pedido,
+                        id_usuario,
+                        fecha_pedido,
+                        fecha_entrega,
+                        observaciones,
                         id_estado
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 3)";
-            
+                    ) VALUES (?, ?, NOW(), ?, ?, 3)";
+
             $stmt = $this->connection->prepare($sql);
             $stmt->execute([
-                $numeroPedido, 
-                $idUsuario, 
-                $clienteNombre,
-                $clienteTelefono,
-                $canalVenta,
-                $prioridad,
-                $observaciones, 
-                $detallesProducto
+                $numeroPedido,
+                $idUsuario,
+                $fechaEntrega,
+                $observacionesCompletas
             ]);
-            
+
             $idPedido = $this->connection->lastInsertId();
-            
+
             error_log("PedidosModel - createPedido: Pedido creado con ID: " . ($idPedido ?? 'NULL'));
-            return $idPedido;
+            return $idPedido ? (int)$idPedido : null;
         } catch (PDOException $e) {
             error_log("ERROR PedidosModel - createPedido: " . $e->getMessage());
             throw new Exception("Error al crear pedido: " . $e->getMessage());
@@ -68,6 +86,52 @@ class PedidosModel
     {
         try {
             error_log("PedidosModel - getAllPedidos: Obteniendo todos los pedidos");
+            
+            // Query simplificada que usa solo las columnas que existen en la BD
+            $sql = "SELECT 
+                        p.id_pedido,
+                        p.numero_pedido,
+                        p.id_usuario,
+                        p.fecha_pedido,
+                        p.fecha_entrega,
+                        p.fecha_compromiso,
+                        p.observaciones,
+                        p.id_estado,
+                        u.nombre_usuario as cliente_nombre,
+                        u.telefono as cliente_telefono,
+                        e.nombre as estado_nombre,
+                        e.codigo as estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                    FROM pedido p
+                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    GROUP BY p.id_pedido, p.numero_pedido, p.id_usuario, p.fecha_pedido, 
+                             p.fecha_entrega, p.fecha_compromiso, p.observaciones, p.id_estado,
+                             u.nombre_usuario, u.telefono, e.nombre, e.codigo
+                    ORDER BY p.fecha_pedido DESC";
+            
+            $stmt = $this->connection->query($sql);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            error_log("PedidosModel - getAllPedidos: Se encontraron " . count($result) . " pedidos");
+            return $result;
+        } catch (PDOException $e) {
+            error_log("ERROR PedidosModel - getAllPedidos: " . $e->getMessage());
+            return [];
+        } catch (PDOException $e) {
+            error_log("ERROR PedidosModel - getAllPedidos: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtener pedidos por usuario
+     */
+    public function getPedidosByUser(int $idUsuario): array
+    {
+        try {
+            error_log("PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: $idUsuario");
             
             $sql = "SELECT 
                         p.id_pedido,
@@ -88,48 +152,10 @@ class PedidosModel
                     LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
                     LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
                     LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
+                    WHERE p.id_usuario = ?
                     GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, 
                              p.fecha_entrega, p.observaciones, p.cliente_nombre, p.cliente_telefono,
                              p.canal_venta, p.prioridad, p.detalles_producto, u.nombre_usuario, e.nombre, e.codigo
-                    ORDER BY p.fecha_pedido DESC";
-            
-            $stmt = $this->connection->query($sql);
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            error_log("PedidosModel - getAllPedidos: Se encontraron " . count($result) . " pedidos");
-            return $result;
-        } catch (PDOException $e) {
-            error_log("ERROR PedidosModel - getAllPedidos: " . $e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * Obtener pedidos por usuario
-     */
-    public function getPedidosByUser(int $idUsuario): array
-    {
-        try {
-            error_log("PedidosModel - getPedidosByUser: Buscando pedidos para usuario ID: $idUsuario");
-            
-            $sql = "SELECT 
-                        p.id_pedido,
-                        p.numero_pedido,
-                        p.fecha_pedido,
-                        p.fecha_compromiso,
-                        p.fecha_entrega,
-                        p.observaciones,
-                        u.nombre_usuario,
-                        e.nombre as estado_nombre,
-                        e.codigo as estado_codigo,
-                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
-                    FROM pedido p
-                    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
-                    LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
-                    LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
-                    WHERE p.id_usuario = ?
-                    GROUP BY p.id_pedido, p.numero_pedido, p.fecha_pedido, p.fecha_compromiso, 
-                             p.fecha_entrega, p.observaciones, u.nombre_usuario, e.nombre, e.codigo
                     ORDER BY p.fecha_pedido DESC";
             
             $stmt = $this->connection->prepare($sql);
@@ -152,8 +178,13 @@ class PedidosModel
         try {
             error_log("PedidosModel - getPedidoById: Obteniendo pedido ID: $idPedido");
             
-            // Obtener información básica del pedido
-            $stmt = $this->connection->prepare("CALL sp_obtener_pedido(?)");
+            // Obtener información básica del pedido (sin depender de SP)
+            $sqlPedido = "SELECT p.*, u.nombre_usuario, e.nombre as estado_nombre, e.codigo as estado_codigo
+                          FROM pedido p
+                          LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+                          LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
+                          WHERE p.id_pedido = ?";
+            $stmt = $this->connection->prepare($sqlPedido);
             $stmt->execute([$idPedido]);
             $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -219,8 +250,15 @@ class PedidosModel
         try {
             error_log("PedidosModel - cambiarEstadoPedido: Cambiando estado pedido $idPedido a $idEstadoNuevo por usuario $idUsuario");
             
-            $stmt = $this->connection->prepare("CALL sp_cambiar_estado_pedido(?, ?, ?)");
-            $result = $stmt->execute([$idPedido, $idEstadoNuevo, $idUsuario]);
+            try {
+                $stmt = $this->connection->prepare("CALL sp_cambiar_estado_pedido(?, ?, ?)");
+                $result = $stmt->execute([$idPedido, $idEstadoNuevo, $idUsuario]);
+            } catch (PDOException $e) {
+                // Fallback directo
+                $sql = "UPDATE pedido SET id_estado = ? WHERE id_pedido = ?";
+                $stmt = $this->connection->prepare($sql);
+                $result = $stmt->execute([$idEstadoNuevo, $idPedido]);
+            }
             
             error_log("PedidosModel - cambiarEstadoPedido: Cambio de estado " . ($result ? "exitoso" : "fallido"));
             return $result;
@@ -238,8 +276,24 @@ class PedidosModel
         try {
             error_log("PedidosModel - deletePedido: Eliminando pedido ID: $idPedido");
             
-            $stmt = $this->connection->prepare("CALL sp_eliminar_pedido(?)");
-            $result = $stmt->execute([$idPedido]);
+            try {
+                $stmt = $this->connection->prepare("CALL sp_eliminar_pedido(?)");
+                $result = $stmt->execute([$idPedido]);
+            } catch (PDOException $e) {
+                // Fallback directo (borrado de detalles y cabecera)
+                $this->connection->beginTransaction();
+                try {
+                    $stmt = $this->connection->prepare("DELETE FROM detallepedido WHERE id_pedido = ?");
+                    $stmt->execute([$idPedido]);
+                    $stmt = $this->connection->prepare("DELETE FROM pedido WHERE id_pedido = ?");
+                    $stmt->execute([$idPedido]);
+                    $this->connection->commit();
+                    $result = true;
+                } catch (PDOException $ie) {
+                    $this->connection->rollBack();
+                    throw $ie;
+                }
+            }
             
             error_log("PedidosModel - deletePedido: Eliminación " . ($result ? "exitosa" : "fallida"));
             return $result;
@@ -259,17 +313,73 @@ class PedidosModel
         try {
             error_log("PedidosModel - createDetallePedido: Creando detalle para pedido " . $detalleData['id_pedido']);
             
-            $stmt = $this->connection->prepare("CALL sp_crear_detalle_pedido(?, ?, ?, ?, ?, ?, ?, ?)");
-            $result = $stmt->execute([
-                $detalleData['producto_solicitado'],
-                $detalleData['precio_unitario'],
-                $detalleData['descuento'],
-                $detalleData['impuesto'],
-                $detalleData['id_pedido'],
-                $detalleData['id_producto'],
-                $detalleData['cantidad'],
-                $detalleData['id_usuario']
-            ]);
+            // Preparar JSON de detalles personalizados si viene como array
+            $detallesPersonalizados = null;
+            if (isset($detalleData['detalles_personalizados'])) {
+                if (is_array($detalleData['detalles_personalizados'])) {
+                    $detallesPersonalizados = json_encode($detalleData['detalles_personalizados'], JSON_UNESCAPED_UNICODE);
+                } else {
+                    $detallesPersonalizados = $detalleData['detalles_personalizados'];
+                }
+            }
+
+            // Si se proveen detalles_personalizados, forzamos inserción directa para incluir la columna (el SP no la contempla)
+            if ($detallesPersonalizados !== null) {
+                $totalLinea = ($detalleData['precio_unitario'] * $detalleData['cantidad']);
+                $totalLinea = ($totalLinea * (1 - ($detalleData['descuento'] / 100)));
+                $totalLinea = ($totalLinea * (1 + ($detalleData['impuesto'] / 100)));
+
+                $sql = "INSERT INTO detallepedido (
+                            producto_solicitado, cantidad, precio_unitario, descuento, impuesto, total_linea, id_pedido, id_producto, detalles_personalizados
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = $this->connection->prepare($sql);
+                $result = $stmt->execute([
+                    $detalleData['producto_solicitado'],
+                    $detalleData['cantidad'],
+                    $detalleData['precio_unitario'],
+                    $detalleData['descuento'],
+                    $detalleData['impuesto'],
+                    $totalLinea,
+                    $detalleData['id_pedido'],
+                    $detalleData['id_producto'] ?? null,
+                    $detallesPersonalizados
+                ]);
+            } else {
+                // Intentar usar SP; si falla, inserción directa sin columna extra
+                try {
+                    $stmt = $this->connection->prepare("CALL sp_crear_detalle_pedido(?, ?, ?, ?, ?, ?, ?, ?)");
+                    $result = $stmt->execute([
+                        $detalleData['producto_solicitado'],
+                        $detalleData['precio_unitario'],
+                        $detalleData['descuento'],
+                        $detalleData['impuesto'],
+                        $detalleData['id_pedido'],
+                        $detalleData['id_producto'],
+                        $detalleData['cantidad'],
+                        $detalleData['id_usuario']
+                    ]);
+                } catch (PDOException $e) {
+                    // Fallback a SQL directo
+                    $totalLinea = ($detalleData['precio_unitario'] * $detalleData['cantidad']);
+                    $totalLinea = ($totalLinea * (1 - ($detalleData['descuento'] / 100)));
+                    $totalLinea = ($totalLinea * (1 + ($detalleData['impuesto'] / 100)));
+
+                    $sql = "INSERT INTO detallepedido (
+                                producto_solicitado, cantidad, precio_unitario, descuento, impuesto, total_linea, id_pedido, id_producto
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    $stmt = $this->connection->prepare($sql);
+                    $result = $stmt->execute([
+                        $detalleData['producto_solicitado'],
+                        $detalleData['cantidad'],
+                        $detalleData['precio_unitario'],
+                        $detalleData['descuento'],
+                        $detalleData['impuesto'],
+                        $totalLinea,
+                        $detalleData['id_pedido'],
+                        $detalleData['id_producto']
+                    ]);
+                }
+            }
             
             error_log("PedidosModel - createDetallePedido: Creación de detalle " . ($result ? "exitosa" : "fallida"));
             return $result;
@@ -287,9 +397,14 @@ class PedidosModel
         try {
             error_log("PedidosModel - getDetalleById: Obteniendo detalle ID: $idDetalle");
             
-            $stmt = $this->connection->prepare("CALL sp_obtener_detalle_pedido(?)");
-            $stmt->execute([$idDetalle]);
-            $detalle = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Sin depender de SP
+        $sql = "SELECT dp.*, p.nombre_producto, p.sku
+            FROM detallepedido dp
+            LEFT JOIN producto p ON dp.id_producto = p.id_producto
+            WHERE dp.id_detalle = ?";
+        $stmt = $this->connection->prepare($sql);
+        $stmt->execute([$idDetalle]);
+        $detalle = $stmt->fetch(PDO::FETCH_ASSOC);
             
             error_log("PedidosModel - getDetalleById: Detalle " . ($detalle ? "encontrado" : "no encontrado"));
             return $detalle ?: null;
@@ -307,16 +422,41 @@ class PedidosModel
         try {
             error_log("PedidosModel - updateDetallePedido: Actualizando detalle ID: $idDetalle");
             
-            $stmt = $this->connection->prepare("CALL sp_actualizar_detalle_pedido(?, ?, ?, ?, ?, ?, ?)");
-            $result = $stmt->execute([
-                $idDetalle,
-                $detalleData['producto_solicitado'],
-                $detalleData['cantidad_nueva'],
-                $detalleData['precio_unitario_nuevo'],
-                $detalleData['descuento_nuevo'],
-                $detalleData['impuesto_nuevo'],
-                $detalleData['id_usuario']
-            ]);
+            // Intentar SP; si falla, fallback directo
+            try {
+                $stmt = $this->connection->prepare("CALL sp_actualizar_detalle_pedido(?, ?, ?, ?, ?, ?, ?)");
+                $result = $stmt->execute([
+                    $idDetalle,
+                    $detalleData['producto_solicitado'],
+                    $detalleData['cantidad_nueva'],
+                    $detalleData['precio_unitario_nuevo'],
+                    $detalleData['descuento_nuevo'],
+                    $detalleData['impuesto_nuevo'],
+                    $detalleData['id_usuario']
+                ]);
+            } catch (PDOException $e) {
+                $totalLinea = ($detalleData['precio_unitario_nuevo'] * $detalleData['cantidad_nueva']);
+                $totalLinea = ($totalLinea * (1 - ($detalleData['descuento_nuevo'] / 100)));
+                $totalLinea = ($totalLinea * (1 + ($detalleData['impuesto_nuevo'] / 100)));
+                $sql = "UPDATE detallepedido
+                        SET producto_solicitado = ?,
+                            cantidad = ?,
+                            precio_unitario = ?,
+                            descuento = ?,
+                            impuesto = ?,
+                            total_linea = ?
+                        WHERE id_detalle = ?";
+                $stmt = $this->connection->prepare($sql);
+                $result = $stmt->execute([
+                    $detalleData['producto_solicitado'],
+                    $detalleData['cantidad_nueva'],
+                    $detalleData['precio_unitario_nuevo'],
+                    $detalleData['descuento_nuevo'],
+                    $detalleData['impuesto_nuevo'],
+                    $totalLinea,
+                    $idDetalle
+                ]);
+            }
             
             error_log("PedidosModel - updateDetallePedido: Actualización " . ($result ? "exitosa" : "fallida"));
             return $result;
@@ -334,8 +474,14 @@ class PedidosModel
         try {
             error_log("PedidosModel - deleteDetallePedido: Eliminando detalle ID: $idDetalle");
             
-            $stmt = $this->connection->prepare("CALL sp_eliminar_detalle_pedido(?)");
-            $result = $stmt->execute([$idDetalle]);
+            // Intentar SP; si falla, DELETE directo
+            try {
+                $stmt = $this->connection->prepare("CALL sp_eliminar_detalle_pedido(?)");
+                $result = $stmt->execute([$idDetalle]);
+            } catch (PDOException $e) {
+                $stmt = $this->connection->prepare("DELETE FROM detallepedido WHERE id_detalle = ?");
+                $result = $stmt->execute([$idDetalle]);
+            }
             
             error_log("PedidosModel - deleteDetallePedido: Eliminación " . ($result ? "exitosa" : "fallida"));
             return $result;

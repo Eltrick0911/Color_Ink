@@ -71,8 +71,7 @@ class Security {
         //postman Autorization
         if (!isset($token['Authorization'])) {
             //echo "El token de acceso en requerido";
-            die(json_encode(ResponseHttp::status400("Para proceder el token de acceso es requerido!")));            
-            exit;
+            die(json_encode(responseHTTP::status400("Para proceder el token de acceso es requerido!")));
         }
         try {
             //recibimos el token de acceso y creamos el array 
@@ -86,10 +85,9 @@ class Security {
 
             self::$jwt_data = $data; //le pasamos el jwt decodificado y lo retornamos
             return $data;
-            exit;
         } catch (\Exception $e) {
             error_log('Token invalido o expiro'. $e);
-            die(json_encode(ResponseHttp::status401('Token invalido o ha expirado'))); //funcion que manda un mj y termina ejecucion 
+            die(json_encode(responseHTTP::status401('Token invalido o ha expirado'))); //funcion que manda un mj y termina ejecucion 
         }
     }
 
@@ -98,6 +96,5 @@ class Security {
     {
         $jwt_decoded_array = json_decode(json_encode(self::$jwt_data),true);
         return $jwt_decoded_array['data'];
-        exit;
     }
 }

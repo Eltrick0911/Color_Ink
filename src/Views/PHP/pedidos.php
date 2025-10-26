@@ -35,7 +35,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Número</th>
                             <th>Cliente</th>
                             <th>Fecha del pedido</th>
                             <th>Fecha de entrega</th>
@@ -46,7 +46,7 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>#001</td>
+                            <td>PED-001</td>
                             <td>Juan Pérez</td>
                             <td>2024-01-10</td>
                             <td>2024-01-15</td>
@@ -119,22 +119,31 @@
             <div class="modal-body">
                 <form id="formNuevoPedido" class="pedido-form">
                     <div class="form-row">
-                          <div class="form-group">
-                            <label for="email">Usuario</label>
-                            <input type="redes" id="redes" name="email">
+                        <div class="form-group">
+                            <label for="clienteNombre">Nombre del Cliente *</label>
+                            <input type="text" id="clienteNombre" name="clienteNombre" required>
                         </div>
                         <div class="form-group">
-                            <label for="telefono">Teléfono</label>
-                            <input type="tel" id="telefono" name="telefono">
+                            <label for="clienteTelefono">Teléfono *</label>
+                            <input type="tel" id="clienteTelefono" name="clienteTelefono" required>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="fechaEntrega">Fecha de Entrega</label>
-                            <input type="date" id="fechaEntrega" name="fechaEntrega">
+                            <label for="fechaEntrega">Fecha de Entrega *</label>
+                            <input type="date" id="fechaEntrega" name="fechaEntrega" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prioridad">Prioridad</label>
+                            <select id="prioridad" name="prioridad">
+                                <option value="normal">Normal</option>
+                                <option value="urgente">Urgente</option>
+                                <option value="alta">Alta</option>
+                            </select>
                         </div>
                     </div>
+                    
                     <div class="form-group">
                         <label for="canalVenta">Canal de Venta *</label>
                         <select id="canalVenta" name="canalVenta" required>
@@ -147,16 +156,9 @@
                         </select>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="precioUnitario">Precio Personalizado</label>
-                            <input type="number" id="precioUnitario" name="precioUnitario" step="0.01" min="0">
-                        </div>
-                         <div class="form-group">
-                            <label for="precioUnitario">Cantidad</label>
-                            <input type="number" id="precioUnitario" name="precioUnitario" step="0.01" min="0">
-                        </div>
-
+                    <div class="form-group">
+                        <label for="observaciones">Observaciones</label>
+                        <textarea id="observaciones" name="observaciones" rows="3"></textarea>
                     </div>
 
                     <!-- Botón para abrir detalles del producto -->
@@ -199,6 +201,16 @@
                             <option value="decoracion">Decoración</option>
                             <option value="otros">Otros</option>
                         </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cantidadProducto">Cantidad</label>
+                            <input type="number" id="cantidadProducto" name="cantidadProducto" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="precioUnitarioProducto">Precio Unitario</label>
+                            <input type="number" id="precioUnitarioProducto" name="precioUnitarioProducto" step="0.01" min="0" value="0.00">
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -401,7 +413,23 @@
     </div>
 
     <script src="/Color_Ink/src/Views/JS/sidebar.js"></script>
-    <script src="/Color_Ink/src/Views/JS/pedidos.js"></script>
     <script src="/Color_Ink/src/Views/JS/pedidosmvc.js"></script>
+    <script src="/Color_Ink/src/Views/JS/pedidos.js"></script>
+    <script>
+        // Inicializar PedidosMVC cuando cargue la página
+        document.addEventListener('DOMContentLoaded', function() {
+            PedidosMVC.init({
+                apiEntry: '/Color_Ink/public/index.php',
+                tableSelector: '.pedidos-table tbody',
+                autoCreateToken: true
+            }).then(function(pedidos) {
+                console.log('Pedidos cargados:', pedidos.length);
+            }).catch(function(error) {
+                console.error('Error al cargar pedidos:', error);
+            });
+        });
+    </script>
 </body>
 </html>
+
+

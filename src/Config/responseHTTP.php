@@ -4,11 +4,14 @@
 namespace App\Config; //este sera nuestro espacio de nombres
 
 class responseHTTP{
-    public static $mensaje = array(
-        'status' => '',
-        'message' => '',
-        'data' => null
-    );
+    // Genera una respuesta base sin estado compartido (evita efectos colaterales)
+    private static function base(string $status, string $message, $data = null): array {
+        return [
+            'status' => $status,
+            'message' => $message,
+            'data' => $data
+        ];
+    }
 
     public static function sendResponse($data) {
         header('Content-Type: application/json');
@@ -16,51 +19,36 @@ class responseHTTP{
         exit;
     }
 
-    //creamos nuestro primer codigo de estado http
+    // Códigos de estado HTTP
 
-    final public static function status200($res){
-        http_response_code(200); //funcion de php que permite cambiar el codigo de estado http
-        self::$mensaje['status'] = 'OK';
-        self::$mensaje['message'] = $res; //la variable res es el mensaje/respuesta que proviene del usuario
-        return self::$mensaje;
+    final public static function status200(string $res = 'OK'): array {
+        http_response_code(200);
+        return self::base('OK', $res);
     }
 
-    final public static function status201(){
-        $res = 'Recurso creado exitosamente!';
+    final public static function status201(string $res = 'Recurso creado exitosamente!'): array {
         http_response_code(201);
-        self::$mensaje['status'] = 'OK';
-        self::$mensaje['message'] = $res; //la variable res es el mensaje
-        return self::$mensaje;
+        return self::base('OK', $res);
     }
 
-    final public static function status400($res){
+    final public static function status400(string $res): array {
         http_response_code(400);
-        self::$mensaje['status'] = 'ERROR';
-        self::$mensaje['message'] = $res; //la variable res es el mensaje
-        return self::$mensaje;
+        return self::base('ERROR', $res);
     }
 
-    final public static function status401($str){
-        $res = 'No tiene privilegios para acceder al recurso! '.$str;
+    final public static function status401(string $str = 'No autenticado'): array {
         http_response_code(401);
-        self::$mensaje['status'] = 'ERROR';
-        self::$mensaje['message'] = $res; //la variable res es el mensaje
-        return self::$mensaje;
+        $res = 'No tiene privilegios para acceder al recurso! ' . $str;
+        return self::base('ERROR', $res);
     }
 
-    final public static function status404($res = 'No existe el recurso solicitado!'){
-        $res = 'No existe  el recurso solicitado!';
+    final public static function status404(string $res = 'No existe el recurso solicitado!'): array {
         http_response_code(404);
-        self::$mensaje['status'] = 'ERROR';
-        self::$mensaje['message'] = $res; //la variable res es el mensaje
-        return self::$mensaje;
+        return self::base('ERROR', $res);
     }
 
-    final public static function status500($res = 'Se ha producido un error en el servidor!'){
-        $res = 'Se ha producido un error en el servidor!';
+    final public static function status500(string $res = 'Se ha producido un error en el servidor!'): array {
         http_response_code(500);
-        self::$mensaje['status'] = 'ERROR';
-        self::$mensaje['message'] = $res; //la variable res es el mensaje
-        return self::$mensaje;
+        return self::base('ERROR', $res);
     }
 }

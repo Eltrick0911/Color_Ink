@@ -5,6 +5,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar funcionalidades de pedidos
     initPedidosPage();
+    
+    // Escuchar cuando se rendericen los pedidos para reconfigurar los selectores
+    document.addEventListener('pedidos:rendered', function(e) {
+        console.log('Pedidos renderizados, reconfigurando selectores...');
+        setupStatusSelectors();
+        setupActionButtons();
+    });
 });
 
 function initPedidosPage() {
@@ -535,8 +542,10 @@ function setupModal() {
         }
     });
     
-    // Configurar envío del formulario
-    form.addEventListener('submit', handleFormSubmit);
+    // NOTA: El envío del formulario hacia el backend se gestiona más abajo
+    // con crearNuevoPedido(). Evitamos el manejador antiguo para no duplicar
+    // listeners ni realizar envíos locales sin API.
+    // form.addEventListener('submit', handleFormSubmit);
     
     // Configurar validación en tiempo real
     setupFormValidation();
@@ -561,6 +570,10 @@ function openModal() {
         if (fechaEntrega) {
             const today = new Date().toISOString().split('T')[0];
             fechaEntrega.min = today;
+            // Prefijar por defecto la fecha de hoy si está vacía
+            if (!fechaEntrega.value) {
+                fechaEntrega.value = today;
+            }
         }
         
         // Enfocar el primer campo
@@ -1361,11 +1374,75 @@ function updateProductDetailsSummary() {
 function setupStatusSelectors() {
     // Configurar selectores de estado en la tabla
     const statusSelectors = document.querySelectorAll('.status-selector');
+    console.log('Configurando ' + statusSelectors.length + ' selectores de estado');
+    
     statusSelectors.forEach(selector => {
-        selector.addEventListener('change', function() {
+        selector.addEventListener('change', async function(e) {
             const pedidoId = this.getAttribute('data-pedido-id');
-            const nuevoEstado = this.value;
-            updatePedidoStatus(pedidoId, nuevoEstado, this);
+            const nuevoEstadoId = this.value;
+            const estadoAnterior = this.getAttribute('data-current-estado');
+            
+            console.log('Cambio de estado - Pedido:', pedidoId, 'Nuevo estado:', nuevoEstadoId);
+            
+            // Confirmar el cambio
+            const opcionSeleccionada = this.options[this.selectedIndex];
+            const nombreEstado = opcionSeleccionada.text;
+            
+            if (!confirm(`¿Cambiar estado del pedido #${pedidoId} a "${nombreEstado}"?`)) {
+                // Revertir si cancela
+                this.value = estadoAnterior;
+                return;
+            }
+            
+            try {
+                // Deshabilitar el selector mientras se actualiza
+                this.disabled = true;
+                
+                // Llamar a la API para actualizar el estado
+                const response = await fetch(`/Color_Ink/public/index.php?route=pedidos/${pedidoId}/cambiar-estado&caso=1`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                    },
+                    body: JSON.stringify({
+                        id_estado_nuevo: parseInt(nuevoEstadoId)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // La API devuelve status: 'OK' para éxito, no 'success'
+                if (response.ok && (data.status === 'OK' || data.status === 'success')) {
+                    // Actualizar el data-current-estado
+                    this.setAttribute('data-current-estado', nuevoEstadoId);
+                    
+                    // Actualizar estilo visual
+                    updateSelectorStyle(this, nuevoEstadoId);
+                    
+                    showNotification(`Estado actualizado a: ${nombreEstado}`, 'success');
+                    
+                    // Recargar la tabla para reflejar cambios
+                    await PedidosMVC.init({
+                        apiEntry: '/Color_Ink/public/index.php',
+                        tableSelector: '.pedidos-table tbody',
+                        autoCreateToken: true
+                    });
+                    
+                    // Reconfigurar los selectores después de recargar
+                    setTimeout(setupStatusSelectors, 500);
+                } else {
+                    throw new Error(data.message || 'Error al actualizar estado');
+                }
+                
+            } catch (error) {
+                console.error('Error al actualizar estado:', error);
+                showNotification('Error al actualizar estado: ' + error.message, 'error');
+                // Revertir el selector
+                this.value = estadoAnterior;
+            } finally {
+                this.disabled = false;
+            }
         });
     });
     
@@ -1419,31 +1496,31 @@ function updatePedidoStatusFromModal(pedidoId, nuevoEstado) {
     showNotification(`Estado del pedido ${pedidoId} actualizado a: ${nuevoEstado.charAt(0).toUpperCase() + nuevoEstado.slice(1)}`, 'success');
 }
 
-function updateSelectorStyle(selector, estado) {
+function updateSelectorStyle(selector, estadoId) {
+    // Mapeo de IDs a códigos de estado
+    // 1: ENTRG (Entregado), 2: CANC (Cancelado), 3: PROCESO (En Proceso)
+    const estadoMap = {
+        '1': { class: 'entregado', bg: 'rgba(40, 167, 69, 0.2)', color: '#28a745' },
+        '2': { class: 'cancelado', bg: 'rgba(220, 53, 69, 0.2)', color: '#dc3545' },
+        '3': { class: 'proceso', bg: 'rgba(0, 123, 255, 0.2)', color: '#007bff' }
+    };
+    
+    const config = estadoMap[String(estadoId)] || estadoMap['3'];
+    
     // Remover clases de estado anteriores
-    selector.classList.remove('pendiente', 'procesando', 'enviado', 'entregado');
+    selector.classList.remove('entregado', 'cancelado', 'proceso', 'pendiente', 'procesando', 'enviado');
     
     // Agregar nueva clase de estado
-    selector.classList.add(estado);
+    selector.classList.add(config.class);
     
-    // Aplicar estilos específicos según el estado
-    const colors = {
-        'pendiente': 'rgba(255, 193, 7, 0.2)',
-        'procesando': 'rgba(0, 123, 255, 0.2)',
-        'enviado': 'rgba(40, 167, 69, 0.2)',
-        'entregado': 'rgba(108, 117, 125, 0.2)'
-    };
-    
-    const textColors = {
-        'pendiente': '#ffc107',
-        'procesando': '#007bff',
-        'enviado': '#28a745',
-        'entregado': '#6c757d'
-    };
-    
-    selector.style.backgroundColor = colors[estado] || colors['pendiente'];
-    selector.style.color = textColors[estado] || textColors['pendiente'];
-    selector.style.borderColor = textColors[estado] || textColors['pendiente'];
+    // Aplicar estilos específicos
+    selector.style.backgroundColor = config.bg;
+    selector.style.color = config.color;
+    selector.style.borderColor = config.color;
+    selector.style.fontWeight = '500';
+    selector.style.padding = '6px 12px';
+    selector.style.borderRadius = '6px';
+    selector.style.border = `2px solid ${config.color}`;
 }
 
 function updatePedidoStatusInStorage(pedidoId, nuevoEstado) {
@@ -2083,3 +2160,370 @@ function removeEditImage(button) {
         }
     }
 }
+
+// ===== NUEVO: Funcionalidad para crear pedido =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar botón "Nuevo Pedido"
+    const btnNuevoPedido = document.querySelector('.btn-nuevo-pedido');
+    if (btnNuevoPedido) {
+        btnNuevoPedido.addEventListener('click', function() {
+            const modal = document.getElementById('modalNuevoPedido');
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    }
+
+    // Configurar formulario de nuevo pedido
+    const formNuevoPedido = document.getElementById('formNuevoPedido');
+    if (formNuevoPedido) {
+        formNuevoPedido.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await crearNuevoPedido();
+        });
+    }
+
+    // Configurar botón de detalles del producto
+    const btnDetallesProducto = document.getElementById('btnDetallesProducto');
+    if (btnDetallesProducto) {
+        btnDetallesProducto.addEventListener('click', function() {
+            const modalDetalles = document.getElementById('modalDetallesProducto');
+            if (modalDetalles) {
+                modalDetalles.style.display = 'block';
+            }
+        });
+    }
+
+    // Configurar botón guardar detalles
+    const btnGuardarDetalles = document.getElementById('guardarDetalles');
+    if (btnGuardarDetalles) {
+        btnGuardarDetalles.addEventListener('click', function() {
+            guardarDetallesProducto();
+        });
+    }
+});
+
+async function crearNuevoPedido() {
+    try {
+        // Mostrar indicador de carga
+        const btnGuardar = document.querySelector('#modalNuevoPedido .btn-guardar');
+        const textOriginal = btnGuardar.textContent;
+        btnGuardar.textContent = 'Guardando...';
+        btnGuardar.disabled = true;
+
+        // Recoger datos del formulario
+        const formData = new FormData(document.getElementById('formNuevoPedido'));
+        
+        // Obtener detalles del producto si fueron guardados
+        const detallesProducto = sessionStorage.getItem('detallesProducto');
+        let categoriaProducto = '', colores = '', especificaciones = '', imagenUrl = '';
+        
+        if (detallesProducto) {
+            const detalles = JSON.parse(detallesProducto);
+            categoriaProducto = detalles.categoria || '';
+            colores = detalles.colores || '';
+            especificaciones = detalles.especificaciones || '';
+            
+            // Parsear las URLs de imágenes
+            if (detalles.imagenesUrls) {
+                try {
+                    const imagenesUrls = JSON.parse(detalles.imagenesUrls);
+                    imagenUrl = imagenesUrls.length > 0 ? imagenesUrls[0] : '';
+                } catch (e) {
+                    imagenUrl = '';
+                }
+            }
+        }
+
+        // Construir objeto del pedido con los nombres correctos que espera el backend
+        const pedidoData = {
+            usuario: (formData.get('clienteNombre') || '').trim(),
+            telefono: (formData.get('clienteTelefono') || '').trim(),
+            fechaEntrega: (formData.get('fechaEntrega') || '').trim(),
+            canalVenta: (formData.get('canalVenta') || '').trim(),
+            prioridad: (formData.get('prioridad') || 'normal').trim(),
+            observaciones: (formData.get('observaciones') || '').trim(),
+            categoriaProducto: categoriaProducto,
+            colores: colores,
+            especificaciones: especificaciones,
+            imagenUrl: imagenUrl
+        };
+
+        console.log('Enviando pedido:', pedidoData);
+
+        // Validaciones mínimas en frontend para evitar 400 del backend
+        const errores = [];
+        const inputFecha = document.getElementById('fechaEntrega');
+        if (!pedidoData.fechaEntrega) {
+            errores.push('La fecha de entrega es obligatoria.');
+            if (inputFecha) inputFecha.focus();
+        }
+        const inputNombre = document.getElementById('clienteNombre');
+        if (!pedidoData.usuario) {
+            errores.push('El nombre del cliente es obligatorio.');
+            if (inputNombre && !inputFecha) inputNombre.focus();
+        }
+        const inputTel = document.getElementById('clienteTelefono');
+        if (!pedidoData.telefono) {
+            errores.push('El teléfono es obligatorio.');
+            if (inputTel && !inputFecha && !inputNombre) inputTel.focus();
+        }
+        const inputCanal = document.getElementById('canalVenta');
+        if (!pedidoData.canalVenta) {
+            errores.push('El canal de venta es obligatorio.');
+            if (inputCanal && !inputFecha && !inputNombre && !inputTel) inputCanal.focus();
+        }
+
+        if (errores.length > 0) {
+            showNotification(errores[0], 'error');
+            // Restaurar botón
+            btnGuardar.textContent = textOriginal;
+            btnGuardar.disabled = false;
+            return;
+        }
+
+        // Llamar al API usando PedidosMVC - crear cabecera del pedido
+        const response = await PedidosMVC.crearPedido(pedidoData);
+        
+        console.log('Respuesta del servidor:', response);
+
+        // Intentar crear el detalle (cantidad y precio) si hay datos
+        try {
+            const idPedido = (response && response.data && response.data.id_pedido_creado) ? response.data.id_pedido_creado : null;
+            if (idPedido) {
+                // Recuperar datos guardados en detallesProducto
+                const detallesProducto = sessionStorage.getItem('detallesProducto');
+                let cantidad = 1;
+                let precioUnitario = 0;
+                let categoriaProducto = '';
+                let especificaciones = '';
+
+                let imagenes = [];
+                if (detallesProducto) {
+                    const d = JSON.parse(detallesProducto);
+                    if (d.cantidad) cantidad = parseInt(d.cantidad) || 1;
+                    if (d.precioUnitario) precioUnitario = parseFloat(d.precioUnitario) || 0;
+                    if (d.categoria) categoriaProducto = String(d.categoria);
+                    if (d.especificaciones) especificaciones = String(d.especificaciones);
+                    if (d.imagenesUrls) {
+                        try {
+                            const imgs = JSON.parse(d.imagenesUrls);
+                            if (Array.isArray(imgs)) imagenes = imgs;
+                        } catch (err) {
+                            console.warn('No se pudieron parsear imagenesUrls');
+                        }
+                    }
+                }
+
+                // Construir un nombre/descr. de producto solicitado
+                const productoSolicitado = categoriaProducto ? `Personalizado: ${categoriaProducto}` : 'Pedido Personalizado';
+
+                // Preparar payload del detalle
+                const detallePersonalizado = {
+                    categoria: categoriaProducto,
+                    colores: colores,
+                    especificaciones: especificaciones,
+                    imagenes: imagenes
+                };
+
+                const detallePayload = {
+                    producto_solicitado: productoSolicitado + (especificaciones ? ` - ${especificaciones.substring(0, 60)}` : ''),
+                    cantidad: Math.max(1, cantidad),
+                    precio_unitario: Math.max(0, precioUnitario),
+                    descuento: 0,
+                    impuesto: 0,
+                    id_producto: 0, // permitir personalizado sin id_producto
+                    detalles_personalizados: JSON.stringify(detallePersonalizado)
+                };
+
+                console.log('Creando detalle para pedido', idPedido, detallePayload);
+                await PedidosMVC.createDetalle(idPedido, detallePayload)
+                    .then(res => console.log('Detalle creado:', res))
+                    .catch(err => { console.warn('No se pudo crear el detalle:', err); });
+            }
+        } catch (e) {
+            console.warn('crearNuevoPedido - error creando detalle:', e);
+        }
+
+        // Cerrar modal
+        const modal = document.getElementById('modalNuevoPedido');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+
+        // Limpiar formulario y sessionStorage
+        document.getElementById('formNuevoPedido').reset();
+        sessionStorage.removeItem('detallesProducto');
+        sessionStorage.removeItem('imagenesSubidas');
+
+        // Mostrar notificación de éxito
+        showNotification('Pedido creado exitosamente', 'success');
+
+    // Recargar la tabla de pedidos (usar la firma correcta)
+    await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+
+        // Restaurar botón
+        btnGuardar.textContent = textOriginal;
+        btnGuardar.disabled = false;
+
+    } catch (error) {
+        console.error('Error al crear pedido:', error);
+        const serverMsg = (error && error.data && (error.data.message || error.data.error)) ? (': ' + (error.data.message || error.data.error)) : '';
+        showNotification('Error al crear el pedido' + serverMsg + ' (' + (error.message || 'Error desconocido') + ')', 'error');
+        
+        // Restaurar botón
+        const btnGuardar = document.querySelector('#modalNuevoPedido .btn-guardar');
+        btnGuardar.textContent = 'Guardar Pedido';
+        btnGuardar.disabled = false;
+    }
+}
+
+function guardarDetallesProducto() {
+    const categoria = document.getElementById('categoriaProducto').value;
+    const color1 = document.getElementById('colorPicker1').value;
+    const color2 = document.getElementById('colorPicker2').value;
+    const color3 = document.getElementById('colorPicker3').value;
+    const especificaciones = document.getElementById('especificaciones').value;
+    const cantidad = (document.getElementById('cantidadProducto')?.value || '').trim();
+    const precioUnitario = (document.getElementById('precioUnitarioProducto')?.value || '').trim();
+    
+    // Combinar colores
+    const colores = [color1, color2, color3].filter(c => c !== '#000000').join(', ');
+    
+    // Obtener las URLs de las imágenes subidas (guardadas en el preview)
+    const imagenesSubidas = sessionStorage.getItem('imagenesSubidas') || '[]';
+    
+    // Guardar en sessionStorage
+    const detalles = {
+        categoria: categoria,
+        colores: colores,
+        especificaciones: especificaciones,
+        imagenesUrls: imagenesSubidas,
+        cantidad: cantidad,
+        precioUnitario: precioUnitario
+    };
+    
+    sessionStorage.setItem('detallesProducto', JSON.stringify(detalles));
+    
+    // Actualizar campo de colores en el formulario principal
+    const campoColores = document.getElementById('colores');
+    if (campoColores) {
+        campoColores.value = colores;
+    }
+    
+    // Cerrar modal
+    const modal = document.getElementById('modalDetallesProducto');
+    modal.style.display = 'none';
+    
+    showNotification('Detalles guardados correctamente', 'success');
+}
+
+// Manejar cambio en el input de archivo para upload de imágenes
+document.addEventListener('DOMContentLoaded', function() {
+    const imagenInput = document.getElementById('imagenReferencia');
+    if (imagenInput) {
+        imagenInput.addEventListener('change', async function(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            
+            try {
+                // Mostrar indicador de carga
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                const placeholder = previewContainer.querySelector('.upload-placeholder');
+                if (placeholder) {
+                    placeholder.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><p>Subiendo imágenes...</p>';
+                }
+                
+                // Subir imágenes al servidor
+                const response = await PedidosMVC.uploadMultiple(files);
+                
+                console.log('Respuesta upload:', response);
+                
+                if (response && response.data && response.data.uploaded) {
+                    const urls = response.data.uploaded.map(img => img.url);
+                    
+                    // Guardar URLs en sessionStorage
+                    sessionStorage.setItem('imagenesSubidas', JSON.stringify(urls));
+                    
+                    // Mostrar preview
+                    mostrarPreviewImagenes(urls, previewContainer);
+                    
+                    showNotification(`${urls.length} imagen(es) subida(s) correctamente`, 'success');
+                } else {
+                    throw new Error('Respuesta inválida del servidor');
+                }
+                
+            } catch (error) {
+                console.error('Error al subir imágenes:', error);
+                showNotification('Error al subir imágenes: ' + error.message, 'error');
+                
+                // Restaurar placeholder
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                const placeholder = previewContainer.querySelector('.upload-placeholder');
+                if (placeholder) {
+                    placeholder.innerHTML = '<i class="fa-solid fa-cloud-upload-alt"></i><p>Arrastra imágenes aquí o haz clic para seleccionar</p>';
+                }
+            }
+        });
+    }
+});
+
+function mostrarPreviewImagenes(urls, previewContainer) {
+    // Limpiar preview anterior
+    const existingPreview = previewContainer.querySelector('.image-preview');
+    if (existingPreview) {
+        existingPreview.remove();
+    }
+    
+    // Ocultar placeholder
+    const placeholder = previewContainer.querySelector('.upload-placeholder');
+    if (placeholder) {
+        placeholder.style.display = 'none';
+    }
+    
+    // Crear contenedor de preview
+    const previewDiv = document.createElement('div');
+    previewDiv.className = 'image-preview';
+    previewDiv.style.cssText = 'display: flex; flex-wrap: wrap; gap: 10px; width: 100%;';
+    
+    urls.forEach((url, index) => {
+        const imageItem = document.createElement('div');
+        imageItem.className = 'image-preview-item';
+        imageItem.style.cssText = 'position: relative; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 2px solid rgba(20, 152, 0, 0.3);';
+        
+        imageItem.innerHTML = `
+            <img src="${url}" alt="Preview ${index + 1}" style="width: 100%; height: 100%; object-fit: cover;">
+            <button type="button" class="remove-image" onclick="removeUploadedImage(this, '${url}')" style="position: absolute; top: -5px; right: -5px; background-color: #ff6b6b; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;">×</button>
+        `;
+        
+        previewDiv.appendChild(imageItem);
+    });
+    
+    previewContainer.appendChild(previewDiv);
+}
+
+// Función para remover imagen subida
+window.removeUploadedImage = function(button, url) {
+    const imageItem = button.parentElement;
+    imageItem.remove();
+    
+    // Actualizar sessionStorage
+    try {
+        const imagenesSubidas = JSON.parse(sessionStorage.getItem('imagenesSubidas') || '[]');
+        const nuevasImagenes = imagenesSubidas.filter(imgUrl => imgUrl !== url);
+        sessionStorage.setItem('imagenesSubidas', JSON.stringify(nuevasImagenes));
+    } catch (e) {
+        console.error('Error al actualizar imágenes:', e);
+    }
+    
+    // Mostrar placeholder si no hay más imágenes
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const remainingImages = previewContainer.querySelectorAll('.image-preview-item');
+    
+    if (remainingImages.length === 0) {
+        const placeholder = previewContainer.querySelector('.upload-placeholder');
+        if (placeholder) {
+            placeholder.style.display = 'block';
+        }
+    }
+};

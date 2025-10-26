@@ -123,7 +123,9 @@ class FirebaseController
             echo json_encode(responseHTTP::status401('No autenticado'));
             return;
         }
-        echo json_encode(responseHTTP::status200('OK') + ['data' => $_SESSION['firebase_user']]);
+    $response = responseHTTP::status200('OK');
+    $response['data'] = $_SESSION['firebase_user'];
+    echo json_encode($response);
     }
 
     public function logout(): void

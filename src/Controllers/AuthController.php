@@ -144,7 +144,9 @@ class AuthController
         $_SESSION['token'] = $token;
         $_SESSION['user'] = $payload;
 
-        echo json_encode(responseHTTP::status200('Login exitoso') + ['data' => ['token' => $token, 'user' => $payload]]);
+    $response = responseHTTP::status200('Login exitoso');
+    $response['data'] = ['token' => $token, 'user' => $payload];
+    echo json_encode($response);
     }
 
     public function me(): void
@@ -168,7 +170,9 @@ class AuthController
                 $user = $data['data'] ?? null;
                 
                 if ($user) {
-                    echo json_encode(responseHTTP::status200('OK') + ['data' => ['user' => $user]]);
+                    $resp = responseHTTP::status200('OK');
+                    $resp['data'] = ['user' => $user];
+                    echo json_encode($resp);
                     return;
                 }
             } catch (\Throwable $e) {
@@ -181,7 +185,9 @@ class AuthController
             echo json_encode(responseHTTP::status401('No autenticado'));
             return;
         }
-        echo json_encode(responseHTTP::status200('OK') + ['data' => ['token' => $_SESSION['token'], 'user' => $_SESSION['user']]]);
+    $response = responseHTTP::status200('OK');
+    $response['data'] = ['token' => $_SESSION['token'], 'user' => $_SESSION['user']];
+    echo json_encode($response);
     }
 
     public function logout(): void

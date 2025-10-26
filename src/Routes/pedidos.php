@@ -58,6 +58,15 @@ $headers = getallheaders();
 // Instanciar controlador
 $pedidosController = new PedidosController();
 
+// Logger de respaldo si no existe una instancia configurada
+if (!isset($logger)) {
+    $logger = new class {
+        public function info($msg) { error_log($msg); }
+        public function debug($msg) { error_log($msg); }
+        public function error($msg) { error_log($msg); }
+    };
+}
+
 // Obtener método HTTP
 $method = $_SERVER['REQUEST_METHOD'];
 
