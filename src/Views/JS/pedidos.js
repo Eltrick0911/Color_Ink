@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setupSearch();
         setupStatusSelectors();
         setupDetailsModal(); // Configurar modal de detalles
+        setupEditColorPickers(); // Configurar color pickers del modal de edición
         
         // Configurar botón "Nuevo Pedido"
         const btnNuevoPedido = document.querySelector('.btn-nuevo-pedido');
@@ -297,71 +298,354 @@ function generateColorsHTML(data) {
 }
 async function editPedido(pedidoId) {
     console.log('Editando pedido:', pedidoId);
+    
     try {
-        // Obtener datos completos del pedido y su detalle
-        const pedido = await PedidosMVC.fetchOne(pedidoId);
-        const detalles = await PedidosMVC.fetchDetalle(pedidoId);
-        const detalle = (detalles && detalles.data && detalles.data.length > 0) ? detalles.data[0] : null;
-
-        // Abrir modal y ajustar encabezado/botón
-        openModal();
-        const headerTitle = document.querySelector('.modal-header h2');
-        if (headerTitle) headerTitle.textContent = 'Editar Pedido';
-        const btnGuardar = document.querySelector('.btn-guardar');
-        if (btnGuardar) btnGuardar.textContent = 'Guardar Cambios';
-
-        // Campos del pedido
-        document.getElementById('clienteNombre').value = pedido.data.cliente_nombre || '';
-        document.getElementById('clienteTelefono').value = pedido.data.cliente_telefono || '';
-        document.getElementById('fechaEntrega').value = pedido.data.fecha_entrega ? pedido.data.fecha_entrega.split('T')[0] : '';
-        document.getElementById('prioridad').value = pedido.data.prioridad || 'normal';
-        document.getElementById('canalVenta').value = pedido.data.canal_venta || '';
-
-        // Campos del detalle (si existe)
-        if (detalle) {
-            document.getElementById('precioUnitario').value = detalle.precio_unitario || '';
-            document.getElementById('cantidad').value = detalle.cantidad || '';
-        } else {
-            document.getElementById('precioUnitario').value = '';
-            document.getElementById('cantidad').value = '';
+        // Obtener datos completos desde la API
+        const pedidoRes = await PedidosMVC.fetchOne(pedidoId);
+        const detallesRes = await PedidosMVC.fetchDetalle(pedidoId);
+        
+        console.log('Respuesta del pedido para editar:', pedidoRes);
+        console.log('Respuesta del detalle para editar:', detallesRes);
+        
+        if (!pedidoRes || !pedidoRes.data) {
+            showNotification('No se pudieron cargar los datos del pedido', 'error');
+            return;
         }
-
-        // Guardar cambios al hacer submit
-        form.onsubmit = async function (e) {
-            e.preventDefault();
-            try {
-                // Recolectar datos del formulario
-                const pedidoData = {
-                    clienteNombre: document.getElementById('clienteNombre').value,
-                    clienteTelefono: document.getElementById('clienteTelefono').value,
-                    fechaEntrega: document.getElementById('fechaEntrega').value,
-                    prioridad: document.getElementById('prioridad').value,
-                    canalVenta: document.getElementById('canalVenta').value
-                };
-                await PedidosMVC.Model.updatePedido(pedidoId, pedidoData);
-
-                // Actualizar detalle si existe
-                if (detalle) {
-                    const detalleData = {
-                        precio_unitario: document.getElementById('precioUnitario').value,
-                        cantidad: document.getElementById('cantidad').value
-                    };
-                    await PedidosMVC.Model.updateDetalle(detalle.id_detalle, detalleData);
-                }
-
-                closeModal();
-                showNotification('Pedido actualizado correctamente', 'success');
-                // Refrescar tabla
-                await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
-            } catch (err) {
-                showNotification('Error al actualizar el pedido', 'error');
-                console.error(err);
+        
+        // La API devuelve un array, necesitamos encontrar el pedido específico
+        let data = null;
+        if (Array.isArray(pedidoRes.data)) {
+            data = pedidoRes.data.find(p => p.id_pedido == pedidoId);
+        } else {
+            data = pedidoRes.data;
+        }
+        
+        if (!data) {
+            showNotification('No se encontró el pedido solicitado', 'error');
+            return;
+        }
+        
+        // Lo mismo para el detalle
+        let detalle = null;
+        if (detallesRes && detallesRes.data) {
+            if (Array.isArray(detallesRes.data)) {
+                detalle = detallesRes.data.find(d => d.id_pedido == pedidoId);
+            } else {
+                detalle = detallesRes.data;
             }
+        }
+        
+        console.log('Pedido para editar:', data);
+        console.log('Detalle para editar:', detalle);
+        
+        // Parsear detalles_producto (JSON en la tabla pedido)
+        let detallesProducto = null;
+        if (data.detalles_producto) {
+            try {
+                detallesProducto = typeof data.detalles_producto === 'string' 
+                    ? JSON.parse(data.detalles_producto) 
+                    : data.detalles_producto;
+            } catch (e) {
+                console.warn('Error al parsear detalles_producto:', e);
+            }
+        }
+        
+        // Parsear detalles_personalizados (JSON en la tabla detallepedido)
+        let detallesPersonalizados = null;
+        if (detalle && detalle.detalles_personalizados) {
+            try {
+                detallesPersonalizados = typeof detalle.detalles_personalizados === 'string' 
+                    ? JSON.parse(detalle.detalles_personalizados) 
+                    : detalle.detalles_personalizados;
+            } catch (e) {
+                console.warn('Error al parsear detalles_personalizados:', e);
+            }
+        }
+        
+        // Construir objeto con datos completos
+        const pedidoData = {
+            id: data.id_pedido || pedidoId,
+            numeroPedido: data.numero_pedido || '',
+            cliente: data.cliente_nombre || '',
+            telefono: data.cliente_telefono || '',
+            fecha: data.fecha_pedido || '',
+            // Manejar diferentes formatos de fecha
+            fechaEntrega: (() => {
+                if (!data.fecha_entrega) return '';
+                // Si tiene espacio, dividir por espacio (formato: 2025-10-27 00:00:00)
+                if (data.fecha_entrega.includes(' ')) {
+                    return data.fecha_entrega.split(' ')[0];
+                }
+                // Si tiene T, dividir por T (formato ISO: 2025-10-27T00:00:00)
+                if (data.fecha_entrega.includes('T')) {
+                    return data.fecha_entrega.split('T')[0];
+                }
+                // Si ya está en formato YYYY-MM-DD, devolverlo tal cual
+                return data.fecha_entrega;
+            })(),
+            estado: data.estado_codigo || data.id_estado || 'PROCESO',
+            estadoNombre: data.estado_nombre || 'En Proceso',
+            prioridad: data.prioridad || 'normal',
+            canalVenta: data.canal_venta || '',
+            observaciones: data.observaciones || '',
+            
+            // Datos del detalle
+            cantidad: detalle ? parseInt(detalle.cantidad) : 1,
+            precioUnitario: detalle ? parseFloat(detalle.precio_unitario) : 0,
+            idDetalle: detalle ? detalle.id_detalle : null,
+            
+            // Datos de detalles_producto
+            categoriaProducto: detallesProducto?.categoria || detallesPersonalizados?.categoria || '',
+            colores: detallesProducto?.colores || detallesPersonalizados?.colores || '',
+            imagenes: detallesProducto?.imagenes || detallesPersonalizados?.imagenes || [],
+            
+            // Especificaciones desde observaciones
+            especificaciones: data.observaciones || ''
         };
-    } catch (err) {
-        showNotification('No se pudo cargar el pedido para editar', 'error');
-        console.error(err);
+        
+        console.log('Datos finales para edición:', pedidoData);
+        
+        // Mostrar modal de edición con los datos
+        showEditPedidoModal(pedidoData);
+    } catch (error) {
+        console.error('Error al cargar datos para edición:', error);
+        showNotification('Error al cargar los datos del pedido', 'error');
     }
+}
+
+// Mostrar modal de edición con diseño similar al de vista
+function showEditPedidoModal(pedido) {
+    console.log('=== INICIANDO EDICIÓN DE PEDIDO ===');
+    console.log('Datos completos del pedido:', pedido);
+    
+    const modal = document.getElementById('modalEditarPedido');
+    const form = document.getElementById('formEditarPedido');
+    const pedidoIdDisplay = document.getElementById('editarPedidoIdDisplay');
+    
+    if (!modal || !form) {
+        console.error('Modal de edición no encontrado');
+        return;
+    }
+    
+    // Actualizar título con número de pedido
+    if (pedidoIdDisplay) {
+        pedidoIdDisplay.textContent = `#${pedido.numeroPedido || pedido.id}`;
+    }
+    
+    // Llenar los campos del formulario con validación
+    const setInputValue = (id, value) => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.value = value || '';
+            console.log(`${id}: "${value}"`);
+        } else {
+            console.warn(`Input ${id} no encontrado`);
+        }
+    };
+    
+    console.log('--- LLENANDO FORMULARIO ---');
+    setInputValue('editarUsuario', pedido.cliente);
+    setInputValue('editarTelefono', pedido.telefono);
+    setInputValue('editarFechaEntrega', pedido.fechaEntrega);
+    setInputValue('editarCanalVenta', pedido.canalVenta);
+    setInputValue('editarPrecioUnitario', pedido.precioUnitario);
+    setInputValue('editarCantidad', pedido.cantidad);
+    setInputValue('editarPrioridad', pedido.prioridad);
+    setInputValue('editarCategoriaProducto', pedido.categoriaProducto);
+    setInputValue('editarEspecificaciones', pedido.especificaciones);
+    
+    // Manejar colores
+    if (pedido.colores && pedido.colores !== 'No especificados') {
+        const coloresArray = pedido.colores.split(',').map(c => c.trim());
+        document.getElementById('editarColores').value = pedido.colores;
+        
+        // Asignar colores a los pickers
+        if (coloresArray[0]) {
+            document.getElementById('editarColorPicker1').value = coloresArray[0];
+            document.getElementById('editarColorName1').textContent = coloresArray[0];
+        }
+        if (coloresArray[1]) {
+            document.getElementById('editarColorPicker2').value = coloresArray[1];
+            document.getElementById('editarColorName2').textContent = coloresArray[1];
+        }
+        if (coloresArray[2]) {
+            document.getElementById('editarColorPicker3').value = coloresArray[2];
+            document.getElementById('editarColorName3').textContent = coloresArray[2];
+        }
+    } else {
+        document.getElementById('editarColores').value = '';
+    }
+    
+    // Manejar imágenes existentes
+    const imagePreviewContainer = document.getElementById('editarImagePreviewContainer');
+    if (imagePreviewContainer && pedido.imagenes && pedido.imagenes.length > 0) {
+        imagePreviewContainer.innerHTML = '';
+        pedido.imagenes.forEach(imgUrl => {
+            const imgElement = document.createElement('div');
+            imgElement.className = 'image-preview-item';
+            imgElement.innerHTML = `
+                <img src="${imgUrl}" alt="Imagen del producto">
+                <button type="button" class="remove-image" data-url="${imgUrl}">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            `;
+            imagePreviewContainer.appendChild(imgElement);
+        });
+    }
+    
+    // Mostrar el modal
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    // Configurar botones de cerrar
+    const closeBtn = modal.querySelector('.close');
+    const cancelBtn = modal.querySelector('.btn-cancelar');
+    
+    if (closeBtn) {
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.onclick = function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+    }
+    
+    // Cerrar al hacer clic fuera del modal
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    };
+    
+    // Configurar el botón de guardar
+    const btnGuardar = document.getElementById('btnGuardarEdicion');
+    if (btnGuardar) {
+        // Remover listeners anteriores
+        btnGuardar.replaceWith(btnGuardar.cloneNode(true));
+        const newBtnGuardar = document.getElementById('btnGuardarEdicion');
+        
+        newBtnGuardar.addEventListener('click', async function(e) {
+            e.preventDefault();
+            await guardarEdicionPedido(pedido.id, pedido.idDetalle);
+        });
+    }
+    
+    console.log('Modal de edición mostrado');
+}
+
+// Guardar los cambios del pedido editado
+async function guardarEdicionPedido(pedidoId, detalleId) {
+    console.log('Guardando cambios del pedido:', pedidoId);
+    
+    try {
+        // Recopilar datos del formulario
+        const pedidoData = {
+            clienteNombre: document.getElementById('editarUsuario').value,
+            clienteTelefono: document.getElementById('editarTelefono').value,
+            fechaEntrega: document.getElementById('editarFechaEntrega').value,
+            canalVenta: document.getElementById('editarCanalVenta').value,
+            prioridad: document.getElementById('editarPrioridad').value,
+            observaciones: document.getElementById('editarEspecificaciones').value, // Las especificaciones van en observaciones
+            detalles_producto: JSON.stringify({
+                categoria: document.getElementById('editarCategoriaProducto').value,
+                colores: document.getElementById('editarColores').value,
+                imagenes: [] // Las imágenes se manejarían por separado si se implementa carga
+            })
+        };
+        
+        console.log('Datos del pedido a actualizar:', pedidoData);
+        
+        // Actualizar pedido
+        await PedidosMVC.updatePedido(pedidoId, pedidoData);
+        
+        // Actualizar detalle si existe
+        if (detalleId) {
+            const detalleData = {
+                cantidad: parseInt(document.getElementById('editarCantidad').value),
+                precio_unitario: parseFloat(document.getElementById('editarPrecioUnitario').value),
+                detalles_personalizados: JSON.stringify({
+                    categoria: document.getElementById('editarCategoriaProducto').value,
+                    colores: document.getElementById('editarColores').value,
+                    especificaciones: document.getElementById('editarEspecificaciones').value
+                })
+            };
+            
+            console.log('Datos del detalle a actualizar:', detalleData);
+            await PedidosMVC.updateDetalle(detalleId, detalleData);
+        }
+        
+        // Cerrar modal
+        const modal = document.getElementById('modalEditarPedido');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        showNotification('Pedido actualizado correctamente', 'success');
+        
+        // Refrescar tabla
+        await PedidosMVC.init({ 
+            apiEntry: '/Color_Ink/public/index.php',
+            tableSelector: '.pedidos-table tbody',
+            autoCreateToken: true
+        });
+    } catch (error) {
+        console.error('Error al guardar cambios:', error);
+        showNotification('Error al actualizar el pedido: ' + (error.message || 'Error desconocido'), 'error');
+    }
+}
+
+// Configurar los color pickers del modal de edición
+function setupEditColorPickers() {
+    const editColorPickers = [
+        { picker: 'editarColorPicker1', name: 'editarColorName1' },
+        { picker: 'editarColorPicker2', name: 'editarColorName2' },
+        { picker: 'editarColorPicker3', name: 'editarColorName3' }
+    ];
+    
+    editColorPickers.forEach(({picker, name}) => {
+        const pickerElement = document.getElementById(picker);
+        const nameElement = document.getElementById(name);
+        
+        if (pickerElement && nameElement) {
+            pickerElement.addEventListener('input', function() {
+                nameElement.textContent = this.value;
+                updateEditColorsField();
+            });
+        }
+    });
+    
+    // Botón limpiar colores
+    const btnLimpiar = document.querySelector('#modalEditarPedido .btn-limpiar-colores');
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', function() {
+            editColorPickers.forEach(({picker, name}) => {
+                const pickerElement = document.getElementById(picker);
+                const nameElement = document.getElementById(name);
+                if (pickerElement) pickerElement.value = '#000000';
+                if (nameElement) nameElement.textContent = `Color ${picker.slice(-1)}`;
+            });
+            document.getElementById('editarColores').value = '';
+        });
+    }
+}
+
+function updateEditColorsField() {
+    const colors = [];
+    const pickerIds = ['editarColorPicker1', 'editarColorPicker2', 'editarColorPicker3'];
+    
+    pickerIds.forEach(id => {
+        const picker = document.getElementById(id);
+        if (picker && picker.value && picker.value !== '#000000') {
+            colors.push(picker.value);
+        }
+    });
+    
+    document.getElementById('editarColores').value = colors.join(', ');
 }
 
 async function deletePedido(pedidoId, row) {
@@ -799,55 +1083,107 @@ async function viewPedido(pedidoId, row) {
     
     try {
         // Obtener datos completos desde la API
-        const pedido = await PedidosMVC.fetchOne(pedidoId);
+        const pedidoRes = await PedidosMVC.fetchOne(pedidoId);
         const detallesRes = await PedidosMVC.fetchDetalle(pedidoId);
-        const detalle = (detallesRes && detallesRes.data && detallesRes.data.length > 0) ? detallesRes.data[0] : null;
         
-        if (!pedido || !pedido.data) {
+        console.log('Respuesta del pedido:', pedidoRes);
+        console.log('Respuesta del detalle:', detallesRes);
+        
+        if (!pedidoRes || !pedidoRes.data) {
             showNotification('No se pudieron cargar los detalles del pedido', 'error');
             return;
         }
         
+        // La API devuelve un array, necesitamos encontrar el pedido específico
+        let data = null;
+        if (Array.isArray(pedidoRes.data)) {
+            data = pedidoRes.data.find(p => p.id_pedido == pedidoId);
+        } else {
+            data = pedidoRes.data;
+        }
+        
+        if (!data) {
+            showNotification('No se encontró el pedido solicitado', 'error');
+            return;
+        }
+        
+        // Lo mismo para el detalle
+        let detalle = null;
+        if (detallesRes && detallesRes.data) {
+            if (Array.isArray(detallesRes.data)) {
+                detalle = detallesRes.data.find(d => d.id_pedido == pedidoId);
+            } else {
+                detalle = detallesRes.data;
+            }
+        }
+        
+        console.log('Pedido encontrado:', data);
+        console.log('Detalle encontrado:', detalle);
+        
+        // Parsear detalles_producto (JSON en la tabla pedido)
+        let detallesProducto = null;
+        if (data.detalles_producto) {
+            try {
+                detallesProducto = typeof data.detalles_producto === 'string' 
+                    ? JSON.parse(data.detalles_producto) 
+                    : data.detalles_producto;
+                console.log('Detalles producto parseados:', detallesProducto);
+            } catch (e) {
+                console.warn('Error al parsear detalles_producto:', e);
+            }
+        }
+        
+        // Parsear detalles_personalizados (JSON en la tabla detallepedido)
+        let detallesPersonalizados = null;
+        if (detalle && detalle.detalles_personalizados) {
+            try {
+                detallesPersonalizados = typeof detalle.detalles_personalizados === 'string' 
+                    ? JSON.parse(detalle.detalles_personalizados) 
+                    : detalle.detalles_personalizados;
+                console.log('Detalles personalizados parseados:', detallesPersonalizados);
+            } catch (e) {
+                console.warn('Error al parsear detalles_personalizados:', e);
+            }
+        }
+        
         // Construir objeto con datos completos
         const pedidoData = {
-            id: pedido.data.id_pedido || pedidoId,
-            numeroPedido: pedido.data.numero_pedido || '',
-            cliente: pedido.data.cliente_nombre || 'Sin nombre',
-            telefono: pedido.data.cliente_telefono || 'No especificado',
-            email: pedido.data.email || 'No especificado',
-            fecha: pedido.data.fecha_pedido || '',
-            fechaEntrega: pedido.data.fecha_entrega || 'No especificada',
-            estado: pedido.data.estado_codigo || 'PROCESO',
-            estadoNombre: pedido.data.estado_nombre || 'En Proceso',
-            prioridad: pedido.data.prioridad || 'normal',
-            canalVenta: pedido.data.canal_venta || 'No especificado',
-            observaciones: pedido.data.observaciones || 'No especificado',
-            direccion: pedido.data.direccion || 'No especificada',
+            id: data.id_pedido || pedidoId,
+            numeroPedido: data.numero_pedido || '',
+            cliente: data.cliente_nombre || 'Sin nombre',
+            telefono: data.cliente_telefono || 'No especificado',
+            email: data.email || 'No especificado',
+            fecha: data.fecha_pedido || '',
+            fechaEntrega: data.fecha_entrega || 'No especificada',
+            estado: data.estado_codigo || data.id_estado || 'PROCESO',
+            estadoNombre: data.estado_nombre || 'En Proceso',
+            prioridad: data.prioridad || 'normal',
+            canalVenta: data.canal_venta || 'No especificado',
+            observaciones: data.observaciones || '',
+            direccion: data.direccion || 'No especificada',
             
             // Datos del detalle
             cantidad: detalle ? detalle.cantidad : 1,
-            precioUnitario: detalle ? detalle.precio_unitario : 0,
-            total: detalle ? (detalle.cantidad * detalle.precio_unitario).toFixed(2) : '0.00',
+            precioUnitario: detalle ? parseFloat(detalle.precio_unitario) : 0,
+            total: detalle ? (parseFloat(detalle.cantidad) * parseFloat(detalle.precio_unitario)).toFixed(2) : '0.00',
             
-            // Intentar parsear detalles_personalizados
-            categoriaProducto: 'No especificado',
-            colores: 'No especificado',
-            especificaciones: 'No especificado',
-            imagenes: []
+            // Datos de detalles_producto (de la tabla pedido)
+            categoriaProducto: detallesProducto?.categoria || 'No especificado',
+            colores: detallesProducto?.colores || 'No especificado',
+            imagenes: detallesProducto?.imagenes || [],
+            
+            // Especificaciones desde observaciones de la tabla pedido
+            especificaciones: data.observaciones || 'No especificadas'
         };
         
-        // Parsear detalles personalizados si existen
-        if (detalle && detalle.detalles_personalizados) {
-            try {
-                const detallesPersonalizados = JSON.parse(detalle.detalles_personalizados);
-                pedidoData.categoriaProducto = detallesPersonalizados.categoria || 'No especificado';
-                pedidoData.colores = detallesPersonalizados.colores || 'No especificado';
-                pedidoData.especificaciones = detallesPersonalizados.especificaciones || 'No especificado';
-                pedidoData.imagenes = detallesPersonalizados.imagenes || [];
-            } catch (e) {
-                console.warn('No se pudieron parsear detalles_personalizados:', e);
-            }
+        // Si hay detalles personalizados, sobrescribir con esos valores
+        if (detallesPersonalizados) {
+            if (detallesPersonalizados.categoria) pedidoData.categoriaProducto = detallesPersonalizados.categoria;
+            if (detallesPersonalizados.colores) pedidoData.colores = detallesPersonalizados.colores;
+            if (detallesPersonalizados.imagenes) pedidoData.imagenes = detallesPersonalizados.imagenes;
         }
+        
+        console.log('Datos finales a mostrar:', pedidoData);
         
         // Mostrar modal con los detalles
         showPedidoDetails(pedidoData);
@@ -855,6 +1191,163 @@ async function viewPedido(pedidoId, row) {
         console.error('Error al cargar detalles del pedido:', error);
         showNotification('Error al cargar los detalles del pedido', 'error');
     }
+}
+
+// Mostrar detalles completos del pedido en el modal
+function showPedidoDetails(pedido) {
+    console.log('showPedidoDetails llamada con:', pedido);
+    
+    const modal = document.getElementById('modalVerPedido');
+    const content = document.getElementById('pedidoDetailsContent');
+    const pedidoIdDisplay = document.getElementById('pedidoIdDisplay');
+    
+    if (!modal || !content) {
+        console.error('Modal de detalles no encontrado');
+        console.log('modal:', modal, 'content:', content);
+        return;
+    }
+    
+    // Actualizar título con número de pedido
+    if (pedidoIdDisplay) {
+        pedidoIdDisplay.textContent = `#${pedido.numeroPedido || pedido.id}`;
+    }
+    
+    // Función para generar los colores visuales
+    function generarColoresHTML(coloresString) {
+        if (!coloresString || coloresString === 'No especificados') {
+            return '<span class="detail-value">No especificados</span>';
+        }
+        
+        // Separar los colores si están separados por comas
+        const coloresArray = coloresString.split(',').map(c => c.trim());
+        
+        let coloresHTML = '<div class="colores-container">';
+        coloresArray.forEach(color => {
+            coloresHTML += `
+                <div class="color-item">
+                    <div class="color-circle" style="background-color: ${color};" title="${color}"></div>
+                    <span class="color-name">${color}</span>
+                </div>
+            `;
+        });
+        coloresHTML += '</div>';
+        
+        return coloresHTML;
+    }
+    
+    // Construir HTML con TODOS los datos del pedido
+    const htmlContent = `
+        <div class="pedido-details-grid">
+            <!-- Información del Cliente -->
+            <div class="details-section">
+                <h3><i class="fa-solid fa-user"></i> Información del Cliente</h3>
+                <div class="details-content">
+                    <div class="detail-item">
+                        <span class="detail-label">Nombre:</span>
+                        <span class="detail-value">${pedido.cliente || 'No especificado'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Teléfono:</span>
+                        <span class="detail-value">${pedido.telefono || 'No especificado'}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Información del Pedido -->
+            <div class="details-section">
+                <h3><i class="fa-solid fa-shopping-cart"></i> Información del Pedido</h3>
+                <div class="details-content">
+                    <div class="detail-item">
+                        <span class="detail-label">Número de Pedido:</span>
+                        <span class="detail-value">${pedido.numeroPedido || pedido.id}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha del Pedido:</span>
+                        <span class="detail-value">${pedido.fecha || 'No especificada'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha de Entrega:</span>
+                        <span class="detail-value">${pedido.fechaEntrega || 'No especificada'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estado:</span>
+                        <span class="detail-value badge-${pedido.estado.toLowerCase()}">${pedido.estadoNombre || pedido.estado}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Prioridad:</span>
+                        <span class="detail-value badge-prioridad-${pedido.prioridad}">${pedido.prioridad || 'Normal'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Canal de Venta:</span>
+                        <span class="detail-value">${pedido.canalVenta || 'No especificado'}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detalles del Producto -->
+            <div class="details-section full-width">
+                <h3><i class="fa-solid fa-box"></i> Detalles del Producto</h3>
+                <div class="details-content">
+                    <div class="detail-item">
+                        <span class="detail-label">Categoría:</span>
+                        <span class="detail-value">${pedido.categoriaProducto || 'No especificada'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Cantidad:</span>
+                        <span class="detail-value">${pedido.cantidad || 1} unidad(es)</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Precio Unitario:</span>
+                        <span class="detail-value">$${parseFloat(pedido.precioUnitario || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Total:</span>
+                        <span class="detail-value total-price">$${pedido.total || '0.00'}</span>
+                    </div>
+                    <div class="detail-item full-width">
+                        <span class="detail-label">Colores:</span>
+                        ${generarColoresHTML(pedido.colores)}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Especificaciones Técnicas -->
+            <div class="details-section full-width">
+                <h3><i class="fa-solid fa-clipboard-list"></i> Especificaciones Técnicas</h3>
+                <div class="details-content">
+                    <div class="detail-item full-width">
+                        <p class="detail-text">${pedido.especificaciones || 'No especificadas'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Imágenes de Referencia -->
+            ${pedido.imagenes && pedido.imagenes.length > 0 ? `
+            <div class="details-section full-width">
+                <h3><i class="fa-solid fa-images"></i> Imágenes de Referencia</h3>
+                <div class="details-content">
+                    <div class="images-gallery">
+                        ${pedido.imagenes.map(img => `
+                            <div class="image-item">
+                                <img src="${img}" alt="Imagen de referencia" onclick="window.open('${img}', '_blank')">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+        </div>
+    `;
+    
+    content.innerHTML = htmlContent;
+    
+    console.log('Modal HTML actualizado');
+    
+    // Mostrar el modal
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    console.log('Modal mostrado');
 }
 
 // Obtener datos del pedido desde la tabla

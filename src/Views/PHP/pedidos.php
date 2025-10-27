@@ -123,8 +123,8 @@
                             <input type="text" id="clienteNombre" name="clienteNombre" required>
                         </div>
                         <div class="form-group">
-                            <label for="clienteTelefono">Teléfono *</label>
-                            <input type="tel" id="clienteTelefono" name="clienteTelefono" required>
+                            <label for="clienteTelefono">Teléfono</label>
+                            <input type="tel" id="clienteTelefono" name="clienteTelefono">
                         </div>
                     </div>
                     
@@ -347,11 +347,6 @@
                     <div class="form-group">
                         <label for="editarEspecificaciones">Especificaciones Técnicas/Detalles del producto</label>
                         <textarea id="editarEspecificaciones" name="especificaciones" rows="4" placeholder="Tamaño específico, acabados, técnicas de impresión, talla etc."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editarObservaciones">Observaciones</label>
-                        <textarea id="editarObservaciones" name="observaciones" rows="3" placeholder="Observaciones adicionales"></textarea>
                     </div>
 
                     <!-- Sección de colores -->

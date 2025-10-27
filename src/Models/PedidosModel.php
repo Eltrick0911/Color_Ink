@@ -16,7 +16,44 @@ class PedidosModel
         $this->connection = connectionDB::getConnection();
     }
 
- 
+    /**
+     * Crear o buscar un usuario cliente (rol 3) con nombre y teléfono
+     * Permite duplicados de nombre y teléfono
+     */
+    public function crearCliente(?string $nombreCliente, ?string $telefonoCliente): int
+    {
+        try {
+            // Siempre crear un nuevo usuario cliente (permitir duplicados)
+            error_log("PedidosModel - crearCliente: Creando nuevo cliente - Nombre: $nombreCliente, Teléfono: " . ($telefonoCliente ?? 'NULL'));
+            
+            // Generar un correo único temporal (requerido por la tabla pero no se usa)
+            $correoTemp = 'cliente_' . bin2hex(random_bytes(8)) . '@temp.local';
+            
+            $sql = "INSERT INTO usuario (
+                        nombre_usuario,
+                        correo,
+                        contrasena,
+                        telefono,
+                        fecha_ingreso,
+                        id_rol
+                    ) VALUES (?, ?, '', ?, CURDATE(), 3)";
+            
+            $stmt = $this->connection->prepare($sql);
+            $stmt->execute([
+                $nombreCliente ?: 'Cliente sin nombre',
+                $correoTemp,
+                $telefonoCliente
+            ]);
+            
+            $idCliente = (int)$this->connection->lastInsertId();
+            error_log("PedidosModel - crearCliente: Cliente creado con ID: $idCliente");
+            
+            return $idCliente;
+        } catch (PDOException $e) {
+            error_log("ERROR PedidosModel - crearCliente: " . $e->getMessage());
+            throw new Exception("Error al crear cliente: " . $e->getMessage());
+        }
+    }
 
     /**
      * Crear un nuevo pedido (con todos los campos de la BD actual)
@@ -34,26 +71,18 @@ class PedidosModel
     ): ?int
     {
         try {
-            error_log("PedidosModel - createPedido: Creando pedido - Numero: $numeroPedido, Usuario: $idUsuario");
+            error_log("PedidosModel - createPedido: Creando pedido - Usuario: $idUsuario");
 
-            // La tabla pedido solo tiene: id_pedido, numero_pedido, id_usuario, fecha_pedido, fecha_compromiso, observaciones, fecha_entrega, id_estado
-            // Los datos adicionales (cliente_nombre, etc.) se guardarán en observaciones como JSON si es necesario
-            
-            $observacionesCompletas = $observaciones;
-            if ($clienteNombre || $clienteTelefono || $canalVenta || $prioridad || $detallesProducto) {
-                $datosAdicionales = [
-                    'cliente_nombre' => $clienteNombre,
-                    'cliente_telefono' => $clienteTelefono,
-                    'canal_venta' => $canalVenta,
-                    'prioridad' => $prioridad,
-                    'detalles_producto' => $detallesProducto,
-                    'observaciones_originales' => $observaciones
-                ];
-                $observacionesCompletas = json_encode($datosAdicionales, JSON_UNESCAPED_UNICODE);
+            // Calcular el siguiente numero_pedido incremental (máximo actual + 1)
+            $sqlMax = "SELECT MAX(CAST(numero_pedido AS UNSIGNED)) as max_num FROM pedido";
+            $maxNum = 0;
+            $stmtMax = $this->connection->query($sqlMax);
+            if ($row = $stmtMax->fetch(PDO::FETCH_ASSOC)) {
+                $maxNum = (int)($row['max_num'] ?? 0);
             }
+            $nextNumeroPedido = strval($maxNum + 1);
 
-            // Usar un numero_pedido provisional único y luego actualizarlo al ID autoincremental
-            $provisionalNumero = 'TMP-' . bin2hex(random_bytes(4));
+            $observacionesFinal = $observaciones;
 
             $sql = "INSERT INTO pedido (
                         numero_pedido,
@@ -71,10 +100,10 @@ class PedidosModel
 
             $stmt = $this->connection->prepare($sql);
             $stmt->execute([
-                $provisionalNumero,
+                $nextNumeroPedido,
                 $idUsuario,
                 $fechaEntrega,
-                $observacionesCompletas,
+                $observacionesFinal,
                 $clienteNombre,
                 $clienteTelefono,
                 $canalVenta,
@@ -83,10 +112,6 @@ class PedidosModel
             ]);
 
             $idPedido = (int)$this->connection->lastInsertId();
-
-            // Actualizar numero_pedido = id_pedido (según requerimiento: usar incrementación de la BD)
-            $upd = $this->connection->prepare("UPDATE pedido SET numero_pedido = ? WHERE id_pedido = ?");
-            $upd->execute([strval($idPedido), $idPedido]);
 
             error_log("PedidosModel - createPedido: Pedido creado con ID: " . ($idPedido ?? 'NULL'));
             return $idPedido ?: null;
@@ -260,6 +285,58 @@ class PedidosModel
             return $result;
         } catch (PDOException $e) {
             error_log("ERROR PedidosModel - updatePedido: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualizar pedido completo con todos sus campos
+     */
+    public function updatePedidoCompleto(int $idPedido, array $datos): bool
+    {
+        try {
+            error_log("PedidosModel - updatePedidoCompleto: Actualizando pedido $idPedido");
+            error_log("Datos a actualizar: " . json_encode($datos));
+            
+            $campos = [];
+            $valores = [];
+            
+            // Campos permitidos para actualizar
+            $camposPermitidos = [
+                'cliente_nombre',
+                'cliente_telefono',
+                'fecha_entrega',
+                'prioridad',
+                'canal_venta',
+                'observaciones',
+                'detalles_producto',
+                'id_estado'
+            ];
+            
+            foreach ($camposPermitidos as $campo) {
+                if (isset($datos[$campo])) {
+                    $campos[] = "$campo = ?";
+                    $valores[] = $datos[$campo];
+                }
+            }
+            
+            if (empty($campos)) {
+                error_log("PedidosModel - updatePedidoCompleto: No hay campos para actualizar");
+                return false;
+            }
+            
+            $valores[] = $idPedido; // WHERE
+            
+            $sql = "UPDATE pedido SET " . implode(', ', $campos) . " WHERE id_pedido = ?";
+            error_log("SQL: $sql");
+            
+            $stmt = $this->connection->prepare($sql);
+            $result = $stmt->execute($valores);
+            
+            error_log("PedidosModel - updatePedidoCompleto: Actualización " . ($result ? "exitosa" : "fallida"));
+            return $result;
+        } catch (PDOException $e) {
+            error_log("ERROR PedidosModel - updatePedidoCompleto: " . $e->getMessage());
             return false;
         }
     }

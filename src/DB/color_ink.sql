@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 25-10-2025 a las 18:00:00
+-- Tiempo de generación: 27-10-2025 a las 15:23:13
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -25,6 +25,24 @@ DELIMITER $$
 --
 -- Procedimientos
 --
+CREATE DEFINER=`root`@`localhost` PROCEDURE `insertar_cliente_usuario` (IN `p_nombre_usuario` VARCHAR(100), IN `p_telefono` VARCHAR(20))   BEGIN
+    INSERT INTO usuario (
+        nombre_usuario, 
+        correo, 
+        contrasena, 
+        telefono, 
+        fecha_ingreso, 
+        id_rol
+    ) VALUES (
+        p_nombre_usuario, 
+        NULL,            -- correo vacío
+        NULL,            -- contraseña vacía
+        p_telefono, 
+        CURDATE(),       -- fecha de ingreso actual
+        3                -- id_rol del cliente
+    );
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_actualizar_categoria` (IN `p_id_categoria` INT, IN `p_descripcion` VARCHAR(100))   BEGIN
     UPDATE categoriaproducto SET descripcion = p_descripcion WHERE id_categoria = p_id_categoria;
 END$$
@@ -622,7 +640,9 @@ INSERT INTO `detallepedido` (`id_detalle`, `producto_solicitado`, `cantidad`, `p
 (26, 'Camisa', 1, 20.00, 0.00, 5.00, 21.00, 2, 1, NULL, NULL),
 (27, 'Tinta Negra', 1, 250.00, 0.00, 16.00, 290.00, 3, 1, NULL, NULL),
 (28, 'Producto de Prueba Web', 1, 200.00, 15.00, 15.00, 195.50, NULL, 1, NULL, NULL),
-(29, 'Producto de Prueba Web', 1, 200.00, 15.00, 15.00, 195.50, NULL, 1, NULL, NULL);
+(29, 'Producto de Prueba Web', 1, 200.00, 15.00, 15.00, 195.50, NULL, 1, NULL, NULL),
+(30, 'Pedido Personalizado', 1, 199.98, 0.00, 0.00, 199.98, NULL, NULL, NULL, '{\"categoria\":\"\",\"colores\":\"\",\"especificaciones\":\"\",\"imagenes\":[]}'),
+(31, 'Personalizado: retratos - acabado lindo', 1, 199.98, 0.00, 0.00, 199.98, NULL, NULL, NULL, '{\"categoria\":\"retratos\",\"colores\":\"#ad0000\",\"especificaciones\":\"acabado lindo \",\"imagenes\":[\"/Color_Ink/uploads/pedidos/pedido_20251027_080438_fc545eb7.png\"]}');
 
 --
 -- Disparadores `detallepedido`
@@ -761,7 +781,9 @@ INSERT INTO `detallepedido_aud` (`id_aud`, `id_detalle`, `accion`, `fecha_accion
 (1, 26, 'INSERT', '2025-10-14 11:11:38', 1, NULL, '{\"id_detalle\": 26, \"producto_solicitado\": \"Camisa\", \"cantidad\": 1, \"precio_unitario\": 20.00, \"descuento\": 0.00, \"impuesto\": 5.00, \"total_linea\": 21.00, \"id_pedido\": 2, \"id_producto\": 1, \"id_movimiento\": null}'),
 (2, 27, 'INSERT', '2025-10-14 11:15:26', 1, NULL, '{\"id_detalle\": 27, \"producto_solicitado\": \"Tinta Negra\", \"cantidad\": 1, \"precio_unitario\": 250.00, \"descuento\": 0.00, \"impuesto\": 16.00, \"total_linea\": 290.00, \"id_pedido\": 3, \"id_producto\": 1, \"id_movimiento\": null}'),
 (3, 28, 'INSERT', '2025-10-21 11:03:08', 1, NULL, '{\"id_detalle\": 28, \"producto_solicitado\": \"Producto de Prueba Web\", \"cantidad\": 1, \"precio_unitario\": 200.00, \"descuento\": 15.00, \"impuesto\": 15.00, \"total_linea\": 195.50, \"id_pedido\": 10, \"id_producto\": 1, \"id_movimiento\": null}'),
-(4, 29, 'INSERT', '2025-10-21 11:05:22', 1, NULL, '{\"id_detalle\": 29, \"producto_solicitado\": \"Producto de Prueba Web\", \"cantidad\": 1, \"precio_unitario\": 200.00, \"descuento\": 15.00, \"impuesto\": 15.00, \"total_linea\": 195.50, \"id_pedido\": 12, \"id_producto\": 1, \"id_movimiento\": null}');
+(4, 29, 'INSERT', '2025-10-21 11:05:22', 1, NULL, '{\"id_detalle\": 29, \"producto_solicitado\": \"Producto de Prueba Web\", \"cantidad\": 1, \"precio_unitario\": 200.00, \"descuento\": 15.00, \"impuesto\": 15.00, \"total_linea\": 195.50, \"id_pedido\": 12, \"id_producto\": 1, \"id_movimiento\": null}'),
+(5, 30, 'INSERT', '2025-10-27 14:41:35', 1, NULL, '{\"id_detalle\": 30, \"producto_solicitado\": \"Pedido Personalizado\", \"cantidad\": 1, \"precio_unitario\": 199.98, \"descuento\": 0.00, \"impuesto\": 0.00, \"total_linea\": 199.98, \"id_pedido\": 14, \"id_producto\": null, \"id_movimiento\": null}'),
+(6, 31, 'INSERT', '2025-10-27 15:04:54', 1, NULL, '{\"id_detalle\": 31, \"producto_solicitado\": \"Personalizado: retratos - acabado lindo\", \"cantidad\": 1, \"precio_unitario\": 199.98, \"descuento\": 0.00, \"impuesto\": 0.00, \"total_linea\": 199.98, \"id_pedido\": 15, \"id_producto\": null, \"id_movimiento\": null}');
 
 -- --------------------------------------------------------
 
@@ -835,9 +857,7 @@ INSERT INTO `pedido` (`id_pedido`, `numero_pedido`, `id_usuario`, `cliente_nombr
 (3, 'PED-001', 1, NULL, NULL, NULL, 'normal', '2025-10-13 00:00:00', 'Pedido de prueba desde Postman', NULL, NULL, 1),
 (4, 'PED-003', 1, NULL, NULL, NULL, 'normal', '2025-10-13 00:00:00', 'Pedido de prueba desde Postman', NULL, NULL, 1),
 (6, 'PED-004', 1, NULL, NULL, NULL, 'normal', '2025-10-13 00:00:00', 'Pedido urgente para cliente VIP', NULL, NULL, 1),
-(7, 'PED-005', 1, NULL, NULL, NULL, 'normal', '2025-10-13 00:00:00', 'Pedido urgente para cliente VIP', NULL, NULL, 1),
-(11, 'PED-DIRECT-20251021030510', 1, 'Cliente Directo', '7777-8888', 'instagram', 'normal', '2025-10-21 11:05:10', 'Pedido de prueba directo desde test_api_sin_auth.php', 'Producto de prueba directo', NULL, 3),
-(13, 'PED-DIRECT-20251021033953', 1, 'Cliente Directo', '7777-8888', 'instagram', 'normal', '2025-10-21 11:39:53', 'Pedido de prueba directo desde test_api_sin_auth.php', 'Producto de prueba directo', NULL, 3);
+(7, 'PED-005', 1, NULL, NULL, NULL, 'normal', '2025-10-13 00:00:00', 'Pedido urgente para cliente VIP', NULL, NULL, 1);
 
 --
 -- Disparadores `pedido`
@@ -989,7 +1009,14 @@ INSERT INTO `pedido_aud` (`id_aud`, `fecha_accion`, `usuario_accion`, `json_ante
 (14, '2025-10-21 11:05:22', 1, '{\"id_pedido\": 12, \"numero_pedido\": \"PED-WEB-20251021030522\", \"fecha_pedido\": \"2025-10-21 11:05:22\", \"fecha_entrega\": null, \"observaciones\": \"Pedido de prueba web desde test_web.php\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Cliente de Prueba\", \"cliente_telefono\": \"9999-9999\", \"canal_venta\": \"whatsapp\", \"prioridad\": \"normal\", \"detalles_producto\": \"Camisa personalizada con logo\"}', '{\"id_pedido\": 12, \"numero_pedido\": \"PED-WEB-20251021030522\", \"fecha_pedido\": \"2025-10-21 11:05:22\", \"fecha_entrega\": \"2025-10-31\", \"observaciones\": \"Pedido de prueba web desde test_web.php\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Cliente de Prueba\", \"cliente_telefono\": \"9999-9999\", \"canal_venta\": \"whatsapp\", \"prioridad\": \"normal\", \"detalles_producto\": \"Camisa personalizada con logo\"}', 12, NULL, NULL, 'UPDATE'),
 (15, '2025-10-21 11:05:22', 1, '{\"id_pedido\": 12, \"numero_pedido\": \"PED-WEB-20251021030522\", \"fecha_pedido\": \"2025-10-21 11:05:22\", \"fecha_entrega\": \"2025-10-31\", \"observaciones\": \"Pedido de prueba web desde test_web.php\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Cliente de Prueba\", \"cliente_telefono\": \"9999-9999\", \"canal_venta\": \"whatsapp\", \"prioridad\": \"normal\", \"detalles_producto\": \"Camisa personalizada con logo\"}', '{\"id_pedido\": 12, \"numero_pedido\": \"PED-WEB-20251021030522\", \"fecha_pedido\": \"2025-10-21 11:05:22\", \"fecha_entrega\": \"2025-10-21\", \"observaciones\": \"Pedido de prueba web desde test_web.php\", \"id_estado\": 1, \"id_usuario\": 1, \"cliente_nombre\": \"Cliente de Prueba\", \"cliente_telefono\": \"9999-9999\", \"canal_venta\": \"whatsapp\", \"prioridad\": \"normal\", \"detalles_producto\": \"Camisa personalizada con logo\"}', 12, NULL, NULL, 'UPDATE'),
 (16, '2025-10-21 11:05:22', 1, '{\"id_pedido\": 12, \"numero_pedido\": \"PED-WEB-20251021030522\", \"fecha_pedido\": \"2025-10-21 11:05:22\", \"fecha_entrega\": \"2025-10-21\", \"observaciones\": \"Pedido de prueba web desde test_web.php\", \"id_estado\": 1, \"id_usuario\": 1, \"cliente_nombre\": \"Cliente de Prueba\", \"cliente_telefono\": \"9999-9999\", \"canal_venta\": \"whatsapp\", \"prioridad\": \"normal\", \"detalles_producto\": \"Camisa personalizada con logo\"}', NULL, 12, NULL, NULL, 'DELETE'),
-(17, '2025-10-21 11:39:53', 1, NULL, '{\"id_pedido\": 13, \"numero_pedido\": \"PED-DIRECT-20251021033953\", \"fecha_pedido\": \"2025-10-21 11:39:53\", \"fecha_entrega\": null, \"observaciones\": \"Pedido de prueba directo desde test_api_sin_auth.php\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Cliente Directo\", \"cliente_telefono\": \"7777-8888\", \"canal_venta\": \"instagram\", \"prioridad\": \"normal\", \"detalles_producto\": \"Producto de prueba directo\"}', 13, NULL, NULL, 'INSERT');
+(17, '2025-10-21 11:39:53', 1, NULL, '{\"id_pedido\": 13, \"numero_pedido\": \"PED-DIRECT-20251021033953\", \"fecha_pedido\": \"2025-10-21 11:39:53\", \"fecha_entrega\": null, \"observaciones\": \"Pedido de prueba directo desde test_api_sin_auth.php\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Cliente Directo\", \"cliente_telefono\": \"7777-8888\", \"canal_venta\": \"instagram\", \"prioridad\": \"normal\", \"detalles_producto\": \"Producto de prueba directo\"}', 13, NULL, NULL, 'INSERT'),
+(18, '2025-10-27 09:24:51', 1, '{\"id_pedido\": 13, \"numero_pedido\": \"PED-DIRECT-20251021033953\", \"fecha_pedido\": \"2025-10-21 11:39:53\", \"fecha_entrega\": null, \"observaciones\": \"Pedido de prueba directo desde test_api_sin_auth.php\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Cliente Directo\", \"cliente_telefono\": \"7777-8888\", \"canal_venta\": \"instagram\", \"prioridad\": \"normal\", \"detalles_producto\": \"Producto de prueba directo\"}', NULL, 13, NULL, NULL, 'DELETE'),
+(19, '2025-10-27 14:41:35', 1, NULL, '{\"id_pedido\": 14, \"numero_pedido\": \"TMP-5e956c77\", \"fecha_pedido\": \"2025-10-27 14:41:35\", \"fecha_entrega\": \"2025-10-31\", \"observaciones\": \"{\\\"cliente_nombre\\\":\\\"Melyz24\\\",\\\"cliente_telefono\\\":\\\"23902302\\\",\\\"canal_venta\\\":\\\"facebook\\\",\\\"prioridad\\\":\\\"alta\\\",\\\"detalles_producto\\\":null,\\\"observaciones_originales\\\":null}\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Melyz24\", \"cliente_telefono\": \"23902302\", \"canal_venta\": \"facebook\", \"prioridad\": \"alta\", \"detalles_producto\": null}', 14, NULL, NULL, 'INSERT'),
+(20, '2025-10-27 14:41:35', 1, '{\"id_pedido\": 14, \"numero_pedido\": \"TMP-5e956c77\", \"fecha_pedido\": \"2025-10-27 14:41:35\", \"fecha_entrega\": \"2025-10-31\", \"observaciones\": \"{\\\"cliente_nombre\\\":\\\"Melyz24\\\",\\\"cliente_telefono\\\":\\\"23902302\\\",\\\"canal_venta\\\":\\\"facebook\\\",\\\"prioridad\\\":\\\"alta\\\",\\\"detalles_producto\\\":null,\\\"observaciones_originales\\\":null}\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Melyz24\", \"cliente_telefono\": \"23902302\", \"canal_venta\": \"facebook\", \"prioridad\": \"alta\", \"detalles_producto\": null}', '{\"id_pedido\": 14, \"numero_pedido\": \"14\", \"fecha_pedido\": \"2025-10-27 14:41:35\", \"fecha_entrega\": \"2025-10-31\", \"observaciones\": \"{\\\"cliente_nombre\\\":\\\"Melyz24\\\",\\\"cliente_telefono\\\":\\\"23902302\\\",\\\"canal_venta\\\":\\\"facebook\\\",\\\"prioridad\\\":\\\"alta\\\",\\\"detalles_producto\\\":null,\\\"observaciones_originales\\\":null}\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Melyz24\", \"cliente_telefono\": \"23902302\", \"canal_venta\": \"facebook\", \"prioridad\": \"alta\", \"detalles_producto\": null}', 14, NULL, NULL, 'UPDATE'),
+(21, '2025-10-27 15:04:54', 1, NULL, '{\"id_pedido\": 15, \"numero_pedido\": \"15\", \"fecha_pedido\": \"2025-10-27 15:04:54\", \"fecha_entrega\": \"2025-10-31\", \"observaciones\": \"acabado lindo\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Melyz25\", \"cliente_telefono\": \"23902302\", \"canal_venta\": \"instagram\", \"prioridad\": \"normal\", \"detalles_producto\": \"{\\\"categoria\\\":\\\"retratos\\\",\\\"imagenes\\\":[\\\"\\\\/Color_Ink\\\\/uploads\\\\/pedidos\\\\/pedido_20251027_080438_fc545eb7.png\\\"],\\\"colores\\\":\\\"#ad0000\\\"}\"}', 15, NULL, NULL, 'INSERT'),
+(22, '2025-10-27 15:17:02', 1, '{\"id_pedido\": 15, \"numero_pedido\": \"15\", \"fecha_pedido\": \"2025-10-27 15:04:54\", \"fecha_entrega\": \"2025-10-31\", \"observaciones\": \"acabado lindo\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Melyz25\", \"cliente_telefono\": \"23902302\", \"canal_venta\": \"instagram\", \"prioridad\": \"normal\", \"detalles_producto\": \"{\\\"categoria\\\":\\\"retratos\\\",\\\"imagenes\\\":[\\\"\\\\/Color_Ink\\\\/uploads\\\\/pedidos\\\\/pedido_20251027_080438_fc545eb7.png\\\"],\\\"colores\\\":\\\"#ad0000\\\"}\"}', NULL, 15, NULL, NULL, 'DELETE'),
+(23, '2025-10-27 15:17:19', 1, '{\"id_pedido\": 14, \"numero_pedido\": \"14\", \"fecha_pedido\": \"2025-10-27 14:41:35\", \"fecha_entrega\": \"2025-10-31\", \"observaciones\": \"{\\\"cliente_nombre\\\":\\\"Melyz24\\\",\\\"cliente_telefono\\\":\\\"23902302\\\",\\\"canal_venta\\\":\\\"facebook\\\",\\\"prioridad\\\":\\\"alta\\\",\\\"detalles_producto\\\":null,\\\"observaciones_originales\\\":null}\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Melyz24\", \"cliente_telefono\": \"23902302\", \"canal_venta\": \"facebook\", \"prioridad\": \"alta\", \"detalles_producto\": null}', NULL, 14, NULL, NULL, 'DELETE'),
+(24, '2025-10-27 15:17:21', 1, '{\"id_pedido\": 11, \"numero_pedido\": \"PED-DIRECT-20251021030510\", \"fecha_pedido\": \"2025-10-21 11:05:10\", \"fecha_entrega\": null, \"observaciones\": \"Pedido de prueba directo desde test_api_sin_auth.php\", \"id_estado\": 3, \"id_usuario\": 1, \"cliente_nombre\": \"Cliente Directo\", \"cliente_telefono\": \"7777-8888\", \"canal_venta\": \"instagram\", \"prioridad\": \"normal\", \"detalles_producto\": \"Producto de prueba directo\"}', NULL, 11, NULL, NULL, 'DELETE');
 
 -- --------------------------------------------------------
 
@@ -1197,7 +1224,8 @@ CREATE TABLE `rol` (
 
 INSERT INTO `rol` (`id_rol`, `descripcion`, `estado`) VALUES
 (1, 'Gerente', 'Activo'),
-(2, 'Administrador', 'Activo');
+(2, 'Administrador', 'Activo'),
+(3, 'Cliente', 'Activo');
 
 -- --------------------------------------------------------
 
@@ -1403,13 +1431,13 @@ ALTER TABLE `cat_estado_pedido`
 -- AUTO_INCREMENT de la tabla `detallepedido`
 --
 ALTER TABLE `detallepedido`
-  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT de la tabla `detallepedido_aud`
 --
 ALTER TABLE `detallepedido_aud`
-  MODIFY `id_aud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_aud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `movimientoinventario`
@@ -1421,13 +1449,13 @@ ALTER TABLE `movimientoinventario`
 -- AUTO_INCREMENT de la tabla `pedido`
 --
 ALTER TABLE `pedido`
-  MODIFY `id_pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `pedido_aud`
 --
 ALTER TABLE `pedido_aud`
-  MODIFY `id_aud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id_aud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT de la tabla `producto`
@@ -1463,7 +1491,7 @@ ALTER TABLE `registroconsulta`
 -- AUTO_INCREMENT de la tabla `rol`
 --
 ALTER TABLE `rol`
-  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_rol` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`

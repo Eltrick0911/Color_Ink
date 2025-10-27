@@ -106,14 +106,23 @@ class PedidosController
             $canalVenta = trim($input['canalVenta'] ?? ($input['canal_venta'] ?? '')) ?: null;
             $prioridad = trim($input['prioridad'] ?? 'normal');
             $fechaEntrega = trim($input['fechaEntrega'] ?? ($input['fecha_entrega'] ?? '')) ?: null;
-            $observaciones = trim($input['observaciones'] ?? '') ?: null;
-            
-            // Construir detalles_producto desde el formulario personalizado
-            $detallesProducto = $this->construirDetallesProducto($input);
-            
-            $idUsuario = $user['id_usuario']; // Usar usuario autenticado
+            // Solo guardar especificaciones en observaciones
+            $observaciones = trim($input['especificaciones'] ?? '') ?: null;
 
-            error_log("PedidosController - create: Datos - Cliente: $clienteNombre, Canal: $canalVenta, Usuario: $idUsuario");
+            // Construir detalles_producto SOLO con categoría, imagen y colores
+            $detallesProducto = $this->construirDetallesProducto($input);
+
+            error_log("PedidosController - create: Datos - Cliente: $clienteNombre, Canal: $canalVenta");
+
+            // Crear o buscar usuario cliente (rol 3) con nombre y teléfono
+            try {
+                $idCliente = $this->pedidosModel->crearCliente($clienteNombre, $clienteTelefono);
+                error_log("PedidosController - create: Cliente creado/encontrado con ID: $idCliente");
+            } catch (\Exception $e) {
+                error_log("PedidosController - create: Error al crear cliente: " . $e->getMessage());
+                echo json_encode(responseHTTP::status500('Error al crear cliente: ' . $e->getMessage()));
+                return;
+            }
 
             // Ya no generamos un número personalizado aquí.
             // El modelo establecerá numero_pedido basado en el ID autoincremental.
@@ -130,7 +139,7 @@ class PedidosController
 
             $idPedido = $this->pedidosModel->createPedido(
                 $numeroPedido,
-                $idUsuario,
+                $idCliente, // Usar el ID del cliente creado (rol 3)
                 $clienteNombre,
                 $clienteTelefono,
                 $canalVenta,
@@ -147,6 +156,7 @@ class PedidosController
                 $resp = responseHTTP::status200('Pedido creado exitosamente');
                 $resp['data'] = [
                     'id_pedido_creado' => (int)$idPedido,
+                    'id_cliente_creado' => $idCliente,
                     'pedido' => $pedidoCompleto
                 ];
                 header('Content-Type: application/json');
@@ -167,36 +177,22 @@ class PedidosController
     private function construirDetallesProducto(array $input): ?string
     {
         $detalles = [];
-        
-        // Categoría del producto
+        // Solo incluir categoría, imagen de referencia (URL), y paleta de colores
         if (!empty($input['categoriaProducto'])) {
             $detalles['categoria'] = $input['categoriaProducto'];
         }
-        
-        // Colores (paleta)
+        // Imagen de referencia (puede venir como imagenesUrls o imagenUrl)
+        if (!empty($input['imagenesUrls'])) {
+            $imagenes = json_decode($input['imagenesUrls'], true);
+            if (is_array($imagenes)) {
+                $detalles['imagenes'] = $imagenes;
+            }
+        } elseif (!empty($input['imagenUrl'])) {
+            $detalles['imagenes'] = [$input['imagenUrl']];
+        }
         if (!empty($input['colores'])) {
             $detalles['colores'] = $input['colores'];
         }
-        
-        // URL de imagen (si se subió)
-        if (!empty($input['imagenUrl'])) {
-            $detalles['imagen_url'] = $input['imagenUrl'];
-        }
-        
-        // Especificaciones técnicas
-        if (!empty($input['especificaciones'])) {
-            $detalles['especificaciones'] = $input['especificaciones'];
-        }
-        
-        // Precio y cantidad personalizados
-        if (!empty($input['precioUnitario'])) {
-            $detalles['precio_unitario'] = $input['precioUnitario'];
-        }
-        
-        if (!empty($input['cantidad'])) {
-            $detalles['cantidad'] = $input['cantidad'];
-        }
-        
         return !empty($detalles) ? json_encode($detalles, JSON_UNESCAPED_UNICODE) : null;
     }
 
@@ -313,6 +309,7 @@ class PedidosController
     {
         try {
             error_log("PedidosController - update: Actualizando pedido ID: $id");
+            error_log("Datos recibidos: " . json_encode($input));
             
             // AUTENTICACIÓN ACTIVADA
             $user = $this->authorize($headers, [1, 2]);
@@ -329,13 +326,38 @@ class PedidosController
                 return;
             }
 
-            // SOLO permitir cambiar estos campos (fecha_pedido es INMUTABLE)
-            $fechaEntrega = $input['fecha_entrega'] ?? null;
-            $idEstado = (int)($input['id_estado'] ?? $pedido['id_estado']);
+            // Preparar datos para actualización
+            $datosActualizar = [];
+            
+            // Campos que se pueden actualizar
+            if (isset($input['clienteNombre'])) {
+                $datosActualizar['cliente_nombre'] = $input['clienteNombre'];
+            }
+            if (isset($input['clienteTelefono'])) {
+                $datosActualizar['cliente_telefono'] = $input['clienteTelefono'];
+            }
+            if (isset($input['fechaEntrega'])) {
+                $datosActualizar['fecha_entrega'] = $input['fechaEntrega'];
+            }
+            if (isset($input['prioridad'])) {
+                $datosActualizar['prioridad'] = $input['prioridad'];
+            }
+            if (isset($input['canalVenta'])) {
+                $datosActualizar['canal_venta'] = $input['canalVenta'];
+            }
+            if (isset($input['observaciones'])) {
+                $datosActualizar['observaciones'] = $input['observaciones'];
+            }
+            if (isset($input['detalles_producto'])) {
+                $datosActualizar['detalles_producto'] = $input['detalles_producto'];
+            }
+            if (isset($input['id_estado'])) {
+                $datosActualizar['id_estado'] = (int)$input['id_estado'];
+            }
 
-            error_log("PedidosController - update: Actualizando - FechaEntrega: $fechaEntrega, Estado: $idEstado");
+            error_log("PedidosController - update: Datos a actualizar: " . json_encode($datosActualizar));
 
-            $success = $this->pedidosModel->updatePedido($id, $fechaEntrega, $idEstado);
+            $success = $this->pedidosModel->updatePedidoCompleto($id, $datosActualizar);
             
             if ($success) {
                 error_log("PedidosController - update: Pedido $id actualizado exitosamente");
