@@ -25,9 +25,9 @@
                 <select class="filter-select">
                     <option value="">Todos los estados</option>
                     <option value="pendiente">Pendiente</option>
-                    <option value="procesando">Procesando</option>
+                    <option value="cancelado">Cancelado</option>
                     <option value="enviado">Enviado</option>
-                    <option value="entregado">Entregado</option>
+                 
                 </select>
             </div>
 
@@ -94,9 +94,8 @@
                     <label for="estadoPedido">Cambiar Estado:</label>
                     <select id="estadoPedido" class="status-selector-modal">
                         <option value="pendiente">Pendiente</option>
-                        <option value="procesando">Procesando</option>
+                        <option value="cancelado">Cancelado</option>
                         <option value="enviado">Enviado</option>
-                        <option value="entregado">Entregado</option>
                     </select>
                     <button type="button" class="btn-actualizar-estado">
                         <i class="fa-solid fa-sync-alt"></i> Actualizar
@@ -156,9 +155,15 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="observaciones">Observaciones</label>
-                        <textarea id="observaciones" name="observaciones" rows="3"></textarea>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cantidad">Cantidad *</label>
+                            <input type="number" id="cantidad" name="cantidad" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="precioUnitario">Precio Unitario *</label>
+                            <input type="number" id="precioUnitario" name="precioUnitario" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
                     </div>
 
                     <!-- Botón para abrir detalles del producto -->
@@ -201,16 +206,6 @@
                             <option value="decoracion">Decoración</option>
                             <option value="otros">Otros</option>
                         </select>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="cantidadProducto">Cantidad</label>
-                            <input type="number" id="cantidadProducto" name="cantidadProducto" min="1" value="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="precioUnitarioProducto">Precio Unitario</label>
-                            <input type="number" id="precioUnitarioProducto" name="precioUnitarioProducto" step="0.01" min="0" value="0.00">
-                        </div>
                     </div>
 
                     <div class="form-group">

@@ -52,27 +52,44 @@ class PedidosModel
                 $observacionesCompletas = json_encode($datosAdicionales, JSON_UNESCAPED_UNICODE);
             }
 
+            // Usar un numero_pedido provisional único y luego actualizarlo al ID autoincremental
+            $provisionalNumero = 'TMP-' . bin2hex(random_bytes(4));
+
             $sql = "INSERT INTO pedido (
                         numero_pedido,
                         id_usuario,
                         fecha_pedido,
                         fecha_entrega,
                         observaciones,
-                        id_estado
-                    ) VALUES (?, ?, NOW(), ?, ?, 3)";
+                        id_estado,
+                        cliente_nombre,
+                        cliente_telefono,
+                        canal_venta,
+                        prioridad,
+                        detalles_producto
+                    ) VALUES (?, ?, NOW(), ?, ?, 3, ?, ?, ?, ?, ?)";
 
             $stmt = $this->connection->prepare($sql);
             $stmt->execute([
-                $numeroPedido,
+                $provisionalNumero,
                 $idUsuario,
                 $fechaEntrega,
-                $observacionesCompletas
+                $observacionesCompletas,
+                $clienteNombre,
+                $clienteTelefono,
+                $canalVenta,
+                $prioridad,
+                $detallesProducto
             ]);
 
-            $idPedido = $this->connection->lastInsertId();
+            $idPedido = (int)$this->connection->lastInsertId();
+
+            // Actualizar numero_pedido = id_pedido (según requerimiento: usar incrementación de la BD)
+            $upd = $this->connection->prepare("UPDATE pedido SET numero_pedido = ? WHERE id_pedido = ?");
+            $upd->execute([strval($idPedido), $idPedido]);
 
             error_log("PedidosModel - createPedido: Pedido creado con ID: " . ($idPedido ?? 'NULL'));
-            return $idPedido ? (int)$idPedido : null;
+            return $idPedido ?: null;
         } catch (PDOException $e) {
             error_log("ERROR PedidosModel - createPedido: " . $e->getMessage());
             throw new Exception("Error al crear pedido: " . $e->getMessage());
@@ -87,27 +104,32 @@ class PedidosModel
         try {
             error_log("PedidosModel - getAllPedidos: Obteniendo todos los pedidos");
             
-            // Query simplificada que usa solo las columnas que existen en la BD
+            // Consulta alineada con el esquema actual (sin fecha_compromiso)
             $sql = "SELECT 
                         p.id_pedido,
                         p.numero_pedido,
                         p.id_usuario,
                         p.fecha_pedido,
                         p.fecha_entrega,
-                        p.fecha_compromiso,
                         p.observaciones,
                         p.id_estado,
-                        u.nombre_usuario as cliente_nombre,
-                        u.telefono as cliente_telefono,
-                        e.nombre as estado_nombre,
-                        e.codigo as estado_codigo,
-                        COALESCE(SUM(dp.total_linea), 0) as total_pedido
+                        p.cliente_nombre,
+                        p.cliente_telefono,
+                        p.canal_venta,
+                        p.prioridad,
+                        p.detalles_producto,
+                        u.nombre_usuario,
+                        u.telefono,
+                        e.nombre AS estado_nombre,
+                        e.codigo AS estado_codigo,
+                        COALESCE(SUM(dp.total_linea), 0) AS total_pedido
                     FROM pedido p
                     LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
                     LEFT JOIN cat_estado_pedido e ON p.id_estado = e.id_estado
                     LEFT JOIN detallepedido dp ON p.id_pedido = dp.id_pedido
                     GROUP BY p.id_pedido, p.numero_pedido, p.id_usuario, p.fecha_pedido, 
-                             p.fecha_entrega, p.fecha_compromiso, p.observaciones, p.id_estado,
+                             p.fecha_entrega, p.observaciones, p.id_estado,
+                             p.cliente_nombre, p.cliente_telefono, p.canal_venta, p.prioridad, p.detalles_producto,
                              u.nombre_usuario, u.telefono, e.nombre, e.codigo
                     ORDER BY p.fecha_pedido DESC";
             

@@ -1,185 +1,143 @@
-/**
- * JavaScript para la página de pedidos
- */
-
+// Inicialización principal: configurar acciones y selectores cuando cargue el DOM
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar funcionalidades de pedidos
-    initPedidosPage();
-    
-    // Escuchar cuando se rendericen los pedidos para reconfigurar los selectores
-    document.addEventListener('pedidos:rendered', function(e) {
-        console.log('Pedidos renderizados, reconfigurando selectores...');
-        setupStatusSelectors();
+    try {
+        // Configurar UI de pedidos
         setupActionButtons();
+        setupFilters();
+        setupSearch();
+        setupStatusSelectors();
+        setupDetailsModal(); // Configurar modal de detalles
+        
+        // Configurar botón "Nuevo Pedido"
+        const btnNuevoPedido = document.querySelector('.btn-nuevo-pedido');
+        if (btnNuevoPedido) {
+            btnNuevoPedido.addEventListener('click', function() {
+                openModal();
+            });
+        }
+        
+        // Configurar modal de nuevo pedido
+        setupModal();
+        
+        // Configurar modal de detalles del producto
+        setupProductDetailsModal();
+        
+        // Configurar formulario de nuevo pedido
+        const formNuevoPedido = document.getElementById('formNuevoPedido');
+        if (formNuevoPedido) {
+            formNuevoPedido.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await crearNuevoPedido();
+            });
+        }
+
+        // Configurar botón de detalles del producto
+        const btnDetallesProducto = document.getElementById('btnDetallesProducto');
+        if (btnDetallesProducto) {
+            btnDetallesProducto.addEventListener('click', function() {
+                const modalDetalles = document.getElementById('modalDetallesProducto');
+                if (modalDetalles) {
+                    modalDetalles.style.display = 'block';
+                }
+            });
+        }
+
+        // Configurar botón guardar detalles
+        const btnGuardarDetalles = document.getElementById('guardarDetalles');
+        if (btnGuardarDetalles) {
+            btnGuardarDetalles.addEventListener('click', function() {
+                guardarDetallesProducto();
+            });
+        }
+        
+        // Configurar upload de imágenes
+        const imagenInput = document.getElementById('imagenReferencia');
+        if (imagenInput) {
+            imagenInput.addEventListener('change', async function(e) {
+                const files = Array.from(e.target.files);
+                if (files.length === 0) return;
+                
+                try {
+                    // Mostrar indicador de carga
+                    const previewContainer = document.getElementById('imagePreviewContainer');
+                    const placeholder = previewContainer.querySelector('.upload-placeholder');
+                    if (placeholder) {
+                        placeholder.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><p>Subiendo imágenes...</p>';
+                    }
+                    
+                    // Subir imágenes al servidor
+                    const response = await PedidosMVC.uploadMultiple(files);
+                    
+                    console.log('Respuesta upload:', response);
+                    
+                    if (response && response.data && response.data.uploaded) {
+                        const urls = response.data.uploaded.map(img => img.url);
+                        
+                        // Guardar URLs en sessionStorage
+                        sessionStorage.setItem('imagenesSubidas', JSON.stringify(urls));
+                        
+                        // Mostrar preview
+                        mostrarPreviewImagenes(urls, previewContainer);
+                        
+                        showNotification(`${urls.length} imagen(es) subida(s) correctamente`, 'success');
+                    } else {
+                        throw new Error('Respuesta inválida del servidor');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error al subir imágenes:', error);
+                    showNotification('Error al subir imágenes: ' + error.message, 'error');
+                    
+                    // Restaurar placeholder
+                    const previewContainer = document.getElementById('imagePreviewContainer');
+                    const placeholder = previewContainer.querySelector('.upload-placeholder');
+                    if (placeholder) {
+                        placeholder.innerHTML = '<i class="fa-solid fa-cloud-upload-alt"></i><p>Arrastra imágenes aquí o haz clic para seleccionar</p>';
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Error inicializando página de pedidos:', e);
+    }
+
+    // Reconfigurar cuando la tabla se renderice de nuevo
+    document.addEventListener('pedidos:rendered', function() {
+        try {
+            setupStatusSelectors();
+            setupActionButtons();
+        } catch (e) {
+            console.error('Error reconfigurando tras render:', e);
+        }
     });
 });
 
-function initPedidosPage() {
-    // Configurar botones de acción
-    setupActionButtons();
-    
-    // Configurar filtros
-    setupFilters();
-    
-    // Configurar búsqueda
-    setupSearch();
-    
-    // Configurar selectores de estado
-    setupStatusSelectors();
-    
-    console.log('Página de pedidos inicializada');
-}
-
-function setupActionButtons() {
-    const actionButtons = document.querySelectorAll('.btn-action');
-    
-    actionButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const icon = this.querySelector('i');
-            const action = getActionFromIcon(icon);
-            
-            if (action) {
-                handleAction(action, this);
-            }
-        });
-    });
-}
-
-function getActionFromIcon(icon) {
-    console.log('Icono detectado:', icon);
-    console.log('Clases del icono:', icon.className);
-    if (icon.classList.contains('fa-eye')) return 'view';
-    if (icon.classList.contains('fa-edit')) return 'edit';
-    if (icon.classList.contains('fa-trash')) return 'delete';
-    console.log('No se encontró acción para el icono');
-    return null;
-}
-
-function handleAction(action, button) {
-    console.log('Acción detectada:', action);
-    const row = button.closest('tr');
-    const pedidoId = row.querySelector('td:first-child').textContent;
-    console.log('ID del pedido:', pedidoId);
-    
-    switch(action) {
-        case 'view':
-            console.log('Ejecutando viewPedido...');
-            viewPedido(pedidoId);
-            break;
-        case 'edit':
-            editPedido(pedidoId);
-            break;
-        case 'delete':
-            deletePedido(pedidoId, row);
-            break;
-    }
-}
-
-function viewPedido(pedidoId) {
-    console.log('Intentando ver pedido:', pedidoId);
-    // Buscar datos del pedido en localStorage o en la tabla
-    const pedidoData = getPedidoData(pedidoId);
-    console.log('Datos del pedido encontrados:', pedidoData);
-    if (pedidoData) {
-        showPedidoDetails(pedidoData);
-    } else {
-        showNotification('No se encontraron los detalles del pedido', 'error');
-    }
-}
-
-function getPedidoData(pedidoId) {
-    // Intentar obtener de localStorage primero
-    try {
-        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-        const pedido = pedidos.find(p => p.id === pedidoId);
-        if (pedido) return pedido;
-    } catch (error) {
-        console.error('Error al obtener datos del localStorage:', error);
-    }
-    
-    // Si no está en localStorage, obtener de la tabla
-    const rows = document.querySelectorAll('.pedidos-table tbody tr');
-    for (let row of rows) {
-        const cells = row.querySelectorAll('td');
-        if (cells.length > 0 && cells[0].textContent.trim() === pedidoId.trim()) {
-            const estadoSelector = cells[3].querySelector('.status-selector');
-            const estado = estadoSelector ? estadoSelector.value : 'pendiente';
-            
-            return {
-                id: cells[0].textContent.trim(),
-                cliente: cells[1].textContent.trim(),
-                fecha: cells[2].textContent.trim(),
-                estado: estado,
-                total: cells[4].textContent.trim(),
-                // Datos adicionales por defecto para mostrar en el modal
-                canalVenta: 'No especificado',
-                categoriaProducto: 'No especificado',
-                tipoTrabajo: 'No especificado',
-                cantidad: '1',
-                precioUnitario: '0.00',
-                prioridad: 'normal',
-                telefono: 'No especificado',
-                email: 'No especificado',
-                usuario: 'No especificado',
-                direccion: 'No especificada',
-                fechaEntrega: 'No especificada',
-                especificaciones: 'No especificadas',
-                textoPersonalizado: 'No especificado',
-                observaciones: 'No especificado',
-                tamano: 'No especificado',
-                material: 'No especificado'
-            };
-        }
-    }
-    
-    return null;
-}
-
+// Muestra el modal de ver pedido con los datos provistos
 function showPedidoDetails(pedidoData) {
-    console.log('Mostrando detalles del pedido:', pedidoData);
     const modal = document.getElementById('modalVerPedido');
     const content = document.getElementById('pedidoDetailsContent');
     const pedidoIdDisplay = document.getElementById('pedidoIdDisplay');
-    
-    console.log('Modal encontrado:', modal);
-    console.log('Content encontrado:', content);
-    
-    if (!modal || !content) {
-        console.error('Modal o content no encontrado');
-        return;
-    }
-    
-    // Mostrar ID del pedido en el header
+    if (!modal || !content) return;
+
     if (pedidoIdDisplay) {
         pedidoIdDisplay.textContent = `ID: ${pedidoData.id}`;
     }
-    
-    // Generar HTML con los detalles del pedido
+
     content.innerHTML = generatePedidoDetailsHTML(pedidoData);
-    
-    // Configurar el selector de estado en el modal
+
     const estadoSelector = document.getElementById('estadoPedido');
     if (estadoSelector && pedidoData.estado) {
         estadoSelector.value = pedidoData.estado;
     }
-    
-    // Configurar event listeners para el modal de detalles
+
     setupDetailsModal();
-    
-    // Configurar imágenes para hacer clic y ampliar
     setupImageClickHandlers();
-    
-    // Mostrar modal con animación
+
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
-    
-    // Agregar clase de animación al contenido
-    setTimeout(() => {
-        content.style.animation = 'bounceIn 0.6s ease';
-    }, 100);
 }
 
+// Construye el HTML de detalle del pedido
 function generatePedidoDetailsHTML(data) {
     const canalVenta = data.canalVenta || 'No especificado';
     const categoriaProducto = data.categoriaProducto || 'No especificado';
@@ -191,13 +149,10 @@ function generatePedidoDetailsHTML(data) {
     const textoPersonalizado = data.textoPersonalizado || 'No especificado';
     const observaciones = data.observaciones || 'No especificado';
     const prioridad = data.prioridad || 'Normal';
-    
-    // Generar colores visuales si existen
+
     const coloresHTML = generateColorsHTML(data);
-    
-    // Generar imágenes si existen
     const imagenesHTML = generateImagesHTML(data);
-    
+
     return `
         <div class="pedido-details">
             <div class="pedido-info-section">
@@ -220,7 +175,7 @@ function generatePedidoDetailsHTML(data) {
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Fecha:</span>
-                    <span class="detail-value">${data.fecha}</span>
+                    <span class="detail-value">${data.fecha || ''}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Fecha de Entrega:</span>
@@ -229,12 +184,12 @@ function generatePedidoDetailsHTML(data) {
                 <div class="detail-item">
                     <span class="detail-label">Estado:</span>
                     <span class="detail-value">
-                        <span class="detail-status ${data.estado}">${data.estado.charAt(0).toUpperCase() + data.estado.slice(1)}</span>
+                        <span class="detail-status ${data.estado}">${String(data.estado)}</span>
                     </span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Prioridad:</span>
-                    <span class="detail-value">${prioridad.charAt(0).toUpperCase() + prioridad.slice(1)}</span>
+                    <span class="detail-value">${prioridad}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Total:</span>
@@ -246,15 +201,15 @@ function generatePedidoDetailsHTML(data) {
                 <h3>Detalles del Producto</h3>
                 <div class="detail-item">
                     <span class="detail-label">Canal de Venta:</span>
-                    <span class="detail-value">${canalVenta.charAt(0).toUpperCase() + canalVenta.slice(1)}</span>
+                    <span class="detail-value">${canalVenta}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Categoría:</span>
-                    <span class="detail-value">${categoriaProducto.charAt(0).toUpperCase() + categoriaProducto.slice(1)}</span>
+                    <span class="detail-value">${categoriaProducto}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Tipo de Trabajo:</span>
-                    <span class="detail-value">${tipoTrabajo.charAt(0).toUpperCase() + tipoTrabajo.slice(1)}</span>
+                    <span class="detail-value">${tipoTrabajo}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Cantidad:</span>
@@ -266,11 +221,11 @@ function generatePedidoDetailsHTML(data) {
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Tamaño:</span>
-                    <span class="detail-value">${tamano.charAt(0).toUpperCase() + tamano.slice(1)}</span>
+                    <span class="detail-value">${tamano}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Material:</span>
-                    <span class="detail-value">${material.charAt(0).toUpperCase() + material.slice(1)}</span>
+                    <span class="detail-value">${material}</span>
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Colores:</span>
@@ -340,75 +295,110 @@ function generateColorsHTML(data) {
         </div>
     `;
 }
-
-function generateImagesHTML(data) {
-    if (!data.imagenes || data.imagenes.length === 0) return '';
-    
-    return `
-        <div class="pedido-info-section">
-            <h3>Imágenes de Referencia</h3>
-            <div class="detail-images">
-                ${data.imagenes.map(img => `<img src="${img}" alt="Imagen de referencia" class="detail-image">`).join('')}
-            </div>
-        </div>
-    `;
-}
-
-function setupDetailsModal() {
-    const modal = document.getElementById('modalVerPedido');
-    if (!modal) return;
-    
-    const closeBtn = modal.querySelector('.close');
-    const cancelBtn = modal.querySelector('.btn-cancelar');
-    
-    // Remover event listeners existentes para evitar duplicados
-    if (closeBtn) {
-        closeBtn.removeEventListener('click', closeDetailsModal);
-        closeBtn.addEventListener('click', closeDetailsModal);
-    }
-    
-    if (cancelBtn) {
-        cancelBtn.removeEventListener('click', closeDetailsModal);
-        cancelBtn.addEventListener('click', closeDetailsModal);
-    }
-    
-    // Remover event listener existente del modal
-    modal.removeEventListener('click', handleModalClick);
-    modal.addEventListener('click', handleModalClick);
-}
-
-function handleModalClick(e) {
-    if (e.target === e.currentTarget) {
-        closeDetailsModal();
-    }
-}
-
-function closeDetailsModal() {
-    const modal = document.getElementById('modalVerPedido');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-function editPedido(pedidoId) {
+async function editPedido(pedidoId) {
     console.log('Editando pedido:', pedidoId);
-    // Buscar datos del pedido
-    const pedidoData = getPedidoData(pedidoId);
-    if (pedidoData) {
-        showEditModal(pedidoData);
-    } else {
-        showNotification('No se encontraron los datos del pedido para editar', 'error');
+    try {
+        // Obtener datos completos del pedido y su detalle
+        const pedido = await PedidosMVC.fetchOne(pedidoId);
+        const detalles = await PedidosMVC.fetchDetalle(pedidoId);
+        const detalle = (detalles && detalles.data && detalles.data.length > 0) ? detalles.data[0] : null;
+
+        // Abrir modal y ajustar encabezado/botón
+        openModal();
+        const headerTitle = document.querySelector('.modal-header h2');
+        if (headerTitle) headerTitle.textContent = 'Editar Pedido';
+        const btnGuardar = document.querySelector('.btn-guardar');
+        if (btnGuardar) btnGuardar.textContent = 'Guardar Cambios';
+
+        // Campos del pedido
+        document.getElementById('clienteNombre').value = pedido.data.cliente_nombre || '';
+        document.getElementById('clienteTelefono').value = pedido.data.cliente_telefono || '';
+        document.getElementById('fechaEntrega').value = pedido.data.fecha_entrega ? pedido.data.fecha_entrega.split('T')[0] : '';
+        document.getElementById('prioridad').value = pedido.data.prioridad || 'normal';
+        document.getElementById('canalVenta').value = pedido.data.canal_venta || '';
+
+        // Campos del detalle (si existe)
+        if (detalle) {
+            document.getElementById('precioUnitario').value = detalle.precio_unitario || '';
+            document.getElementById('cantidad').value = detalle.cantidad || '';
+        } else {
+            document.getElementById('precioUnitario').value = '';
+            document.getElementById('cantidad').value = '';
+        }
+
+        // Guardar cambios al hacer submit
+        form.onsubmit = async function (e) {
+            e.preventDefault();
+            try {
+                // Recolectar datos del formulario
+                const pedidoData = {
+                    clienteNombre: document.getElementById('clienteNombre').value,
+                    clienteTelefono: document.getElementById('clienteTelefono').value,
+                    fechaEntrega: document.getElementById('fechaEntrega').value,
+                    prioridad: document.getElementById('prioridad').value,
+                    canalVenta: document.getElementById('canalVenta').value
+                };
+                await PedidosMVC.Model.updatePedido(pedidoId, pedidoData);
+
+                // Actualizar detalle si existe
+                if (detalle) {
+                    const detalleData = {
+                        precio_unitario: document.getElementById('precioUnitario').value,
+                        cantidad: document.getElementById('cantidad').value
+                    };
+                    await PedidosMVC.Model.updateDetalle(detalle.id_detalle, detalleData);
+                }
+
+                closeModal();
+                showNotification('Pedido actualizado correctamente', 'success');
+                // Refrescar tabla
+                await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+            } catch (err) {
+                showNotification('Error al actualizar el pedido', 'error');
+                console.error(err);
+            }
+        };
+    } catch (err) {
+        showNotification('No se pudo cargar el pedido para editar', 'error');
+        console.error(err);
     }
 }
 
-function deletePedido(pedidoId, row) {
-    if (confirm(`¿Estás seguro de que quieres eliminar el pedido ${pedidoId}?`)) {
-        row.style.opacity = '0.5';
-        row.style.transition = 'opacity 0.3s ease';
-        
-        setTimeout(() => {
-            row.remove();
+async function deletePedido(pedidoId, row) {
+    // Asegurar que tenemos el ID numérico correcto
+    const id = parseInt(pedidoId);
+    
+    if (!id || isNaN(id)) {
+        console.error('ID de pedido inválido:', pedidoId);
+        showNotification('Error: ID de pedido inválido', 'error');
+        return;
+    }
+    
+    if (confirm(`¿Estás seguro de que quieres eliminar el pedido ${pedidoId}?\n\nEsta acción no se puede deshacer.`)) {
+        try {
+            console.log('Eliminando pedido ID:', id);
+            
+            // Llamar al API para eliminar
+            const response = await PedidosMVC.deletePedido(id);
+            console.log('Respuesta de eliminación:', response);
+            
+            // Remover fila de la tabla inmediatamente
+            if (row) {
+                row.remove();
+            }
+            
             showNotification('Pedido eliminado correctamente', 'success');
-        }, 300);
+            
+            // Refrescar tabla completa para asegurar consistencia
+            await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+        } catch (err) {
+            console.error('Error al eliminar pedido:', err);
+            const errorMsg = err.data?.message || err.message || 'Error desconocido';
+            showNotification('Error al eliminar el pedido: ' + errorMsg, 'error');
+            
+            // Refrescar tabla en caso de error para mostrar estado real
+            await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+        }
     }
 }
 
@@ -498,22 +488,7 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// Función para el botón de nuevo pedido
-document.addEventListener('DOMContentLoaded', function() {
-    const nuevoPedidoBtn = document.querySelector('.btn-nuevo-pedido');
-    
-    if (nuevoPedidoBtn) {
-        nuevoPedidoBtn.addEventListener('click', function() {
-            openModal();
-        });
-    }
-    
-    // Configurar modal
-    setupModal();
-    
-    // Configurar modal de detalles del producto
-    setupProductDetailsModal();
-});
+// Función para el botón de nuevo pedido - ya configurado en el DOMContentLoaded principal
 
 // Variables globales para el modal
 let modal = null;
@@ -751,144 +726,225 @@ function calculateTotal() {
     }
 }
 
-function handleFormSubmit(e) {
-    e.preventDefault();
+// Legacy functions removed - using PedidosMVC for all CRUD operations
+
+// ===== FUNCIONES PARA ACCIONES DE TABLA =====
+
+// Configurar botones de acción en tabla
+function setupActionButtons() {
+    console.log('Configurando botones de acción de tabla...');
+    const actionButtons = document.querySelectorAll('.pedidos-table .btn-action');
+    console.log(`Encontrados ${actionButtons.length} botones de acción`);
     
-    // Validar todos los campos
-    const requiredFields = form.querySelectorAll('[required]');
-    let isFormValid = true;
-    
-    requiredFields.forEach(field => {
-        if (!validateField(field)) {
-            isFormValid = false;
-        }
+    actionButtons.forEach(button => {
+        // Remover listeners existentes clonando el botón
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        newButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const icon = this.querySelector('i');
+            const action = getActionFromIcon(icon);
+            const row = this.closest('tr');
+            const pedidoId = this.dataset.id || row.querySelector('.pedido-id')?.textContent?.trim() || null;
+            
+            console.log('Botón clickeado - Acción:', action, 'ID:', pedidoId);
+            
+            if (!pedidoId) {
+                console.error('No se pudo obtener ID del pedido desde la fila');
+                return;
+            }
+            
+            handleAction(action, pedidoId, row);
+        });
     });
-    
-    if (!isFormValid) {
-        showNotification('Por favor, corrija los errores en el formulario', 'error');
-        return;
-    }
-    
-    // Recopilar datos del formulario
-    const formData = new FormData(form);
-    const pedidoData = {};
-    
-    for (let [key, value] of formData.entries()) {
-        pedidoData[key] = value;
-    }
-    
-    // Agregar colores seleccionados
-    const colorPickers = document.querySelectorAll('.color-picker');
-    colorPickers.forEach((picker, index) => {
-        if (picker.value && picker.value !== '#000000') {
-            pedidoData[`colorPicker${index + 1}`] = picker.value;
-        }
-    });
-    
-    // Agregar datos de detalles del producto
-    Object.assign(pedidoData, productDetailsData);
-    
-    // Generar ID único para el pedido
-    const pedidoId = generatePedidoId();
-    
-    // Crear nuevo pedido
-    createNewPedido(pedidoData, pedidoId);
-    
-    // Cerrar modal y limpiar formulario
-    closeModal();
-    
-    // Mostrar notificación de éxito
-    showNotification('Pedido creado exitosamente', 'success');
 }
 
-function generatePedidoId() {
-    const now = new Date();
-    const timestamp = now.getTime().toString().slice(-6);
-    return `#${timestamp}`;
+// Determinar la acción desde el icono del botón
+function getActionFromIcon(icon) {
+    if (!icon) return null;
+    
+    const classList = icon.classList;
+    if (classList.contains('fa-eye')) return 'view';
+    if (classList.contains('fa-edit')) return 'edit';
+    if (classList.contains('fa-trash')) return 'delete';
+    
+    return null;
 }
 
-function createNewPedido(data, pedidoId) {
-    // Crear nueva fila en la tabla
-    const tbody = document.querySelector('.pedidos-table tbody');
-    const newRow = document.createElement('tr');
+// Manejar la acción del botón
+function handleAction(action, pedidoId, row) {
+    console.log(`Ejecutando acción: ${action} para pedido ${pedidoId}`);
     
-    // Determinar estado por defecto
-    const estado = 'pendiente';
-    const estadoClass = 'pendiente';
-    
-    // Calcular total
-    const cantidadPedido = parseFloat(data.cantidad) || 0;
-    const precio = parseFloat(data.precioUnitario) || 0;
-    const total = cantidadPedido * precio;
-    
-    // Formatear fecha
-    const fecha = new Date().toLocaleDateString('es-ES');
-    
-    // Obtener canal de venta y categoría para mostrar en la tabla
-    const canalVenta = data.canalVenta || 'No especificado';
-    const categoriaProducto = data.categoriaProducto || 'No especificado';
-    const cantidad = data.cantidad || '1';
-    
-    newRow.innerHTML = `
-        <td>${pedidoId}</td>
-        <td>${data.cliente}</td>
-        <td>${fecha}</td>
-        <td>
-            <select class="status-selector" data-pedido-id="${pedidoId}">
-                <option value="pendiente" ${estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
-                <option value="procesando" ${estado === 'procesando' ? 'selected' : ''}>Procesando</option>
-                <option value="enviado" ${estado === 'enviado' ? 'selected' : ''}>Enviado</option>
-                <option value="entregado" ${estado === 'entregado' ? 'selected' : ''}>Entregado</option>
-            </select>
-        </td>
-        <td>$${total.toFixed(2)}</td>
-        <td>
-            <button class="btn-action" title="Ver detalles"><i class="fa-solid fa-eye"></i></button>
-            <button class="btn-action" title="Editar"><i class="fa-solid fa-edit"></i></button>
-            <button class="btn-action" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
-        </td>
-    `;
-    
-    // Agregar atributos de datos para facilitar la búsqueda
-    newRow.setAttribute('data-canal', canalVenta);
-    newRow.setAttribute('data-categoria', categoriaProducto);
-    newRow.setAttribute('data-prioridad', data.prioridad || 'normal');
-    
-    // Agregar la nueva fila al principio de la tabla
-    tbody.insertBefore(newRow, tbody.firstChild);
-    
-    // Reconfigurar los event listeners para los nuevos botones
-    setupActionButtons();
-    
-    // Reconfigurar selectores de estado
-    reconfigureStatusSelectors();
-    
-    // Aplicar estilo inicial al selector
-    const newSelector = newRow.querySelector('.status-selector');
-    if (newSelector) {
-        updateSelectorStyle(newSelector, estado);
+    switch(action) {
+        case 'view':
+            viewPedido(pedidoId, row);
+            break;
+        case 'edit':
+            editPedido(pedidoId);
+            break;
+        case 'delete':
+            deletePedido(pedidoId, row);
+            break;
+        default:
+            console.warn('Acción no reconocida:', action);
     }
-    
-    // Guardar datos en localStorage (opcional)
-    savePedidoToStorage(pedidoId, data);
 }
 
-function savePedidoToStorage(pedidoId, data) {
+// Ver detalles de un pedido - Obtener datos completos desde la API
+async function viewPedido(pedidoId, row) {
+    console.log('Mostrando detalles del pedido:', pedidoId);
+    
     try {
-        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-        const nuevoPedido = {
-            id: pedidoId,
-            ...data,
-            fecha: new Date().toISOString(),
-            estado: 'pendiente',
-            total: (parseFloat(data.cantidad) || 0) * (parseFloat(data.precioUnitario) || 0)
+        // Obtener datos completos desde la API
+        const pedido = await PedidosMVC.fetchOne(pedidoId);
+        const detallesRes = await PedidosMVC.fetchDetalle(pedidoId);
+        const detalle = (detallesRes && detallesRes.data && detallesRes.data.length > 0) ? detallesRes.data[0] : null;
+        
+        if (!pedido || !pedido.data) {
+            showNotification('No se pudieron cargar los detalles del pedido', 'error');
+            return;
+        }
+        
+        // Construir objeto con datos completos
+        const pedidoData = {
+            id: pedido.data.id_pedido || pedidoId,
+            numeroPedido: pedido.data.numero_pedido || '',
+            cliente: pedido.data.cliente_nombre || 'Sin nombre',
+            telefono: pedido.data.cliente_telefono || 'No especificado',
+            email: pedido.data.email || 'No especificado',
+            fecha: pedido.data.fecha_pedido || '',
+            fechaEntrega: pedido.data.fecha_entrega || 'No especificada',
+            estado: pedido.data.estado_codigo || 'PROCESO',
+            estadoNombre: pedido.data.estado_nombre || 'En Proceso',
+            prioridad: pedido.data.prioridad || 'normal',
+            canalVenta: pedido.data.canal_venta || 'No especificado',
+            observaciones: pedido.data.observaciones || 'No especificado',
+            direccion: pedido.data.direccion || 'No especificada',
+            
+            // Datos del detalle
+            cantidad: detalle ? detalle.cantidad : 1,
+            precioUnitario: detalle ? detalle.precio_unitario : 0,
+            total: detalle ? (detalle.cantidad * detalle.precio_unitario).toFixed(2) : '0.00',
+            
+            // Intentar parsear detalles_personalizados
+            categoriaProducto: 'No especificado',
+            colores: 'No especificado',
+            especificaciones: 'No especificado',
+            imagenes: []
         };
         
-        pedidos.unshift(nuevoPedido);
-        localStorage.setItem('pedidos', JSON.stringify(pedidos));
+        // Parsear detalles personalizados si existen
+        if (detalle && detalle.detalles_personalizados) {
+            try {
+                const detallesPersonalizados = JSON.parse(detalle.detalles_personalizados);
+                pedidoData.categoriaProducto = detallesPersonalizados.categoria || 'No especificado';
+                pedidoData.colores = detallesPersonalizados.colores || 'No especificado';
+                pedidoData.especificaciones = detallesPersonalizados.especificaciones || 'No especificado';
+                pedidoData.imagenes = detallesPersonalizados.imagenes || [];
+            } catch (e) {
+                console.warn('No se pudieron parsear detalles_personalizados:', e);
+            }
+        }
+        
+        // Mostrar modal con los detalles
+        showPedidoDetails(pedidoData);
     } catch (error) {
-        console.error('Error al guardar pedido:', error);
+        console.error('Error al cargar detalles del pedido:', error);
+        showNotification('Error al cargar los detalles del pedido', 'error');
     }
+}
+
+// Obtener datos del pedido desde la tabla
+function getPedidoData(pedidoId, row) {
+    if (!row) {
+        const rows = document.querySelectorAll('.pedidos-table tbody tr');
+        for (let r of rows) {
+            const id = r.querySelector('.pedido-id')?.textContent?.trim();
+            if (id === pedidoId) {
+                row = r;
+                break;
+            }
+        }
+        if (!row) return null;
+    }
+    
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 6) return null;
+    
+    return {
+        id: pedidoId,
+        cliente: cells[1]?.textContent?.trim() || '',
+        fecha: cells[2]?.textContent?.trim() || '',
+        fechaEntrega: cells[3]?.textContent?.trim() || '',
+        estado: cells[4]?.querySelector('select')?.value || '',
+        total: cells[5]?.textContent?.trim() || '',
+        telefono: row.dataset.telefono || '',
+        email: row.dataset.email || '',
+        observaciones: row.dataset.observaciones || '',
+        prioridad: row.dataset.prioridad || 'normal',
+        canalVenta: row.dataset.canal || '',
+        categoriaProducto: row.dataset.categoria || ''
+    };
+}
+
+// Configurar el modal de detalles
+function setupDetailsModal() {
+    const modal = document.getElementById('modalVerPedido');
+    if (!modal) return;
+    
+    const closeBtn = modal.querySelector('.close');
+    const cancelBtn = modal.querySelector('.btn-cancelar');
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+    }
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    });
+}
+
+// Generar HTML para las imágenes
+function generateImagesHTML(data) {
+    // Verificar si hay imágenes en los datos
+    const imagenes = data.imagenes || [];
+    
+    if (imagenes.length === 0) {
+        return '<div class="pedido-info-section"><h3>Imágenes de Referencia</h3><p style="color: rgba(255,255,255,0.6);">No hay imágenes disponibles</p></div>';
+    }
+    
+    const imagenesItems = imagenes.map((img, index) => {
+        return `
+            <div class="detail-image-item">
+                <img src="${img}" alt="Imagen ${index + 1}" class="detail-image" style="cursor: pointer;">
+            </div>
+        `;
+    }).join('');
+    
+    return `
+        <div class="pedido-info-section">
+            <h3>Imágenes de Referencia</h3>
+            <div class="detail-images-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;">
+                ${imagenesItems}
+            </div>
+        </div>
+    `;
 }
 
 // Funciones para manejo de imágenes
@@ -971,76 +1027,6 @@ function handleFiles(files) {
     }
 }
 
-function removeImage(button) {
-    const imageItem = button.parentElement;
-    imageItem.remove();
-    
-    // Mostrar placeholder si no hay más imágenes
-    const previewContainer = document.getElementById('imagePreviewContainer');
-    const remainingImages = previewContainer.querySelectorAll('.image-preview-item');
-    
-    if (remainingImages.length === 0) {
-        const placeholder = previewContainer.querySelector('.upload-placeholder');
-        if (placeholder) {
-            placeholder.style.display = 'block';
-        }
-    }
-}
-
-// Funciones para manejo de colores
-function setupColorPickers() {
-    const colorPickers = document.querySelectorAll('.color-picker');
-    const coloresInput = document.getElementById('colores');
-    
-    colorPickers.forEach((picker, index) => {
-        picker.addEventListener('change', function() {
-            updateColoresInput();
-        });
-    });
-    
-    if (coloresInput) {
-        coloresInput.addEventListener('input', function() {
-            // Opcional: actualizar los color pickers basado en el texto
-        });
-    }
-}
-
-function updateColoresInput() {
-    const colorPickers = document.querySelectorAll('.color-picker');
-    const coloresInput = document.getElementById('colores');
-    
-    if (!coloresInput) return;
-    
-    const colors = Array.from(colorPickers)
-        .map(picker => picker.value)
-        .filter(color => color && color !== '#000000');
-    
-    if (colors.length > 0) {
-        coloresInput.value = colors.join(', ');
-    }
-}
-
-// Función para obtener imágenes del formulario
-function getFormImages() {
-    const fileInput = document.getElementById('imagenReferencia');
-    const images = [];
-    
-    if (fileInput && fileInput.files) {
-        Array.from(fileInput.files).forEach(file => {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    images.push(e.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-    
-    return images;
-}
-
-// Funciones para el modal de detalles del producto
 function setupProductDetailsModal() {
     productDetailsModal = document.getElementById('modalDetallesProducto');
     productDetailsForm = document.getElementById('formDetallesProducto');
@@ -1074,6 +1060,7 @@ function setupProductDetailsModal() {
     setupProductDetailsImageUpload();
     setupProductDetailsColorPickers();
 }
+
 
 function openProductDetailsModal() {
     if (productDetailsModal) {
@@ -1430,7 +1417,10 @@ function setupStatusSelectors() {
                     });
                     
                     // Reconfigurar los selectores después de recargar
-                    setTimeout(setupStatusSelectors, 500);
+                    setTimeout(() => {
+                        setupStatusSelectors();
+                        setupActionButtons();
+                    }, 500);
                 } else {
                     throw new Error(data.message || 'Error al actualizar estado');
                 }
@@ -1465,7 +1455,6 @@ function updatePedidoStatus(pedidoId, nuevoEstado, selector) {
     // Actualizar el selector visualmente
     updateSelectorStyle(selector, nuevoEstado);
     
-    // Actualizar localStorage
     updatePedidoStatusInStorage(pedidoId, nuevoEstado);
     
     // Mostrar notificación
@@ -1486,7 +1475,6 @@ function updatePedidoStatusFromModal(pedidoId, nuevoEstado) {
         updateSelectorStyle(selector, nuevoEstado);
     }
     
-    // Actualizar localStorage
     updatePedidoStatusInStorage(pedidoId, nuevoEstado);
     
     // Actualizar el modal de detalles si está abierto
@@ -1525,16 +1513,13 @@ function updateSelectorStyle(selector, estadoId) {
 
 function updatePedidoStatusInStorage(pedidoId, nuevoEstado) {
     try {
-        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
         const pedidoIndex = pedidos.findIndex(p => p.id === pedidoId);
         
         if (pedidoIndex !== -1) {
             pedidos[pedidoIndex].estado = nuevoEstado;
             pedidos[pedidoIndex].fechaActualizacion = new Date().toISOString();
-            localStorage.setItem('pedidos', JSON.stringify(pedidos));
         }
     } catch (error) {
-        console.error('Error al actualizar estado en localStorage:', error);
     }
 }
 
@@ -1568,7 +1553,7 @@ function getCurrentPedidoId() {
     return null;
 }
 
-// Función para reconfigurar selectores después de agregar nuevos pedidos
+// Función para reconfigurar selectores después de agregar/recargar pedidos
 function reconfigureStatusSelectors() {
     // Remover event listeners existentes
     const existingSelectors = document.querySelectorAll('.status-selector');
@@ -1909,8 +1894,6 @@ function saveEditChanges() {
     }
     
     // Actualizar pedido
-    updatePedidoInTable(pedidoId, updatedData);
-    updatePedidoInStorage(pedidoId, updatedData);
     
     // Cerrar modal
     closeEditModal();
@@ -1919,49 +1902,6 @@ function saveEditChanges() {
     showNotification('Pedido actualizado exitosamente', 'success');
 }
 
-function updatePedidoInTable(pedidoId, updatedData) {
-    // Buscar la fila en la tabla
-    const rows = document.querySelectorAll('.pedidos-table tbody tr');
-    for (let row of rows) {
-        const cells = row.querySelectorAll('td');
-        if (cells.length > 0 && cells[0].textContent.trim() === pedidoId.trim()) {
-            // Actualizar datos visibles en la tabla
-            if (cells[1] && updatedData.cliente) {
-                cells[1].textContent = updatedData.cliente;
-            }
-            
-            // El total se puede recalcular si se cambió precio o cantidad
-            if (updatedData.precioUnitario && updatedData.cantidad) {
-                const total = parseFloat(updatedData.precioUnitario) * parseFloat(updatedData.cantidad);
-                if (cells[4]) {
-                    cells[4].textContent = `$${total.toFixed(2)}`;
-                }
-            }
-            
-            break;
-        }
-    }
-}
-
-function updatePedidoInStorage(pedidoId, updatedData) {
-    try {
-        const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-        const pedidoIndex = pedidos.findIndex(p => p.id === pedidoId);
-        
-        if (pedidoIndex !== -1) {
-            // Actualizar datos existentes
-            pedidos[pedidoIndex] = {
-                ...pedidos[pedidoIndex],
-                ...updatedData,
-                fechaActualizacion: new Date().toISOString()
-            };
-            
-            localStorage.setItem('pedidos', JSON.stringify(pedidos));
-        }
-    } catch (error) {
-        console.error('Error al actualizar pedido en localStorage:', error);
-    }
-}
 
 // Funciones para manejo de colores en el modal de edición
 function setupEditColorPickers() {
@@ -2161,48 +2101,7 @@ function removeEditImage(button) {
     }
 }
 
-// ===== NUEVO: Funcionalidad para crear pedido =====
-document.addEventListener('DOMContentLoaded', function() {
-    // Configurar botón "Nuevo Pedido"
-    const btnNuevoPedido = document.querySelector('.btn-nuevo-pedido');
-    if (btnNuevoPedido) {
-        btnNuevoPedido.addEventListener('click', function() {
-            const modal = document.getElementById('modalNuevoPedido');
-            if (modal) {
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            }
-        });
-    }
-
-    // Configurar formulario de nuevo pedido
-    const formNuevoPedido = document.getElementById('formNuevoPedido');
-    if (formNuevoPedido) {
-        formNuevoPedido.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await crearNuevoPedido();
-        });
-    }
-
-    // Configurar botón de detalles del producto
-    const btnDetallesProducto = document.getElementById('btnDetallesProducto');
-    if (btnDetallesProducto) {
-        btnDetallesProducto.addEventListener('click', function() {
-            const modalDetalles = document.getElementById('modalDetallesProducto');
-            if (modalDetalles) {
-                modalDetalles.style.display = 'block';
-            }
-        });
-    }
-
-    // Configurar botón guardar detalles
-    const btnGuardarDetalles = document.getElementById('guardarDetalles');
-    if (btnGuardarDetalles) {
-        btnGuardarDetalles.addEventListener('click', function() {
-            guardarDetallesProducto();
-        });
-    }
-});
+// ===== Funcionalidad para crear pedido - ya configurado en el DOMContentLoaded principal =====
 
 async function crearNuevoPedido() {
     try {
@@ -2288,22 +2187,22 @@ async function crearNuevoPedido() {
         
         console.log('Respuesta del servidor:', response);
 
-        // Intentar crear el detalle (cantidad y precio) si hay datos
+        // Intentar crear el detalle (cantidad y precio del formulario principal)
         try {
             const idPedido = (response && response.data && response.data.id_pedido_creado) ? response.data.id_pedido_creado : null;
             if (idPedido) {
-                // Recuperar datos guardados en detallesProducto
+                // Obtener cantidad y precio del formulario principal
+                const cantidadForm = parseInt(formData.get('cantidad')) || 1;
+                const precioForm = parseFloat(formData.get('precioUnitario')) || 0;
+                
+                // Recuperar datos guardados en detallesProducto (solo detalles adicionales)
                 const detallesProducto = sessionStorage.getItem('detallesProducto');
-                let cantidad = 1;
-                let precioUnitario = 0;
                 let categoriaProducto = '';
                 let especificaciones = '';
-
                 let imagenes = [];
+                
                 if (detallesProducto) {
                     const d = JSON.parse(detallesProducto);
-                    if (d.cantidad) cantidad = parseInt(d.cantidad) || 1;
-                    if (d.precioUnitario) precioUnitario = parseFloat(d.precioUnitario) || 0;
                     if (d.categoria) categoriaProducto = String(d.categoria);
                     if (d.especificaciones) especificaciones = String(d.especificaciones);
                     if (d.imagenesUrls) {
@@ -2329,8 +2228,8 @@ async function crearNuevoPedido() {
 
                 const detallePayload = {
                     producto_solicitado: productoSolicitado + (especificaciones ? ` - ${especificaciones.substring(0, 60)}` : ''),
-                    cantidad: Math.max(1, cantidad),
-                    precio_unitario: Math.max(0, precioUnitario),
+                    cantidad: Math.max(1, cantidadForm),
+                    precio_unitario: Math.max(0, precioForm),
                     descuento: 0,
                     impuesto: 0,
                     id_producto: 0, // permitir personalizado sin id_producto
@@ -2384,8 +2283,6 @@ function guardarDetallesProducto() {
     const color2 = document.getElementById('colorPicker2').value;
     const color3 = document.getElementById('colorPicker3').value;
     const especificaciones = document.getElementById('especificaciones').value;
-    const cantidad = (document.getElementById('cantidadProducto')?.value || '').trim();
-    const precioUnitario = (document.getElementById('precioUnitarioProducto')?.value || '').trim();
     
     // Combinar colores
     const colores = [color1, color2, color3].filter(c => c !== '#000000').join(', ');
@@ -2393,14 +2290,12 @@ function guardarDetallesProducto() {
     // Obtener las URLs de las imágenes subidas (guardadas en el preview)
     const imagenesSubidas = sessionStorage.getItem('imagenesSubidas') || '[]';
     
-    // Guardar en sessionStorage
+    // Guardar en sessionStorage (sin cantidad ni precio, ahora están en el form principal)
     const detalles = {
         categoria: categoria,
         colores: colores,
         especificaciones: especificaciones,
-        imagenesUrls: imagenesSubidas,
-        cantidad: cantidad,
-        precioUnitario: precioUnitario
+        imagenesUrls: imagenesSubidas
     };
     
     sessionStorage.setItem('detallesProducto', JSON.stringify(detalles));
@@ -2418,55 +2313,7 @@ function guardarDetallesProducto() {
     showNotification('Detalles guardados correctamente', 'success');
 }
 
-// Manejar cambio en el input de archivo para upload de imágenes
-document.addEventListener('DOMContentLoaded', function() {
-    const imagenInput = document.getElementById('imagenReferencia');
-    if (imagenInput) {
-        imagenInput.addEventListener('change', async function(e) {
-            const files = Array.from(e.target.files);
-            if (files.length === 0) return;
-            
-            try {
-                // Mostrar indicador de carga
-                const previewContainer = document.getElementById('imagePreviewContainer');
-                const placeholder = previewContainer.querySelector('.upload-placeholder');
-                if (placeholder) {
-                    placeholder.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><p>Subiendo imágenes...</p>';
-                }
-                
-                // Subir imágenes al servidor
-                const response = await PedidosMVC.uploadMultiple(files);
-                
-                console.log('Respuesta upload:', response);
-                
-                if (response && response.data && response.data.uploaded) {
-                    const urls = response.data.uploaded.map(img => img.url);
-                    
-                    // Guardar URLs en sessionStorage
-                    sessionStorage.setItem('imagenesSubidas', JSON.stringify(urls));
-                    
-                    // Mostrar preview
-                    mostrarPreviewImagenes(urls, previewContainer);
-                    
-                    showNotification(`${urls.length} imagen(es) subida(s) correctamente`, 'success');
-                } else {
-                    throw new Error('Respuesta inválida del servidor');
-                }
-                
-            } catch (error) {
-                console.error('Error al subir imágenes:', error);
-                showNotification('Error al subir imágenes: ' + error.message, 'error');
-                
-                // Restaurar placeholder
-                const previewContainer = document.getElementById('imagePreviewContainer');
-                const placeholder = previewContainer.querySelector('.upload-placeholder');
-                if (placeholder) {
-                    placeholder.innerHTML = '<i class="fa-solid fa-cloud-upload-alt"></i><p>Arrastra imágenes aquí o haz clic para seleccionar</p>';
-                }
-            }
-        });
-    }
-});
+// Manejar cambio en el input de archivo para upload de imágenes - ya configurado en el DOMContentLoaded principal
 
 function mostrarPreviewImagenes(urls, previewContainer) {
     // Limpiar preview anterior
@@ -2527,3 +2374,4 @@ window.removeUploadedImage = function(button, url) {
         }
     }
 };
+

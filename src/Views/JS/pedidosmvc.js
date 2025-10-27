@@ -1,3 +1,4 @@
+
 /*
  * pedidosmvc.js
  * Capa JS ligera MVC para Pedidos (solo lectura)
@@ -31,6 +32,30 @@
 
     // ===== Model =====
     const Model = {
+        // Actualizar pedido (PUT)
+        updatePedido: function (idPedido, pedidoData) {
+            const url = this.apiEntry + '?route=pedidos/' + encodeURIComponent(idPedido) + '&caso=1';
+            return this.request(url, {
+                method: 'PUT',
+                body: JSON.stringify(pedidoData)
+            });
+        },
+
+        // Actualizar detalle de pedido (PUT)
+        updateDetalle: function (idDetalle, detalleData) {
+            const url = this.apiEntry + '?route=pedidos/detalle/' + encodeURIComponent(idDetalle) + '&caso=1';
+            return this.request(url, {
+                method: 'PUT',
+                body: JSON.stringify(detalleData)
+            });
+        },
+        // Eliminar pedido (DELETE)
+        deletePedido: function (idPedido) {
+            const url = this.apiEntry + '?route=pedidos/' + encodeURIComponent(idPedido) + '&caso=1';
+            return this.request(url, {
+                method: 'DELETE'
+            });
+        },
         apiEntry: defaultApiEntry,
         token: null,
 
@@ -112,6 +137,24 @@
                 body: JSON.stringify(detalleData)
             });
         },
+
+        // Actualizar pedido (PUT)
+        updatePedido: function (idPedido, pedidoData) {
+            const url = this.apiEntry + '?route=pedidos/' + encodeURIComponent(idPedido) + '&caso=1';
+            return this.request(url, {
+                method: 'PUT',
+                body: JSON.stringify(pedidoData)
+            });
+        },
+
+        // Actualizar detalle de pedido (PUT)
+        updateDetalle: function (idDetalle, detalleData) {
+            const url = this.apiEntry + '?route=pedidos/detalle/' + encodeURIComponent(idDetalle) + '&caso=1';
+            return this.request(url, {
+                method: 'PUT',
+                body: JSON.stringify(detalleData)
+            });
+        },
         
         // Upload de imagen
         uploadImage: async function (file) {
@@ -184,7 +227,8 @@
             // raw puede venir con distintas claves según el backend; mapear seguros
             // ID SIEMPRE del campo id_pedido (no usar numero_pedido como fallback)
             const idPedido = raw.id_pedido || raw.id || raw.ID || raw.idPedido || '';
-            const numeroPedido = raw.numero_pedido || raw.numeroPedido || '';
+            // Mostrar como "Número" el ID autoincremental de la BD por requerimiento
+            const numeroPedido = (raw.id_pedido || raw.id || raw.ID) ?? (raw.numero_pedido || raw.numeroPedido || '');
             const cliente = raw.cliente_nombre || raw.nombre_usuario || raw.cliente || raw.usuario || '';
             const fecha = raw.fecha_pedido || raw.fecha || raw.fecha || '';
             const fechaEntrega = raw.fecha_entrega || raw.fechaEntrega || '';
@@ -435,11 +479,23 @@
         // Crear detalle de pedido
         createDetalle: (idPedido, detalleData) => Model.createDetalle(idPedido, detalleData),
         
+        // Actualizar pedido
+        updatePedido: (idPedido, pedidoData) => Model.updatePedido(idPedido, pedidoData),
+        
+        // Actualizar detalle
+        updateDetalle: (idDetalle, detalleData) => Model.updateDetalle(idDetalle, detalleData),
+        
+        // Eliminar pedido
+        deletePedido: (idPedido) => Model.deletePedido(idPedido),
+        
         // Upload de imagen
         uploadImage: (file) => Model.uploadImage(file),
         
         // Upload múltiple
-        uploadMultiple: (files) => Model.uploadMultiple(files)
+        uploadMultiple: (files) => Model.uploadMultiple(files),
+        
+        // Exponer Model directamente para acceso avanzado
+        Model: Model
     };
 
     // Exportar globalmente

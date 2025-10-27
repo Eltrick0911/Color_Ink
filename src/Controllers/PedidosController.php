@@ -115,9 +115,10 @@ class PedidosController
 
             error_log("PedidosController - create: Datos - Cliente: $clienteNombre, Canal: $canalVenta, Usuario: $idUsuario");
 
-            // Generar número de pedido si no viene
+            // Ya no generamos un número personalizado aquí.
+            // El modelo establecerá numero_pedido basado en el ID autoincremental.
             if (empty($numeroPedido)) {
-                $numeroPedido = 'PED-' . date('Ymd-His') . '-' . bin2hex(random_bytes(2));
+                $numeroPedido = '';
             }
 
             // Validar fecha de entrega (requerida)
