@@ -7,14 +7,18 @@ document.addEventListener('DOMContentLoaded', function() {
         setupSearch();
         setupStatusSelectors();
         setupDetailsModal(); // Configurar modal de detalles
-        setupEditColorPickers(); // Configurar color pickers del modal de edición
+    setupEditColorPickers(); // Configurar color pickers del modal de edición
         
         // Configurar botón "Nuevo Pedido"
         const btnNuevoPedido = document.querySelector('.btn-nuevo-pedido');
+        console.log('Botón Nuevo Pedido encontrado:', btnNuevoPedido);
         if (btnNuevoPedido) {
             btnNuevoPedido.addEventListener('click', function() {
+                console.log('Click en botón Nuevo Pedido');
                 openModal();
             });
+        } else {
+            console.error('No se encontró el botón .btn-nuevo-pedido');
         }
         
         // Configurar modal de nuevo pedido
@@ -43,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Configurar botón guardar detalles
+        // Configurar botón guardar detalles (Personalizado)
         const btnGuardarDetalles = document.getElementById('guardarDetalles');
         if (btnGuardarDetalles) {
             btnGuardarDetalles.addEventListener('click', function() {
@@ -105,8 +109,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reconfigurar cuando la tabla se renderice de nuevo
     document.addEventListener('pedidos:rendered', function() {
         try {
-            setupStatusSelectors();
-            setupActionButtons();
+            // Usar setTimeout para asegurar que las funciones estén disponibles
+            setTimeout(() => {
+                if (typeof setupStatusSelectors === 'function') {
+                    setupStatusSelectors();
+                } else {
+                    console.warn('setupStatusSelectors no está definida aún');
+                }
+                if (typeof setupActionButtons === 'function') {
+                    setupActionButtons();
+                } else {
+                    console.warn('setupActionButtons no está definida aún');
+                }
+            }, 0);
         } catch (e) {
             console.error('Error reconfigurando tras render:', e);
         }
@@ -140,172 +155,124 @@ function showPedidoDetails(pedidoData) {
 
 // Construye el HTML de detalle del pedido
 function generatePedidoDetailsHTML(data) {
-    const canalVenta = data.canalVenta || 'No especificado';
-    const categoriaProducto = data.categoriaProducto || 'No especificado';
-    const tipoTrabajo = data.tipoTrabajo || 'No especificado';
-    const colores = data.colores || 'No especificado';
-    const tamano = data.tamano || 'No especificado';
-    const material = data.material || 'No especificado';
-    const especificaciones = data.especificaciones || 'No especificado';
-    const textoPersonalizado = data.textoPersonalizado || 'No especificado';
-    const observaciones = data.observaciones || 'No especificado';
-    const prioridad = data.prioridad || 'Normal';
+    // Utilidad para mostrar colores
+    function generarColoresHTML(colores) {
+        if (!colores || colores.length === 0) return '<span class="detail-value">No especificados</span>';
+        let coloresHTML = '<div class="colores-container">';
+        (Array.isArray(colores) ? colores : (typeof colores === 'string' ? colores.split(',') : [])).forEach(color => {
+            coloresHTML += `
+                <div class="color-item">
+                    <div class="color-circle" style="background-color: ${color};" title="${color}"></div>
+                    <span class="color-name">${color}</span>
+                </div>
+            `;
+        });
+        coloresHTML += '</div>';
+        return coloresHTML;
+    }
 
-    const coloresHTML = generateColorsHTML(data);
-    const imagenesHTML = generateImagesHTML(data);
+    // Obtener productos del pedido (array)
+    let productos = [];
+    if (pedido.detalles_producto) {
+        try {
+            productos = typeof pedido.detalles_producto === 'string' ? JSON.parse(pedido.detalles_producto) : pedido.detalles_producto;
+            if (!Array.isArray(productos)) productos = [productos];
+        } catch (e) {
+            productos = [];
+        }
+    }
 
-    return `
-        <div class="pedido-details">
-            <div class="pedido-info-section">
-                <h3>Información del Pedido</h3>
-                <div class="detail-item">
-                    <span class="detail-label">ID:</span>
-                    <span class="detail-value">${data.id}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Cliente:</span>
-                    <span class="detail-value">${data.cliente}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Teléfono:</span>
-                    <span class="detail-value">${data.telefono || 'No especificado'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Email:</span>
-                    <span class="detail-value">${data.email || 'No especificado'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Fecha:</span>
-                    <span class="detail-value">${data.fecha || ''}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Fecha de Entrega:</span>
-                    <span class="detail-value">${data.fechaEntrega || 'No especificada'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Estado:</span>
-                    <span class="detail-value">
-                        <span class="detail-status ${data.estado}">${String(data.estado)}</span>
-                    </span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Prioridad:</span>
-                    <span class="detail-value">${prioridad}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Total:</span>
-                    <span class="detail-value">${data.total || '$0.00'}</span>
+    // HTML de productos
+    let productosHTML = '';
+    if (productos.length > 0) {
+        productosHTML = productos.map((prod, idx) => `
+            <div class="producto-card">
+                <h4>Producto #${idx + 1}</h4>
+                <div class="producto-detalle-grid">
+                    <div><b>Categoría:</b> ${prod.categoria || 'No especificada'}</div>
+                    <div><b>Cantidad:</b> ${prod.cantidad || 1}</div>
+                    <div><b>Precio Unitario:</b> $${parseFloat(prod.precio_unitario || prod.precio || 0).toFixed(2)}</div>
+                    <div><b>Descuento:</b> ${prod.descuento || 0}%</div>
+                    <div><b>Impuesto:</b> ${prod.impuesto || 0}%</div>
+                    <div><b>Colores:</b> ${generarColoresHTML(prod.colores)}</div>
+                    <div><b>Especificaciones:</b> ${prod.especificaciones || ''}</div>
+                    <div><b>Imágenes:</b> ${(prod.imagenes && prod.imagenes.length > 0) ? prod.imagenes.map(img => `<img src="${img}" alt="img" style="max-width:60px;max-height:60px;margin:2px;cursor:pointer;" onclick="window.open('${img}','_blank')">`).join('') : 'No especificadas'}</div>
                 </div>
             </div>
-            
-            <div class="pedido-info-section">
-                <h3>Detalles del Producto</h3>
-                <div class="detail-item">
-                    <span class="detail-label">Canal de Venta:</span>
-                    <span class="detail-value">${canalVenta}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Categoría:</span>
-                    <span class="detail-value">${categoriaProducto}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Tipo de Trabajo:</span>
-                    <span class="detail-value">${tipoTrabajo}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Cantidad:</span>
-                    <span class="detail-value">${data.cantidad || '1'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Precio Unitario:</span>
-                    <span class="detail-value">$${data.precioUnitario || '0.00'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Tamaño:</span>
-                    <span class="detail-value">${tamano}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Material:</span>
-                    <span class="detail-value">${material}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Colores:</span>
-                    <span class="detail-value">${colores}</span>
-                </div>
-                ${coloresHTML}
-            </div>
-        </div>
-        
-        <div class="pedido-info-section">
-            <h3>Especificaciones y Detalles</h3>
-            <div class="detail-item">
-                <span class="detail-label">Especificaciones Técnicas:</span>
-                <span class="detail-value">${especificaciones}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Texto Personalizado:</span>
-                <span class="detail-value">${textoPersonalizado}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Observaciones:</span>
-                <span class="detail-value">${observaciones}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Dirección de Entrega:</span>
-                <span class="detail-value">${data.direccion || 'No especificada'}</span>
-            </div>
-        </div>
-        
-        ${imagenesHTML}
-    `;
-}
+        `).join('');
+    } else {
+        productosHTML = '<div class="producto-card">No hay productos registrados en este pedido.</div>';
+    }
 
-function generateColorsHTML(data) {
-    const colors = [];
-    
-    // Recopilar colores
-    if (data.colorPicker1 && data.colorPicker1 !== '#000000') {
-        colors.push(data.colorPicker1);
-    }
-    if (data.colorPicker2 && data.colorPicker2 !== '#000000') {
-        colors.push(data.colorPicker2);
-    }
-    if (data.colorPicker3 && data.colorPicker3 !== '#000000') {
-        colors.push(data.colorPicker3);
-    }
-    if (data.colorPicker4 && data.colorPicker4 !== '#000000') {
-        colors.push(data.colorPicker4);
-    }
-    if (data.colorPicker5 && data.colorPicker5 !== '#000000') {
-        colors.push(data.colorPicker5);
-    }
-    
-    if (colors.length === 0) return '';
-    
-    return `
-        <div class="detail-item">
-            <span class="detail-label">Colores Seleccionados:</span>
-            <div class="detail-colors">
-                ${colors.map((color, index) => 
-                    `<div class="detail-color" 
-                         style="background-color: ${color}" 
-                         data-color-name="${color.toUpperCase()}"
-                         title="${color.toUpperCase()}"></div>`
-                ).join('')}
+    // Construir HTML con TODOS los datos del pedido y productos
+    const htmlContent = `
+        <div class="pedido-details-grid">
+            <!-- Información del Cliente -->
+            <div class="details-section">
+                <h3><i class="fa-solid fa-user"></i> Información del Cliente</h3>
+                <div class="details-content">
+                    <div class="detail-item">
+                        <span class="detail-label">Nombre:</span>
+                        <span class="detail-value">${pedido.cliente || 'No especificado'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Teléfono:</span>
+                        <span class="detail-value">${pedido.telefono || 'No especificado'}</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Información del Pedido -->
+            <div class="details-section">
+                <h3><i class="fa-solid fa-shopping-cart"></i> Información del Pedido</h3>
+                <div class="details-content">
+                    <div class="detail-item">
+                        <span class="detail-label">Número de Pedido:</span>
+                        <span class="detail-value">${pedido.numeroPedido || pedido.id}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha del Pedido:</span>
+                        <span class="detail-value">${pedido.fecha || 'No especificada'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fecha de Entrega:</span>
+                        <span class="detail-value">${pedido.fechaEntrega || 'No especificada'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estado:</span>
+                        <span class="detail-value badge-${pedido.estado.toLowerCase()}">${pedido.estadoNombre || pedido.estado}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Prioridad:</span>
+                        <span class="detail-value badge-prioridad-${pedido.prioridad}">${pedido.prioridad || 'Normal'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Canal de Venta:</span>
+                        <span class="detail-value">${pedido.canalVenta || 'No especificado'}</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Detalles de Productos -->
+            <div class="details-section full-width">
+                <h3><i class="fa-solid fa-box"></i> Productos del Pedido</h3>
+                <div class="details-content">
+                    ${productosHTML}
+                </div>
             </div>
         </div>
     `;
-}
+    content.innerHTML = htmlContent;
+
+    // Mostrar el modal
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
 async function editPedido(pedidoId) {
     console.log('Editando pedido:', pedidoId);
     
     try {
         // Obtener datos completos desde la API
         const pedidoRes = await PedidosMVC.fetchOne(pedidoId);
-        const detallesRes = await PedidosMVC.fetchDetalle(pedidoId);
         
         console.log('Respuesta del pedido para editar:', pedidoRes);
-        console.log('Respuesta del detalle para editar:', detallesRes);
         
         if (!pedidoRes || !pedidoRes.data) {
             showNotification('No se pudieron cargar los datos del pedido', 'error');
@@ -325,13 +292,13 @@ async function editPedido(pedidoId) {
             return;
         }
         
-        // Lo mismo para el detalle
+        // Obtener el detalle directamente del pedido (getPedidoById incluye 'detalles')
         let detalle = null;
-        if (detallesRes && detallesRes.data) {
-            if (Array.isArray(detallesRes.data)) {
-                detalle = detallesRes.data.find(d => d.id_pedido == pedidoId);
-            } else {
-                detalle = detallesRes.data;
+        if (data && data.detalles) {
+            if (Array.isArray(data.detalles) && data.detalles.length > 0) {
+                detalle = data.detalles[0];
+            } else if (typeof data.detalles === 'object') {
+                detalle = data.detalles; // por si viene como objeto
             }
         }
         
@@ -392,7 +359,9 @@ async function editPedido(pedidoId) {
             // Datos del detalle
             cantidad: detalle ? parseInt(detalle.cantidad) : 1,
             precioUnitario: detalle ? parseFloat(detalle.precio_unitario) : 0,
-            idDetalle: detalle ? detalle.id_detalle : null,
+            descuento: detalle ? parseFloat(detalle.descuento || 0) : 0,
+            impuesto: detalle ? parseFloat(detalle.impuesto || 0) : 0,
+            idDetalle: detalle ? (detalle.id_detalle || detalle.id || null) : null,
             
             // Datos de detalles_producto
             categoriaProducto: detallesProducto?.categoria || detallesPersonalizados?.categoria || '',
@@ -450,6 +419,9 @@ function showEditPedidoModal(pedido) {
     setInputValue('editarCanalVenta', pedido.canalVenta);
     setInputValue('editarPrecioUnitario', pedido.precioUnitario);
     setInputValue('editarCantidad', pedido.cantidad);
+    // Nuevos campos: descuento e impuesto por línea
+    if (typeof pedido.descuento !== 'undefined') setInputValue('editarDescuento', pedido.descuento);
+    if (typeof pedido.impuesto !== 'undefined') setInputValue('editarImpuesto', pedido.impuesto);
     setInputValue('editarPrioridad', pedido.prioridad);
     setInputValue('editarCategoriaProducto', pedido.categoriaProducto);
     setInputValue('editarEspecificaciones', pedido.especificaciones);
@@ -496,6 +468,23 @@ function showEditPedidoModal(pedido) {
     // Mostrar el modal
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
+
+    // Marcar que estamos en edición para que el modal Personalizado persista directo
+    window.currentEditPedidoId = pedido.id;
+    // Cargar los detalles personalizados actuales en sessionStorage para edición
+    try {
+        const detallesActuales = {
+            categoria: pedido.categoriaProducto || '',
+            colores: document.getElementById('editarColores').value || '',
+            especificaciones: document.getElementById('editarEspecificaciones').value || '',
+            imagenesUrls: '[]',
+            cantidad: Number.isFinite(pedido.cantidad) ? pedido.cantidad : 1,
+            precio: Number.isFinite(pedido.precioUnitario) ? pedido.precioUnitario : 0,
+            descuento: Number.isFinite(pedido.descuento) ? pedido.descuento : 0,
+            impuesto: Number.isFinite(pedido.impuesto) ? pedido.impuesto : 0
+        };
+        sessionStorage.setItem('detallesProducto', JSON.stringify(detallesActuales));
+    } catch (e) {}
     
     // Configurar botones de cerrar
     const closeBtn = modal.querySelector('.close');
@@ -537,6 +526,14 @@ function showEditPedidoModal(pedido) {
     }
     
     console.log('Modal de edición mostrado');
+
+    // Botón para abrir modal personalizado en edición
+    const btnEditarPersonalizado = document.getElementById('btnEditarPersonalizado');
+    if (btnEditarPersonalizado) {
+        btnEditarPersonalizado.onclick = function() {
+            openProductDetailsModal();
+        };
+    }
 }
 
 // Guardar los cambios del pedido editado
@@ -552,11 +549,20 @@ async function guardarEdicionPedido(pedidoId, detalleId) {
             canalVenta: document.getElementById('editarCanalVenta').value,
             prioridad: document.getElementById('editarPrioridad').value,
             observaciones: document.getElementById('editarEspecificaciones').value, // Las especificaciones van en observaciones
-            detalles_producto: JSON.stringify({
-                categoria: document.getElementById('editarCategoriaProducto').value,
-                colores: document.getElementById('editarColores').value,
-                imagenes: [] // Las imágenes se manejarían por separado si se implementa carga
-            })
+            detalles_producto: (function(){
+                // Intentar usar lo que esté en sessionStorage (del modal personalizado)
+                try {
+                    const ss = sessionStorage.getItem('detallesProducto');
+                    if (ss) return ss;
+                } catch(e) {}
+                // Si no, construir básico desde el formulario
+                return JSON.stringify({
+                    categoria: document.getElementById('editarCategoriaProducto').value,
+                    colores: document.getElementById('editarColores').value,
+                    imagenes: [],
+                    items: []
+                });
+            })()
         };
         
         console.log('Datos del pedido a actualizar:', pedidoData);
@@ -569,6 +575,8 @@ async function guardarEdicionPedido(pedidoId, detalleId) {
             const detalleData = {
                 cantidad: parseInt(document.getElementById('editarCantidad').value),
                 precio_unitario: parseFloat(document.getElementById('editarPrecioUnitario').value),
+                descuento: parseFloat(document.getElementById('editarDescuento')?.value || '0'),
+                impuesto: parseFloat(document.getElementById('editarImpuesto')?.value || '0'),
                 detalles_personalizados: JSON.stringify({
                     categoria: document.getElementById('editarCategoriaProducto').value,
                     colores: document.getElementById('editarColores').value,
@@ -593,6 +601,10 @@ async function guardarEdicionPedido(pedidoId, detalleId) {
             tableSelector: '.pedidos-table tbody',
             autoCreateToken: true
         });
+
+        // Limpiar bandera de edición y detalles temporales
+        window.currentEditPedidoId = null;
+        sessionStorage.removeItem('detallesProducto');
     } catch (error) {
         console.error('Error al guardar cambios:', error);
         showNotification('Error al actualizar el pedido: ' + (error.message || 'Error desconocido'), 'error');
@@ -781,18 +793,119 @@ let productDetailsModal = null;
 let productDetailsForm = null;
 let productDetailsData = {};
 
+// ================= Productos múltiples (nuevo pedido) =================
+function setupProductosMultiples() {
+    const tbody = document.getElementById('productosTBody');
+    if (!tbody) return; // solo existe en el modal nuevo
+
+    const btnAdd = document.getElementById('btnAgregarProducto');
+    if (btnAdd) {
+        btnAdd.onclick = function () {
+            addProductoRow();
+        };
+    }
+
+    // Si no hay filas, agregar una inicial
+    if (!tbody.querySelector('tr')) {
+        addProductoRow();
+    }
+}
+
+function addProductoRow(prefill = {}) {
+    const tbody = document.getElementById('productosTBody');
+    if (!tbody) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td style="padding:6px;">
+            <input type="text" class="prod-desc" placeholder="Descripción del producto" style="width:100%" value="${(prefill.descripcion||'').replace(/\"/g,'&quot;')}">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="prod-cant" min="1" value="${Number.isFinite(prefill.cantidad)?prefill.cantidad:1}" style="width:90px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="prod-precio" step="0.01" min="0" value="${Number.isFinite(prefill.precio)?prefill.precio:0}" style="width:110px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="prod-descuento" step="0.01" min="0" value="${Number.isFinite(prefill.descuento)?prefill.descuento:0}" style="width:90px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="prod-impuesto" step="0.01" min="0" value="${Number.isFinite(prefill.impuesto)?prefill.impuesto:0}" style="width:90px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <span class="prod-total">$0.00</span>
+        </td>
+        <td style="padding:6px; text-align:center;">
+            <button type="button" class="btn-action" title="Eliminar"><i class="fa fa-trash"></i></button>
+        </td>
+    `;
+
+    tbody.appendChild(tr);
+
+    const inputs = tr.querySelectorAll('input');
+    inputs.forEach(inp => {
+        inp.addEventListener('input', () => {
+            recalcRow(tr);
+            recalcTotalesPedido();
+        });
+    });
+
+    const btnDel = tr.querySelector('button');
+    btnDel.addEventListener('click', () => {
+        tr.remove();
+        recalcTotalesPedido();
+        // Si no queda ninguna fila, agregar una en blanco
+        if (!tbody.querySelector('tr')) {
+            addProductoRow();
+        }
+    });
+
+    // Calcular al crear
+    recalcRow(tr);
+    recalcTotalesPedido();
+}
+
+function recalcRow(tr) {
+    const q = Math.max(1, parseInt(tr.querySelector('.prod-cant')?.value || '1'));
+    const p = Math.max(0, parseFloat(tr.querySelector('.prod-precio')?.value || '0'));
+    const d = Math.max(0, parseFloat(tr.querySelector('.prod-descuento')?.value || '0'));
+    const t = Math.max(0, parseFloat(tr.querySelector('.prod-impuesto')?.value || '0'));
+    let total = q * p;
+    total = total * (1 - (d / 100));
+    total = total * (1 + (t / 100));
+    tr.querySelector('.prod-total').textContent = total.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+}
+
+function recalcTotalesPedido() {
+    const spans = document.querySelectorAll('#productosTBody .prod-total');
+    let suma = 0;
+    spans.forEach(sp => {
+        const val = sp.textContent.replace(/[^0-9.,-]/g, '').replace(/,/g, '');
+        const num = parseFloat(val) || 0;
+        suma += num;
+    });
+    const totalSpan = document.getElementById('totalPedidoPreview');
+    if (totalSpan) {
+        totalSpan.textContent = suma.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+    }
+}
+
 function setupModal() {
     modal = document.getElementById('modalNuevoPedido');
     form = document.getElementById('formNuevoPedido');
     
-    if (!modal || !form) return;
+    if (!modal || !form) {
+        console.error('setupModal: No se encontró el modal o el formulario', { modal, form });
+        return;
+    }
+    
+    console.log('setupModal: Modal y formulario encontrados correctamente');
     
     // Configurar botones de cerrar
     const closeBtn = modal.querySelector('.close');
     const cancelBtn = modal.querySelector('.btn-cancelar');
     
-    closeBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
     
     // Cerrar modal al hacer clic fuera de él
     modal.addEventListener('click', function(e) {
@@ -817,10 +930,19 @@ function setupModal() {
     
     // Configurar selectores de color
     setupColorPickers();
+    
+    // Los productos múltiples ahora se gestionan dentro del modal de Personalizado
 }
 
 function openModal() {
+    console.log('openModal llamado, modal:', modal);
+    if (!modal) {
+        console.error('openModal: modal es null, intentando obtenerlo nuevamente');
+        modal = document.getElementById('modalNuevoPedido');
+    }
+    
     if (modal) {
+        console.log('openModal: Abriendo modal');
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden'; // Prevenir scroll del body
         
@@ -1310,6 +1432,8 @@ function showPedidoDetails(pedido) {
                     </div>
                 </div>
             </div>
+
+            
             
             <!-- Especificaciones Técnicas -->
             <div class="details-section full-width">
@@ -1520,38 +1644,150 @@ function handleFiles(files) {
     }
 }
 
+// === Lógica de productos múltiples en modal personalizado ===
+let productosPersonalizados = [];
+let productoActivo = 0;
+
 function setupProductDetailsModal() {
     productDetailsModal = document.getElementById('modalDetallesProducto');
     productDetailsForm = document.getElementById('formDetallesProducto');
-    
     if (!productDetailsModal || !productDetailsForm) return;
-    
-    // Configurar botón para abrir modal
+
+    // Botón para abrir modal
     const btnDetalles = document.getElementById('btnDetallesProducto');
     if (btnDetalles) {
         btnDetalles.addEventListener('click', openProductDetailsModal);
     }
-    
-    // Configurar botones de cerrar
+
+    // Botones de cerrar
     const closeBtn = productDetailsModal.querySelector('.close');
     const cancelBtn = productDetailsModal.querySelector('.btn-cancelar');
     const guardarBtn = document.getElementById('guardarDetalles');
-    
-    closeBtn.addEventListener('click', closeProductDetailsModal);
-    cancelBtn.addEventListener('click', closeProductDetailsModal);
-    guardarBtn.addEventListener('click', saveProductDetails);
-    
+    if (closeBtn) closeBtn.addEventListener('click', closeProductDetailsModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeProductDetailsModal);
+
     // Cerrar modal al hacer clic fuera de él
     productDetailsModal.addEventListener('click', function(e) {
-        if (e.target === productDetailsModal) {
-            closeProductDetailsModal();
-        }
+        if (e.target === productDetailsModal) closeProductDetailsModal();
     });
-    
-    // Configurar validación y funcionalidades
+
+    // Validación y funcionalidades
     setupProductDetailsValidation();
     setupProductDetailsImageUpload();
     setupProductDetailsColorPickers();
+
+    // Configuración de total simple
+    ['pdCantidad','pdPrecio','pdDescuento','pdImpuesto'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updatePdTotalPreview);
+    });
+    updatePdTotalPreview();
+}
+
+function productoVacio() {
+    return {
+        categoria: '', colores: '', especificaciones: '', imagenesUrls: '[]', cantidad: 1, precio: 0, descuento: 0, impuesto: 0
+    };
+}
+
+function renderProductosNav() {
+    const nav = document.getElementById('productosNav');
+    if (!nav) return;
+    
+    nav.innerHTML = '';
+    
+    // Botones de productos numerados
+    productosPersonalizados.forEach((prod, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-producto-nav';
+        btn.textContent = (idx + 1);
+        btn.style = 'padding: 4px 10px; border-radius: 50%; margin-right: 2px; border: 1px solid #ccc; cursor: pointer;';
+        if (idx === productoActivo) {
+            btn.style.background = '#b2f2e6';
+            btn.style.fontWeight = 'bold';
+        }
+        btn.onclick = () => {
+            guardarProductoActual();
+            productoActivo = idx;
+            cargarProductoEnFormulario(idx);
+            renderProductosNav();
+        };
+        nav.appendChild(btn);
+    });
+    
+    // Botón + para agregar
+    const btnAdd = document.createElement('button');
+    btnAdd.type = 'button';
+    btnAdd.className = 'btn-add-producto';
+    btnAdd.title = 'Agregar producto';
+    btnAdd.innerHTML = '<i class="fa-solid fa-plus"></i>';
+    btnAdd.style = 'font-size:1.2em; padding:0 10px; border-radius:50%; background:#e0e0e0; border:none; margin-left:4px; cursor: pointer;';
+    btnAdd.onclick = () => {
+        guardarProductoActual();
+        productosPersonalizados.push(productoVacio());
+        productoActivo = productosPersonalizados.length - 1;
+        cargarProductoEnFormulario(productoActivo);
+        renderProductosNav();
+    };
+    nav.appendChild(btnAdd);
+}
+
+function cargarProductoEnFormulario(idx) {
+    const prod = productosPersonalizados[idx] || productoVacio();
+    document.getElementById('categoriaProducto').value = prod.categoria || '';
+    document.getElementById('colores').value = prod.colores || '';
+    document.getElementById('especificaciones').value = prod.especificaciones || '';
+    document.getElementById('pdCantidad').value = prod.cantidad || 1;
+    document.getElementById('pdPrecio').value = prod.precio || 0;
+    document.getElementById('pdDescuento').value = prod.descuento || 0;
+    document.getElementById('pdImpuesto').value = prod.impuesto || 0;
+    updatePdTotalPreview();
+    // Colores y preview imágenes pueden mejorarse aquí
+}
+
+function guardarProductoActual() {
+    // Guarda el producto actualmente en el formulario en productosPersonalizados[productoActivo]
+    if (typeof productoActivo !== 'number' || productoActivo < 0) return;
+    const prod = {
+        categoria: document.getElementById('categoriaProducto').value,
+        colores: document.getElementById('colores').value,
+        especificaciones: document.getElementById('especificaciones').value,
+        imagenesUrls: sessionStorage.getItem('imagenesSubidas') || '[]',
+        cantidad: Math.max(1, parseInt(document.getElementById('pdCantidad')?.value || '1')),
+        precio: Math.max(0, parseFloat(document.getElementById('pdPrecio')?.value || '0')),
+        descuento: Math.max(0, parseFloat(document.getElementById('pdDescuento')?.value || '0')),
+        impuesto: Math.max(0, parseFloat(document.getElementById('pdImpuesto')?.value || '0'))
+    };
+    productosPersonalizados[productoActivo] = prod;
+}
+
+// Al abrir el modal, inicializar productos si no existen
+function openProductDetailsModal() {
+    if (!productosPersonalizados.length) {
+        productosPersonalizados = [productoVacio()];
+        productoActivo = 0;
+    }
+    cargarProductoEnFormulario(productoActivo);
+    renderProductosNav();
+    if (productDetailsModal) {
+        productDetailsModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        // Enfocar el primer campo
+        const firstInput = productDetailsForm.querySelector('input[required]');
+        if (firstInput) setTimeout(() => firstInput.focus(), 100);
+    }
+}
+
+// Guardar todos los productos al cerrar
+function guardarDetallesProducto() {
+    guardarProductoActual();
+    // Guardar en sessionStorage
+    sessionStorage.setItem('detalles_productos', JSON.stringify(productosPersonalizados));
+    // Guardar la cantidad total en observaciones (puedes ajustar esto según tu backend)
+    sessionStorage.setItem('observaciones', productosPersonalizados.length);
+    closeProductDetailsModal();
+    showNotification('Detalles de productos guardados', 'success');
 }
 
 
@@ -1560,8 +1796,8 @@ function openProductDetailsModal() {
         productDetailsModal.style.display = 'block';
         document.body.style.overflow = 'hidden';
         
-        // Cargar datos existentes si los hay
-        loadExistingProductDetails();
+    // Cargar datos existentes si los hay
+    loadExistingProductDetails();
         
         // Enfocar el primer campo
         const firstInput = productDetailsForm.querySelector('input[required]');
@@ -1599,6 +1835,160 @@ function loadExistingProductDetails() {
     if (productDetailsData.imagenes && productDetailsData.imagenes.length > 0) {
         displayExistingImages(productDetailsData.imagenes);
     }
+
+    // Cargar configuración de precio desde sessionStorage si existe
+    try {
+        const ss = sessionStorage.getItem('detallesProducto');
+        if (ss) {
+            const det = JSON.parse(ss);
+            const c = document.getElementById('pdCantidad');
+            const p = document.getElementById('pdPrecio');
+            const d = document.getElementById('pdDescuento');
+            const t = document.getElementById('pdImpuesto');
+            if (c && Number.isFinite(Number(det.cantidad))) c.value = Number(det.cantidad);
+            if (p && Number.isFinite(Number(det.precio))) p.value = Number(det.precio);
+            if (d && Number.isFinite(Number(det.descuento))) d.value = Number(det.descuento);
+            if (t && Number.isFinite(Number(det.impuesto))) t.value = Number(det.impuesto);
+            updatePdTotalPreview();
+        }
+    } catch (e) {}
+}
+
+function updatePdTotalPreview() {
+    const q = Math.max(1, parseInt(document.getElementById('pdCantidad')?.value || '1'));
+    const pr = Math.max(0, parseFloat(document.getElementById('pdPrecio')?.value || '0'));
+    const de = Math.max(0, parseFloat(document.getElementById('pdDescuento')?.value || '0'));
+    const im = Math.max(0, parseFloat(document.getElementById('pdImpuesto')?.value || '0'));
+    let total = q * pr; total = total * (1 - de/100); total = total * (1 + im/100);
+    const span = document.getElementById('pdTotalPreview');
+    if (span) span.textContent = total.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+}
+
+// ================= Items dentro de Personalizado =================
+function setupItemsPersonalizados() {
+    const btnAdd = document.getElementById('btnAgregarItem');
+    if (btnAdd) {
+        btnAdd.onclick = function () {
+            addItemRow();
+        };
+    }
+}
+
+function addItemRow(prefill = {}) {
+    const tbody = document.getElementById('itemsTBody');
+    if (!tbody) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td style="padding:6px;">
+            <input type="text" class="item-desc" placeholder="Descripción" style="width:100%" value="${(prefill.descripcion||'').replace(/\"/g,'&quot;')}">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="item-cant" min="1" value="${Number.isFinite(prefill.cantidad)?prefill.cantidad:1}" style="width:90px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="item-precio" step="0.01" min="0" value="${Number.isFinite(prefill.precio)?prefill.precio:0}" style="width:110px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="item-descuento" step="0.01" min="0" value="${Number.isFinite(prefill.descuento)?prefill.descuento:0}" style="width:90px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="item-impuesto" step="0.01" min="0" value="${Number.isFinite(prefill.impuesto)?prefill.impuesto:0}" style="width:90px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <span class="item-total">$0.00</span>
+        </td>
+        <td style="padding:6px; text-align:center;">
+            <button type="button" class="btn-action" title="Eliminar"><i class="fa fa-trash"></i></button>
+        </td>
+    `;
+
+    tbody.appendChild(tr);
+
+    const inputs = tr.querySelectorAll('input');
+    inputs.forEach(inp => {
+        inp.addEventListener('input', () => {
+            recalcItemRow(tr);
+            recalcItemsTotal();
+        });
+    });
+
+    const btnDel = tr.querySelector('button');
+    btnDel.addEventListener('click', () => {
+        tr.remove();
+        recalcItemsTotal();
+    });
+
+    // Calcular al crear
+    recalcItemRow(tr);
+    recalcItemsTotal();
+}
+
+function recalcItemRow(tr) {
+    const q = Math.max(1, parseInt(tr.querySelector('.item-cant')?.value || '1'));
+    const p = Math.max(0, parseFloat(tr.querySelector('.item-precio')?.value || '0'));
+    const d = Math.max(0, parseFloat(tr.querySelector('.item-descuento')?.value || '0'));
+    const t = Math.max(0, parseFloat(tr.querySelector('.item-impuesto')?.value || '0'));
+    let total = q * p;
+    total = total * (1 - (d / 100));
+    total = total * (1 + (t / 100));
+    tr.querySelector('.item-total').textContent = total.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+}
+
+function recalcItemsTotal() {
+    const spans = document.querySelectorAll('#itemsTBody .item-total');
+    let suma = 0;
+    spans.forEach(sp => {
+        const val = sp.textContent.replace(/[^0-9.,-]/g, '').replace(/,/g, '');
+        const num = parseFloat(val) || 0;
+        suma += num;
+    });
+    const totalSpan = document.getElementById('totalItemsPreview');
+    if (totalSpan) {
+        totalSpan.textContent = suma.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+    }
+}
+
+function loadExistingItems() {
+    const tbody = document.getElementById('itemsTBody');
+    if (!tbody) return;
+    // Limpiar
+    tbody.innerHTML = '';
+
+    let items = [];
+    try {
+        // Preferir sessionStorage si existe (edición en curso)
+        const detallesSS = sessionStorage.getItem('detallesProducto');
+        if (detallesSS) {
+            const parsed = JSON.parse(detallesSS);
+            if (parsed.items && Array.isArray(parsed.items)) items = parsed.items;
+        } else if (productDetailsData && Array.isArray(productDetailsData.items)) {
+            items = productDetailsData.items;
+        }
+    } catch (e) {}
+
+    if (items.length === 0) {
+        // una fila por defecto
+        addItemRow();
+    } else {
+        items.forEach(it => addItemRow(it));
+    }
+}
+
+function collectItemsFromModal() {
+    const rows = document.querySelectorAll('#itemsTBody tr');
+    const items = [];
+    rows.forEach(tr => {
+        const descripcion = tr.querySelector('.item-desc')?.value?.trim() || '';
+        const cantidad = Math.max(1, parseInt(tr.querySelector('.item-cant')?.value || '1'));
+        const precio = Math.max(0, parseFloat(tr.querySelector('.item-precio')?.value || '0'));
+        const descuento = Math.max(0, parseFloat(tr.querySelector('.item-descuento')?.value || '0'));
+        const impuesto = Math.max(0, parseFloat(tr.querySelector('.item-impuesto')?.value || '0'));
+        let total = cantidad * precio;
+        total = total * (1 - (descuento / 100));
+        total = total * (1 + (impuesto / 100));
+        items.push({ descripcion, cantidad, precio, descuento, impuesto, total: Number(total.toFixed(2)) });
+    });
+    return items;
 }
 
 function saveProductDetails() {
@@ -1636,19 +2026,25 @@ function saveProductDetails() {
         }
     });
     
-    // Agregar imágenes
+    // Agregar imágenes (si hubiera manejo de base64 aquí)
     const images = getProductDetailsImages();
     if (images.length > 0) {
         productDetailsData.imagenes = images;
     }
-    
-    // Actualizar resumen
-    updateProductDetailsSummary();
-    
-    // Cerrar modal
+
+    // Agregar items
+    productDetailsData.items = collectItemsFromModal();
+
+    // Persistir en sessionStorage para consumo posterior
+    try {
+        // También incluir URLs de imágenes subidas si existen
+        const imagenesSubidas = sessionStorage.getItem('imagenesSubidas') || '[]';
+        productDetailsData.imagenesUrls = imagenesSubidas;
+        sessionStorage.setItem('detallesProducto', JSON.stringify(productDetailsData));
+    } catch (e) {}
+
+    // Cerrar modal y notificar
     closeProductDetailsModal();
-    
-    // Mostrar notificación
     showNotification('Detalles del producto guardados', 'success');
 }
 
@@ -2607,39 +3003,31 @@ async function crearNuevoPedido() {
         // Recoger datos del formulario
         const formData = new FormData(document.getElementById('formNuevoPedido'));
         
-        // Obtener detalles del producto si fueron guardados
-        const detallesProducto = sessionStorage.getItem('detallesProducto');
-        let categoriaProducto = '', colores = '', especificaciones = '', imagenUrl = '';
-        
-        if (detallesProducto) {
-            const detalles = JSON.parse(detallesProducto);
-            categoriaProducto = detalles.categoria || '';
-            colores = detalles.colores || '';
-            especificaciones = detalles.especificaciones || '';
-            
-            // Parsear las URLs de imágenes
-            if (detalles.imagenesUrls) {
-                try {
-                    const imagenesUrls = JSON.parse(detalles.imagenesUrls);
-                    imagenUrl = imagenesUrls.length > 0 ? imagenesUrls[0] : '';
-                } catch (e) {
-                    imagenUrl = '';
-                }
-            }
-        }
 
-        // Construir objeto del pedido con los nombres correctos que espera el backend
+        // Obtener todos los productos del modal personalizado
+        const detallesProductos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
+        // Sumar cantidades y totales
+        let totalCantidad = 0;
+        let totalPrecio = 0;
+        detallesProductos.forEach(prod => {
+            totalCantidad += Number(prod.cantidad || 0);
+            let subtotal = (Number(prod.cantidad || 0) * Number(prod.precio || 0));
+            subtotal = subtotal * (1 - (Number(prod.descuento || 0) / 100));
+            subtotal = subtotal * (1 + (Number(prod.impuesto || 0) / 100));
+            totalPrecio += subtotal;
+        });
+
+        // Construir objeto del pedido
         const pedidoData = {
             usuario: (formData.get('clienteNombre') || '').trim(),
             telefono: (formData.get('clienteTelefono') || '').trim(),
             fechaEntrega: (formData.get('fechaEntrega') || '').trim(),
             canalVenta: (formData.get('canalVenta') || '').trim(),
             prioridad: (formData.get('prioridad') || 'normal').trim(),
-            observaciones: (formData.get('observaciones') || '').trim(),
-            categoriaProducto: categoriaProducto,
-            colores: colores,
-            especificaciones: especificaciones,
-            imagenUrl: imagenUrl
+            observaciones: detallesProductos.length, // cantidad de productos
+            detalles_producto: JSON.stringify(detallesProductos),
+            cantidad: totalCantidad,
+            precio: Number(totalPrecio.toFixed(2))
         };
 
         console.log('Enviando pedido:', pedidoData);
@@ -2675,78 +3063,21 @@ async function crearNuevoPedido() {
             return;
         }
 
+
         // Llamar al API usando PedidosMVC - crear cabecera del pedido
         const response = await PedidosMVC.crearPedido(pedidoData);
-        
         console.log('Respuesta del servidor:', response);
-
-        // Intentar crear el detalle (cantidad y precio del formulario principal)
-        try {
-            const idPedido = (response && response.data && response.data.id_pedido_creado) ? response.data.id_pedido_creado : null;
-            if (idPedido) {
-                // Obtener cantidad y precio del formulario principal
-                const cantidadForm = parseInt(formData.get('cantidad')) || 1;
-                const precioForm = parseFloat(formData.get('precioUnitario')) || 0;
-                
-                // Recuperar datos guardados en detallesProducto (solo detalles adicionales)
-                const detallesProducto = sessionStorage.getItem('detallesProducto');
-                let categoriaProducto = '';
-                let especificaciones = '';
-                let imagenes = [];
-                
-                if (detallesProducto) {
-                    const d = JSON.parse(detallesProducto);
-                    if (d.categoria) categoriaProducto = String(d.categoria);
-                    if (d.especificaciones) especificaciones = String(d.especificaciones);
-                    if (d.imagenesUrls) {
-                        try {
-                            const imgs = JSON.parse(d.imagenesUrls);
-                            if (Array.isArray(imgs)) imagenes = imgs;
-                        } catch (err) {
-                            console.warn('No se pudieron parsear imagenesUrls');
-                        }
-                    }
-                }
-
-                // Construir un nombre/descr. de producto solicitado
-                const productoSolicitado = categoriaProducto ? `Personalizado: ${categoriaProducto}` : 'Pedido Personalizado';
-
-                // Preparar payload del detalle
-                const detallePersonalizado = {
-                    categoria: categoriaProducto,
-                    colores: colores,
-                    especificaciones: especificaciones,
-                    imagenes: imagenes
-                };
-
-                const detallePayload = {
-                    producto_solicitado: productoSolicitado + (especificaciones ? ` - ${especificaciones.substring(0, 60)}` : ''),
-                    cantidad: Math.max(1, cantidadForm),
-                    precio_unitario: Math.max(0, precioForm),
-                    descuento: 0,
-                    impuesto: 0,
-                    id_producto: 0, // permitir personalizado sin id_producto
-                    detalles_personalizados: JSON.stringify(detallePersonalizado)
-                };
-
-                console.log('Creando detalle para pedido', idPedido, detallePayload);
-                await PedidosMVC.createDetalle(idPedido, detallePayload)
-                    .then(res => console.log('Detalle creado:', res))
-                    .catch(err => { console.warn('No se pudo crear el detalle:', err); });
-            }
-        } catch (e) {
-            console.warn('crearNuevoPedido - error creando detalle:', e);
-        }
 
         // Cerrar modal
         const modal = document.getElementById('modalNuevoPedido');
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
 
-        // Limpiar formulario y sessionStorage
-        document.getElementById('formNuevoPedido').reset();
-        sessionStorage.removeItem('detallesProducto');
-        sessionStorage.removeItem('imagenesSubidas');
+    // Limpiar formulario y sessionStorage
+    document.getElementById('formNuevoPedido').reset();
+    sessionStorage.removeItem('detallesProducto');
+    sessionStorage.removeItem('imagenesSubidas');
+    sessionStorage.removeItem('detalles_productos');
 
         // Mostrar notificación de éxito
         showNotification('Pedido creado exitosamente', 'success');
@@ -2783,12 +3114,21 @@ function guardarDetallesProducto() {
     // Obtener las URLs de las imágenes subidas (guardadas en el preview)
     const imagenesSubidas = sessionStorage.getItem('imagenesSubidas') || '[]';
     
-    // Guardar en sessionStorage (sin cantidad ni precio, ahora están en el form principal)
+    // Tomar configuración de precio simple del modal
+    const cantidad = Math.max(1, parseInt(document.getElementById('pdCantidad')?.value || '1'));
+    const precio = Math.max(0, parseFloat(document.getElementById('pdPrecio')?.value || '0'));
+    const descuento = Math.max(0, parseFloat(document.getElementById('pdDescuento')?.value || '0'));
+    const impuesto = Math.max(0, parseFloat(document.getElementById('pdImpuesto')?.value || '0'));
+    // Guardar en sessionStorage
     const detalles = {
         categoria: categoria,
         colores: colores,
         especificaciones: especificaciones,
-        imagenesUrls: imagenesSubidas
+        imagenesUrls: imagenesSubidas,
+        cantidad: cantidad,
+        precio: precio,
+        descuento: descuento,
+        impuesto: impuesto
     };
     
     sessionStorage.setItem('detallesProducto', JSON.stringify(detalles));
@@ -2799,11 +3139,31 @@ function guardarDetallesProducto() {
         campoColores.value = colores;
     }
     
-    // Cerrar modal
-    const modal = document.getElementById('modalDetallesProducto');
-    modal.style.display = 'none';
-    
-    showNotification('Detalles guardados correctamente', 'success');
+    // Si estamos editando un pedido existente, persistir inmediatamente
+    if (window.currentEditPedidoId) {
+        const payload = { detalles_producto: JSON.stringify(detalles) };
+        PedidosMVC.updatePedido(window.currentEditPedidoId, payload)
+            .then(() => {
+                showNotification('Personalizado actualizado', 'success');
+                // Cerrar modal
+                const modal = document.getElementById('modalDetallesProducto');
+                modal.style.display = 'none';
+                // También reflejar valores en el formulario de edición si existe
+                const c = document.getElementById('editarCantidad'); if (c) c.value = String(cantidad);
+                const pu = document.getElementById('editarPrecioUnitario'); if (pu) pu.value = String(precio);
+                const ds = document.getElementById('editarDescuento'); if (ds) ds.value = String(descuento);
+                const im = document.getElementById('editarImpuesto'); if (im) im.value = String(impuesto);
+            })
+            .catch(err => {
+                console.error('Error actualizando personalizado:', err);
+                showNotification('No se pudo actualizar el personalizado', 'error');
+            });
+    } else {
+        // Cerrar modal
+        const modal = document.getElementById('modalDetallesProducto');
+        modal.style.display = 'none';
+        showNotification('Detalles guardados correctamente', 'success');
+    }
 }
 
 // Manejar cambio en el input de archivo para upload de imágenes - ya configurado en el DOMContentLoaded principal
@@ -2867,4 +3227,4 @@ window.removeUploadedImage = function(button, url) {
         }
     }
 };
-
+}

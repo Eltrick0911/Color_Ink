@@ -521,40 +521,58 @@ class PedidosModel
         try {
             error_log("PedidosModel - updateDetallePedido: Actualizando detalle ID: $idDetalle");
             
-            // Intentar SP; si falla, fallback directo
-            try {
-                $stmt = $this->connection->prepare("CALL sp_actualizar_detalle_pedido(?, ?, ?, ?, ?, ?, ?)");
-                $result = $stmt->execute([
-                    $idDetalle,
-                    $detalleData['producto_solicitado'],
-                    $detalleData['cantidad_nueva'],
-                    $detalleData['precio_unitario_nuevo'],
-                    $detalleData['descuento_nuevo'],
-                    $detalleData['impuesto_nuevo'],
-                    $detalleData['id_usuario']
-                ]);
-            } catch (PDOException $e) {
+            // Si se proporciona detalles_personalizados, usamos UPDATE directo para incluir la columna
+            $usarDirecto = array_key_exists('detalles_personalizados', $detalleData) && $detalleData['detalles_personalizados'] !== null;
+
+            if (!$usarDirecto) {
+                try {
+                    $stmt = $this->connection->prepare("CALL sp_actualizar_detalle_pedido(?, ?, ?, ?, ?, ?, ?)");
+                    $result = $stmt->execute([
+                        $idDetalle,
+                        $detalleData['producto_solicitado'],
+                        $detalleData['cantidad_nueva'],
+                        $detalleData['precio_unitario_nuevo'],
+                        $detalleData['descuento_nuevo'],
+                        $detalleData['impuesto_nuevo'],
+                        $detalleData['id_usuario']
+                    ]);
+                } catch (PDOException $e) {
+                    $usarDirecto = true;
+                }
+            }
+
+            if ($usarDirecto) {
                 $totalLinea = ($detalleData['precio_unitario_nuevo'] * $detalleData['cantidad_nueva']);
                 $totalLinea = ($totalLinea * (1 - ($detalleData['descuento_nuevo'] / 100)));
                 $totalLinea = ($totalLinea * (1 + ($detalleData['impuesto_nuevo'] / 100)));
-                $sql = "UPDATE detallepedido
-                        SET producto_solicitado = ?,
-                            cantidad = ?,
-                            precio_unitario = ?,
-                            descuento = ?,
-                            impuesto = ?,
-                            total_linea = ?
-                        WHERE id_detalle = ?";
-                $stmt = $this->connection->prepare($sql);
-                $result = $stmt->execute([
+
+                $campos = [
+                    'producto_solicitado = ?',
+                    'cantidad = ?',
+                    'precio_unitario = ?',
+                    'descuento = ?',
+                    'impuesto = ?',
+                    'total_linea = ?'
+                ];
+                $valores = [
                     $detalleData['producto_solicitado'],
                     $detalleData['cantidad_nueva'],
                     $detalleData['precio_unitario_nuevo'],
                     $detalleData['descuento_nuevo'],
                     $detalleData['impuesto_nuevo'],
-                    $totalLinea,
-                    $idDetalle
-                ]);
+                    $totalLinea
+                ];
+
+                if (array_key_exists('detalles_personalizados', $detalleData)) {
+                    $campos[] = 'detalles_personalizados = ?';
+                    $valores[] = $detalleData['detalles_personalizados'];
+                }
+
+                $valores[] = $idDetalle; // WHERE
+
+                $sql = 'UPDATE detallepedido SET ' . implode(', ', $campos) . ' WHERE id_detalle = ?';
+                $stmt = $this->connection->prepare($sql);
+                $result = $stmt->execute($valores);
             }
             
             error_log("PedidosModel - updateDetallePedido: Actualización " . ($result ? "exitosa" : "fallida"));

@@ -106,11 +106,19 @@ class PedidosController
             $canalVenta = trim($input['canalVenta'] ?? ($input['canal_venta'] ?? '')) ?: null;
             $prioridad = trim($input['prioridad'] ?? 'normal');
             $fechaEntrega = trim($input['fechaEntrega'] ?? ($input['fecha_entrega'] ?? '')) ?: null;
-            // Solo guardar especificaciones en observaciones
-            $observaciones = trim($input['especificaciones'] ?? '') ?: null;
 
-            // Construir detalles_producto SOLO con categoría, imagen y colores
-            $detallesProducto = $this->construirDetallesProducto($input);
+            // Si el frontend envía un array de productos (multi-producto), usarlo directamente
+            if (!empty($input['detalles_producto'])) {
+                // Si ya es un string JSON, usarlo tal cual
+                $detallesProducto = is_array($input['detalles_producto']) ? json_encode($input['detalles_producto'], JSON_UNESCAPED_UNICODE) : $input['detalles_producto'];
+                // Guardar en observaciones la cantidad de productos
+                $observaciones = isset($input['detalles_producto']) ? count(is_array($input['detalles_producto']) ? $input['detalles_producto'] : json_decode($input['detalles_producto'], true)) : null;
+            } else {
+                // Solo guardar especificaciones en observaciones (modo legacy)
+                $observaciones = trim($input['especificaciones'] ?? '') ?: null;
+                // Construir detalles_producto SOLO con categoría, imagen y colores (modo legacy)
+                $detallesProducto = $this->construirDetallesProducto($input);
+            }
 
             error_log("PedidosController - create: Datos - Cliente: $clienteNombre, Canal: $canalVenta");
 
@@ -176,12 +184,15 @@ class PedidosController
      */
     private function construirDetallesProducto(array $input): ?string
     {
+        // Si el input ya trae un array de productos (multi-producto), devolverlo serializado
+        if (!empty($input['detalles_producto'])) {
+            return is_array($input['detalles_producto']) ? json_encode($input['detalles_producto'], JSON_UNESCAPED_UNICODE) : $input['detalles_producto'];
+        }
+        // Legacy: solo un producto
         $detalles = [];
-        // Solo incluir categoría, imagen de referencia (URL), y paleta de colores
         if (!empty($input['categoriaProducto'])) {
             $detalles['categoria'] = $input['categoriaProducto'];
         }
-        // Imagen de referencia (puede venir como imagenesUrls o imagenUrl)
         if (!empty($input['imagenesUrls'])) {
             $imagenes = json_decode($input['imagenesUrls'], true);
             if (is_array($imagenes)) {
@@ -337,7 +348,10 @@ class PedidosController
                 $datosActualizar['cliente_telefono'] = $input['clienteTelefono'];
             }
             if (isset($input['fechaEntrega'])) {
-                $datosActualizar['fecha_entrega'] = $input['fechaEntrega'];
+                $fechaEntrega = trim((string)$input['fechaEntrega']);
+                if ($fechaEntrega !== '') {
+                    $datosActualizar['fecha_entrega'] = $fechaEntrega;
+                }
             }
             if (isset($input['prioridad'])) {
                 $datosActualizar['prioridad'] = $input['prioridad'];
@@ -588,13 +602,35 @@ class PedidosController
                 return;
             }
 
+            // Aceptar alias provenientes del frontend: cantidad, precio_unitario, etc.
+            $cantidad = $input['cantidad'] ?? $input['cantidad_nueva'] ?? $detalleExistente['cantidad'];
+            $precioUnit = $input['precio_unitario'] ?? $input['precio_unitario_nuevo'] ?? $detalleExistente['precio_unitario'];
+            $descuento = $input['descuento'] ?? $input['descuento_nuevo'] ?? $detalleExistente['descuento'];
+            $impuesto = $input['impuesto'] ?? $input['impuesto_nuevo'] ?? $detalleExistente['impuesto'];
+
+            // Normalizar detalles_personalizados: aceptar string JSON o construir desde campos sueltos
+            $detallesPersonalizados = $input['detalles_personalizados'] ?? null;
+            if (is_array($detallesPersonalizados)) {
+                $detallesPersonalizados = json_encode($detallesPersonalizados, JSON_UNESCAPED_UNICODE);
+            } elseif (!$detallesPersonalizados) {
+                // Intentar componer desde otros campos si existen
+                $dp = [];
+                if (!empty($input['categoria'])) $dp['categoria'] = $input['categoria'];
+                if (!empty($input['categoriaProducto'])) $dp['categoria'] = $input['categoriaProducto'];
+                if (!empty($input['colores'])) $dp['colores'] = $input['colores'];
+                if (!empty($input['especificaciones'])) $dp['especificaciones'] = $input['especificaciones'];
+                if (!empty($input['imagenes']) && is_array($input['imagenes'])) $dp['imagenes'] = $input['imagenes'];
+                if (!empty($dp)) $detallesPersonalizados = json_encode($dp, JSON_UNESCAPED_UNICODE);
+            }
+
             $detalleData = [
                 'producto_solicitado' => trim($input['producto_solicitado'] ?? $detalleExistente['producto_solicitado']),
-                'cantidad_nueva' => (int)($input['cantidad_nueva'] ?? $detalleExistente['cantidad']),
-                'precio_unitario_nuevo' => (float)($input['precio_unitario_nuevo'] ?? $detalleExistente['precio_unitario']),
-                'descuento_nuevo' => (float)($input['descuento_nuevo'] ?? $detalleExistente['descuento']),
-                'impuesto_nuevo' => (float)($input['impuesto_nuevo'] ?? $detalleExistente['impuesto']),
-                'id_usuario' => $user['id_usuario'] // Usar usuario autenticado
+                'cantidad_nueva' => (int)$cantidad,
+                'precio_unitario_nuevo' => (float)$precioUnit,
+                'descuento_nuevo' => (float)$descuento,
+                'impuesto_nuevo' => (float)$impuesto,
+                'id_usuario' => $user['id_usuario'], // Usar usuario autenticado
+                'detalles_personalizados' => $detallesPersonalizados
             ];
 
             error_log("PedidosController - actualizarDetalle: Datos preparados para actualización");
