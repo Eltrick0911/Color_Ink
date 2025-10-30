@@ -159,6 +159,34 @@ class PedidosController
             
             if ($idPedido) {
                 error_log("PedidosController - create: Pedido creado exitosamente - ID: $idPedido");
+                
+                // Crear entrada en detallepedido con los totales calculados
+                if (!empty($input['cantidad']) && !empty($input['precio'])) {
+                    try {
+                        $detalleData = [
+                            'producto_solicitado' => 'Pedido Personalizado Multi-Producto',
+                            'cantidad' => (int)$input['cantidad'], // Suma de todas las cantidades
+                            'precio_unitario' => (float)$input['precio'], // Total general después de descuento e impuesto
+                            'descuento' => (float)($input['descuento'] ?? 0), // Descuento global en %
+                            'impuesto' => (float)($input['impuesto'] ?? 0), // Impuesto global en %
+                            'id_pedido' => (int)$idPedido,
+                            'id_producto' => null, // Pedido personalizado no tiene id_producto
+                            'id_usuario' => (int)$user['id_usuario']
+                        ];
+                        
+                        $detalleCreado = $this->pedidosModel->createDetallePedido($detalleData);
+                        
+                        if ($detalleCreado) {
+                            error_log("PedidosController - create: Detalle pedido creado exitosamente");
+                        } else {
+                            error_log("PedidosController - create: Advertencia - No se pudo crear el detalle del pedido");
+                        }
+                    } catch (\Exception $e) {
+                        error_log("PedidosController - create: Error al crear detalle pedido: " . $e->getMessage());
+                        // No detener el proceso, el pedido principal ya está creado
+                    }
+                }
+                
                 // Devolver el registro completo en la respuesta (JSON)
                 $pedidoCompleto = $this->pedidosModel->getPedidoById((int)$idPedido) ?? [];
                 $resp = responseHTTP::status200('Pedido creado exitosamente');

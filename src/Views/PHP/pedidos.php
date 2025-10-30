@@ -45,26 +45,38 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>PED-001</td>
-                            <td>Juan Pérez</td>
-                            <td>2024-01-10</td>
-                            <td>2024-01-15</td>
-                            <td>
-                                <select class="status-selector" data-pedido-id="#001">
-                                    <option value="pendiente" selected>Pendiente</option>
-                                    <option value="procesando">Procesando</option>
-                                    <option value="enviado">Enviado</option>
-                                    <option value="entregado">Entregado</option>
-                                </select>
-                            </td>
-                            <td>$150.00</td>
-                            <td>
-                                <button class="btn-action"><i class="fa-solid fa-eye"></i></button>
-                                <button class="btn-action"><i class="fa-solid fa-edit"></i></button>
-                                <button class="btn-action"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
+                        <?php if (!empty($pedidos) && is_array($pedidos)): ?>
+                            <?php foreach ($pedidos as $pedido): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($pedido['numero_pedido'] ?? $pedido['id_pedido']) ?></td>
+                                    <td><?= htmlspecialchars($pedido['cliente_nombre'] ?? '') ?></td>
+                                    <td><?= htmlspecialchars($pedido['fecha_pedido'] ?? '') ?></td>
+                                    <td><?= htmlspecialchars($pedido['fecha_entrega'] ?? '') ?></td>
+                                    <td>
+                                        <select class="status-selector" data-pedido-id="<?= $pedido['id_pedido'] ?>">
+                                            <option value="pendiente" <?= ($pedido['estado_codigo'] ?? $pedido['id_estado']) == 'pendiente' ? 'selected' : '' ?>>Pendiente</option>
+                                            <option value="procesando" <?= ($pedido['estado_codigo'] ?? $pedido['id_estado']) == 'procesando' ? 'selected' : '' ?>>Procesando</option>
+                                            <option value="enviado" <?= ($pedido['estado_codigo'] ?? $pedido['id_estado']) == 'enviado' ? 'selected' : '' ?>>Enviado</option>
+                                            <option value="entregado" <?= ($pedido['estado_codigo'] ?? $pedido['id_estado']) == 'entregado' ? 'selected' : '' ?>>Entregado</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        // Mostrar el total de la BD (total_linea del detallepedido principal)
+                                        $totalLinea = isset($pedido['total_linea']) ? $pedido['total_linea'] : null;
+                                        echo $totalLinea !== null ? '$' . number_format($totalLinea, 2) : '<span style="color:#888">-</span>';
+                                        ?>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action"><i class="fa-solid fa-eye"></i></button>
+                                        <button class="btn-action"><i class="fa-solid fa-edit"></i></button>
+                                        <button class="btn-action"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="7" style="text-align:center; color:#888;">No hay pedidos registrados.</td></tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -297,6 +309,7 @@
             </div>
             <div class="modal-body">
                 <form id="formEditarPedido" class="pedido-form">
+                    <!-- SOLO CAMPOS GENERALES DEL PEDIDO -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="editarUsuario">Usuario</label>
@@ -307,14 +320,20 @@
                             <input type="tel" id="editarTelefono" name="telefono">
                         </div>
                     </div>
-                    
                     <div class="form-row">
                         <div class="form-group">
                             <label for="editarFechaEntrega">Fecha de Entrega</label>
                             <input type="date" id="editarFechaEntrega" name="fechaEntrega">
                         </div>
+                        <div class="form-group">
+                            <label for="editarPrioridad">Prioridad</label>
+                            <select id="editarPrioridad" name="prioridad">
+                                <option value="normal">Normal</option>
+                                <option value="alta">Alta</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                        </div>
                     </div>
-
                     <div class="form-group">
                         <label for="editarCanalVenta">Canal de Venta *</label>
                         <select id="editarCanalVenta" name="canalVenta" required>
@@ -326,104 +345,18 @@
                             <option value="telefono">Teléfono</option>
                         </select>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editarPrecioUnitario">Precio Personalizado</label>
-                            <input type="number" id="editarPrecioUnitario" name="precioUnitario" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="editarCantidad">Cantidad</label>
-                            <input type="number" id="editarCantidad" name="cantidad" min="1" value="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="editarDescuento">Descuento (%)</label>
-                            <input type="number" id="editarDescuento" name="descuento" step="0.01" min="0" value="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="editarImpuesto">Impuesto (%)</label>
-                            <input type="number" id="editarImpuesto" name="impuesto" step="0.01" min="0" value="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="editarPrioridad">Prioridad</label>
-                            <select id="editarPrioridad" name="prioridad">
-                                <option value="normal">Normal</option>
-                                <option value="alta">Alta</option>
-                                <option value="urgente">Urgente</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editarCategoriaProducto">Categoría de Producto</label>
-                            <select id="editarCategoriaProducto" name="categoriaProducto">
-                                <option value="">Seleccionar categoría</option>
-                                <option value="camisas">Camisas/Playeras</option>
-                                <option value="retratos">Retratos</option>
-                                <option value="arreglos-florales">Arreglos Florales</option>
-                                <option value="vinil">Vinil Adhesivo</option>
-                                <option value="banner">Banner</option>
-                                <option value="tarjetas">Tarjetas de Presentación</option>
-                                <option value="volantes">Volantes</option>
-                                <option value="invitaciones">Invitaciones</option>
-                                <option value="decoracion">Decoración</option>
-                                <option value="otros">Otros</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editarEspecificaciones">Especificaciones Técnicas/Detalles del producto</label>
-                        <textarea id="editarEspecificaciones" name="especificaciones" rows="4" placeholder="Tamaño específico, acabados, técnicas de impresión, talla etc."></textarea>
-                    </div>
-
-                    <!-- Botón para abrir modal de Personalizado desde edición -->
-                    <div class="form-group">
-                        <button type="button" class="btn-detalles-producto" id="btnEditarPersonalizado">
-                            <i class="fa-solid fa-cog"></i> Editar Personalizado
+                    <!-- TABLA EDITABLE DE PRODUCTOS -->
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px; display: block;">Productos del Pedido</label>
+                        <div id="tablaProductosEditablesContainer" style="margin-bottom: 15px;"></div>
+                        <button type="button" class="btn-agregar-producto" id="btnAgregarProductoEditable" style="background:#007bff; color:#fff; border:none; border-radius:5px; padding:8px 20px; font-size:0.95em; cursor:pointer; transition: all 0.3s;">
+                            <i class="fa-solid fa-plus"></i> Agregar Producto
                         </button>
                     </div>
-
-                    <!-- Sección de colores -->
-                    <div class="form-group">
-                        <label for="editarColores">Paleta de Colores</label>
-                        <div class="color-selection">
-                            <input type="text" id="editarColores" name="colores" placeholder="Selecciona los colores que deseas usar" readonly>
-                            <div class="color-picker-container">
-                                <div class="color-picker-item">
-                                    <input type="color" id="editarColorPicker1" class="color-picker" title="Color 1" value="#000000">
-                                    <span class="color-name" id="editarColorName1">Color 1</span>
-                                </div>
-                                <div class="color-picker-item">
-                                    <input type="color" id="editarColorPicker2" class="color-picker" title="Color 2" value="#000000">
-                                    <span class="color-name" id="editarColorName2">Color 2</span>
-                                </div>
-                                <div class="color-picker-item">
-                                    <input type="color" id="editarColorPicker3" class="color-picker" title="Color 3" value="#000000">
-                                    <span class="color-name" id="editarColorName3">Color 3</span>
-                                </div>
-                            </div>
-                            <div class="color-actions">
-                                <button type="button" class="btn-limpiar-colores">
-                                    <i class="fa-solid fa-eraser"></i> Limpiar Colores
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sección de imágenes -->
-                    <div class="form-group">
-                        <label for="editarImagenReferencia">Imagen de Referencia</label>
-                        <div class="image-upload-container">
-                            <input type="file" id="editarImagenReferencia" name="imagenReferencia" accept="image/*" multiple>
-                            <div class="image-preview-container" id="editarImagePreviewContainer">
-                                <div class="upload-placeholder">
-                                    <i class="fa-solid fa-cloud-upload-alt"></i>
-                                    <p>Arrastra imágenes aquí o haz clic para seleccionar</p>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- RESUMEN DE TOTALES -->
+                    <div class="form-group" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <label style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px; display: block;">Resumen del Pedido</label>
+                        <div id="resumenTotalesEdicion"></div>
                     </div>
                 </form>
             </div>
