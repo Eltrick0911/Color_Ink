@@ -25,10 +25,12 @@
                 <a href="index"><i class="fa-solid fa-house" onclick="resetBarPosition()" title="Inicio"></i></a>
                 <a href="pedidos"><i class="fa-solid fa-truck-ramp-box" onclick="moveBar()" title="Pedidos"></i></a>
                 <a href="inve"><i class="fa-solid fa-truck" onclick="moveBar()" title="Inventario"></i></a>
-                <a href="gestion_usu"><i class="fa-solid fa-credit-card" onclick="moveBar()" title="Gestión de Usuarios"></i></a>
+                <a href="ventas"><i class="fa-solid fa-credit-card" onclick="moveBar()" title="Ventas"></i></a>
+                <!-- Auditoría visible solo para admin: oculto por defecto y mostrado por JS si id_rol === 1 -->
+                <a href="auditoria" style="display:none"><i class="fa-solid fa-clipboard-list" onclick="moveBar()" title="Auditoría"></i></a>
             </div>
         </div>
-      <a href="login"> <i class="fa-solid fa-arrow-right user-icon" title="Salir" ></i></a> 
+    <a href="#" id="btnLogout"> <i class="fa-solid fa-arrow-right user-icon" title="Salir" ></i></a> 
     </header>
 
     <main class="login-section">
@@ -38,6 +40,6 @@
 
 <script src="/Color_Ink/src/Views/JS/login.js"></script>
 <script src="/Color_Ink/src/Views/JS/index.js"></script>
-<script src="/Color_Ink/src/Views/JS/sidebar.js"></script>
+<!-- No cargar sidebar.js en index porque tiene header estático -->
 </body>
 </html>

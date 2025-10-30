@@ -1,15 +1,28 @@
 RewriteEngine On
 Options All -Indexes
 
-#prevenir acceso al archivo .htaccess
-<files .htaccess>
-order allow,deny
-deny from all
-</files>
+# prevenir acceso al archivo .htaccess
+<Files ".htaccess">
+	Require all denied
+</Files>
 
-# camuflar archivos PHP como NAS, se puede ocultar la versión 
-#de php también, etc.
+# camuflar archivos PHP como NAS, se puede ocultar la versión de php también, etc.
 AddType application/x-httpd-php .nas
 
-#URL amigable con un solo parametro
-RewriteRule ^([0-9a-zA-Z-_@./]+)$ index.php?route=$1 [QSA]
+# Base del proyecto (ajusta si cambias la carpeta)
+RewriteBase /Color_Ink/public/
+
+# No reescribir si el recurso existe como archivo o directorio
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Redirigir URLs con .php a su versión sin extensión (canonical)
+RewriteCond %{REQUEST_URI} \.php$ [NC]
+RewriteRule ^(.+)\.php$ /Color_Ink/public/$1 [R=301,L]
+
+# Redirigir la raíz /public/ al login
+RewriteRule ^$ index.php?route=login [QSA,L]
+
+# URL amigables: cualquier ruta -> index.php?route=<ruta>
+RewriteRule ^([0-9a-zA-Z-_@./]+)$ index.php?route=$1 [QSA,L]

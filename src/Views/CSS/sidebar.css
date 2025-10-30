@@ -143,6 +143,19 @@ header.sidebar .icon-bar i.fa-credit-card:hover {
     box-shadow: 0 4px 8px rgba(255, 115, 0, 0.628);
 }
 
+/* Hover para Auditoría */
+.icon-bar i.fa-clipboard-list:hover {
+    color: rgb(0, 191, 165);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 191, 165, 0.6);
+}
+
+header.sidebar .icon-bar i.fa-clipboard-list:hover {
+    color: rgb(0, 191, 165);
+    transform: scale(1.2);
+    box-shadow: 0 4px 8px rgba(0, 191, 165, 0.6);
+}
+
 .user-icon {
     color: rgba(255, 115, 0, 0.749);
     font-size: 1.5em;
@@ -157,4 +170,23 @@ header.sidebar .icon-bar i.fa-credit-card:hover {
 
 body.sidebar-active .sidebar-content {
     margin-right: 80px;
+}
+
+/* Responsivo: evitar que el último icono quede fuera de pantalla en el header horizontal (index) */
+@media (max-width: 1200px) {
+    .icon-bar { gap: 50px; }
+}
+
+@media (max-width: 992px) {
+    .icon-bar { gap: 36px; }
+}
+
+@media (max-width: 768px) {
+    .icon-bar { gap: 24px; }
+    .icon-bar-container { top: 140px; }
+}
+
+@media (max-width: 600px) {
+    .icon-bar { gap: 18px; }
+    .icon-bar-container { top: 135px; }
 }
