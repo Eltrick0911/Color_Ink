@@ -1,3 +1,12 @@
+<?php
+// Detectar base path dinámicamente
+$uri = $_SERVER['REQUEST_URI'];
+$basePath = '';
+if (strpos($uri, '/public/') !== false) {
+    $parts = explode('/public/', $uri);
+    $basePath = $parts[0];
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,9 +14,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio Color Ink </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="/Color_Ink/src/Views/CSS/index.css">
-    <link rel="stylesheet" href="/Color_Ink/src/Views/CSS/sidebar.css">
-     <link rel="icon" href="/Color_Ink/src/Views/IMG/LOGO.png" type="image/png">
+    <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/index.css">
+    <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/sidebar.css">
+     <link rel="icon" href="<?php echo $basePath; ?>/src/Views/IMG/LOGO.png" type="image/png">
 </head>
 <body>
   
@@ -35,11 +44,11 @@
 
     <main class="login-section">
         <h1>COLOR INK</h1>
-        <img src="/Color_Ink/src/Views/IMG/COLOR INK.gif" alt="Color Ink Logo"> <!-- Placeholder para el logo -->
+        <img src="<?php echo $basePath; ?>/src/Views/IMG/COLOR INK.gif" alt="Color Ink Logo"> <!-- Placeholder para el logo -->
     </main>
 
-<script src="/Color_Ink/src/Views/JS/login.js"></script>
-<script src="/Color_Ink/src/Views/JS/index.js"></script>
+<script src="<?php echo $basePath; ?>/src/Views/JS/login.js"></script>
+<script src="<?php echo $basePath; ?>/src/Views/JS/index.js"></script>
 <!-- No cargar sidebar.js en index porque tiene header estático -->
 </body>
 </html>

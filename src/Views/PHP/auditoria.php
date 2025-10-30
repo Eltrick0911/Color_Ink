@@ -1,3 +1,13 @@
+<?php
+// Detectar base path dinámicamente
+$uri = $_SERVER['REQUEST_URI'];
+$scriptName = $_SERVER['SCRIPT_NAME'];
+$basePath = '';
+if (strpos($uri, '/public/') !== false) {
+    $parts = explode('/public/', $uri);
+    $basePath = $parts[0];
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,9 +15,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auditoría - Color Ink</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="/Color_Ink/src/Views/CSS/sidebar.css">
-    <link rel="stylesheet" href="/Color_Ink/src/Views/CSS/auditoria.css">
-    <link rel="icon" href="/Color_Ink/src/Views/IMG/LOGO.png" type="image/png">
+    <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/sidebar.css">
+    <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/auditoria.css">
+    <link rel="icon" href="<?php echo $basePath; ?>/src/Views/IMG/LOGO.png" type="image/png">
     <!-- Librería para exportar a Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Date picker (Flatpickr) -->
@@ -84,7 +94,7 @@
         </div>
     </main>
 
-    <script src="/Color_Ink/src/Views/JS/sidebar.js"></script>
-    <script src="/Color_Ink/src/Views/JS/auditoria.js"></script>
+    <script src="<?php echo $basePath; ?>/src/Views/JS/sidebar.js"></script>
+    <script src="<?php echo $basePath; ?>/src/Views/JS/auditoria.js"></script>
 </body>
 </html>

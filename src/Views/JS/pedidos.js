@@ -588,8 +588,11 @@ async function guardarEdicionPedido(pedidoId, detalleId) {
         showNotification('Pedido actualizado correctamente', 'success');
         
         // Refrescar tabla
+        const parts = window.location.pathname.split('/');
+        const pIdx = parts.indexOf('public');
+        const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
         await PedidosMVC.init({ 
-            apiEntry: '/Color_Ink/public/index.php',
+            apiEntry: base + '/public/index.php',
             tableSelector: '.pedidos-table tbody',
             autoCreateToken: true
         });
@@ -1879,7 +1882,10 @@ function setupStatusSelectors() {
                 this.disabled = true;
                 
                 // Llamar a la API para actualizar el estado
-                const response = await fetch(`/Color_Ink/public/index.php?route=pedidos/${pedidoId}/cambiar-estado&caso=1`, {
+                const parts = window.location.pathname.split('/');
+                const pIdx = parts.indexOf('public');
+                const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
+                const response = await fetch(`${base}/public/index.php?route=pedidos/${pedidoId}/cambiar-estado&caso=1`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1903,8 +1909,11 @@ function setupStatusSelectors() {
                     showNotification(`Estado actualizado a: ${nombreEstado}`, 'success');
                     
                     // Recargar la tabla para reflejar cambios
+                    const parts = window.location.pathname.split('/');
+                    const pIdx = parts.indexOf('public');
+                    const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
                     await PedidosMVC.init({
-                        apiEntry: '/Color_Ink/public/index.php',
+                        apiEntry: base + '/public/index.php',
                         tableSelector: '.pedidos-table tbody',
                         autoCreateToken: true
                     });

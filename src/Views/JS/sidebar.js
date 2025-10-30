@@ -65,7 +65,10 @@ class SidebarManager {
         userIcon.className = 'fa-solid fa-user user-icon';
         userIcon.title = 'Gestión de Usuarios';
         userIcon.onclick = () => {
-            window.location.href = '/Color_Ink/public/gestion_usu';
+            const parts = window.location.pathname.split('/');
+            const pIdx = parts.indexOf('public');
+            const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
+            window.location.href = base + '/public/gestion_usu';
         };
 
         // Crear el contenedor de iconos - Replica exacta
@@ -98,6 +101,14 @@ class SidebarManager {
             return false;
         })();
 
+        // Calcular base path para todas las rutas
+        const getBase = () => {
+            const parts = window.location.pathname.split('/');
+            const pIdx = parts.indexOf('public');
+            return pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
+        };
+        const basePath = getBase();
+
         // Definir los iconos con la misma lógica que index.html
         const icons = [
             { 
@@ -107,17 +118,17 @@ class SidebarManager {
             },
             { 
                 class: 'fa-truck-ramp-box', 
-                onclick: () => this.handleOtherClick('/Color_Ink/public/pedidos'),
+                onclick: () => this.handleOtherClick(basePath + '/public/pedidos'),
                 title: 'Pedidos'
             },
             { 
                 class: 'fa-truck', 
-                onclick: () => this.handleOtherClick('/Color_Ink/public/inve'),
+                onclick: () => this.handleOtherClick(basePath + '/public/inve'),
                 title: 'Inventario'
             },
             { 
                 class: 'fa-credit-card', 
-                onclick: () => this.handleOtherClick('/Color_Ink/public/ventas'),
+                onclick: () => this.handleOtherClick(basePath + '/public/ventas'),
                 title: 'Ventas'
             }
         ];
@@ -126,7 +137,7 @@ class SidebarManager {
         if (isAdmin) {
             icons.push({
                 class: 'fa-clipboard-list',
-                onclick: () => this.handleOtherClick('/Color_Ink/public/auditoria'),
+                onclick: () => this.handleOtherClick(basePath + '/public/auditoria'),
                 title: 'Auditoría'
             });
         }

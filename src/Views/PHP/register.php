@@ -1,20 +1,29 @@
+<?php
+// Detectar base path dinámicamente
+$uri = $_SERVER['REQUEST_URI'];
+$basePath = '';
+if (strpos($uri, '/public/') !== false) {
+    $parts = explode('/public/', $uri);
+    $basePath = $parts[0];
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
-    <link rel="stylesheet" href="/Color_Ink/src/Views/CSS/login.css">
+    <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/login.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" href="/Color_Ink/src/Views/IMG/LOGO.png" type="image/png">
+    <link rel="icon" href="<?php echo $basePath; ?>/src/Views/IMG/LOGO.png" type="image/png">
 </head>
 <body>
     <div class="container">
         <div class="login-box">
             <div class="login-header">
                 <h1>Crear cuenta</h1>
-                <img src="/Color_Ink/src/Views/IMG/COLOR INK.gif" alt="Color Ink Logo">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/COLOR INK.gif" alt="Color Ink Logo">
             </div>
             <form id="registerForm" action="#" method="POST">
                 <div class="form-group">
