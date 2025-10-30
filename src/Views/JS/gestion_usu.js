@@ -227,7 +227,7 @@ function redirectToLogin() {
     }
     
     // Redirigir al login
-    window.location.href = 'login.php';
+    window.location.href = 'login';
 }
 
 /**
@@ -277,7 +277,7 @@ async function checkAuthAndInit() {
             console.log('- access_token:', sessionStorage.getItem('access_token') ? 'Presente' : 'No presente');
             console.log('- user:', sessionStorage.getItem('user'));
             
-            window.location.href = 'login.php';
+            window.location.href = 'login';
             return;
         }
         

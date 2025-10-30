@@ -98,15 +98,20 @@ class FirebaseController
         error_log('FirebaseController - Payload a enviar: ' . json_encode($payload));
         error_log('FirebaseController - User desde BD: ' . json_encode($user));
 
-        $_SESSION['firebase_token'] = $idToken;
-        $_SESSION['firebase_user'] = $payload;
+    $_SESSION['firebase_token'] = $idToken;
+    $_SESSION['firebase_user'] = $payload;
+
+    // Generar JWT propio del backend con datos de la BD (id_usuario, id_rol, etc.)
+    $token = Security::createTokenJwt(Security::secretKey(), $payload);
+    $_SESSION['token'] = $token;
         
         // Construir respuesta correctamente
         $response = [
             'status' => 'OK',
             'message' => 'Login Firebase OK',
             'data' => [
-                'user' => $payload
+                'user' => $payload,
+                'token' => $token
             ]
         ];
         
@@ -133,12 +138,15 @@ class FirebaseController
     public function verifyIdToken(string $idToken): ?array
     {
         try {
+            // Tolerancia para desfase de reloj entre cliente y servidor
+            \Firebase\JWT\JWT::$leeway = 60; // segundos
             $jwks = $this->fetchJwks();
             $keys = JWK::parseKeySet($jwks);
             // Firebase ID Tokens están firmados con RS256
             $decoded = JWT::decode($idToken, $keys, ['RS256']);
             $claims = json_decode(json_encode($decoded), true);
             if (!$this->validateFirebaseClaims($claims)) {
+                error_log('Firebase verify: claims inválidos. aud=' . ($claims['aud'] ?? 'null') . ' iss=' . ($claims['iss'] ?? 'null') . ' sub=' . ($claims['sub'] ?? 'null'));
                 return null;
             }
             return $claims;
@@ -156,9 +164,13 @@ class FirebaseController
 
     private function fetchJwks(): array
     {
-        $ctx = stream_context_create(['http' => ['timeout' => 3]]);
-        $json = file_get_contents($this->jwksUrl, false, $ctx);
-        return json_decode($json, true);
+        $ctx = stream_context_create(['http' => ['timeout' => 4]]);
+        $json = @file_get_contents($this->jwksUrl, false, $ctx);
+        if ($json === false) {
+            error_log('FirebaseController - No se pudo obtener JWKS de Google');
+            return [];
+        }
+        return json_decode($json, true) ?: [];
     }
 
     private function validateFirebaseClaims(array $claims): bool
@@ -169,10 +181,19 @@ class FirebaseController
         // Si no tenemos projectId configurado, usar el 'aud' del token
         $projectId = $this->projectId !== '' ? $this->projectId : $aud;
 
-        if ($aud !== $projectId) return false;
+        if ($aud !== $projectId) {
+            error_log('Firebase validateClaims: aud no coincide. aud=' . $aud . ' projectId=' . $projectId);
+            return false;
+        }
         $issExpected = 'https://securetoken.google.com/' . $projectId;
-        if ($iss !== $issExpected) return false;
-        if (!isset($claims['sub']) || $claims['sub'] === '') return false;
+        if ($iss !== $issExpected) {
+            error_log('Firebase validateClaims: iss no coincide. iss=' . $iss . ' esperado=' . $issExpected);
+            return false;
+        }
+        if (!isset($claims['sub']) || $claims['sub'] === '') {
+            error_log('Firebase validateClaims: sub vacío');
+            return false;
+        }
         return true;
     }
 

@@ -29,16 +29,26 @@ class SidebarManager {
             return;
         }
 
+        // En index.php ya existe un header estático, no lo toques
+        if (this.currentPage === 'index') {
+            // Verificar si ya existe un header antes de intentar nada
+            const existingHeader = document.querySelector('header.main');
+            if (existingHeader) {
+                this.header = existingHeader;
+                this.body = document.body;
+                this.isInitialized = true;
+                console.log('Sidebar: usando header existente en index');
+                return;
+            }
+        }
+
+        // En otras páginas, crear el sidebar dinámicamente
         this.createSidebar();
         this.attachEventListeners();
-        
-        // Si no estamos en index.html, mostrar la barra en posición vertical
-        if (this.currentPage !== 'index') {
-            this.moveBar();
-        }
+        this.moveBar(); // Mostrar en posición vertical
         
         this.isInitialized = true;
-        console.log('Sidebar inicializada correctamente');
+        console.log('Sidebar: creada correctamente para ' + this.currentPage);
     }
 
     /**
@@ -67,6 +77,27 @@ class SidebarManager {
         const iconBar = document.createElement('div');
         iconBar.className = 'icon-bar';
 
+        // Calcular si el usuario es admin (rol 1)
+        const isAdmin = (() => {
+            try {
+                const u = sessionStorage.getItem('user');
+                if (u) {
+                    const ju = JSON.parse(u);
+                    return Number(ju.id_rol) === 1;
+                }
+            } catch (e) {}
+            // Fallback: intentar decodificar el JWT local (sin validar) sólo para UI
+            try {
+                const t = sessionStorage.getItem('access_token');
+                if (t && t.split('.').length === 3) {
+                    const payload = JSON.parse(atob(t.split('.')[1]));
+                    const data = payload.data || payload;
+                    return Number(data.id_rol) === 1;
+                }
+            } catch (e) {}
+            return false;
+        })();
+
         // Definir los iconos con la misma lógica que index.html
         const icons = [
             { 
@@ -91,6 +122,15 @@ class SidebarManager {
             }
         ];
 
+        // Agregar Auditoría sólo para admins
+        if (isAdmin) {
+            icons.push({
+                class: 'fa-clipboard-list',
+                onclick: () => this.handleOtherClick('/Color_Ink/public/auditoria'),
+                title: 'Auditoría'
+            });
+        }
+
         // Crear los iconos
         icons.forEach(iconData => {
             const icon = document.createElement('i');
@@ -102,11 +142,49 @@ class SidebarManager {
 
         // Crear el icono de salida - Replica exacta
         const exitLink = document.createElement('a');
-        exitLink.href = '/Color_Ink/public/login';
+        exitLink.href = '#';
         const exitIcon = document.createElement('i');
         exitIcon.className = 'fa-solid fa-arrow-right user-icon';
         exitIcon.title = 'Salir';
         exitLink.appendChild(exitIcon);
+
+        // Manejar logout limpiando tokens y redirigiendo
+        exitLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            // Si existe función global, usarla
+            if (typeof window.performLogout === 'function') {
+                await window.performLogout();
+                return;
+            }
+            // Fallback local
+            try {
+                const parts = window.location.pathname.split('/');
+                const pIdx = parts.indexOf('public');
+                const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
+                const apiEntry = `${base}/public/index.php`;
+                const loginUrl = `${base}/public/login`;
+                const jwtToken = sessionStorage.getItem('access_token');
+                if (jwtToken) {
+                    try {
+                        await fetch(`${apiEntry}?route=auth&caso=1&action=logout`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${jwtToken}` }
+                        });
+                    } catch (_) {}
+                }
+                try { if (window.firebase && firebase.auth) await firebase.auth().signOut(); } catch(_) {}
+                sessionStorage.removeItem('firebase_id_token');
+                sessionStorage.removeItem('access_token');
+                sessionStorage.removeItem('user');
+                window.location.replace(loginUrl);
+            } catch (_) {
+                sessionStorage.clear();
+                const parts = window.location.pathname.split('/');
+                const pIdx = parts.indexOf('public');
+                const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
+                window.location.replace(base + '/public/login');
+            }
+        });
 
         // Ensamblar la estructura - Replica exacta de index.html
         iconContainer.appendChild(iconBar);
@@ -133,7 +211,10 @@ class SidebarManager {
             this.resetBarPosition();
         } else {
             // Si estamos en otra página, navegar a index
-            window.location.href = '/Color_Ink/public/index';
+            const parts = window.location.pathname.split('/');
+            const pIdx = parts.indexOf('public');
+            const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
+            window.location.href = base + '/public/index';
         }
     }
 

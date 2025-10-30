@@ -19,7 +19,7 @@
             </div>
             
             <!-- ===== FORMULARIO CON FUNCIONALIDADES COMPLETAS (Fusionado de ambas APIs) ===== -->
-            <form class="login-form" id="loginForm" action="login.php" method="POST">
+            <form class="login-form" id="loginForm" action="login" method="POST">
                 <div class="form-group">
                     <label for="email">Correo Electrónico</label>
                     <input type="email" id="email" name="email" required>

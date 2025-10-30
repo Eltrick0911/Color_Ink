@@ -1,6 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar autenticación y configurar interfaz según rol
     checkAuthAndSetupUI();
+
+    // Enlazar botón de salir si existe
+    const btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await performLogout();
+        });
+    }
 });
 
 async function checkAuthAndSetupUI() {
@@ -26,7 +35,7 @@ async function checkAuthAndSetupUI() {
             sessionStorage.removeItem('firebase_id_token');
             sessionStorage.removeItem('access_token');
             sessionStorage.removeItem('user');
-            window.location.href = 'login.php';
+            window.location.href = 'login';
             return;
         }
         
@@ -38,7 +47,7 @@ async function checkAuthAndSetupUI() {
             sessionStorage.removeItem('firebase_id_token');
             sessionStorage.removeItem('access_token');
             sessionStorage.removeItem('user');
-            window.location.href = 'login.php';
+            window.location.href = 'login';
             return;
         }
         
@@ -47,7 +56,7 @@ async function checkAuthAndSetupUI() {
         
     } catch (error) {
         console.error('❌ Error verificando autenticación en dashboard:', error);
-        window.location.href = 'login.php';
+        window.location.href = 'login';
     }
 }
 
@@ -126,20 +135,13 @@ async function getCurrentUser() {
 function setupUIForUser(user) {
     console.log('Usuario autenticado:', user);
     
-    // Configurar iconos según el rol
-    const userManagementIcon = document.querySelector('a[href="gestion_usu.php"]');
-    if (userManagementIcon) {
-        if (user.id_rol === 1) {
-            // Administrador: mostrar gestión de usuarios
-            userManagementIcon.style.display = 'block';
-            userManagementIcon.title = 'Gestión de Usuarios';
-            userManagementIcon.innerHTML = '<i class="fa-solid fa-users" onclick="moveBar()" title="Gestión de Usuarios"></i>';
+    // Mostrar/ocultar botón Auditoría según rol (sólo en index, header estático)
+    const auditAnchor = document.querySelector('a[href="auditoria"]');
+    if (auditAnchor) {
+        if (Number(user.id_rol) === 1) {
+            auditAnchor.style.display = 'inline-block';
         } else {
-            // Usuario común: mostrar perfil personal
-            userManagementIcon.href = 'perfil';
-            userManagementIcon.style.display = 'block';
-            userManagementIcon.title = 'Mi Perfil';
-            userManagementIcon.innerHTML = '<i class="fa-solid fa-user" onclick="moveBar()" title="Mi Perfil"></i>';
+            auditAnchor.style.display = 'none';
         }
     }
     
@@ -156,6 +158,51 @@ function getApiBase() {
     }
     return '/' + (parts[1] || '');
 }
+
+// Logout global reutilizable
+async function performLogout() {
+    try {
+        const base = getApiBase();
+        const apiEntry = `${base}/public/index.php`;
+        const loginUrl = `${base}/public/login`;
+
+        // Intentar cerrar sesión en backend si hay token JWT
+        const jwtToken = sessionStorage.getItem('access_token');
+        if (jwtToken) {
+            try {
+                await fetch(`${apiEntry}?route=auth&caso=1&action=logout`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${jwtToken}` }
+                });
+            } catch (_) {}
+        }
+
+        // Cerrar sesión de Firebase si está disponible
+        try {
+            if (window.firebase && firebase.auth) {
+                await firebase.auth().signOut();
+            }
+        } catch (_) {}
+
+        // Limpiar almacenamiento local
+        sessionStorage.removeItem('firebase_id_token');
+        sessionStorage.removeItem('access_token');
+        sessionStorage.removeItem('user');
+
+        // Redirigir al login
+        window.location.replace(loginUrl);
+    } catch (e) {
+        // Fallback: limpiar y redirigir
+        sessionStorage.clear();
+        const parts = window.location.pathname.split('/');
+        const pIdx = parts.indexOf('public');
+        const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
+        window.location.replace(base + '/public/login');
+    }
+}
+
+// Exponer por compatibilidad
+window.performLogout = performLogout;
 
 // Función authGuard para compatibilidad
 window.authGuard = function() {

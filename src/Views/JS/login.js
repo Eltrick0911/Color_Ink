@@ -159,6 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             sessionStorage.setItem('firebase_id_token', idToken);
             sessionStorage.setItem('user', JSON.stringify(data.data.user));
+            if (data?.data?.token) {
+                sessionStorage.setItem('access_token', data.data.token);
+                console.log('✅ JWT del backend guardado');
+            } else {
+                console.log('ℹ️ Backend no devolvió JWT propio, se usará solo el ID Token de Firebase');
+            }
             
             console.log('✅ Datos guardados en sessionStorage:');
             console.log('Firebase ID Token:', idToken ? 'Guardado' : 'No guardado');
@@ -178,6 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
 window.authGuard = function() {
     const token = sessionStorage.getItem('firebase_id_token') || sessionStorage.getItem('access_token');
     if (!token) {
-        window.location.href = '/Color_Ink/public/login';
+        const parts = window.location.pathname.split('/');
+        const pIdx = parts.indexOf('public');
+        const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
+        window.location.href = base + '/public/login';
     }
 }
