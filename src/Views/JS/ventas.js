@@ -252,7 +252,7 @@
                     <button class="btn-action" title="Ver Detalles" onclick="verVenta(${r.id_venta})">
                         <i class="fa-solid fa-eye"></i>
                     </button>
-                    ${currentUser && currentUser.id_rol === 2 ? `
+                    ${currentUser && currentUser.id_rol === 1 ? `
                         <button class="btn-action" title="Editar" onclick="editarVenta(${r.id_venta})">
                             <i class="fa-solid fa-edit"></i>
                         </button>

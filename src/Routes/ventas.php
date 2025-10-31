@@ -49,7 +49,7 @@ switch ($method) {
         break;
         
     case 'PUT':
-        if ($action === 'editar') {
+        if ($action === 'editar' || $action === 'actualizar') {
             $id = isset($_GET['id']) ? (int)$_GET['id'] : $id;
             if ($id) {
                 $controller->editarVenta($id);

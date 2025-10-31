@@ -117,7 +117,7 @@ class VentaController
     private function validarRol(int $idRol, bool $soloAdmin = false): bool
     {
         if ($soloAdmin) {
-            return $idRol === 2; // Solo Administrador
+            return $idRol === 1; // Solo Gerente (administrador principal)
         }
         return $idRol === 1 || $idRol === 2; // Gerente o Administrador
     }
