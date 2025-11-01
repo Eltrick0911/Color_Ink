@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\PedidosModel;
+use App\Models\inveModel;
 use App\Config\Security;
 use App\Config\responseHTTP;
 use App\Controllers\FirebaseController;
@@ -21,10 +22,12 @@ if (!class_exists(responseHTTP::class)) {
 class PedidosController
 {
     private $pedidosModel;
+    private $inveModel;
 
     public function __construct()
     {
         $this->pedidosModel = new PedidosModel();
+        $this->inveModel = new inveModel();
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -504,6 +507,7 @@ class PedidosController
             ];
 
             // Normalizar id_producto: permitir productos personalizados (sin id de catálogo)
+            $idProductoOriginal = $detalleData['id_producto'];
             if ($detalleData['id_producto'] <= 0) {
                 $detalleData['id_producto'] = null; // La columna permite NULL
             }
@@ -515,13 +519,39 @@ class PedidosController
                 return;
             }
 
+            // Si hay un producto del inventario (id_producto válido), descontar stock
+            if ($idProductoOriginal > 0) {
+                error_log("PedidosController - crearDetalle: Descontando stock para producto ID: $idProductoOriginal, cantidad: " . $detalleData['cantidad']);
+                $resultadoStock = $this->inveModel->descontarStock($idProductoOriginal, $detalleData['cantidad']);
+                
+                if ($resultadoStock['status'] !== 'OK') {
+                    error_log("PedidosController - crearDetalle: Error al descontar stock - " . ($resultadoStock['message'] ?? 'Error desconocido'));
+                    echo json_encode(responseHTTP::status400($resultadoStock['message'] ?? 'Error al descontar stock del inventario'));
+                    return;
+                }
+                
+                error_log("PedidosController - crearDetalle: Stock descontado exitosamente. Stock actualizado: " . ($resultadoStock['data']['stock_actualizado'] ?? 'N/A'));
+            }
+
             error_log("PedidosController - crearDetalle: Datos válidos, creando detalle");
 
             $success = $this->pedidosModel->createDetallePedido($detalleData);
             
             if ($success) {
                 error_log("PedidosController - crearDetalle: Detalle creado exitosamente para pedido $idPedido");
-                echo json_encode(responseHTTP::status200('Detalle de pedido creado exitosamente'));
+                
+                // Preparar respuesta con información del stock si se descontó
+                $responseData = ['message' => 'Detalle de pedido creado exitosamente'];
+                if ($idProductoOriginal > 0 && isset($resultadoStock['data'])) {
+                    $responseData['stock_info'] = [
+                        'id_producto' => $resultadoStock['data']['id_producto'],
+                        'stock_actualizado' => $resultadoStock['data']['stock_actualizado'],
+                        'alerta_stock' => ($resultadoStock['data']['stock_actualizado'] ?? 0) <= 0 ? 'Producto agotado' : 
+                                        (($resultadoStock['data']['stock_actualizado'] ?? 999) <= 3 ? 'Stock bajo' : null)
+                    ];
+                }
+                
+                echo json_encode(responseHTTP::status200('Detalle de pedido creado exitosamente', $responseData));
             } else {
                 error_log("PedidosController - crearDetalle: Error al crear detalle para pedido $idPedido");
                 echo json_encode(responseHTTP::status500('Error al crear el detalle del pedido'));
