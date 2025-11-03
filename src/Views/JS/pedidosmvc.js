@@ -11,8 +11,10 @@
 
     const defaultApiEntry = (function () {
         // Apuntar a public/index.php que es el punto de entrada del enrutador
-        const origin = window.location.origin || '';
-        return origin + '/Color_Ink/public/index.php';
+        const parts = window.location.pathname.split('/');
+        const pIdx = parts.indexOf('public');
+        const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
+        return base + '/public/index.php';
     })();
 
     function safeJSON(res) {

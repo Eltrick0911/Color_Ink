@@ -2295,6 +2295,37 @@ function setupProductDetailsColorPickers() {
         }
     });
     
+    // Configurar input de colores
+    const coloresInput = document.getElementById('colores');
+    
+    // Configurar botón de limpiar colores
+    setupClearColorsButton();
+    
+    if (coloresInput) {
+        coloresInput.addEventListener('input', function() {
+            // Opcional: actualizar los color pickers basado en el texto
+        });
+    }
+}
+
+function setupClearColorsButton() {
+    const colorPickers = [
+        { picker: 'colorPicker1', name: 'colorName1' },
+        { picker: 'colorPicker2', name: 'colorName2' },
+        { picker: 'colorPicker3', name: 'colorName3' }
+    ];
+    
+    const clearButton = document.querySelector('.btn-limpiar-colores');
+    if (clearButton) {
+        clearButton.addEventListener('click', function() {
+            const colorPickers = document.querySelectorAll('.color-picker');
+            colorPickers.forEach((picker, index) => {
+                picker.value = '#000000';
+                updateColorName(picker, index + 1);
+            });
+        });
+    }
+    
     // Botón limpiar colores del modal de productos
     const btnLimpiar = document.querySelector('#modalDetallesProducto .btn-limpiar-colores');
     if (btnLimpiar) {
