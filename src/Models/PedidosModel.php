@@ -424,9 +424,11 @@ class PedidosModel
 
             // Si se proveen detalles_personalizados, forzamos inserción directa para incluir la columna (el SP no la contempla)
             if ($detallesPersonalizados !== null) {
-                $totalLinea = ($detalleData['precio_unitario'] * $detalleData['cantidad']);
-                $totalLinea = ($totalLinea * (1 - ($detalleData['descuento'] / 100)));
-                $totalLinea = ($totalLinea * (1 + ($detalleData['impuesto'] / 100)));
+                // Usar total_linea si viene en los datos, de lo contrario calcularlo
+                $totalLinea = isset($detalleData['total_linea']) ? $detalleData['total_linea'] : 
+                    (($detalleData['precio_unitario'] * $detalleData['cantidad']) * 
+                    (1 - ($detalleData['descuento'] / 100)) * 
+                    (1 + ($detalleData['impuesto'] / 100)));
 
                 $sql = "INSERT INTO detallepedido (
                             producto_solicitado, cantidad, precio_unitario, descuento, impuesto, total_linea, id_pedido, id_producto, detalles_personalizados
@@ -459,9 +461,11 @@ class PedidosModel
                     ]);
                 } catch (PDOException $e) {
                     // Fallback a SQL directo
-                    $totalLinea = ($detalleData['precio_unitario'] * $detalleData['cantidad']);
-                    $totalLinea = ($totalLinea * (1 - ($detalleData['descuento'] / 100)));
-                    $totalLinea = ($totalLinea * (1 + ($detalleData['impuesto'] / 100)));
+                    // Usar total_linea si viene en los datos, de lo contrario calcularlo
+                    $totalLinea = isset($detalleData['total_linea']) ? $detalleData['total_linea'] : 
+                        (($detalleData['precio_unitario'] * $detalleData['cantidad']) * 
+                        (1 - ($detalleData['descuento'] / 100)) * 
+                        (1 + ($detalleData['impuesto'] / 100)));
 
                     $sql = "INSERT INTO detallepedido (
                                 producto_solicitado, cantidad, precio_unitario, descuento, impuesto, total_linea, id_pedido, id_producto
@@ -604,6 +608,27 @@ class PedidosModel
             return $result;
         } catch (PDOException $e) {
             error_log("ERROR PedidosModel - deleteDetallePedido: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Eliminar todos los detalles de un pedido específico
+     */
+    public function deleteDetallesByPedidoId(int $idPedido): bool
+    {
+        try {
+            error_log("PedidosModel - deleteDetallesByPedidoId: Eliminando todos los detalles del pedido ID: $idPedido");
+            
+            $stmt = $this->connection->prepare("DELETE FROM detallepedido WHERE id_pedido = ?");
+            $result = $stmt->execute([$idPedido]);
+            
+            $rowCount = $stmt->rowCount();
+            error_log("PedidosModel - deleteDetallesByPedidoId: Se eliminaron $rowCount registros");
+            
+            return $result;
+        } catch (PDOException $e) {
+            error_log("ERROR PedidosModel - deleteDetallesByPedidoId: " . $e->getMessage());
             return false;
         }
     }

@@ -274,9 +274,9 @@
         },
 
         formatCurrency: function (v) {
-            if (v === null || v === undefined || v === '') return '$0.00';
+            if (v === null || v === undefined || v === '') return 'L 0.00';
             const num = Number(v) || 0;
-            return num.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+            return 'L ' + num.toFixed(2);
         }
     };
 

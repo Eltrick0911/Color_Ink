@@ -160,29 +160,71 @@ class PedidosController
             if ($idPedido) {
                 error_log("PedidosController - create: Pedido creado exitosamente - ID: $idPedido");
                 
-                // Crear entrada en detallepedido con los totales calculados
-                if (!empty($input['cantidad']) && !empty($input['precio'])) {
+                // Crear múltiples entradas en detallepedido, una por cada producto
+                if (!empty($input['detalles_producto'])) {
                     try {
-                        $detalleData = [
-                            'producto_solicitado' => 'Pedido Personalizado Multi-Producto',
-                            'cantidad' => (int)$input['cantidad'], // Suma de todas las cantidades
-                            'precio_unitario' => (float)$input['precio'], // Total general después de descuento e impuesto
-                            'descuento' => (float)($input['descuento'] ?? 0), // Descuento global en %
-                            'impuesto' => (float)($input['impuesto'] ?? 0), // Impuesto global en %
-                            'id_pedido' => (int)$idPedido,
-                            'id_producto' => null, // Pedido personalizado no tiene id_producto
-                            'id_usuario' => (int)$user['id_usuario']
-                        ];
+                        // Decodificar el array de productos
+                        $productosArray = is_array($input['detalles_producto']) 
+                            ? $input['detalles_producto'] 
+                            : json_decode($input['detalles_producto'], true);
                         
-                        $detalleCreado = $this->pedidosModel->createDetallePedido($detalleData);
-                        
-                        if ($detalleCreado) {
-                            error_log("PedidosController - create: Detalle pedido creado exitosamente");
-                        } else {
-                            error_log("PedidosController - create: Advertencia - No se pudo crear el detalle del pedido");
+                        if (is_array($productosArray) && count($productosArray) > 0) {
+                            error_log("PedidosController - create: Creando " . count($productosArray) . " registros en detallepedido");
+                            
+                            foreach ($productosArray as $producto) {
+                                // Calcular el total_linea para este producto específico
+                                $cantidad = (int)($producto['cantidad'] ?? 1);
+                                $precioBase = (float)($producto['precio'] ?? 0);
+                                $descuento = (float)($producto['descuento'] ?? 0); // en porcentaje
+                                $impuesto = (float)($producto['impuesto'] ?? 0); // en porcentaje
+                                
+                                // Calcular subtotal con descuento
+                                $subtotalConDescuento = $precioBase - ($precioBase * ($descuento / 100));
+                                
+                                // Calcular total con impuesto
+                                $totalLinea = $subtotalConDescuento + ($subtotalConDescuento * ($impuesto / 100));
+                                
+                                // Construir nombre del producto
+                                $nombreProducto = 'Personalizado';
+                                if (!empty($producto['categoria'])) {
+                                    $nombreProducto .= ': ' . $producto['categoria'];
+                                }
+                                if (!empty($producto['especificaciones'])) {
+                                    $nombreProducto .= ' - ' . substr($producto['especificaciones'], 0, 50);
+                                }
+                                
+                                // Preparar detalles personalizados en JSON
+                                $detallesPersonalizados = [
+                                    'categoria' => $producto['categoria'] ?? '',
+                                    'colores' => $producto['colores'] ?? '',
+                                    'especificaciones' => $producto['especificaciones'] ?? '',
+                                    'imagenes' => $producto['imagenes'] ?? []
+                                ];
+                                
+                                $detalleData = [
+                                    'producto_solicitado' => $nombreProducto,
+                                    'cantidad' => $cantidad,
+                                    'precio_unitario' => $precioBase, // Precio base antes de descuentos/impuestos
+                                    'total_linea' => $totalLinea, // Total después de descuento e impuesto
+                                    'descuento' => $descuento, // En porcentaje
+                                    'impuesto' => $impuesto, // En porcentaje
+                                    'id_pedido' => (int)$idPedido,
+                                    'id_producto' => null, // Pedido personalizado no tiene id_producto
+                                    'id_usuario' => (int)$user['id_usuario'],
+                                    'detalles_personalizados' => $detallesPersonalizados
+                                ];
+                                
+                                $detalleCreado = $this->pedidosModel->createDetallePedido($detalleData);
+                                
+                                if ($detalleCreado) {
+                                    error_log("PedidosController - create: Detalle producto creado: $nombreProducto");
+                                } else {
+                                    error_log("PedidosController - create: Advertencia - No se pudo crear detalle: $nombreProducto");
+                                }
+                            }
                         }
                     } catch (\Exception $e) {
-                        error_log("PedidosController - create: Error al crear detalle pedido: " . $e->getMessage());
+                        error_log("PedidosController - create: Error al crear detalles pedido: " . $e->getMessage());
                         // No detener el proceso, el pedido principal ya está creado
                     }
                 }
@@ -402,6 +444,79 @@ class PedidosController
             $success = $this->pedidosModel->updatePedidoCompleto($id, $datosActualizar);
             
             if ($success) {
+                // Si vienen detalles de productos, actualizar también la tabla detallepedido
+                if (!empty($input['detalles_producto'])) {
+                    try {
+                        // Decodificar el array de productos
+                        $productosArray = is_array($input['detalles_producto']) 
+                            ? $input['detalles_producto'] 
+                            : json_decode($input['detalles_producto'], true);
+                        
+                        if (is_array($productosArray) && count($productosArray) > 0) {
+                            error_log("PedidosController - update: Actualizando detallepedido - eliminando registros antiguos y creando nuevos");
+                            
+                            // Paso 1: Eliminar todos los detalles antiguos de este pedido
+                            $this->pedidosModel->deleteDetallesByPedidoId($id);
+                            
+                            // Paso 2: Crear nuevos registros para cada producto
+                            foreach ($productosArray as $producto) {
+                                // Calcular el total_linea para este producto específico
+                                $cantidad = (int)($producto['cantidad'] ?? 1);
+                                $precioBase = (float)($producto['precio'] ?? 0);
+                                $descuento = (float)($producto['descuento'] ?? 0); // en porcentaje
+                                $impuesto = (float)($producto['impuesto'] ?? 0); // en porcentaje
+                                
+                                // Calcular subtotal con descuento
+                                $subtotalConDescuento = $precioBase - ($precioBase * ($descuento / 100));
+                                
+                                // Calcular total con impuesto
+                                $totalLinea = $subtotalConDescuento + ($subtotalConDescuento * ($impuesto / 100));
+                                
+                                // Construir nombre del producto
+                                $nombreProducto = 'Personalizado';
+                                if (!empty($producto['categoria'])) {
+                                    $nombreProducto .= ': ' . $producto['categoria'];
+                                }
+                                if (!empty($producto['especificaciones'])) {
+                                    $nombreProducto .= ' - ' . substr($producto['especificaciones'], 0, 50);
+                                }
+                                
+                                // Preparar detalles personalizados en JSON
+                                $detallesPersonalizados = [
+                                    'categoria' => $producto['categoria'] ?? '',
+                                    'colores' => $producto['colores'] ?? '',
+                                    'especificaciones' => $producto['especificaciones'] ?? '',
+                                    'imagenes' => $producto['imagenes'] ?? []
+                                ];
+                                
+                                $detalleData = [
+                                    'producto_solicitado' => $nombreProducto,
+                                    'cantidad' => $cantidad,
+                                    'precio_unitario' => $precioBase, // Precio base antes de descuentos/impuestos
+                                    'total_linea' => $totalLinea, // Total después de descuento e impuesto
+                                    'descuento' => $descuento, // En porcentaje
+                                    'impuesto' => $impuesto, // En porcentaje
+                                    'id_pedido' => (int)$id,
+                                    'id_producto' => null, // Pedido personalizado no tiene id_producto
+                                    'id_usuario' => (int)$user['id_usuario'],
+                                    'detalles_personalizados' => $detallesPersonalizados
+                                ];
+                                
+                                $detalleCreado = $this->pedidosModel->createDetallePedido($detalleData);
+                                
+                                if ($detalleCreado) {
+                                    error_log("PedidosController - update: Detalle producto creado: $nombreProducto");
+                                } else {
+                                    error_log("PedidosController - update: Advertencia - No se pudo crear detalle: $nombreProducto");
+                                }
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        error_log("PedidosController - update: Error al actualizar detalles pedido: " . $e->getMessage());
+                        // No detener el proceso, el pedido principal ya está actualizado
+                    }
+                }
+                
                 error_log("PedidosController - update: Pedido $id actualizado exitosamente");
                 echo json_encode(responseHTTP::status200('Pedido actualizado exitosamente'));
             } else {

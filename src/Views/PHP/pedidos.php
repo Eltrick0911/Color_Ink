@@ -64,7 +64,7 @@
                                         <?php
                                         // Mostrar el total de la BD (total_linea del detallepedido principal)
                                         $totalLinea = isset($pedido['total_linea']) ? $pedido['total_linea'] : null;
-                                        echo $totalLinea !== null ? '$' . number_format($totalLinea, 2) : '<span style="color:#888">-</span>';
+                                        echo $totalLinea !== null ? 'L ' . number_format($totalLinea, 2) : '<span style="color:#888">-</span>';
                                         ?>
                                     </td>
                                     <td>
@@ -176,6 +176,37 @@
                         </button>
                     </div>
 
+                    <!-- Resumen de totales del pedido -->
+                    <div id="resumenTotalesNuevoPedido" style="display:none; margin-top:20px; padding:15px; background:#f8f9fa; border-radius:8px; border:1px solid #dee2e6;">
+                        <h4 style="margin:0 0 10px 0; color:#495057;">Resumen del Pedido</h4>
+                        <div style="display:grid; gap:8px;">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Productos:</span>
+                                <strong id="resumenCantidadProductos">0</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Cantidad Total:</span>
+                                <strong id="resumenCantidadTotal">0</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Subtotal:</span>
+                                <strong id="resumenSubtotal">L 0.00</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; color:#dc3545;">
+                                <span>Descuento (prom. <span id="resumenPorcentajeDescuento">0</span>%):</span>
+                                <strong id="resumenMontoDescuento">L 0.00</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; color:#28a745;">
+                                <span>Impuesto (prom. <span id="resumenPorcentajeImpuesto">0</span>%):</span>
+                                <strong id="resumenMontoImpuesto">L 0.00</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:2px solid #007bff; font-size:1.1em;">
+                                <span>Total:</span>
+                                <strong id="resumenTotalGeneral" style="color:#007bff;">L 0.00</strong>
+                            </div>
+                        </div>
+                    </div>
+
                 </form>
             </div>
             <div class="modal-footer">
@@ -281,7 +312,11 @@
                                 <input type="number" id="pdImpuesto" step="0.01" min="0" value="0">
                             </div>
                         </div>
-                        <div style="margin-top:8px; font-weight:600;">Total: <span id="pdTotalPreview">$0.00</span></div>
+                        <div style="margin-top:12px; padding:12px; background:#f8f9fa; border-radius:6px; border:2px solid #007bff;">
+                            <div style="font-size:1.1em; font-weight:700; color:#007bff; text-align:center;">
+                                Total: <span id="pdTotalPreview" style="font-size:1.3em;">L 0.00</span>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>

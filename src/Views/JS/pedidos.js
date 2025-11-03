@@ -2,6 +2,11 @@
 let productosPersonalizados = [];
 let productoActivo = 0;
 
+// Función helper para formatear moneda en lempiras
+function formatoLempiras(valor) {
+    return 'L ' + Number(valor).toFixed(2);
+}
+
 // Función para guardar el producto actual antes de cambiar a otro
 function guardarProductoActual() {
     if (!productosPersonalizados[productoActivo]) {
@@ -48,10 +53,10 @@ function updatePdTotalPreview() {
     const montoImpuesto = subtotal * (impuesto / 100);
     const total = subtotal + montoImpuesto;
     
-    // Mostrar el total en algún elemento si existe
-    const totalDisplay = document.getElementById('pdTotalDisplay');
-    if (totalDisplay) {
-        totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+    // Mostrar el total en el modal de detalles del producto
+    const totalPreview = document.getElementById('pdTotalPreview');
+    if (totalPreview) {
+        totalPreview.textContent = formatoLempiras(total);
     }
 }
 
@@ -376,6 +381,18 @@ function openModal() {
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden'; // Prevenir scroll del body
         
+        // Limpiar productos y resumen
+        productosPersonalizados = [];
+        productoActivo = 0;
+        sessionStorage.removeItem('detalles_productos');
+        sessionStorage.removeItem('observaciones');
+        
+        // Ocultar resumen de totales
+        const resumenContainer = document.getElementById('resumenTotalesNuevoPedido');
+        if (resumenContainer) {
+            resumenContainer.style.display = 'none';
+        }
+        
         // Establecer fecha mínima para entrega (hoy)
         const fechaEntrega = document.getElementById('fechaEntrega');
         if (fechaEntrega) {
@@ -561,9 +578,75 @@ function guardarDetallesProducto() {
     try {
         actualizarCamposTotalesEnEdicion();
     } catch (e) {}
+    
+    // Actualizar resumen de totales en modal de nuevo pedido
+    actualizarResumenNuevoPedido();
 
     closeProductDetailsModal();
     showNotification('Detalles de productos guardados', 'success');
+}
+
+// Función para actualizar el resumen de totales en el modal de nuevo pedido
+function actualizarResumenNuevoPedido() {
+    const resumenContainer = document.getElementById('resumenTotalesNuevoPedido');
+    if (!resumenContainer) return;
+    
+    const productos = productosPersonalizados || [];
+    
+    if (productos.length === 0) {
+        resumenContainer.style.display = 'none';
+        return;
+    }
+    
+    // Mostrar el resumen
+    resumenContainer.style.display = 'block';
+    
+    // Calcular totales - cada producto con su propio descuento e impuesto
+    let cantidadTotal = 0;
+    let subtotalSinDescuentos = 0;
+    let totalDescuentos = 0;
+    let totalImpuestos = 0;
+    let totalGeneral = 0;
+    
+    productos.forEach(prod => {
+        const cantidad = Number(prod.cantidad || 0);
+        const precio = Number(prod.precio || 0);
+        const descuento = Number(prod.descuento || 0);
+        const impuesto = Number(prod.impuesto || 0);
+        
+        cantidadTotal += cantidad;
+        
+        // Subtotal del producto
+        let subtotalProducto = cantidad * precio;
+        subtotalSinDescuentos += subtotalProducto;
+        
+        // Aplicar descuento del producto
+        const montoDescuentoProducto = subtotalProducto * (descuento / 100);
+        totalDescuentos += montoDescuentoProducto;
+        subtotalProducto = subtotalProducto - montoDescuentoProducto;
+        
+        // Aplicar impuesto del producto
+        const montoImpuestoProducto = subtotalProducto * (impuesto / 100);
+        totalImpuestos += montoImpuestoProducto;
+        
+        // Total del producto
+        totalGeneral += subtotalProducto + montoImpuestoProducto;
+    });
+    
+    // Calcular porcentajes promedio para mostrar (solo visual)
+    const descuentoPromedio = subtotalSinDescuentos > 0 ? (totalDescuentos / subtotalSinDescuentos * 100) : 0;
+    const subtotalConDescuento = subtotalSinDescuentos - totalDescuentos;
+    const impuestoPromedio = subtotalConDescuento > 0 ? (totalImpuestos / subtotalConDescuento * 100) : 0;
+    
+    // Actualizar los valores en el DOM
+    document.getElementById('resumenCantidadProductos').textContent = productos.length;
+    document.getElementById('resumenCantidadTotal').textContent = cantidadTotal;
+    document.getElementById('resumenSubtotal').textContent = formatoLempiras(subtotalSinDescuentos);
+    document.getElementById('resumenPorcentajeDescuento').textContent = descuentoPromedio.toFixed(1);
+    document.getElementById('resumenMontoDescuento').textContent = formatoLempiras(totalDescuentos);
+    document.getElementById('resumenPorcentajeImpuesto').textContent = impuestoPromedio.toFixed(1);
+    document.getElementById('resumenMontoImpuesto').textContent = formatoLempiras(totalImpuestos);
+    document.getElementById('resumenTotalGeneral').textContent = formatoLempiras(totalGeneral);
 }
 
 // Función para crear nuevo pedido
@@ -579,26 +662,42 @@ async function crearNuevoPedido() {
             return;
         }
         
-        // Calcular totales
+        // Calcular totales - cada producto con su propio descuento e impuesto
         let totalCantidad = 0;
-        let subtotalGeneral = 0;
+        let subtotalSinDescuentos = 0;
+        let totalDescuentos = 0;
+        let totalImpuestos = 0;
+        let totalGeneral = 0;
         
         detallesProductos.forEach(prod => {
-            const cantidadNum = Number(prod.cantidad || 0);
-            const precioNum = Number(prod.precio || 0);
-            totalCantidad += cantidadNum;
-            subtotalGeneral += (cantidadNum * precioNum);
+            const cantidad = Number(prod.cantidad || 0);
+            const precio = Number(prod.precio || 0);
+            const descuento = Number(prod.descuento || 0);
+            const impuesto = Number(prod.impuesto || 0);
+            
+            totalCantidad += cantidad;
+            
+            // Subtotal del producto
+            let subtotalProducto = cantidad * precio;
+            subtotalSinDescuentos += subtotalProducto;
+            
+            // Aplicar descuento del producto
+            const montoDescuentoProducto = subtotalProducto * (descuento / 100);
+            totalDescuentos += montoDescuentoProducto;
+            subtotalProducto = subtotalProducto - montoDescuentoProducto;
+            
+            // Aplicar impuesto del producto
+            const montoImpuestoProducto = subtotalProducto * (impuesto / 100);
+            totalImpuestos += montoImpuestoProducto;
+            
+            // Total del producto
+            totalGeneral += subtotalProducto + montoImpuestoProducto;
         });
         
-        // Obtener descuento e impuesto global (del primer producto)
-        const descuentoGlobal = detallesProductos.length > 0 ? Number(detallesProductos[0].descuento || 0) : 0;
-        const impuestoGlobal = detallesProductos.length > 0 ? Number(detallesProductos[0].impuesto || 0) : 0;
-        
-        // Aplicar descuento e impuesto
-        const montoDescuento = subtotalGeneral * (descuentoGlobal / 100);
-        const subtotalConDescuento = subtotalGeneral - montoDescuento;
-        const montoImpuesto = subtotalConDescuento * (impuestoGlobal / 100);
-        const totalGeneral = subtotalConDescuento + montoImpuesto;
+        // Calcular porcentajes promedio (solo para referencia)
+        const descuentoPromedio = subtotalSinDescuentos > 0 ? (totalDescuentos / subtotalSinDescuentos * 100) : 0;
+        const subtotalConDescuento = subtotalSinDescuentos - totalDescuentos;
+        const impuestoPromedio = subtotalConDescuento > 0 ? (totalImpuestos / subtotalConDescuento * 100) : 0;
         
         // Recopilar datos del formulario
         const pedidoData = {
@@ -610,17 +709,27 @@ async function crearNuevoPedido() {
             observaciones: detallesProductos.length + ' producto(s)',
             detalles_producto: JSON.stringify(detallesProductos),
             cantidad: totalCantidad,
-            precio: Number(totalGeneral.toFixed(2)),
-            descuento: descuentoGlobal,
-            impuesto: impuestoGlobal
+            precio_unitario: Number((subtotalSinDescuentos / (totalCantidad || 1)).toFixed(2)), // Precio unitario promedio
+            precio: Number(totalGeneral.toFixed(2)), // Total general
+            descuento: descuentoPromedio,
+            impuesto: impuestoPromedio
         };
         
         console.log('Datos del nuevo pedido:', pedidoData);
         
         // Crear pedido
-        const response = await PedidosMVC.create(pedidoData);
+        const response = await PedidosMVC.crearPedido(pedidoData);
         
-        if (response && response.status === 'success') {
+        console.log('Respuesta completa del servidor:', response);
+        
+        // Validar diferentes formatos de respuesta exitosa
+        const isSuccess = response && (
+            response.status === 'success' || 
+            response.status === 'OK' || 
+            (response.message && response.message.includes('exitosamente'))
+        );
+        
+        if (isSuccess) {
             showNotification('Pedido creado exitosamente', 'success');
             
             // Cerrar modal
@@ -651,20 +760,42 @@ function actualizarCamposTotalesEnEdicion() {
         const detallesProductos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
         if (!Array.isArray(detallesProductos) || detallesProductos.length === 0) return;
 
+        // Calcular totales - cada producto con su propio descuento e impuesto
         let totalCantidad = 0;
-        let subtotalGeneral = 0;
+        let subtotalSinDescuentos = 0;
+        let totalDescuentos = 0;
+        let totalImpuestos = 0;
+        let totalGeneral = 0;
+        
         detallesProductos.forEach(prod => {
-            totalCantidad += Number(prod.cantidad || 0);
-            subtotalGeneral += (Number(prod.cantidad || 0) * Number(prod.precio || 0));
+            const cantidad = Number(prod.cantidad || 0);
+            const precio = Number(prod.precio || 0);
+            const descuento = Number(prod.descuento || 0);
+            const impuesto = Number(prod.impuesto || 0);
+            
+            totalCantidad += cantidad;
+            
+            // Subtotal del producto
+            let subtotalProducto = cantidad * precio;
+            subtotalSinDescuentos += subtotalProducto;
+            
+            // Aplicar descuento del producto
+            const montoDescuentoProducto = subtotalProducto * (descuento / 100);
+            totalDescuentos += montoDescuentoProducto;
+            subtotalProducto = subtotalProducto - montoDescuentoProducto;
+            
+            // Aplicar impuesto del producto
+            const montoImpuestoProducto = subtotalProducto * (impuesto / 100);
+            totalImpuestos += montoImpuestoProducto;
+            
+            // Total del producto
+            totalGeneral += subtotalProducto + montoImpuestoProducto;
         });
 
-        const descuentoGlobal = detallesProductos.length > 0 ? Number(detallesProductos[0].descuento || 0) : 0;
-        const impuestoGlobal = detallesProductos.length > 0 ? Number(detallesProductos[0].impuesto || 0) : 0;
-
-        const montoDescuento = subtotalGeneral * (descuentoGlobal / 100);
-        const subtotalConDescuento = subtotalGeneral - montoDescuento;
-        const montoImpuesto = subtotalConDescuento * (impuestoGlobal / 100);
-        const totalGeneral = subtotalConDescuento + montoImpuesto;
+        // Calcular porcentajes promedio
+        const descuentoPromedio = subtotalSinDescuentos > 0 ? (totalDescuentos / subtotalSinDescuentos * 100) : 0;
+        const subtotalConDescuento = subtotalSinDescuentos - totalDescuentos;
+        const impuestoPromedio = subtotalConDescuento > 0 ? (totalImpuestos / subtotalConDescuento * 100) : 0;
 
         // Actualizar inputs del modal de edición si existen
         const inpCantidad = document.getElementById('editarCantidad');
@@ -674,8 +805,8 @@ function actualizarCamposTotalesEnEdicion() {
 
         if (inpCantidad) inpCantidad.value = totalCantidad;
         if (inpPrecio) inpPrecio.value = Number(totalGeneral.toFixed(2));
-        if (inpDescuento) inpDescuento.value = descuentoGlobal;
-        if (inpImpuesto) inpImpuesto.value = impuestoGlobal;
+        if (inpDescuento) inpDescuento.value = descuentoPromedio.toFixed(2);
+        if (inpImpuesto) inpImpuesto.value = impuestoPromedio.toFixed(2);
     } catch (e) {
         console.error('Error actualizando campos de totales en edición:', e);
     }
@@ -1220,27 +1351,42 @@ async function guardarEdicionPedido(pedidoId, detalleId) {
             return;
         }
         
-        // Calcular totales según la nueva lógica (igual que en crear)
+        // Calcular totales - cada producto con su propio descuento e impuesto
         let totalCantidad = 0;
-        let subtotalGeneral = 0;
+        let subtotalSinDescuentos = 0;
+        let totalDescuentos = 0;
+        let totalImpuestos = 0;
+        let totalGeneral = 0;
         
         detallesProductos.forEach(prod => {
-            const cantidadNum = Number(prod.cantidad || 0);
-            const precioNum = Number((prod.precio ?? prod.precio_unitario) || 0);
-            totalCantidad += cantidadNum;
-            const subtotal = cantidadNum * precioNum;
-            subtotalGeneral += subtotal;
+            const cantidad = Number(prod.cantidad || 0);
+            const precio = Number((prod.precio ?? prod.precio_unitario) || 0);
+            const descuento = Number(prod.descuento || 0);
+            const impuesto = Number(prod.impuesto || 0);
+            
+            totalCantidad += cantidad;
+            
+            // Subtotal del producto
+            let subtotalProducto = cantidad * precio;
+            subtotalSinDescuentos += subtotalProducto;
+            
+            // Aplicar descuento del producto
+            const montoDescuentoProducto = subtotalProducto * (descuento / 100);
+            totalDescuentos += montoDescuentoProducto;
+            subtotalProducto = subtotalProducto - montoDescuentoProducto;
+            
+            // Aplicar impuesto del producto
+            const montoImpuestoProducto = subtotalProducto * (impuesto / 100);
+            totalImpuestos += montoImpuestoProducto;
+            
+            // Total del producto
+            totalGeneral += subtotalProducto + montoImpuestoProducto;
         });
         
-        // Obtener descuento e impuesto global (del primer producto)
-        const descuentoGlobal = detallesProductos.length > 0 ? Number(detallesProductos[0].descuento || 0) : 0;
-        const impuestoGlobal = detallesProductos.length > 0 ? Number(detallesProductos[0].impuesto || 0) : 0;
-        
-        // Aplicar descuento e impuesto al subtotal general
-        const montoDescuento = subtotalGeneral * (descuentoGlobal / 100);
-        const subtotalConDescuento = subtotalGeneral - montoDescuento;
-        const montoImpuesto = subtotalConDescuento * (impuestoGlobal / 100);
-        const totalGeneral = subtotalConDescuento + montoImpuesto;
+        // Calcular porcentajes promedio
+        const descuentoPromedio = subtotalSinDescuentos > 0 ? (totalDescuentos / subtotalSinDescuentos * 100) : 0;
+        const subtotalConDescuento = subtotalSinDescuentos - totalDescuentos;
+        const impuestoPromedio = subtotalConDescuento > 0 ? (totalImpuestos / subtotalConDescuento * 100) : 0;
         
         // Recopilar datos del formulario
         const pedidoData = {
@@ -1253,40 +1399,16 @@ async function guardarEdicionPedido(pedidoId, detalleId) {
             detalles_producto: JSON.stringify(detallesProductos),
             cantidad: totalCantidad,
             precio: Number(totalGeneral.toFixed(2)),
-            descuento: descuentoGlobal,
-            impuesto: impuestoGlobal
+            descuento: descuentoPromedio,
+            impuesto: impuestoPromedio
         };
         
         console.log('Datos del pedido a actualizar:', pedidoData);
+        console.log('Productos individuales a guardar:', detallesProductos);
         
-        // Actualizar pedido (detalles y datos generales)
+        // Actualizar pedido (el Controller maneja la eliminación de detalles antiguos 
+        // y la creación de nuevos registros individuales por cada producto)
         await PedidosMVC.updatePedido(pedidoId, pedidoData);
-        
-        // Actualizar detalle si existe, de lo contrario crearlo
-        if (detalleId) {
-            const detalleData = {
-                producto_solicitado: 'Pedido Personalizado Multi-Producto',
-                cantidad: totalCantidad,
-                precio_unitario: Number((subtotalGeneral / (totalCantidad || 1)).toFixed(2)), // precio base promedio unitario
-                total_linea: Number(totalGeneral.toFixed(2)), // total real con descuento e impuesto
-                descuento: descuentoGlobal,
-                impuesto: impuestoGlobal
-            };
-            
-            console.log('Datos del detalle a actualizar:', detalleData);
-            await PedidosMVC.updateDetalle(detalleId, detalleData);
-        } else {
-            const detalleData = {
-                producto_solicitado: 'Pedido Personalizado Multi-Producto',
-                cantidad: totalCantidad,
-                precio_unitario: Number((subtotalGeneral / (totalCantidad || 1)).toFixed(2)), // precio base promedio unitario
-                total_linea: Number(totalGeneral.toFixed(2)), // total real con descuento e impuesto
-                descuento: descuentoGlobal,
-                impuesto: impuestoGlobal
-            };
-            console.log('Detalle no existía, creando nuevo detalle para el pedido:', pedidoId, detalleData);
-            await PedidosMVC.createDetalle(pedidoId, detalleData);
-        }
         
         // Cerrar modal
         const modal = document.getElementById('modalEditarPedido');
@@ -1492,7 +1614,7 @@ function recalcRow(tr) {
     let total = q * p;
     total = total * (1 - d / 100);
     total = total * (1 + t / 100);
-    tr.querySelector('.prod-total').textContent = total.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+    tr.querySelector('.prod-total').textContent = formatoLempiras(total);
 }
 
 function recalcTotalesPedido() {
@@ -1505,7 +1627,7 @@ function recalcTotalesPedido() {
     });
     const totalSpan = document.getElementById('totalPedidoPreview');
     if (totalSpan) {
-        totalSpan.textContent = suma.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+        totalSpan.textContent = formatoLempiras(suma);
     }
 }
 
@@ -1658,7 +1780,7 @@ function calculateTotal() {
     }
     
     if (total > 0) {
-        totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+        totalDisplay.textContent = `Total: ${formatoLempiras(total)}`;
         totalDisplay.style.display = 'block';
     } else {
         totalDisplay.style.display = 'none';
@@ -1792,11 +1914,11 @@ function showPedidoDetails(pedido) {
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Precio Unitario:</span>
-                            <span class="detail-value">$${precio.toFixed(2)}</span>
+                            <span class="detail-value">${formatoLempiras(precio)}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Subtotal:</span>
-                            <span class="detail-value" style="font-weight: bold;">$${subtotal.toFixed(2)}</span>
+                            <span class="detail-value" style="font-weight: bold;">${formatoLempiras(subtotal)}</span>
                         </div>
                         ${prod.colores ? `
                         <div class="detail-item full-width" style="grid-column: 1 / -1;">
@@ -1836,27 +1958,27 @@ function showPedidoDetails(pedido) {
                 <div style="display: grid; gap: 10px; max-width: 400px; margin: 0 auto;">
                     <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <span style="font-weight: 500;">Subtotal:</span>
-                        <span style="font-weight: bold;">$${subtotalGeneral.toFixed(2)}</span>
+                        <span style="font-weight: bold;">${formatoLempiras(subtotalGeneral)}</span>
                     </div>
                     ${descuentoGlobal > 0 ? `
                     <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #ff6b6b;">
                         <span>Descuento (${descuentoGlobal}%):</span>
-                        <span>-$${montoDescuento.toFixed(2)}</span>
+                        <span>-${formatoLempiras(montoDescuento)}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <span>Subtotal con Descuento:</span>
-                        <span style="font-weight: bold;">$${subtotalConDescuento.toFixed(2)}</span>
+                        <span style="font-weight: bold;">${formatoLempiras(subtotalConDescuento)}</span>
                     </div>
                     ` : ''}
                     ${impuestoGlobal > 0 ? `
                     <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #ffd93d;">
                         <span>Impuesto (${impuestoGlobal}%):</span>
-                        <span>+$${montoImpuesto.toFixed(2)}</span>
+                        <span>+${formatoLempiras(montoImpuesto)}</span>
                     </div>
                     ` : ''}
                     <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #b2f2e6; margin-top: 5px;">
                         <span style="font-size: 1.2em; font-weight: bold; color: #b2f2e6;">TOTAL:</span>
-                        <span style="font-size: 1.3em; font-weight: bold; color: #b2f2e6;">$${totalGeneral.toFixed(2)}</span>
+                        <span style="font-size: 1.3em; font-weight: bold; color: #b2f2e6;">${formatoLempiras(totalGeneral)}</span>
                     </div>
                 </div>
             </div>
@@ -1913,7 +2035,7 @@ function showPedidoDetails(pedido) {
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Total del Pedido:</span>
-                        <span class="detail-value total-price" style="font-size: 1.2em; font-weight: bold; color: #b2f2e6;">$${totalGeneral.toFixed(2)}</span>
+                        <span class="detail-value total-price" style="font-size: 1.2em; font-weight: bold; color: #b2f2e6;">${formatoLempiras(totalGeneral)}</span>
                     </div>
                 </div>
             </div>
@@ -2109,6 +2231,50 @@ function setupProductDetailsImageUpload() {
     console.log('Upload de imágenes de productos configurado');
 }
 
+function mostrarPreviewImagenes(urls, container) {
+    if (!container || !urls || urls.length === 0) return;
+    
+    // Limpiar contenedor
+    container.innerHTML = '';
+    
+    // Crear previews para cada imagen
+    urls.forEach((url, index) => {
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'image-preview-item';
+        previewDiv.style.cssText = 'position: relative; display: inline-block; margin: 5px;';
+        
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = `Preview ${index + 1}`;
+        img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border: 2px solid #007bff; border-radius: 4px;';
+        
+        // Botón para eliminar imagen
+        const btnEliminar = document.createElement('button');
+        btnEliminar.type = 'button';
+        btnEliminar.className = 'btn btn-danger btn-sm';
+        btnEliminar.innerHTML = '<i class="fa-solid fa-times"></i>';
+        btnEliminar.style.cssText = 'position: absolute; top: -5px; right: -5px; padding: 2px 6px; border-radius: 50%;';
+        btnEliminar.onclick = function() {
+            // Eliminar de la lista
+            const imagenesGuardadas = JSON.parse(sessionStorage.getItem('imagenesSubidas') || '[]');
+            const nuevasImagenes = imagenesGuardadas.filter(u => u !== url);
+            sessionStorage.setItem('imagenesSubidas', JSON.stringify(nuevasImagenes));
+            
+            // Eliminar del DOM
+            previewDiv.remove();
+            
+            // Si no quedan imágenes, mostrar placeholder
+            if (container.children.length === 0) {
+                container.innerHTML = '<div class="upload-placeholder"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arrastra imágenes o haz clic para seleccionar</p></div>';
+            }
+        };
+        
+        previewDiv.appendChild(img);
+        previewDiv.appendChild(btnEliminar);
+        container.appendChild(previewDiv);
+    });
+}
+
 function setupProductDetailsColorPickers() {
     // Configurar color pickers del modal de productos personalizados
     const colorPickers = [
@@ -2235,7 +2401,7 @@ function renderTablaProductosEditables() {
                 <td style="padding:8px;"><input type="number" class="td-precio" min="0" step="0.01" value="${precio}" style="width:75px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
                 <td style="padding:8px;"><input type="number" class="td-descuento" min="0" step="0.01" value="${descuento}" style="width:55px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
                 <td style="padding:8px;"><input type="number" class="td-impuesto" min="0" step="0.01" value="${impuesto}" style="width:55px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
-                <td class="td-total" style="font-weight:bold; color:#28a745; padding:8px;">$${total.toFixed(2)}</td>
+                <td class="td-total" style="font-weight:bold; color:#28a745; padding:8px;">${formatoLempiras(total)}</td>
                 <td style="padding:8px;"><input type="text" class="td-colores" value="${prod.colores || ''}" style="width:80px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
                 <td style="padding:8px;"><input type="text" class="td-especificaciones" value="${prod.especificaciones || ''}" style="width:120px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
                 <td style="padding:8px;"><button type="button" class="btn-eliminar-producto" data-idx="${idx}" style="color:#fff; background:#dc3545; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:0.9em;" title="Eliminar producto"><i class="fa fa-trash"></i></button></td>
@@ -2334,7 +2500,7 @@ function onEditarProductoEditable(event) {
     const total = subtotalConDescuento + montoImpuesto;
 
     const tdTotal = row.querySelector('.td-total');
-    if (tdTotal) tdTotal.textContent = `$${total.toFixed(2)}`;
+    if (tdTotal) tdTotal.textContent = formatoLempiras(total);
 
     // Actualizar resumen de totales sin re-renderizar la tabla
     renderResumenTotalesEdicion();
@@ -2375,26 +2541,42 @@ function renderResumenTotalesEdicion() {
         return;
     }
     
-    // Calcular totales
+    // Calcular totales - con descuento e impuesto INDIVIDUAL por producto
     let totalCantidad = 0;
-    let subtotalGeneral = 0;
+    let subtotalSinDescuentos = 0;
+    let totalDescuentos = 0;
+    let totalImpuestos = 0;
+    let totalGeneral = 0;
     
     productos.forEach(prod => {
-        const cantidadNum = Number(prod.cantidad || 0);
-        const precioNum = Number((prod.precio ?? prod.precio_unitario) || 0);
-        totalCantidad += cantidadNum;
-        subtotalGeneral += (cantidadNum * precioNum);
+        const cantidad = Number(prod.cantidad || 0);
+        const precio = Number((prod.precio ?? prod.precio_unitario) || 0);
+        const descuento = Number(prod.descuento || 0);
+        const impuesto = Number(prod.impuesto || 0);
+        
+        totalCantidad += cantidad;
+        
+        // Subtotal del producto
+        let subtotalProducto = cantidad * precio;
+        subtotalSinDescuentos += subtotalProducto;
+        
+        // Aplicar descuento del producto
+        const montoDescuentoProducto = subtotalProducto * (descuento / 100);
+        totalDescuentos += montoDescuentoProducto;
+        subtotalProducto = subtotalProducto - montoDescuentoProducto;
+        
+        // Aplicar impuesto del producto
+        const montoImpuestoProducto = subtotalProducto * (impuesto / 100);
+        totalImpuestos += montoImpuestoProducto;
+        
+        // Total del producto
+        totalGeneral += subtotalProducto + montoImpuestoProducto;
     });
     
-    // Obtener descuento e impuesto del primer producto (global)
-    const descuentoGlobal = productos.length > 0 ? Number(productos[0].descuento || 0) : 0;
-    const impuestoGlobal = productos.length > 0 ? Number(productos[0].impuesto || 0) : 0;
-    
-    // Aplicar descuento e impuesto
-    const montoDescuento = subtotalGeneral * (descuentoGlobal / 100);
-    const subtotalConDescuento = subtotalGeneral - montoDescuento;
-    const montoImpuesto = subtotalConDescuento * (impuestoGlobal / 100);
-    const totalGeneral = subtotalConDescuento + montoImpuesto;
+    // Calcular porcentajes promedio para mostrar
+    const descuentoPromedio = subtotalSinDescuentos > 0 ? (totalDescuentos / subtotalSinDescuentos * 100) : 0;
+    const subtotalConDescuento = subtotalSinDescuentos - totalDescuentos;
+    const impuestoPromedio = subtotalConDescuento > 0 ? (totalImpuestos / subtotalConDescuento * 100) : 0;
     
     // Renderizar resumen
     let html = `
@@ -2406,16 +2588,16 @@ function renderResumenTotalesEdicion() {
             <div style="font-weight: 600;">${totalCantidad}</div>
             
             <div style="text-align: right; font-weight: 500;">Subtotal:</div>
-            <div>$${subtotalGeneral.toFixed(2)}</div>
+            <div>${formatoLempiras(subtotalSinDescuentos)}</div>
             
-            <div style="text-align: right; font-weight: 500;">Descuento (${descuentoGlobal}%):</div>
-            <div style="color: #dc3545;">-$${montoDescuento.toFixed(2)}</div>
+            <div style="text-align: right; font-weight: 500;">Descuento (promedio ${descuentoPromedio.toFixed(1)}%):</div>
+            <div style="color: #dc3545;">-${formatoLempiras(totalDescuentos)}</div>
             
-            <div style="text-align: right; font-weight: 500;">Impuesto (${impuestoGlobal}%):</div>
-            <div style="color: #28a745;">+$${montoImpuesto.toFixed(2)}</div>
+            <div style="text-align: right; font-weight: 500;">Impuesto (promedio ${impuestoPromedio.toFixed(1)}%):</div>
+            <div style="color: #28a745;">+${formatoLempiras(totalImpuestos)}</div>
             
             <div style="text-align: right; font-weight: 600; font-size: 1.1em; border-top: 2px solid #007bff; padding-top: 8px;">Total:</div>
-            <div style="font-weight: 700; font-size: 1.2em; color: #007bff; border-top: 2px solid #007bff; padding-top: 8px;">$${totalGeneral.toFixed(2)}</div>
+            <div style="font-weight: 700; font-size: 1.2em; color: #007bff; border-top: 2px solid #007bff; padding-top: 8px;">${formatoLempiras(totalGeneral)}</div>
         </div>
     `;
     
