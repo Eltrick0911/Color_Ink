@@ -7,21 +7,31 @@ use PDO;
 
 class AuditModel
 {
+    // Allowed tables with metadata to handle schema differences per entity
+    // - table: physical table name
+    // - idCol: primary audit id column to order by
+    // - userCol: column that stores the user id who performed the action
     private array $allowed = [
-        'producto' => 'producto_aud',
-        'pedido' => 'pedido_aud',
-        'detallepedido' => 'detallepedido_aud',
-        'proveedor' => 'proveedor_aud',
-        'venta' => 'venta_aud',
-        'usuario' => 'usuario_aud',
+        'producto' => ['table' => 'producto_aud',      'idCol' => 'id_aud',        'userCol' => 'usuario_accion'],
+        'pedido' => ['table' => 'pedido_aud',          'idCol' => 'id_aud',        'userCol' => 'usuario_accion'],
+        'detallepedido' => ['table' => 'detallepedido_aud','idCol' => 'id_aud',    'userCol' => 'usuario_accion'],
+        'proveedor' => ['table' => 'proveedor_aud',    'idCol' => 'id_aud',        'userCol' => 'usuario_accion'],
+        // venta_aud tiene columnas distintas: id_venta_aud y usuario_admin
+        'venta' => ['table' => 'venta_aud',            'idCol' => 'id_venta_aud',  'userCol' => 'usuario_admin'],
+        'usuario' => ['table' => 'usuario_aud',        'idCol' => 'id_aud',        'userCol' => 'usuario_accion'],
     ];
 
     public function getAllowedTables(): array
     {
-        return $this->allowed;
+        // Return just the mapping key => table name for listing available tables
+        $result = [];
+        foreach ($this->allowed as $k => $meta) {
+            $result[$k] = $meta['table'];
+        }
+        return $result;
     }
 
-    private function resolveTable(string $key): ?string
+    private function resolveMeta(string $key): ?array
     {
         $key = strtolower(trim($key));
         return $this->allowed[$key] ?? null;
@@ -29,10 +39,13 @@ class AuditModel
 
     public function listAudits(string $tableKey, array $filters, int $page, int $limit): array
     {
-        $table = $this->resolveTable($tableKey);
-        if (!$table) {
+        $meta = $this->resolveMeta($tableKey);
+        if (!$meta) {
             throw new \InvalidArgumentException('Tabla no permitida');
         }
+        $table = $meta['table'];
+        $idCol = $meta['idCol'];
+        $userCol = $meta['userCol'];
 
         $pdo = connectionDB::getConnection();
 
@@ -40,7 +53,8 @@ class AuditModel
         $params = [];
 
         if (!empty($filters['usuario_accion'])) {
-            $where[] = 'usuario_accion = :usuario_accion';
+            // Mapear a la columna real de usuario según la tabla
+            $where[] = $userCol . ' = :usuario_accion';
             $params[':usuario_accion'] = (int)$filters['usuario_accion'];
         }
         if (!empty($filters['accion'])) {
@@ -76,7 +90,7 @@ class AuditModel
         $total = (int)$stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
         $offset = ($page - 1) * $limit;
-        $sql = "SELECT * FROM {$table} {$whereSql} ORDER BY fecha_accion DESC, id_aud DESC LIMIT :limit OFFSET :offset";
+    $sql = "SELECT * FROM {$table} {$whereSql} ORDER BY fecha_accion DESC, {$idCol} DESC LIMIT :limit OFFSET :offset";
         $stmt = $pdo->prepare($sql);
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v);
@@ -99,14 +113,16 @@ class AuditModel
 
     public function getDistinct(string $tableKey, string $column): array
     {
-        $table = $this->resolveTable($tableKey);
-        if (!$table) {
+        $meta = $this->resolveMeta($tableKey);
+        if (!$meta) {
             throw new \InvalidArgumentException('Tabla no permitida');
         }
-
+        $table = $meta['table'];
         // Solo columnas permitidas para evitar inyección
         $column = strtolower($column);
-        if (!in_array($column, ['usuario_accion', 'accion'])) {
+        if ($column === 'usuario_accion') {
+            $column = $meta['userCol'];
+        } elseif ($column !== 'accion') {
             throw new \InvalidArgumentException('Columna no permitida');
         }
 

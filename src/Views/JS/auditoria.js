@@ -53,12 +53,18 @@
   }
 
   async function apiGet(params){
-    const url = apiBase + '&' + new URLSearchParams(params).toString();
+    // Evitar respuestas en caché cuando se cambia de tabla o filtros
+    const qp = new URLSearchParams(params);
+    qp.append('_ts', Date.now().toString());
+    const url = apiBase + '&' + qp.toString();
     const token = getAuthToken();
     if(!token){
       throw new Error('Se requiere iniciar sesión (token local) para ver Auditoría. Inicia sesión nuevamente.');
     }
-    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + token },
+      cache: 'no-store'
+    });
     if(!res.ok){
       const msg = await res.text();
       throw new Error('Error ' + res.status + ': ' + msg);
@@ -67,12 +73,18 @@
   }
 
   async function apiGetUsers(params){
-    const url = apiUserBase + '&' + new URLSearchParams(params).toString();
+    // Evitar caché del listado de usuarios para etiquetas en exportación
+    const qp = new URLSearchParams(params);
+    qp.append('_ts', Date.now().toString());
+    const url = apiUserBase + '&' + qp.toString();
     const token = getAuthToken();
     if(!token){
       throw new Error('Se requiere iniciar sesión (token local).');
     }
-    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + token },
+      cache: 'no-store'
+    });
     if(!res.ok){
       const msg = await res.text();
       throw new Error('Error ' + res.status + ': ' + msg);
@@ -99,7 +111,8 @@
       'pedido': 'id_pedido',
       'detallepedido': 'id_detalle',
       'proveedor': 'id_proveedor',
-      'venta': 'id_venta',
+      // En venta_aud el id de la entidad original es id_venta_original
+      'venta': 'id_venta_original',
       'usuario': 'id_usuario'
     };
     return mapping[table] || null;
@@ -142,14 +155,35 @@
       return;
     }
     body.innerHTML = rows.map(r => {
-      const id = r.id_aud ?? '';
+      const id = r.id_aud ?? r.id_venta_aud ?? '';
       const entityId = entityIdCol && r[entityIdCol] ? r[entityIdCol] : '-';
       const fecha = formatDateTime(r.fecha_accion ?? '');
-      const userId = r.usuario_accion ?? '';
-      const usuario = (usersMapCache && usersMapCache[userId]) ? `${userId} - ${usersMapCache[userId]}` : `${userId}`;
+      // Resolver columna de usuario según la tabla
+      const rawUserId = table === 'venta' ? (r.usuario_admin ?? '') : (r.usuario_accion ?? '');
+      const usuario = (usersMapCache && usersMapCache[rawUserId]) ? `${rawUserId} - ${usersMapCache[rawUserId]}` : `${rawUserId}`;
       const accion = r.accion ?? '';
-      const antes = r.json_antes ?? '';
-      const despues = r.json_despues ?? '';
+
+      // Preparar detalles
+      let antes = r.json_antes ?? '';
+      let despues = r.json_despues ?? '';
+      if ((!antes && !despues) && table === 'venta') {
+        // Sintetizar detalles para venta_aud usando su esquema
+        const beforeObj = {
+          id_venta: r.id_venta_original ?? null,
+          id_pedido: r.id_pedido_original ?? null,
+          fecha_venta: r.fecha_venta_original ? formatDateTime(r.fecha_venta_original) : null,
+          monto_cobrado: r.monto_cobrado_original ?? null,
+          estado: r.estado_original ?? null
+        };
+        const afterObj = {
+          accion: r.accion ?? null,
+          motivo: r.motivo ?? '',
+          usuario_admin: r.usuario_admin ?? null
+        };
+        try { antes = JSON.stringify(beforeObj); } catch(_) { antes = ''; }
+        try { despues = JSON.stringify(afterObj); } catch(_) { despues = ''; }
+      }
+
       return `<tr>
         <td>${id}</td>
         <td><strong>${entityId}</strong></td>
@@ -309,23 +343,44 @@
       const entityIdCol = getEntityIdColumn(table);
       const entityLabel = getEntityIdLabel(table);
       
-      // Preparar datos para Excel
+      // Preparar datos para Excel (compatibles con esquemas por tabla)
       const excelData = rows.map(r => {
         const entityId = entityIdCol && r[entityIdCol] ? r[entityIdCol] : '-';
-        const userId = r.usuario_accion ?? '';
+        const idAud = r.id_aud ?? r.id_venta_aud ?? '';
+        // Columna de usuario según tabla
+        const userCol = table === 'venta' ? 'usuario_admin' : 'usuario_accion';
+        const userId = r[userCol] ?? '';
         const userName = usersMapCache && usersMapCache[userId] ? usersMapCache[userId] : '';
-        const antes = prettyJson(r.json_antes || '');
-        const despues = prettyJson(r.json_despues || '');
-        
+
+        // Detalles antes/después: si no existen y es venta, sintetizar
+        let antes = r.json_antes || '';
+        let despues = r.json_despues || '';
+        if ((!antes && !despues) && table === 'venta') {
+          const beforeObj = {
+            id_venta: r.id_venta_original ?? null,
+            id_pedido: r.id_pedido_original ?? null,
+            fecha_venta: r.fecha_venta_original ? formatDateTime(r.fecha_venta_original) : null,
+            monto_cobrado: r.monto_cobrado_original ?? null,
+            estado: r.estado_original ?? null
+          };
+          const afterObj = {
+            accion: r.accion ?? null,
+            motivo: r.motivo ?? '',
+            usuario_admin: r.usuario_admin ?? null
+          };
+          try { antes = JSON.stringify(beforeObj); } catch(_) {}
+          try { despues = JSON.stringify(afterObj); } catch(_) {}
+        }
+
         return {
-          'ID Auditoría': r.id_aud ?? '',
+          'ID Auditoría': idAud,
           [entityLabel]: entityId,
           'Fecha': formatDateTime(r.fecha_accion ?? ''),
           'ID Usuario': userId,
           'Usuario': userName,
           'Acción': r.accion ?? '',
-          'Datos Antes': antes,
-          'Datos Después': despues
+          'Datos Antes': prettyJson(antes),
+          'Datos Después': prettyJson(despues)
         };
       });
 
