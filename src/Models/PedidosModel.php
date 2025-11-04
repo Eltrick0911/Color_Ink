@@ -411,6 +411,7 @@ class PedidosModel
     {
         try {
             error_log("PedidosModel - createDetallePedido: Creando detalle para pedido " . $detalleData['id_pedido']);
+            error_log("PedidosModel - createDetallePedido: DATOS COMPLETOS RECIBIDOS: " . json_encode($detalleData));
             
             // Preparar JSON de detalles personalizados si viene como array
             $detallesPersonalizados = null;
@@ -430,6 +431,8 @@ class PedidosModel
                     (1 - ($detalleData['descuento'] / 100)) * 
                     (1 + ($detalleData['impuesto'] / 100)));
 
+                error_log("PedidosModel - createDetallePedido: INSERTANDO con total_linea=" . $totalLinea . " (cantidad=" . $detalleData['cantidad'] . ", precio_unitario=" . $detalleData['precio_unitario'] . ", descuento=" . $detalleData['descuento'] . "%, impuesto=" . $detalleData['impuesto'] . "%)");
+
                 $sql = "INSERT INTO detallepedido (
                             producto_solicitado, cantidad, precio_unitario, descuento, impuesto, total_linea, id_pedido, id_producto, detalles_personalizados
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -445,6 +448,8 @@ class PedidosModel
                     $detalleData['id_producto'] ?? null,
                     $detallesPersonalizados
                 ]);
+                
+                error_log("PedidosModel - createDetallePedido: INSERT resultado=" . ($result ? 'EXITOSO' : 'FALLIDO') . ", id_detalle insertado=" . $this->connection->lastInsertId());
             } else {
                 // Intentar usar SP; si falla, inserción directa sin columna extra
                 try {

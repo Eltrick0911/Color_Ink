@@ -274,6 +274,74 @@ function setupDetailsModal() {
             document.body.style.overflow = 'auto';
         }
     });
+    
+    // Configurar botón de actualizar estado en el modal
+    const btnActualizarEstado = modal.querySelector('.btn-actualizar-estado');
+    const estadoSelector = modal.querySelector('#estadoPedido');
+    
+    if (btnActualizarEstado && estadoSelector) {
+        btnActualizarEstado.addEventListener('click', async function() {
+            const pedidoId = modal.getAttribute('data-pedido-id');
+            const nuevoEstadoId = estadoSelector.value;
+            
+            if (!pedidoId) {
+                showNotification('Error: No se pudo identificar el pedido', 'error');
+                return;
+            }
+            
+            console.log('Actualizando estado del pedido:', pedidoId, 'a estado:', nuevoEstadoId);
+            
+            // Confirmar el cambio
+            const opcionSeleccionada = estadoSelector.options[estadoSelector.selectedIndex];
+            const nombreEstado = opcionSeleccionada.text;
+            
+            if (!confirm(`¿Cambiar estado del pedido a "${nombreEstado}"?`)) {
+                return;
+            }
+            
+            try {
+                // Deshabilitar el botón mientras se actualiza
+                btnActualizarEstado.disabled = true;
+                btnActualizarEstado.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Actualizando...';
+                
+                // Llamar a la API para actualizar el estado
+                const response = await fetch(`/Color_Ink/public/index.php?route=pedidos/${pedidoId}/cambiar-estado&caso=1`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                    },
+                    body: JSON.stringify({
+                        id_estado_nuevo: parseInt(nuevoEstadoId)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && (data.status === 'OK' || data.status === 'success')) {
+                    showNotification(`Estado actualizado a: ${nombreEstado}`, 'success');
+                    
+                    // Cerrar modal
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    
+                    // Recargar la tabla
+                    if (typeof PedidosMVC !== 'undefined') {
+                        console.log('Recargando tabla después de cambio de estado...');
+                        await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+                    }
+                } else {
+                    throw new Error(data.message || 'Error al cambiar el estado');
+                }
+            } catch (error) {
+                console.error('Error cambiando estado:', error);
+                showNotification('Error al cambiar el estado del pedido', 'error');
+            } finally {
+                btnActualizarEstado.disabled = false;
+                btnActualizarEstado.innerHTML = '<i class="fa-solid fa-sync-alt"></i> Actualizar';
+            }
+        });
+    }
 }
 
 function setupEditColorPickers() {
@@ -743,7 +811,20 @@ async function crearNuevoPedido() {
             document.getElementById('formNuevoPedido').reset();
             
             // Refrescar tabla
-            await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+            console.log('Refrescando tabla de pedidos después de crear...');
+            try {
+                // Limpiar caché de localStorage antes de refrescar
+                console.log('Limpiando caché de pedidos...');
+                localStorage.removeItem('pedidos');
+                
+                await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+                console.log('Tabla refrescada exitosamente');
+            } catch (refreshError) {
+                console.error('Error al refrescar tabla:', refreshError);
+                // Intentar recargar la página como último recurso
+                console.log('Recargando página...');
+                window.location.reload();
+            }
         } else {
             throw new Error(response?.message || 'Error al crear pedido');
         }
@@ -1167,7 +1248,8 @@ function setupStatusSelectors() {
                     
                     // Recargar la tabla
                     if (typeof PedidosMVC !== 'undefined') {
-                        PedidosMVC.loadAll();
+                        console.log('Recargando tabla después de cambio de estado...');
+                        await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
                     }
                 } else {
                     throw new Error(data.message || 'Error al cambiar el estado');
@@ -1799,6 +1881,7 @@ function showPedidoDetails(pedido) {
     const modal = document.getElementById('modalVerPedido');
     const content = document.getElementById('pedidoDetailsContent');
     const pedidoIdDisplay = document.getElementById('pedidoIdDisplay');
+    const estadoSelector = document.getElementById('estadoPedido');
     
     if (!modal || !content) {
         console.error('Modal de detalles no encontrado');
@@ -1806,9 +1889,17 @@ function showPedidoDetails(pedido) {
         return;
     }
     
+    // Guardar el ID del pedido en el modal para usarlo al cambiar estado
+    modal.setAttribute('data-pedido-id', pedido.id || pedido.id_pedido);
+    
     // Actualizar título con número de pedido
     if (pedidoIdDisplay) {
         pedidoIdDisplay.textContent = `#${pedido.numeroPedido || pedido.id}`;
+    }
+    
+    // Establecer el estado actual en el selector
+    if (estadoSelector && pedido.estadoId) {
+        estadoSelector.value = pedido.estadoId;
     }
     
     // Función para generar los colores visuales
@@ -2380,7 +2471,7 @@ function renderTablaProductosEditables() {
 
     let html = `<table class="tabla-productos-editable" style="width:100%; border-collapse:separate; border-spacing:0 6px; font-size:0.95em;">
         <thead>
-            <tr style="background:#007bff; color:#fff;">
+            <tr style="background: linear-gradient(45deg, rgba(20, 152, 0, 0.95), rgba(20, 152, 0, 0.75)); color:#fff;">
                 <th style="padding:8px; border-radius:8px 0 0 0;">#</th>
                 <th style="padding:8px;" title='Categoría'>Categoría</th>
                 <th style="padding:8px;" title='Cantidad'>Cant.</th>
@@ -2425,16 +2516,16 @@ function renderTablaProductosEditables() {
                 especificaciones: prod.especificaciones
             });
             
-            html += `<tr data-idx="${idx}" style="background:${idx%2===0?'#e8f4f8':'#f8f9fa'}; border: 1px solid #ddd;">
+            html += `<tr data-idx="${idx}" style="background:${idx%2===0?'#eef9f1':'#f8fbf9'}; border: 1px solid rgba(20, 152, 0, 0.08);">
                 <td style="text-align:center; font-weight:bold; padding:8px; color:#333;">${idx + 1}</td>
-                <td style="padding:8px;"><input type="text" class="td-categoria" value="${categoria}" style="width:100px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
-                <td style="padding:8px;"><input type="number" class="td-cantidad" min="1" value="${cantidad}" style="width:60px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
-                <td style="padding:8px;"><input type="number" class="td-precio" min="0" step="0.01" value="${precio}" style="width:75px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
-                <td style="padding:8px;"><input type="number" class="td-descuento" min="0" step="0.01" value="${descuento}" style="width:55px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
-                <td style="padding:8px;"><input type="number" class="td-impuesto" min="0" step="0.01" value="${impuesto}" style="width:55px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="text" class="td-categoria" value="${categoria}" style="width:100px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="number" class="td-cantidad" min="1" value="${cantidad}" style="width:60px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="number" class="td-precio" min="0" step="0.01" value="${precio}" style="width:75px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="number" class="td-descuento" min="0" step="0.01" value="${descuento}" style="width:55px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="number" class="td-impuesto" min="0" step="0.01" value="${impuesto}" style="width:55px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
                 <td class="td-total" style="font-weight:bold; color:#28a745; padding:8px;">${formatoLempiras(total)}</td>
-                <td style="padding:8px;"><input type="text" class="td-colores" value="${prod.colores || ''}" style="width:80px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
-                <td style="padding:8px;"><input type="text" class="td-especificaciones" value="${prod.especificaciones || ''}" style="width:120px; padding:4px 6px; border:1px solid #007bff; border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="text" class="td-colores" value="${prod.colores || ''}" style="width:80px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="text" class="td-especificaciones" value="${prod.especificaciones || ''}" style="width:120px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
                 <td style="padding:8px;"><button type="button" class="btn-eliminar-producto" data-idx="${idx}" style="color:#fff; background:#dc3545; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:0.9em;" title="Eliminar producto"><i class="fa fa-trash"></i></button></td>
             </tr>`;
         });
@@ -2627,8 +2718,8 @@ function renderResumenTotalesEdicion() {
             <div style="text-align: right; font-weight: 500;">Impuesto (promedio ${impuestoPromedio.toFixed(1)}%):</div>
             <div style="color: #28a745;">+${formatoLempiras(totalImpuestos)}</div>
             
-            <div style="text-align: right; font-weight: 600; font-size: 1.1em; border-top: 2px solid #007bff; padding-top: 8px;">Total:</div>
-            <div style="font-weight: 700; font-size: 1.2em; color: #007bff; border-top: 2px solid #007bff; padding-top: 8px;">${formatoLempiras(totalGeneral)}</div>
+            <div style="text-align: right; font-weight: 600; font-size: 1.1em; border-top: 2px solid rgba(20, 152, 0, 0.5); padding-top: 8px;">Total:</div>
+            <div style="font-weight: 700; font-size: 1.2em; color: rgba(20, 152, 0, 0.95); border-top: 2px solid rgba(20, 152, 0, 0.5); padding-top: 8px;">${formatoLempiras(totalGeneral)}</div>
         </div>
     `;
     

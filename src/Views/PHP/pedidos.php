@@ -114,9 +114,9 @@ if (strpos($uri, '/public/') !== false) {
                 <div class="status-change-section">
                     <label for="estadoPedido">Cambiar Estado:</label>
                     <select id="estadoPedido" class="status-selector-modal">
-                        <option value="pendiente">Pendiente</option>
-                        <option value="cancelado">Cancelado</option>
-                        <option value="enviado">Enviado</option>
+                        <option value="3">En Proceso</option>
+                        <option value="1">Entregado</option>
+                        <option value="2">Cancelado</option>
                     </select>
                     <button type="button" class="btn-actualizar-estado">
                         <i class="fa-solid fa-sync-alt"></i> Actualizar
@@ -393,7 +393,7 @@ if (strpos($uri, '/public/') !== false) {
                     <div class="form-group" style="margin-top: 20px;">
                         <label style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px; display: block;">Productos del Pedido</label>
                         <div id="tablaProductosEditablesContainer" style="margin-bottom: 15px;"></div>
-                        <button type="button" class="btn-agregar-producto" id="btnAgregarProductoEditable" style="background:#007bff; color:#fff; border:none; border-radius:5px; padding:8px 20px; font-size:0.95em; cursor:pointer; transition: all 0.3s;">
+                        <button type="button" class="btn-agregar-producto" id="btnAgregarProductoEditable">
                             <i class="fa-solid fa-plus"></i> Agregar Producto
                         </button>
                     </div>

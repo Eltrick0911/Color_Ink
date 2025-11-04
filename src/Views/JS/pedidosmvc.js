@@ -93,7 +93,9 @@
 
         // Try both route patterns when there is ambiguity
         getAllPedidos: function () {
-            const url = this.apiEntry + '?route=pedidos&caso=1';
+            // Agregar timestamp para evitar caché del navegador
+            const timestamp = new Date().getTime();
+            const url = this.apiEntry + '?route=pedidos&caso=1&_t=' + timestamp;
             console.log('PedidosMVC - getAllPedidos: URL:', url);
             console.log('PedidosMVC - getAllPedidos: Token:', this.token ? 'Presente' : 'Ausente');
             return this.request(url, { method: 'GET' })
@@ -296,6 +298,7 @@
         },
 
         renderTable: function (selector, pedidos) {
+            console.log('PedidosMVC - renderTable: Selector:', selector, 'Pedidos:', pedidos.length);
             this.tableSelector = selector;
             const table = document.querySelector(selector);
             if (!table) {
@@ -305,6 +308,7 @@
             const tbody = table.querySelector('tbody') || table;
             // Limpiar
             tbody.innerHTML = '';
+            console.log('PedidosMVC - renderTable: Tabla limpiada, renderizando', pedidos.length, 'pedidos');
 
             if (!pedidos || pedidos.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: rgba(255,255,255,0.6);">No hay pedidos para mostrar</td></tr>';
