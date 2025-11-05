@@ -158,16 +158,20 @@ async function editProducto(id, codigo, producto) {
 async function deleteProducto(id, codigo, producto, row) {
     if (confirm(`¿Estás seguro de que quieres eliminar el producto "${producto}" (${codigo})?`)) {
         try {
+            const authHeader = getAuthHeader();
+            console.log('🗑️ Eliminar producto - Auth header:', authHeader);
+            
             const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...getAuthHeader(),
+                    ...authHeader,
                 },
                 body: JSON.stringify({ id_producto: id })
             });
 
             const result = await response.json();
+            console.log('🗑️ Eliminar producto - Respuesta:', result);
 
             if (result.status === 'OK') {
                 showNotification(' Producto eliminado exitosamente', 'success');

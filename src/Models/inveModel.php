@@ -499,14 +499,14 @@ class inveModel
                 return false;
             }
 
-            // Establecer variable de usuario para el trigger de auditoría con el usuario autenticado si está disponible
+            // Extraer id_usuario para auditoría (el SP lo establecerá internamente)
             $idUsuario = isset($data['id_usuario']) ? (int)$data['id_usuario'] : 1;
-            $this->db->exec("SET @usuario_id = " . $idUsuario . "");
 
             // Usar procedimiento almacenado para desactivar el producto (soft delete)
-            error_log('inveModel - deleteProduct: Llamando SP sp_eliminar_producto');
-            $stmt = $this->db->prepare("CALL sp_eliminar_producto(:id_producto)");
+            error_log('inveModel - deleteProduct: Llamando SP sp_eliminar_producto con usuario: ' . $idUsuario);
+            $stmt = $this->db->prepare("CALL sp_eliminar_producto(:id_producto, :id_usuario)");
             $stmt->bindParam(':id_producto', $data['id_producto'], PDO::PARAM_INT);
+            $stmt->bindParam(':id_usuario', $idUsuario, PDO::PARAM_INT);
 
             $result = $stmt->execute();
             // Limpiar cursores adicionales del CALL
