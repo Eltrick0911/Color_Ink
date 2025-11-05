@@ -1348,7 +1348,7 @@ function exportUsuarios() {
             csvContent += rowData.join(',') + '\n';
         }
     });
-    
+
     // Crear y descargar archivo
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

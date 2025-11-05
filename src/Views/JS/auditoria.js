@@ -45,6 +45,9 @@
   let usersMapCache = null; // cache de id_usuario -> nombre_usuario
   let fpStart = null; // instancia flatpickr para startDate
   let fpEnd = null;   // instancia flatpickr para endDate
+  let loadingEl = null; // overlay de carga
+  let isFirstDataLoad = true; // mostrar overlay solo en la primera carga de datos
+  let pendingLoads = 0; // contador para anidar llamadas durante la carga inicial
 
   function getAuthToken(){
     // Auditoría exige SOLO token local del backend
@@ -70,6 +73,20 @@
       throw new Error('Error ' + res.status + ': ' + msg);
     }
     return res.json();
+  }
+
+  function showLoading(){
+    // Inline loading: insertar mensaje directamente en el tbody de la tabla
+    if (!isFirstDataLoad) return;
+    const tbody = document.getElementById('tableBody');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando auditoría...</td></tr>';
+    }
+  }
+  function hideLoading(){
+    // Al terminar, isFirstDataLoad se desactiva para ya no mostrar loading en siguientes consultas
+    if (!isFirstDataLoad) return;
+    isFirstDataLoad = false;
   }
 
   async function apiGetUsers(params){
@@ -250,6 +267,7 @@
   }
 
   async function loadTables(){
+    showLoading();
     try{
       const json = await apiGet({ action: 'tables' });
       const tables = json.data || [];
@@ -259,11 +277,14 @@
     }catch(e){
       console.error(e);
       alert('No se pudieron cargar las tablas');
+    } finally {
+      hideLoading();
     }
   }
 
   async function onTableChanged(){
     const table = document.getElementById('tableSelect').value;
+    showLoading();
     try{
       const json = await apiGet({ action: 'filters', table });
       const selU = document.getElementById('userSelect');
@@ -275,6 +296,8 @@
       await loadData(1);
     }catch(e){
       console.error(e);
+    } finally {
+      hideLoading();
     }
   }
 
@@ -284,6 +307,7 @@
     const transaction = document.getElementById('txSelect').value;
     const start_date = document.getElementById('startDate').value;
     const end_date = document.getElementById('endDate').value;
+    showLoading();
     try{
       const json = await apiGet({ action: 'list', table, user_id, transaction, start_date, end_date, page, limit: 20 });
       renderTableHead(); // Llamar primero para actualizar headers según tabla seleccionada
@@ -292,6 +316,8 @@
     }catch(e){
       console.error(e);
       alert('Error al cargar auditoría');
+    } finally {
+      hideLoading();
     }
   }
 
@@ -319,6 +345,7 @@
     const end_date = document.getElementById('endDate').value;
     
     try {
+      showLoading();
       // Asegurar mapa de usuarios (id -> nombre) una sola vez
       await ensureUsersMap();
 
@@ -416,6 +443,8 @@
     } catch(e) {
       console.error(e);
       alert('Error al exportar: ' + e.message);
+    } finally {
+      hideLoading();
     }
   }
 
@@ -445,6 +474,9 @@
     document.getElementById('modalClose').addEventListener('click', () => document.getElementById('detailModal').classList.add('hidden'));
     document.addEventListener('keydown', e => { if(e.key === 'Escape') document.getElementById('detailModal').classList.add('hidden'); });
   }
+
+  // Mostrar loading inmediatamente al cargar el script (antes de DOMContentLoaded)
+  showLoading();
 
   document.addEventListener('DOMContentLoaded', function(){
     initEvents();
