@@ -1,14 +1,28 @@
 .sidebar-content {
     padding: 0 1rem 1rem;
-    max-width: 1190px;
+    max-width: 1390px;
     margin: 0 auto;
     width: 92%; /* Asegura que tome el ancho disponible dentro de los márgenes */
     flex-grow: 1; /* Permite que el contenedor principal crezca */
 }
 
+/* Evitar que el sidebar (derecha) tape contenido en esta vista */
+body.sidebar-active .sidebar-content {
+    /* deja el margen global y añade un colchón interno para tablas anchas */
+    margin-right: 0 !important; /* anula el empuje global de sidebar.css que corría el contenido a la izquierda */
+    padding-right: calc(80px + 12px);
+}
+
+/* Ajuste para móviles donde el sidebar es más angosto */
+@media (max-width: 576px), (orientation: portrait) and (max-width: 768px) {
+    body.sidebar-active .sidebar-content {
+        padding-right: calc(56px + 10px);
+    }
+}
+
 .usuarios-container {
     padding: 0 20px 20px;
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -155,13 +169,16 @@
 .usuarios-table {
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
-    overflow: hidden;
+    /* No ocultar columnas si el ancho no alcanza; permitir scroll horizontal suave */
+    overflow: auto;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .usuarios-table table {
     width: 100%;
     border-collapse: collapse;
+    /* Extender un ancho mínimo para que quepan todas las columnas de gestión */
+    min-width: 1000px;
 }
 
 .usuarios-table th {
@@ -178,6 +195,22 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.9);
     vertical-align: middle;
+}
+
+/* Limitar visualmente el correo a ~30 caracteres con elipsis */
+.usuarios-table td:nth-child(3),
+.usuarios-table td.cell-email {
+    max-width: 30ch;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Reservar espacio visible para la columna de Acciones */
+.usuarios-table th:last-child,
+.usuarios-table td:last-child {
+    width: 180px;
+    white-space: nowrap;
 }
 
 .usuarios-table tr:hover {
@@ -304,13 +337,9 @@
         min-width: auto;
     }
     
-    .usuarios-table {
-        overflow-x: auto;
-    }
-    
-    .usuarios-table table {
-        min-width: 800px;
-    }
+    /* En móviles mantenemos el scroll horizontal y un ancho mínimo más contenido */
+    .usuarios-table { overflow-x: auto; }
+    .usuarios-table table { min-width: 800px; }
     
     .user-info {
         flex-direction: column;

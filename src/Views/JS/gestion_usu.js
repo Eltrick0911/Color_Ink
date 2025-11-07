@@ -832,11 +832,11 @@ function createUserRow(user) {
                 </div>
                 <div class="user-details">
                     <strong>${user.nombre_usuario}</strong>
-                    <small>${user.correo}</small>
+                    <small title="${user.correo}">${user.correo}</small>
                 </div>
             </div>
         </td>
-        <td>${user.correo}</td>
+        <td class="cell-email" title="${user.correo}">${user.correo}</td>
         <td><span class="role ${roleClass}">${roleText}</span></td>
         <td><span class="status ${statusClass}">${statusText}</span></td>
         <td>${lastAccess}</td>
