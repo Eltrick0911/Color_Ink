@@ -248,9 +248,9 @@ if (strpos($uri, '/public/') !== false) {
                 <form id="formDetallesProducto" class="product-details-form">
                     <div id="productoDetalleContainer">
                         <div class="form-group">
-                            <label for="categoriaProducto">Categoría de Producto *</label>
+                            <label for="categoriaProducto">Producto *</label>
                             <select id="categoriaProducto" name="categoriaProducto" required>
-                                <option value="">Seleccionar categoría</option>
+                                <option value="">Seleccionar producto</option>
                                 <option value="camisas">Camisas/Playeras</option>
                                 <option value="retratos">Retratos</option>
                                 <option value="arreglos-florales">Arreglos Florales</option>
