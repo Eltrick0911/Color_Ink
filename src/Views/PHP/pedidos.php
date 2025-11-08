@@ -17,6 +17,8 @@ if (strpos($uri, '/public/') !== false) {
     <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/sidebar.css">
     <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/pedidos.css">
     <link rel="icon" href="<?php echo $basePath; ?>/src/Views/IMG/LOGO.png" type="image/png">
+    <!-- SheetJS para exportación a Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <main class="sidebar-content">
@@ -24,19 +26,23 @@ if (strpos($uri, '/public/') !== false) {
         <div class="pedidos-container">
             <div class="pedidos-header">
                 <h2>Lista de Pedidos</h2>
-                <button class="btn-nuevo-pedido">
-                    <i class="fa-solid fa-plus"></i> Nuevo Pedido
-                </button>
+                <div class="header-buttons">
+                    <button class="btn-exportar-excel" id="btnExportarExcel">
+                        <i class="fa-solid fa-file-excel"></i> Exportar a Excel
+                    </button>
+                    <button class="btn-nuevo-pedido">
+                        <i class="fa-solid fa-plus"></i> Nuevo Pedido
+                    </button>
+                </div>
             </div>
             
             <div class="pedidos-filters">
                 <input type="text" placeholder="Buscar pedidos..." class="search-input">
-                <select class="filter-select">
-                    <option value="">Todos los estados</option>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="cancelado">Cancelado</option>
-                    <option value="enviado">Enviado</option>
-                 
+                <select class="filter-select" title="Filtrar por estado">
+                    <option value="">Todos</option>
+                    <option value="2">Cancelado</option>
+                    <option value="3">En Proceso</option>
+                    <option value="1">Entregado</option>
                 </select>
             </div>
 
@@ -432,6 +438,28 @@ if (strpos($uri, '/public/') !== false) {
             });
         });
     </script>
+
+    <!-- Modal de confirmación de eliminación -->
+    <div id="modalConfirmDelete" class="modal-confirm-delete">
+        <div class="modal-confirm-content">
+            <div class="modal-confirm-header">
+                <svg class="icon-warning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <h3>¿Eliminar pedido?</h3>
+            </div>
+            <div class="modal-confirm-body">
+                <p id="confirmDeleteMessage">¿Estás seguro de que quieres eliminar este pedido?</p>
+                <p class="warning-text">Esta acción no se puede deshacer</p>
+            </div>
+            <div class="modal-confirm-footer">
+                <button class="btn-cancel" id="btnCancelDelete">Cancelar</button>
+                <button class="btn-delete" id="btnConfirmDelete">Eliminar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 

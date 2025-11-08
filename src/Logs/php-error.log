@@ -10045,3 +10045,946 @@ Stack trace:
 [04-Nov-2025 11:07:46 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 18 pedidos de la BD
 [04-Nov-2025 11:07:46 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":30,"numero_pedido":"10","id_usuario":18,"fecha_pedido":"2025-11-03 02:47:45","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":1,"cliente_nombre":"Finish","cliente_telefono":"111111111","canal_venta":"instagram","prioridad":"alta","detalles_producto":"[{\"categoria\":\"arreglos-florales\",\"colores\":\"#54d100\",\"especificaciones\":\"jsjsjsjjsjsj\",\"cantidad\":1,\"precio\":2000,\"descuento\":1,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"vinil\",\"colores\":\"#493b08\",\"especificaciones\":\"jsjsjjs\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Finish","telefono":"111111111","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"2980.00"}
 [04-Nov-2025 11:07:46 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 18 pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:10:21 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:10:21 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[04-Nov-2025 11:10:21 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[04-Nov-2025 11:10:21 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 18 pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 18 pedidos de la BD
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":30,"numero_pedido":"10","id_usuario":18,"fecha_pedido":"2025-11-03 02:47:45","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":1,"cliente_nombre":"Finish","cliente_telefono":"111111111","canal_venta":"instagram","prioridad":"alta","detalles_producto":"[{\"categoria\":\"arreglos-florales\",\"colores\":\"#54d100\",\"especificaciones\":\"jsjsjsjjsjsj\",\"cantidad\":1,\"precio\":2000,\"descuento\":1,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"vinil\",\"colores\":\"#493b08\",\"especificaciones\":\"jsjsjjs\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Finish","telefono":"111111111","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"2980.00"}
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 18 pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:10:21 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:10:21 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[04-Nov-2025 11:10:21 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 18 pedidos
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 18 pedidos de la BD
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":30,"numero_pedido":"10","id_usuario":18,"fecha_pedido":"2025-11-03 02:47:45","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":1,"cliente_nombre":"Finish","cliente_telefono":"111111111","canal_venta":"instagram","prioridad":"alta","detalles_producto":"[{\"categoria\":\"arreglos-florales\",\"colores\":\"#54d100\",\"especificaciones\":\"jsjsjsjjsjsj\",\"cantidad\":1,\"precio\":2000,\"descuento\":1,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"vinil\",\"colores\":\"#493b08\",\"especificaciones\":\"jsjsjjs\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Finish","telefono":"111111111","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"2980.00"}
+[04-Nov-2025 11:10:21 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 18 pedidos
+[04-Nov-2025 11:13:09 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:09 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:09 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosRoute - Method: POST
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosRoute - Input data: {"clienteNombre":"Emelda247","clienteTelefono":"32537289","fechaEntrega":"2025-12-03","canalVenta":"telefono","prioridad":"alta","observaciones":"2 producto(s)","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":2,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","cantidad":3,"precio_unitario":600,"precio":1800,"descuento":0,"impuesto":0}
+[04-Nov-2025 11:13:09 America/Tegucigalpa] Nueva petición - Método: POST, URL: pedidos
+[04-Nov-2025 11:13:09 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","Content-Length":"617","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","Content-Type":"application\/json","sec-ch-ua-mobile":"?0","Accept":"*\/*","Origin":"http:\/\/localhost","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:09 America/Tegucigalpa] Datos de entrada: {"clienteNombre":"Emelda247","clienteTelefono":"32537289","fechaEntrega":"2025-12-03","canalVenta":"telefono","prioridad":"alta","observaciones":"2 producto(s)","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":2,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","cantidad":3,"precio_unitario":600,"precio":1800,"descuento":0,"impuesto":0}
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=, SubAction='', SubID=
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosRoute - Routing: POST /pedidos
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: Iniciando creación de pedido
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: Datos - Cliente: Emelda247, Canal: telefono
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - crearCliente: Creando nuevo cliente - Nombre: Emelda247, Teléfono: 32537289
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - crearCliente: Cliente creado con ID: 20
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: Cliente creado/encontrado con ID: 20
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createPedido: Creando pedido - Usuario: 20
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createPedido: Pedido creado con ID: 32
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: Pedido creado exitosamente - ID: 32
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: Creando 2 registros en detallepedido
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: ===== PRODUCTO #1 =====
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: Producto RAW: {"categoria":"banner","colores":"#8a0000, #fea4a4","especificaciones":"Producto 1","cantidad":2,"precio":400,"descuento":0,"impuesto":0,"imagenesUrls":"[]"}
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: cantidad=2, precioBase=400, descuento=0%, impuesto=0%
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: CALCULO -> subtotal=800, montoDescuento=0, subtotalConDescuento=800, montoImpuesto=0, total_linea=800
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: detalleData COMPLETO antes de insert: {"producto_solicitado":"Personalizado: banner - Producto 1","cantidad":2,"precio_unitario":400,"total_linea":800,"descuento":0,"impuesto":0,"id_pedido":32,"id_producto":null,"id_usuario":1,"detalles_personalizados":{"categoria":"banner","colores":"#8a0000, #fea4a4","especificaciones":"Producto 1","imagenes":[]}}
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createDetallePedido: Creando detalle para pedido 32
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createDetallePedido: DATOS COMPLETOS RECIBIDOS: {"producto_solicitado":"Personalizado: banner - Producto 1","cantidad":2,"precio_unitario":400,"total_linea":800,"descuento":0,"impuesto":0,"id_pedido":32,"id_producto":null,"id_usuario":1,"detalles_personalizados":{"categoria":"banner","colores":"#8a0000, #fea4a4","especificaciones":"Producto 1","imagenes":[]}}
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createDetallePedido: INSERTANDO con total_linea=800 (cantidad=2, precio_unitario=400, descuento=0%, impuesto=0%)
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createDetallePedido: INSERT resultado=EXITOSO, id_detalle insertado=68
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createDetallePedido: Creación de detalle exitosa
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: ✓ Detalle producto creado EXITOSAMENTE: Personalizado: banner - Producto 1
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: ===== PRODUCTO #2 =====
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: Producto RAW: {"categoria":"volantes","colores":"#ffadad","especificaciones":"Producto 2","cantidad":1,"precio":1000,"descuento":0,"impuesto":0,"imagenesUrls":"[]"}
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: cantidad=1, precioBase=1000, descuento=0%, impuesto=0%
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: CALCULO -> subtotal=1000, montoDescuento=0, subtotalConDescuento=1000, montoImpuesto=0, total_linea=1000
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: detalleData COMPLETO antes de insert: {"producto_solicitado":"Personalizado: volantes - Producto 2","cantidad":1,"precio_unitario":1000,"total_linea":1000,"descuento":0,"impuesto":0,"id_pedido":32,"id_producto":null,"id_usuario":1,"detalles_personalizados":{"categoria":"volantes","colores":"#ffadad","especificaciones":"Producto 2","imagenes":[]}}
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createDetallePedido: Creando detalle para pedido 32
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createDetallePedido: DATOS COMPLETOS RECIBIDOS: {"producto_solicitado":"Personalizado: volantes - Producto 2","cantidad":1,"precio_unitario":1000,"total_linea":1000,"descuento":0,"impuesto":0,"id_pedido":32,"id_producto":null,"id_usuario":1,"detalles_personalizados":{"categoria":"volantes","colores":"#ffadad","especificaciones":"Producto 2","imagenes":[]}}
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createDetallePedido: INSERTANDO con total_linea=1000 (cantidad=1, precio_unitario=1000, descuento=0%, impuesto=0%)
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createDetallePedido: INSERT resultado=EXITOSO, id_detalle insertado=69
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - createDetallePedido: Creación de detalle exitosa
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosController - create: ✓ Detalle producto creado EXITOSAMENTE: Personalizado: volantes - Producto 2
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 32
+[04-Nov-2025 11:13:09 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido 32 obtenido con 2 detalles
+[04-Nov-2025 11:13:09 America/Tegucigalpa] Fin de la petición
+[04-Nov-2025 11:13:09 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:10 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:10 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[04-Nov-2025 11:13:10 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[04-Nov-2025 11:13:10 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-12-03","observaciones":"2","id_estado":3,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":2,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"En Proceso","estado_codigo":"PROCESO","total_pedido":"1800.00"}
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:10 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:10 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[04-Nov-2025 11:13:10 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-12-03","observaciones":"2","id_estado":3,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":2,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"En Proceso","estado_codigo":"PROCESO","total_pedido":"1800.00"}
+[04-Nov-2025 11:13:10 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[04-Nov-2025 11:13:13 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:13 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:13 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosRoute - URL: pedidos/32
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","32"]
+[04-Nov-2025 11:13:13 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/32
+[04-Nov-2025 11:13:13 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-12-03","observaciones":"2","id_estado":3,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":2,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"En Proceso","estado_codigo":"PROCESO","total_pedido":"1800.00"}
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[04-Nov-2025 11:13:13 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:13 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:13 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosRoute - URL: pedidos/detalle/32
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","detalle","32"]
+[04-Nov-2025 11:13:13 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/detalle/32
+[04-Nov-2025 11:13:13 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-12-03","observaciones":"2","id_estado":3,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":2,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"En Proceso","estado_codigo":"PROCESO","total_pedido":"1800.00"}
+[04-Nov-2025 11:13:13 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:23 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Method: PUT
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - URL: pedidos/32/cambiar-estado
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","32","cambiar-estado"]
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Input data: {"id_estado_nuevo":2}
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Nueva petición - Método: PUT, URL: pedidos/32/cambiar-estado
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","Content-Length":"21","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","Content-Type":"application\/json","sec-ch-ua-mobile":"?0","Accept":"*\/*","Origin":"http:\/\/localhost","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Datos de entrada: {"id_estado_nuevo":2}
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=32, SubAction='cambiar-estado', SubID=
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Routing: PUT /pedidos/32/cambiar-estado
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - cambiarEstado: Cambiando estado pedido ID: 32
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 32
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido 32 obtenido con 2 detalles
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - cambiarEstado: Cambiando estado a 2 por usuario 1
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosModel - cambiarEstadoPedido: Cambiando estado pedido 32 a 2 por usuario 1
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosModel - cambiarEstadoPedido: Cambio de estado exitoso
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - cambiarEstado: Estado del pedido 32 actualizado exitosamente
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Fin de la petición
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:23 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":2,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"1800.00"}
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:23 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":2,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"1800.00"}
+[04-Nov-2025 11:13:23 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[04-Nov-2025 11:13:26 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:26 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:26 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosRoute - URL: pedidos/32
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","32"]
+[04-Nov-2025 11:13:26 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/32
+[04-Nov-2025 11:13:26 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":2,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"1800.00"}
+[04-Nov-2025 11:13:26 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[04-Nov-2025 11:13:45 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:45 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:45 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosRoute - Method: PUT
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosRoute - URL: pedidos/32
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","32"]
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosRoute - Input data: {"clienteNombre":"Emelda247","clienteTelefono":"32537289","fechaEntrega":"2025-11-04","canalVenta":"telefono","prioridad":"alta","observaciones":"2 producto(s)","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","cantidad":4,"precio":2200,"descuento":0,"impuesto":0}
+[04-Nov-2025 11:13:45 America/Tegucigalpa] Nueva petición - Método: PUT, URL: pedidos/32
+[04-Nov-2025 11:13:45 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","Content-Length":"595","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","Content-Type":"application\/json","sec-ch-ua-mobile":"?0","Accept":"*\/*","Origin":"http:\/\/localhost","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:45 America/Tegucigalpa] Datos de entrada: {"clienteNombre":"Emelda247","clienteTelefono":"32537289","fechaEntrega":"2025-11-04","canalVenta":"telefono","prioridad":"alta","observaciones":"2 producto(s)","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","cantidad":4,"precio":2200,"descuento":0,"impuesto":0}
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=32, SubAction='', SubID=
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosRoute - Routing: PUT /pedidos/32
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosController - update: Actualizando pedido ID: 32
+[04-Nov-2025 11:13:45 America/Tegucigalpa] Datos recibidos: {"clienteNombre":"Emelda247","clienteTelefono":"32537289","fechaEntrega":"2025-11-04","canalVenta":"telefono","prioridad":"alta","observaciones":"2 producto(s)","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","cantidad":4,"precio":2200,"descuento":0,"impuesto":0}
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 32
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido 32 obtenido con 2 detalles
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosController - update: Datos a actualizar: {"cliente_nombre":"Emelda247","cliente_telefono":"32537289","fecha_entrega":"2025-11-04","prioridad":"alta","canal_venta":"telefono","observaciones":"2 producto(s)","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]"}
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosModel - updatePedidoCompleto: Actualizando pedido 32
+[04-Nov-2025 11:13:45 America/Tegucigalpa] Datos a actualizar: {"cliente_nombre":"Emelda247","cliente_telefono":"32537289","fecha_entrega":"2025-11-04","prioridad":"alta","canal_venta":"telefono","observaciones":"2 producto(s)","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]"}
+[04-Nov-2025 11:13:45 America/Tegucigalpa] SQL: UPDATE pedido SET cliente_nombre = ?, cliente_telefono = ?, fecha_entrega = ?, prioridad = ?, canal_venta = ?, observaciones = ?, detalles_producto = ? WHERE id_pedido = ?
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosModel - updatePedidoCompleto: Actualización exitosa
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosController - update: Actualizando detallepedido - eliminando registros antiguos y creando nuevos
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosModel - deleteDetallesByPedidoId: Eliminando todos los detalles del pedido ID: 32
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosModel - deleteDetallesByPedidoId: Se eliminaron 2 registros
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosController - update: detalleData COMPLETO antes de insert: {"producto_solicitado":"Personalizado: banner - Producto 1","cantidad":3,"precio_unitario":400,"total_linea":1200,"descuento":0,"impuesto":0,"id_pedido":32,"id_producto":null,"id_usuario":1,"detalles_personalizados":{"categoria":"banner","colores":"#8a0000, #fea4a4","especificaciones":"Producto 1","imagenes":[]}}
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosModel - createDetallePedido: Creando detalle para pedido 32
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosModel - createDetallePedido: DATOS COMPLETOS RECIBIDOS: {"producto_solicitado":"Personalizado: banner - Producto 1","cantidad":3,"precio_unitario":400,"total_linea":1200,"descuento":0,"impuesto":0,"id_pedido":32,"id_producto":null,"id_usuario":1,"detalles_personalizados":{"categoria":"banner","colores":"#8a0000, #fea4a4","especificaciones":"Producto 1","imagenes":[]}}
+[04-Nov-2025 11:13:45 America/Tegucigalpa] PedidosModel - createDetallePedido: INSERTANDO con total_linea=1200 (cantidad=3, precio_unitario=400, descuento=0%, impuesto=0%)
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - createDetallePedido: INSERT resultado=EXITOSO, id_detalle insertado=70
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - createDetallePedido: Creación de detalle exitosa
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - update: ✓ Detalle producto creado EXITOSAMENTE: Personalizado: banner - Producto 1
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - update: detalleData COMPLETO antes de insert: {"producto_solicitado":"Personalizado: volantes - Producto 2","cantidad":1,"precio_unitario":1000,"total_linea":1000,"descuento":0,"impuesto":0,"id_pedido":32,"id_producto":null,"id_usuario":1,"detalles_personalizados":{"categoria":"volantes","colores":"#ffadad","especificaciones":"Producto 2","imagenes":[]}}
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - createDetallePedido: Creando detalle para pedido 32
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - createDetallePedido: DATOS COMPLETOS RECIBIDOS: {"producto_solicitado":"Personalizado: volantes - Producto 2","cantidad":1,"precio_unitario":1000,"total_linea":1000,"descuento":0,"impuesto":0,"id_pedido":32,"id_producto":null,"id_usuario":1,"detalles_personalizados":{"categoria":"volantes","colores":"#ffadad","especificaciones":"Producto 2","imagenes":[]}}
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - createDetallePedido: INSERTANDO con total_linea=1000 (cantidad=1, precio_unitario=1000, descuento=0%, impuesto=0%)
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - createDetallePedido: INSERT resultado=EXITOSO, id_detalle insertado=71
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - createDetallePedido: Creación de detalle exitosa
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - update: ✓ Detalle producto creado EXITOSAMENTE: Personalizado: volantes - Producto 2
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - update: Pedido 32 actualizado exitosamente
+[04-Nov-2025 11:13:46 America/Tegucigalpa] Fin de la petición
+[04-Nov-2025 11:13:46 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:46 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:46 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[04-Nov-2025 11:13:46 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[04-Nov-2025 11:13:46 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:46 America/Tegucigalpa] Conexión exitosa
+[04-Nov-2025 11:13:46 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosRoute - Method: GET
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[04-Nov-2025 11:13:46 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 2239aab7-3dc1-4acd-84f9-71206216da74","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=8vk3a8bn8o5d7dr0c02a38vg0k"}
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[04-Nov-2025 11:13:46 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:51:32 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:51:32 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 02:51:32 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 02:51:32 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5"}
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5"}
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:51:32 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:51:32 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 02:51:32 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:51:32 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Iniciando
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Headers enviados
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Imports cargados
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Iniciando
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Headers enviados
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Iniciando
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Imports cargados
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Headers enviados
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Imports cargados
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Iniciando
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Headers enviados
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Imports cargados
+[08-Nov-2025 02:51:55 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Controller creado
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Método: GET, Acción: proveedores
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Llamando getProveedores
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getProveedores: MODO TESTING - Autorización desactivada
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getProveedores: Obteniendo lista de proveedores
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveModel - getProveedores: Llamando SP sp_listar_proveedores
+[08-Nov-2025 02:51:55 America/Tegucigalpa] Error getProveedores: SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE color_ink.sp_listar_proveedores does not exist
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getProveedores: Proveedores obtenidos: []
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getProveedores: Respuesta final: {"status":"OK","message":"Proveedores obtenidos exitosamente","data":[]}
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Proceso completado
+[08-Nov-2025 02:51:55 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Controller creado
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Método: GET, Acción: productos
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Llamando getProductos
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getProductos: MODO TESTING - Autorización desactivada
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getProductos: Obteniendo lista de productos
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveModel - getProductos: Llamando SP sp_listar_productos
+[08-Nov-2025 02:51:55 America/Tegucigalpa] Error getProductos: SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE color_ink.sp_listar_productos does not exist
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getProductos: Productos obtenidos: []
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getProductos: Respuesta final: {"status":"OK","message":"Productos obtenidos exitosamente","data":[]}
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Proceso completado
+[08-Nov-2025 02:51:55 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Controller creado
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Método: GET, Acción: categorias
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Llamando getCategorias
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getCategorias: MODO TESTING - Autorización desactivada
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getCategorias: Obteniendo lista de categorías
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveModel - getCategorias: Llamando SP sp_listar_categorias
+[08-Nov-2025 02:51:55 America/Tegucigalpa] Error getCategorias: SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE color_ink.sp_listar_categorias does not exist
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getCategorias: Categorías obtenidas: []
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getCategorias: Respuesta final: {"status":"OK","message":"Categor\u00edas obtenidas exitosamente","data":[]}
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Proceso completado
+[08-Nov-2025 02:51:55 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Controller creado
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Método: GET, Acción: estadisticas
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Llamando getEstadisticas
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getEstadisticas: MODO TESTING - Autorización desactivada
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getEstadisticas: Obteniendo estadísticas del inventario
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveModel - getEstadisticas: Llamando SP sp_obtener_estadisticas_inventario
+[08-Nov-2025 02:51:55 America/Tegucigalpa] Error getEstadisticas: SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE color_ink.sp_obtener_estadisticas_inventario does not exist
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getEstadisticas: Estadísticas obtenidas: {"total_productos":0,"stock_bajo":0,"valor_total":0}
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inveController - getEstadisticas: Respuesta final: {"status":"OK","message":"Estad\u00edsticas obtenidas exitosamente","data":{"total_productos":0,"stock_bajo":0,"valor_total":0}}
+[08-Nov-2025 02:51:55 America/Tegucigalpa] inve route: Proceso completado
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Iniciando
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Headers enviados
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Imports cargados
+[08-Nov-2025 02:52:00 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Controller creado
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Método: GET, Acción: ultimo-id
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Llamando getUltimoIdProducto
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inveController - getUltimoIdProducto: MODO TESTING - Autorización desactivada
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inveModel - getUltimoIdProducto: Llamando SP sp_obtener_ultimo_id_producto
+[08-Nov-2025 02:52:00 America/Tegucigalpa] Error getUltimoIdProducto (PDO): SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE color_ink.sp_obtener_ultimo_id_producto does not exist
+[08-Nov-2025 02:52:00 America/Tegucigalpa] Error Info: ["42000",1305,"PROCEDURE color_ink.sp_obtener_ultimo_id_producto does not exist"]
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Proceso completado
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Iniciando
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Headers enviados
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Imports cargados
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Iniciando
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Headers enviados
+[08-Nov-2025 02:52:00 America/Tegucigalpa] inve route: Imports cargados
+[08-Nov-2025 02:52:01 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inve route: Controller creado
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inve route: Método: GET, Acción: categorias
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inve route: Llamando getCategorias
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inveController - getCategorias: MODO TESTING - Autorización desactivada
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inveController - getCategorias: Obteniendo lista de categorías
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inveModel - getCategorias: Llamando SP sp_listar_categorias
+[08-Nov-2025 02:52:01 America/Tegucigalpa] Error getCategorias: SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE color_ink.sp_listar_categorias does not exist
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inveController - getCategorias: Categorías obtenidas: []
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inveController - getCategorias: Respuesta final: {"status":"OK","message":"Categor\u00edas obtenidas exitosamente","data":[]}
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inve route: Proceso completado
+[08-Nov-2025 02:52:01 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inve route: Controller creado
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inve route: Método: GET, Acción: proveedores
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inve route: Llamando getProveedores
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inveController - getProveedores: MODO TESTING - Autorización desactivada
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inveController - getProveedores: Obteniendo lista de proveedores
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inveModel - getProveedores: Llamando SP sp_listar_proveedores
+[08-Nov-2025 02:52:01 America/Tegucigalpa] Error getProveedores: SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE color_ink.sp_listar_proveedores does not exist
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inveController - getProveedores: Proveedores obtenidos: []
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inveController - getProveedores: Respuesta final: {"status":"OK","message":"Proveedores obtenidos exitosamente","data":[]}
+[08-Nov-2025 02:52:01 America/Tegucigalpa] inve route: Proceso completado
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inve route: Iniciando
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inve route: Headers enviados
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inve route: Imports cargados
+[08-Nov-2025 02:52:25 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inve route: Controller creado
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inve route: Método: GET, Acción: estadisticas
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inve route: Llamando getEstadisticas
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inveController - getEstadisticas: MODO TESTING - Autorización desactivada
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inveController - getEstadisticas: Obteniendo estadísticas del inventario
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inveModel - getEstadisticas: Llamando SP sp_obtener_estadisticas_inventario
+[08-Nov-2025 02:52:25 America/Tegucigalpa] Error getEstadisticas: SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE color_ink.sp_obtener_estadisticas_inventario does not exist
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inveController - getEstadisticas: Estadísticas obtenidas: {"total_productos":0,"stock_bajo":0,"valor_total":0}
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inveController - getEstadisticas: Respuesta final: {"status":"OK","message":"Estad\u00edsticas obtenidas exitosamente","data":{"total_productos":0,"stock_bajo":0,"valor_total":0}}
+[08-Nov-2025 02:52:25 America/Tegucigalpa] inve route: Proceso completado
+[08-Nov-2025 02:52:53 America/Tegucigalpa] inve route: Iniciando
+[08-Nov-2025 02:52:53 America/Tegucigalpa] inve route: Headers enviados
+[08-Nov-2025 02:52:53 America/Tegucigalpa] inve route: Imports cargados
+[08-Nov-2025 02:52:53 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:52:53 America/Tegucigalpa] inve route: Controller creado
+[08-Nov-2025 02:52:53 America/Tegucigalpa] inve route: Método: GET, Acción: exportar-excel
+[08-Nov-2025 02:52:53 America/Tegucigalpa] inve route: Llamando exportarExcel
+[08-Nov-2025 02:52:53 America/Tegucigalpa] inveController - exportarExcel: MODO TESTING - Autorización desactivada
+[08-Nov-2025 02:52:53 America/Tegucigalpa] inveModel - getProductos: Llamando SP sp_listar_productos
+[08-Nov-2025 02:52:53 America/Tegucigalpa] Error getProductos: SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE color_ink.sp_listar_productos does not exist
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inve route: Iniciando
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inve route: Headers enviados
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inve route: Imports cargados
+[08-Nov-2025 02:52:55 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inve route: Controller creado
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inve route: Método: GET, Acción: estadisticas
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inve route: Llamando getEstadisticas
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inveController - getEstadisticas: MODO TESTING - Autorización desactivada
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inveController - getEstadisticas: Obteniendo estadísticas del inventario
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inveModel - getEstadisticas: Llamando SP sp_obtener_estadisticas_inventario
+[08-Nov-2025 02:52:55 America/Tegucigalpa] Error getEstadisticas: SQLSTATE[42000]: Syntax error or access violation: 1305 PROCEDURE color_ink.sp_obtener_estadisticas_inventario does not exist
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inveController - getEstadisticas: Estadísticas obtenidas: {"total_productos":0,"stock_bajo":0,"valor_total":0}
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inveController - getEstadisticas: Respuesta final: {"status":"OK","message":"Estad\u00edsticas obtenidas exitosamente","data":{"total_productos":0,"stock_bajo":0,"valor_total":0}}
+[08-Nov-2025 02:52:55 America/Tegucigalpa] inve route: Proceso completado
+[08-Nov-2025 02:53:14 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:53:14 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:53:14 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 02:53:14 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 02:53:14 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:53:14 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:53:14 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 02:53:14 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:53:14 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:55:53 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:55:53 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 02:55:53 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 02:55:53 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:55:53 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:55:53 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 02:55:53 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:55:53 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:56:03 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:56:03 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:56:03 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:56:03 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:56:03 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 02:56:03 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 02:56:03 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 02:56:03 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:56:03 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:56:03 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:56:03 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:56:03 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:56:03 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:56:03 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:56:04 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:56:04 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:56:04 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 02:56:04 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 02:56:04 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:56:04 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:56:05 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:56:05 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 02:56:05 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 02:56:05 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:56:05 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:56:05 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 02:56:05 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:56:05 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:57:14 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:57:14 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 02:57:14 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 02:57:14 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:57:14 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:57:14 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 02:57:14 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 561a595d-32c8-4b3d-839e-e486a0755975","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=aa4n6rsaglrli2qj8ugno4vfuv"}
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:57:14 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:57:21 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:57:21 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 02:57:21 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 02:57:21 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 603943d4-c529-4026-85dc-65ecf5602e2f","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5"}
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 603943d4-c529-4026-85dc-65ecf5602e2f","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5"}
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:57:21 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 02:57:21 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 02:57:21 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 603943d4-c529-4026-85dc-65ecf5602e2f","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=jpnrj3p7sk1ijiurqj71a56ogv"}
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 603943d4-c529-4026-85dc-65ecf5602e2f","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=jpnrj3p7sk1ijiurqj71a56ogv"}
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 02:57:21 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:04:47 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:04:47 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 03:04:47 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 03:04:47 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 5584f75f-04e5-4bb0-adaf-8fdf3e6da383","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5"}
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 5584f75f-04e5-4bb0-adaf-8fdf3e6da383","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5"}
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:04:47 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:04:47 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 03:04:47 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 5584f75f-04e5-4bb0-adaf-8fdf3e6da383","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=efajjd2fdo2d3nj6v9adhf7c4a"}
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 5584f75f-04e5-4bb0-adaf-8fdf3e6da383","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=efajjd2fdo2d3nj6v9adhf7c4a"}
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 03:04:47 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 03:08:51 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:08:51 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:08:51 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 03:08:51 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 03:08:51 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5"}
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5"}
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 03:08:51 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 03:08:52 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:08:52 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:08:52 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 03:08:52 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 03:08:52 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=ajrgv5nei1jiqhb5fg1in882l5"}
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=ajrgv5nei1jiqhb5fg1in882l5"}
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 03:08:52 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:09:05 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - Method: DELETE
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - URL: pedidos/6
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","6"]
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Nueva petición - Método: DELETE, URL: pedidos/6
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Origin":"http:\/\/localhost","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=ajrgv5nei1jiqhb5fg1in882l5"}
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=6, SubAction='', SubID=
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - Routing: DELETE /pedidos/6
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - remove: Eliminando pedido ID: 6
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosModel - deletePedido: Eliminando pedido ID: 6
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosModel - deletePedido: Eliminación exitosa
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - remove: Pedido 6 eliminado exitosamente
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Fin de la petición
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:09:05 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=ajrgv5nei1jiqhb5fg1in882l5"}
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=ajrgv5nei1jiqhb5fg1in882l5"}
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 18 pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 18 pedidos de la BD
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 18 pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:09:05 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=ajrgv5nei1jiqhb5fg1in882l5"}
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=ajrgv5nei1jiqhb5fg1in882l5"}
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 18 pedidos
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 18 pedidos de la BD
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 03:09:05 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 18 pedidos
+[08-Nov-2025 03:09:32 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:09:32 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 03:09:32 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosRoute - URL: pedidos/4
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","4"]
+[08-Nov-2025 03:09:32 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/4
+[08-Nov-2025 03:09:32 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=ajrgv5nei1jiqhb5fg1in882l5"}
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer af533f0a-297f-4981-989b-aa61ceef3404","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=ajrgv5nei1jiqhb5fg1in882l5"}
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 18 pedidos
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 18 pedidos de la BD
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 03:09:32 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 18 pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 13:52:31 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 13:52:31 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 13:52:31 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 13:52:31 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 08b317df-15dd-40b8-9c82-9a2ee7f942fc","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5"}
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 08b317df-15dd-40b8-9c82-9a2ee7f942fc","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5"}
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 18 pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 18 pedidos de la BD
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 18 pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 13:52:31 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 13:52:31 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 13:52:31 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 08b317df-15dd-40b8-9c82-9a2ee7f942fc","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=1uh0bas0c63ih29dls0s7r44ds"}
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 08b317df-15dd-40b8-9c82-9a2ee7f942fc","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=1uh0bas0c63ih29dls0s7r44ds"}
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 18 pedidos
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 18 pedidos de la BD
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":32,"numero_pedido":"11","id_usuario":20,"fecha_pedido":"2025-11-04 14:13:09","fecha_entrega":"2025-11-04","observaciones":"2 producto(s)","id_estado":2,"cliente_nombre":"Emelda247","cliente_telefono":"32537289","canal_venta":"telefono","prioridad":"alta","detalles_producto":"[{\"categoria\":\"banner\",\"colores\":\"#8a0000, #fea4a4\",\"especificaciones\":\"Producto 1\",\"cantidad\":3,\"precio\":400,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"},{\"categoria\":\"volantes\",\"colores\":\"#ffadad\",\"especificaciones\":\"Producto 2\",\"cantidad\":1,\"precio\":1000,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Emelda247","telefono":"32537289","estado_nombre":"Cancelado","estado_codigo":"CANC","total_pedido":"2200.00"}
+[08-Nov-2025 13:52:31 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 18 pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 13:53:23 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Method: POST
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Input data: {"clienteNombre":"Yor","clienteTelefono":"32537289","fechaEntrega":"2025-12-05","canalVenta":"whatsapp","prioridad":"alta","observaciones":"1 producto(s)","detalles_producto":"[{\"categoria\":\"retratos\",\"colores\":\"#9b0303\",\"especificaciones\":\"\",\"cantidad\":1,\"precio\":3000,\"descuento\":2,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","cantidad":1,"precio_unitario":3000,"precio":2940,"descuento":2,"impuesto":0}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Nueva petición - Método: POST, URL: pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","Content-Length":"421","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 08b317df-15dd-40b8-9c82-9a2ee7f942fc","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","Content-Type":"application\/json","sec-ch-ua-mobile":"?0","Accept":"*\/*","Origin":"http:\/\/localhost","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=1uh0bas0c63ih29dls0s7r44ds"}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Datos de entrada: {"clienteNombre":"Yor","clienteTelefono":"32537289","fechaEntrega":"2025-12-05","canalVenta":"whatsapp","prioridad":"alta","observaciones":"1 producto(s)","detalles_producto":"[{\"categoria\":\"retratos\",\"colores\":\"#9b0303\",\"especificaciones\":\"\",\"cantidad\":1,\"precio\":3000,\"descuento\":2,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","cantidad":1,"precio_unitario":3000,"precio":2940,"descuento":2,"impuesto":0}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=, SubAction='', SubID=
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Routing: POST /pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: Iniciando creación de pedido
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: Datos - Cliente: Yor, Canal: whatsapp
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - crearCliente: Creando nuevo cliente - Nombre: Yor, Teléfono: 32537289
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - crearCliente: Cliente creado con ID: 21
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: Cliente creado/encontrado con ID: 21
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - createPedido: Creando pedido - Usuario: 21
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - createPedido: Pedido creado con ID: 33
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: Pedido creado exitosamente - ID: 33
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: Creando 1 registros en detallepedido
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: ===== PRODUCTO #1 =====
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: Producto RAW: {"categoria":"retratos","colores":"#9b0303","especificaciones":"","cantidad":1,"precio":3000,"descuento":2,"impuesto":0,"imagenesUrls":"[]"}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: cantidad=1, precioBase=3000, descuento=2%, impuesto=0%
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: CALCULO -> subtotal=3000, montoDescuento=60, subtotalConDescuento=2940, montoImpuesto=0, total_linea=2940
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: detalleData COMPLETO antes de insert: {"producto_solicitado":"Personalizado: retratos","cantidad":1,"precio_unitario":3000,"total_linea":2940,"descuento":2,"impuesto":0,"id_pedido":33,"id_producto":null,"id_usuario":1,"detalles_personalizados":{"categoria":"retratos","colores":"#9b0303","especificaciones":"","imagenes":[]}}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - createDetallePedido: Creando detalle para pedido 33
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - createDetallePedido: DATOS COMPLETOS RECIBIDOS: {"producto_solicitado":"Personalizado: retratos","cantidad":1,"precio_unitario":3000,"total_linea":2940,"descuento":2,"impuesto":0,"id_pedido":33,"id_producto":null,"id_usuario":1,"detalles_personalizados":{"categoria":"retratos","colores":"#9b0303","especificaciones":"","imagenes":[]}}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - createDetallePedido: INSERTANDO con total_linea=2940 (cantidad=1, precio_unitario=3000, descuento=2%, impuesto=0%)
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - createDetallePedido: INSERT resultado=EXITOSO, id_detalle insertado=72
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - createDetallePedido: Creación de detalle exitosa
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - create: ✓ Detalle producto creado EXITOSAMENTE: Personalizado: retratos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 33
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido 33 obtenido con 1 detalles
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Fin de la petición
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 13:53:23 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 08b317df-15dd-40b8-9c82-9a2ee7f942fc","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=1uh0bas0c63ih29dls0s7r44ds"}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 08b317df-15dd-40b8-9c82-9a2ee7f942fc","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=1uh0bas0c63ih29dls0s7r44ds"}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":33,"numero_pedido":"12","id_usuario":21,"fecha_pedido":"2025-11-08 16:53:23","fecha_entrega":"2025-12-05","observaciones":"1","id_estado":3,"cliente_nombre":"Yor","cliente_telefono":"32537289","canal_venta":"whatsapp","prioridad":"alta","detalles_producto":"[{\"categoria\":\"retratos\",\"colores\":\"#9b0303\",\"especificaciones\":\"\",\"cantidad\":1,\"precio\":3000,\"descuento\":2,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Yor","telefono":"32537289","estado_nombre":"En Proceso","estado_codigo":"PROCESO","total_pedido":"2940.00"}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Conexión exitosa
+[08-Nov-2025 13:53:23 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Method: GET
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 08b317df-15dd-40b8-9c82-9a2ee7f942fc","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=1uh0bas0c63ih29dls0s7r44ds"}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer 08b317df-15dd-40b8-9c82-9a2ee7f942fc","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/142.0.0.0 Safari\/537.36 Edg\/142.0.0.0","sec-ch-ua":"\"Chromium\";v=\"142\", \"Microsoft Edge\";v=\"142\", \"Not_A Brand\";v=\"99\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es,es-ES;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,es-HN;q=0.5","Cookie":"PHPSESSID=1uh0bas0c63ih29dls0s7r44ds"}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 19 pedidos
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 19 pedidos de la BD
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":33,"numero_pedido":"12","id_usuario":21,"fecha_pedido":"2025-11-08 16:53:23","fecha_entrega":"2025-12-05","observaciones":"1","id_estado":3,"cliente_nombre":"Yor","cliente_telefono":"32537289","canal_venta":"whatsapp","prioridad":"alta","detalles_producto":"[{\"categoria\":\"retratos\",\"colores\":\"#9b0303\",\"especificaciones\":\"\",\"cantidad\":1,\"precio\":3000,\"descuento\":2,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Yor","telefono":"32537289","estado_nombre":"En Proceso","estado_codigo":"PROCESO","total_pedido":"2940.00"}
+[08-Nov-2025 13:53:23 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 19 pedidos

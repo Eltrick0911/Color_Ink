@@ -83,6 +83,18 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('No se encontró el botón .btn-nuevo-pedido');
         }
         
+        // Configurar botón "Exportar a Excel"
+        const btnExportarExcel = document.getElementById('btnExportarExcel');
+        if (btnExportarExcel) {
+            btnExportarExcel.addEventListener('click', function() {
+                console.log('Click en botón Exportar a Excel');
+                exportarPedidosAExcel();
+            });
+        }
+        
+        // Configurar modal de confirmación de eliminación
+        setupConfirmDeleteModal();
+        
         // Configurar modal de nuevo pedido
         setupModal();
         
@@ -194,57 +206,69 @@ function setupFilters() {
     
     if (filterSelect) {
         filterSelect.addEventListener('change', function() {
-            const status = this.value;
-            filterPedidosByStatus(status);
+            applyFilters();
         });
     }
 }
 
-function filterPedidosByStatus(status) {
-    const rows = document.querySelectorAll('.pedidos-table tbody tr');
-    
-    rows.forEach(row => {
-        const statusCell = row.querySelector('.status');
-        const rowStatus = statusCell ? statusCell.textContent.toLowerCase() : '';
-        
-        if (status === '' || rowStatus.includes(status.toLowerCase())) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
+// Mantener compatibilidad: delega al filtro compuesto
+function filterPedidosByStatus() { applyFilters(); }
 
 function setupSearch() {
     const searchInput = document.querySelector('.search-input');
     
     if (searchInput) {
         searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            searchPedidos(searchTerm);
+            applyFilters();
         });
     }
 }
 
-function searchPedidos(searchTerm) {
-    const rows = document.querySelectorAll('.pedidos-table tbody tr');
-    
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        let found = false;
-        
-        cells.forEach(cell => {
-            if (cell.textContent.toLowerCase().includes(searchTerm)) {
-                found = true;
-            }
-        });
-        
-        if (found || searchTerm === '') {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+// Mantener compatibilidad: delega al filtro compuesto
+function searchPedidos() { applyFilters(); }
+
+// Filtro compuesto: aplica búsqueda + estado sobre filas actuales
+function applyFilters() {
+    try {
+        const searchInput = document.querySelector('.search-input');
+        const filterSelect = document.querySelector('.filter-select');
+        const search = (searchInput?.value || '').toLowerCase();
+        const estado = (filterSelect?.value || '').trim();
+        if (typeof PedidosMVC !== 'undefined' && typeof PedidosMVC.filter === 'function') {
+            PedidosMVC.filter({ estado, search });
+            return;
         }
-    });
+        // Fallback si PedidosMVC no está: filtrar directamente DOM
+        const rows = document.querySelectorAll('.pedidos-table tbody tr');
+        rows.forEach(row => {
+            if (row.querySelector('[colspan]')) return;
+            // Buscar texto
+            const rowText = Array.from(row.querySelectorAll('td')).map(td => td.textContent.toLowerCase()).join(' ');
+            const matchSearch = !search || rowText.includes(search);
+            // Estado por select o texto
+            let rowEstadoId = '';
+            const sel = row.querySelector('.status-selector');
+            if (sel) {
+                const val = (sel.value || '').toLowerCase();
+                rowEstadoId = mapEstadoToId(val);
+            } else {
+                const estadoCellText = (row.querySelector('.pedido-estado')?.textContent || '').toLowerCase();
+                rowEstadoId = mapEstadoToId(estadoCellText);
+            }
+            const matchEstado = !estado || rowEstadoId === estado;
+            row.style.display = (matchSearch && matchEstado) ? '' : 'none';
+        });
+    } catch (e) {
+        console.warn('applyFilters error:', e);
+    }
+}
+
+function mapEstadoToId(text) {
+    const t = (text || '').toLowerCase().trim();
+    if (t === '1' || t === 'entregado') return '1';
+    if (t === '2' || t === 'cancelado') return '2';
+    if (t === '3' || t.includes('proceso') || t === 'procesando' || t === 'pendiente') return '3';
+    return '';
 }
 
 function setupDetailsModal() {
@@ -390,6 +414,98 @@ function updateEditColorsField() {
     });
     
     document.getElementById('editarColores').value = colors.join(', ');
+}
+
+// ===== MODAL DE CONFIRMACIÓN DE ELIMINACIÓN =====
+function setupConfirmDeleteModal() {
+    const modal = document.getElementById('modalConfirmDelete');
+    const btnCancel = document.getElementById('btnCancelDelete');
+    const btnConfirm = document.getElementById('btnConfirmDelete');
+    
+    if (!modal) {
+        console.error('Modal de confirmación no encontrado');
+        return;
+    }
+    
+    // Cerrar modal con botón cancelar
+    if (btnCancel) {
+        btnCancel.addEventListener('click', function() {
+            modal.classList.remove('show');
+        });
+    }
+    
+    // Cerrar modal al hacer clic fuera
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('show');
+        }
+    });
+    
+    // El botón confirmar se configura dinámicamente en showConfirmDelete()
+}
+
+/**
+ * Muestra el modal de confirmación de eliminación
+ * @param {string} message - Mensaje principal
+ * @param {Function} onConfirm - Función a ejecutar si se confirma
+ */
+function showConfirmDelete(message, onConfirm) {
+    return new Promise((resolve, reject) => {
+        const modal = document.getElementById('modalConfirmDelete');
+        const messageElement = document.getElementById('confirmDeleteMessage');
+        const btnConfirm = document.getElementById('btnConfirmDelete');
+        const btnCancel = document.getElementById('btnCancelDelete');
+        
+        if (!modal || !messageElement || !btnConfirm) {
+            console.error('Elementos del modal de confirmación no encontrados');
+            reject(new Error('Modal no disponible'));
+            return;
+        }
+        
+        // Establecer mensaje
+        messageElement.textContent = message;
+        
+        // Mostrar modal
+        modal.classList.add('show');
+        
+        // Función para limpiar event listeners
+        const cleanup = () => {
+            btnConfirm.replaceWith(btnConfirm.cloneNode(true));
+            btnCancel.replaceWith(btnCancel.cloneNode(true));
+            modal.classList.remove('show');
+            // Reconfigurar listeners básicos
+            setupConfirmDeleteModal();
+        };
+        
+        // Configurar botón confirmar
+        const newBtnConfirm = document.getElementById('btnConfirmDelete');
+        newBtnConfirm.addEventListener('click', async function() {
+            cleanup();
+            try {
+                if (onConfirm) await onConfirm();
+                resolve(true);
+            } catch (error) {
+                reject(error);
+            }
+        });
+        
+        // Configurar botón cancelar
+        const newBtnCancel = document.getElementById('btnCancelDelete');
+        newBtnCancel.addEventListener('click', function() {
+            cleanup();
+            resolve(false);
+        });
+        
+        // Cerrar con ESC
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                cleanup();
+                document.removeEventListener('keydown', handleEscape);
+                resolve(false);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    });
 }
 
 function setupModal() {
@@ -1531,31 +1647,39 @@ async function deletePedido(pedidoId, row) {
         return;
     }
     
-    if (confirm(`¿Estás seguro de que quieres eliminar el pedido ${pedidoId}?\n\nEsta acción no se puede deshacer.`)) {
-        try {
-            console.log('Eliminando pedido ID:', id);
-            
-            // Llamar al API para eliminar
-            const response = await PedidosMVC.deletePedido(id);
-            console.log('Respuesta de eliminación:', response);
-            
-            // Remover fila de la tabla inmediatamente
-            if (row) {
-                row.remove();
+    // Usar modal personalizado en lugar de confirm()
+    try {
+        const confirmed = await showConfirmDelete(
+            `¿Estás seguro de que quieres eliminar el pedido #${pedidoId}?`,
+            async () => {
+                console.log('Eliminando pedido ID:', id);
+                
+                // Llamar al API para eliminar
+                const response = await PedidosMVC.deletePedido(id);
+                console.log('Respuesta de eliminación:', response);
+                
+                // Remover fila de la tabla inmediatamente
+                if (row) {
+                    row.remove();
+                }
+                
+                showNotification('Pedido eliminado correctamente', 'success');
+                
+                // Refrescar tabla completa para asegurar consistencia
+                await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
             }
-            
-            showNotification('Pedido eliminado correctamente', 'success');
-            
-            // Refrescar tabla completa para asegurar consistencia
-            await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
-        } catch (err) {
-            console.error('Error al eliminar pedido:', err);
-            const errorMsg = err.data?.message || err.message || 'Error desconocido';
-            showNotification('Error al eliminar el pedido: ' + errorMsg, 'error');
-            
-            // Refrescar tabla en caso de error para mostrar estado real
-            await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+        );
+        
+        if (!confirmed) {
+            console.log('Eliminación cancelada por el usuario');
         }
+    } catch (err) {
+        console.error('Error al eliminar pedido:', err);
+        const errorMsg = err.data?.message || err.message || 'Error desconocido';
+        showNotification('Error al eliminar el pedido: ' + errorMsg, 'error');
+        
+        // Refrescar tabla en caso de error para mostrar estado real
+        await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
     }
 }
 
@@ -2629,7 +2753,7 @@ function onEditarProductoEditable(event) {
 }
 
 // Eliminar un producto de la tabla editable
-function eliminarProductoEditable(idx) {
+async function eliminarProductoEditable(idx) {
     let productos = [];
     try {
         productos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
@@ -2639,11 +2763,22 @@ function eliminarProductoEditable(idx) {
     
     if (!Array.isArray(productos)) return;
     
-    // Confirmar eliminación
-    if (confirm('¿Estás seguro de eliminar este producto?')) {
-        productos.splice(idx, 1);
-        sessionStorage.setItem('detalles_productos', JSON.stringify(productos));
-        renderTablaProductosEditables();
+    // Confirmar eliminación con modal personalizado
+    try {
+        const confirmed = await showConfirmDelete(
+            '¿Estás seguro de eliminar este producto del pedido?',
+            async () => {
+                productos.splice(idx, 1);
+                sessionStorage.setItem('detalles_productos', JSON.stringify(productos));
+                renderTablaProductosEditables();
+            }
+        );
+        
+        if (!confirmed) {
+            console.log('Eliminación de producto cancelada');
+        }
+    } catch (error) {
+        console.error('Error al eliminar producto:', error);
     }
 }
 
@@ -2746,6 +2881,173 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// ===== EXPORTACIÓN A EXCEL =====
+/**
+ * Exporta la tabla de pedidos actual a un archivo Excel con formato profesional
+ */
+function exportarPedidosAExcel() {
+    try {
+        console.log('Iniciando exportación a Excel...');
+        
+        // Verificar que SheetJS esté cargado
+        if (typeof XLSX === 'undefined') {
+            showNotification('Error: Librería de Excel no cargada', 'error');
+            return;
+        }
+        
+        // Obtener todos los pedidos visibles en la tabla
+        const tabla = document.querySelector('.pedidos-table tbody');
+        if (!tabla) {
+            showNotification('No se encontró la tabla de pedidos', 'error');
+            return;
+        }
+        
+        const filas = tabla.querySelectorAll('tr');
+        if (filas.length === 0 || (filas.length === 1 && filas[0].querySelector('td[colspan]'))) {
+            showNotification('No hay pedidos para exportar', 'warning');
+            return;
+        }
+        
+        // Crear array de datos para el Excel
+        const datos = [];
+        
+        // Agregar encabezados
+        datos.push([
+            'Número',
+            'Cliente',
+            'Fecha del pedido',
+            'Fecha de entrega',
+            'Estado',
+            'Total'
+        ]);
+        
+        // Extraer datos de cada fila
+        filas.forEach(fila => {
+            // Saltar filas vacías o de "no hay pedidos"
+            if (fila.querySelector('td[colspan]')) return;
+            
+            const celdas = fila.querySelectorAll('td');
+            if (celdas.length < 6) return;
+            
+            const numeroPedido = celdas[0].textContent.trim();
+            const cliente = celdas[1].textContent.trim();
+            const fechaPedido = celdas[2].textContent.trim();
+            const fechaEntrega = celdas[3].textContent.trim();
+            
+            // Obtener el estado del selector
+            const selector = celdas[4].querySelector('.status-selector');
+            const estado = selector ? selector.options[selector.selectedIndex].text : celdas[4].textContent.trim();
+            
+            const total = celdas[5].textContent.trim();
+            
+            datos.push([
+                numeroPedido,
+                cliente,
+                fechaPedido,
+                fechaEntrega,
+                estado,
+                total
+            ]);
+        });
+        
+        console.log('Datos extraídos:', datos.length - 1, 'pedidos');
+        
+        // Crear libro de trabajo (workbook)
+        const wb = XLSX.utils.book_new();
+        
+        // Crear hoja de trabajo (worksheet) desde los datos
+        const ws = XLSX.utils.aoa_to_sheet(datos);
+        
+        // Configurar anchos de columna para mejor visualización
+        const columnWidths = [
+            { wch: 10 },  // Número
+            { wch: 25 },  // Cliente
+            { wch: 18 },  // Fecha del pedido
+            { wch: 18 },  // Fecha de entrega
+            { wch: 15 },  // Estado
+            { wch: 15 }   // Total
+        ];
+        ws['!cols'] = columnWidths;
+        
+        // Aplicar estilos a los encabezados (primera fila)
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        
+        // Estilo para encabezados
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const address = XLSX.utils.encode_col(C) + "1"; // Primera fila
+            if (!ws[address]) continue;
+            
+            // Aplicar formato de encabezado
+            ws[address].s = {
+                font: { 
+                    bold: true, 
+                    sz: 12, 
+                    color: { rgb: "FFFFFF" } 
+                },
+                fill: { 
+                    fgColor: { rgb: "149800" } // Verde de Color Ink
+                },
+                alignment: { 
+                    horizontal: "center", 
+                    vertical: "center" 
+                },
+                border: {
+                    top: { style: "thin", color: { rgb: "000000" } },
+                    bottom: { style: "thin", color: { rgb: "000000" } },
+                    left: { style: "thin", color: { rgb: "000000" } },
+                    right: { style: "thin", color: { rgb: "000000" } }
+                }
+            };
+        }
+        
+        // Aplicar bordes y centrado a todas las celdas de datos
+        for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const address = XLSX.utils.encode_cell({ r: R, c: C });
+                if (!ws[address]) continue;
+                
+                ws[address].s = {
+                    alignment: { 
+                        horizontal: "center", 
+                        vertical: "center" 
+                    },
+                    border: {
+                        top: { style: "thin", color: { rgb: "CCCCCC" } },
+                        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+                        left: { style: "thin", color: { rgb: "CCCCCC" } },
+                        right: { style: "thin", color: { rgb: "CCCCCC" } }
+                    }
+                };
+                
+                // Aplicar fondo alternado para mejor legibilidad
+                if (R % 2 === 0) {
+                    ws[address].s.fill = { 
+                        fgColor: { rgb: "F5F5F5" } 
+                    };
+                }
+            }
+        }
+        
+        // Agregar la hoja al libro
+        XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
+        
+        // Generar nombre de archivo con fecha actual
+        const fecha = new Date();
+        const nombreArchivo = `Pedidos_ColorInk_${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}.xlsx`;
+        
+        // Exportar el archivo
+        XLSX.writeFile(wb, nombreArchivo);
+        
+        showNotification(`Excel exportado exitosamente: ${nombreArchivo}`, 'success');
+        console.log('Exportación completada:', nombreArchivo);
+        
+    } catch (error) {
+        console.error('Error al exportar a Excel:', error);
+        showNotification('Error al exportar los pedidos: ' + error.message, 'error');
+    }
+}
+
 
 // Inicializar tabla y resumen al abrir modal de edición
 window.addEventListener('DOMContentLoaded', () => {

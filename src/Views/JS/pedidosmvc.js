@@ -317,6 +317,13 @@
 
             pedidos.forEach(p => {
                 const tr = document.createElement('tr');
+                // Añadir atributos de filtrado y búsqueda
+                tr.dataset.estadoId = p.estadoId || '';
+                tr.dataset.estadoNombre = (p.estadoNombre || '').toLowerCase();
+                tr.dataset.searchIndex = (
+                    (p.numeroPedido || '') + ' ' + (p.cliente || '') + ' ' + (p.fecha || '') + ' ' +
+                    (p.fechaEntrega || '') + ' ' + (p.total || '') + ' ' + (p.estadoNombre || '')
+                ).toLowerCase();
                 tr.innerHTML = `
                     <td class="pedido-id">${p.numeroPedido || ''}</td>
                     <td class="pedido-cliente">${p.cliente}</td>
@@ -331,8 +338,6 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
-                
-                // Aplicar estilo al selector recién creado
                 const selector = tr.querySelector('.status-selector');
                 if (selector && p.estadoId) {
                     View.applyEstadoStyle(selector, p.estadoId);
@@ -341,6 +346,29 @@
 
             // Dejar que la vista original maneje los botones; opcionalmente emitir evento
             document.dispatchEvent(new CustomEvent('pedidos:rendered', { detail: { count: pedidos.length } }));
+        },
+        // Filtro compuesto (estado + texto)
+        applyCompositeFilter: function({ estado = '', search = '' } = {}) {
+            const tbody = document.querySelector(this.tableSelector);
+            if (!tbody) return;
+            const rows = tbody.querySelectorAll('tr');
+            const estadoFilter = String(estado).trim(); // '', '1','2','3'
+            const searchTerm = search.toLowerCase();
+            let visibles = 0;
+            rows.forEach(row => {
+                if (row.querySelector('[colspan]')) return; // Fila vacía
+                const rEstado = (row.dataset.estadoId || '').toString();
+                const rSearch = row.dataset.searchIndex || '';
+                const matchEstado = !estadoFilter || rEstado === estadoFilter;
+                const matchSearch = !searchTerm || rSearch.includes(searchTerm);
+                if (matchEstado && matchSearch) {
+                    row.style.display = '';
+                    visibles++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            document.dispatchEvent(new CustomEvent('pedidos:filtered', { detail: { visible: visibles } }));
         },
 
         renderEstadoSelect: function (currentEstadoId, pedidoId) {
@@ -470,6 +498,10 @@
         getCached: () => View.getCachedPedidos(),
         renderCached: (selector) => View.renderTable(selector, View.getCachedPedidos()),
         setToken: (t) => { Model.token = t; localStorage.setItem('token', t); },
+        // Exponer filtrado compuesto a la vista principal
+        filter: function({ estado = '', search = '' } = {}) {
+            View.applyCompositeFilter({ estado, search });
+        },
         
         // Crear pedido desde formulario
         crearPedido: async (pedidoData) => {
