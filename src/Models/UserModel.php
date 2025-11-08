@@ -94,7 +94,8 @@ class UserModel
     {
         try {
             error_log('UserModel - listUsers: Ejecutando consulta SQL');
-            $stmt = $this->db->query("SELECT id_usuario, nombre_usuario, correo, telefono, fecha_ingreso, ultimo_acceso, id_rol, bloqueado_hasta FROM usuario ORDER BY id_usuario");
+            // Filtrar solo usuarios con id_rol 1 (Administrador) y 2 (Usuario)
+            $stmt = $this->db->query("SELECT id_usuario, nombre_usuario, correo, telefono, fecha_ingreso, ultimo_acceso, id_rol, bloqueado_hasta FROM usuario WHERE id_rol IN (1, 2) ORDER BY id_usuario");
             $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
             // Verificar Lista Negra para cada usuario
