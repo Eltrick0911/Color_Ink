@@ -45,6 +45,9 @@
   let usersMapCache = null; // cache de id_usuario -> nombre_usuario
   let fpStart = null; // instancia flatpickr para startDate
   let fpEnd = null;   // instancia flatpickr para endDate
+  let loadingEl = null; // overlay de carga
+  let isFirstDataLoad = true; // mostrar overlay solo en la primera carga de datos
+  let pendingLoads = 0; // contador para anidar llamadas durante la carga inicial
 
   function getAuthToken(){
     // Auditoría exige SOLO token local del backend
@@ -53,12 +56,18 @@
   }
 
   async function apiGet(params){
-    const url = apiBase + '&' + new URLSearchParams(params).toString();
+    // Evitar respuestas en caché cuando se cambia de tabla o filtros
+    const qp = new URLSearchParams(params);
+    qp.append('_ts', Date.now().toString());
+    const url = apiBase + '&' + qp.toString();
     const token = getAuthToken();
     if(!token){
       throw new Error('Se requiere iniciar sesión (token local) para ver Auditoría. Inicia sesión nuevamente.');
     }
-    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + token },
+      cache: 'no-store'
+    });
     if(!res.ok){
       const msg = await res.text();
       throw new Error('Error ' + res.status + ': ' + msg);
@@ -66,13 +75,33 @@
     return res.json();
   }
 
+  function showLoading(){
+    // Inline loading: insertar mensaje directamente en el tbody de la tabla
+    if (!isFirstDataLoad) return;
+    const tbody = document.getElementById('tableBody');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando auditoría...</td></tr>';
+    }
+  }
+  function hideLoading(){
+    // Al terminar, isFirstDataLoad se desactiva para ya no mostrar loading en siguientes consultas
+    if (!isFirstDataLoad) return;
+    isFirstDataLoad = false;
+  }
+
   async function apiGetUsers(params){
-    const url = apiUserBase + '&' + new URLSearchParams(params).toString();
+    // Evitar caché del listado de usuarios para etiquetas en exportación
+    const qp = new URLSearchParams(params);
+    qp.append('_ts', Date.now().toString());
+    const url = apiUserBase + '&' + qp.toString();
     const token = getAuthToken();
     if(!token){
       throw new Error('Se requiere iniciar sesión (token local).');
     }
-    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + token },
+      cache: 'no-store'
+    });
     if(!res.ok){
       const msg = await res.text();
       throw new Error('Error ' + res.status + ': ' + msg);
@@ -80,10 +109,44 @@
     return res.json();
   }
 
-  function toTag(accion){
+  function translateOperacion(accion, jsonAntes, jsonDespues, table){
+    // Traduce el tipo de operación al español
+    // Si es UPDATE en producto y cambió activo de 1 a 0, mostrar como Eliminación
+    const upper = (accion || '').toUpperCase();
+    
+    if (upper === 'UPDATE' && table === 'producto') {
+      try {
+        const antes = jsonAntes ? JSON.parse(jsonAntes) : {};
+        const despues = jsonDespues ? JSON.parse(jsonDespues) : {};
+        
+        // Detectar si cambió de activo=1 a activo=0
+        if (antes.activo === 1 && despues.activo === 0) {
+          return 'Eliminación';
+        }
+      } catch (e) {
+        // Si hay error al parsear, continuar con traducción normal
+      }
+    }
+    
+    const translations = {
+      'INSERT': 'Creación',
+      'UPDATE': 'Actualización',
+      'DELETE': 'Eliminación'
+    };
+    return translations[upper] || accion;
+  }
+
+  function toTag(accion, jsonAntes, jsonDespues, table){
     if(!accion) return '';
-    const cls = accion.toLowerCase() === 'insert' ? 'insert' : accion.toLowerCase() === 'delete' ? 'delete' : 'update';
-    return `<span class="tag ${cls}">${accion}</span>`;
+    const texto = translateOperacion(accion, jsonAntes, jsonDespues, table);
+    
+    // Determinar clase CSS: si el texto es "Eliminación", usar clase delete
+    const upper = (accion || '').toUpperCase();
+    let cls = 'update'; // default
+    if (upper === 'INSERT') cls = 'insert';
+    else if (upper === 'DELETE' || texto === 'Eliminación') cls = 'delete';
+    
+    return `<span class="tag ${cls}">${texto}</span>`;
   }
 
   function formatDateTime(dt){
@@ -99,7 +162,8 @@
       'pedido': 'id_pedido',
       'detallepedido': 'id_detalle',
       'proveedor': 'id_proveedor',
-      'venta': 'id_venta',
+      // En venta_aud el id de la entidad original es id_venta_original
+      'venta': 'id_venta_original',
       'usuario': 'id_usuario'
     };
     return mapping[table] || null;
@@ -135,27 +199,95 @@
 
   function renderRows(rows){
     const table = document.getElementById('tableSelect').value;
+    const transaction = document.getElementById('txSelect').value;
     const entityIdCol = getEntityIdColumn(table);
     const body = document.getElementById('tableBody');
     if (!rows || rows.length === 0) {
       body.innerHTML = `<tr><td colspan="6" class="no-data">No se encontraron registros de auditoría para los filtros seleccionados.</td></tr>`;
       return;
     }
-    body.innerHTML = rows.map(r => {
-      const id = r.id_aud ?? '';
+    
+    // Aplicar filtro inteligente en el frontend para tabla producto
+    let filteredRows = rows;
+    if (table === 'producto') {
+      filteredRows = rows.filter(r => {
+        const accion = (r.accion || '').toUpperCase();
+        let antes = r.json_antes || '';
+        let despues = r.json_despues || '';
+        
+        // Parsear JSON para detectar cambio de activo
+        let antesObj = {};
+        let despuesObj = {};
+        try { antesObj = antes ? JSON.parse(antes) : {}; } catch(e) {}
+        try { despuesObj = despues ? JSON.parse(despues) : {}; } catch(e) {}
+        
+        const esEliminacionLogica = (antesObj.activo === 1 && despuesObj.activo === 0);
+        
+        // Si NO hay filtro de transacción, mostrar todo
+        if (!transaction) {
+          return true;
+        }
+        
+        const transUpper = transaction.toUpperCase();
+        
+        // Si buscan UPDATE: excluir eliminaciones lógicas (mostrar solo updates reales)
+        if (transUpper === 'UPDATE') {
+          return (accion === 'UPDATE' && !esEliminacionLogica);
+        }
+        
+        // Si buscan DELETE: mostrar DELETE reales Y eliminaciones lógicas (UPDATE con activo 1→0)
+        if (transUpper === 'DELETE') {
+          return (accion === 'DELETE') || (accion === 'UPDATE' && esEliminacionLogica);
+        }
+        
+        // Para INSERT u otros casos, mostrar si la acción coincide exactamente
+        return accion === transUpper;
+      });
+    } else if (transaction) {
+      // Para otras tablas, filtrar normalmente por acción
+      const transUpper = transaction.toUpperCase();
+      filteredRows = rows.filter(r => {
+        const accion = (r.accion || '').toUpperCase();
+        return accion === transUpper;
+      });
+    }
+    
+    body.innerHTML = filteredRows.map(r => {
+      const id = r.id_aud ?? r.id_venta_aud ?? '';
       const entityId = entityIdCol && r[entityIdCol] ? r[entityIdCol] : '-';
       const fecha = formatDateTime(r.fecha_accion ?? '');
-      const userId = r.usuario_accion ?? '';
-      const usuario = (usersMapCache && usersMapCache[userId]) ? `${userId} - ${usersMapCache[userId]}` : `${userId}`;
+      // Resolver columna de usuario según la tabla
+      const rawUserId = table === 'venta' ? (r.usuario_admin ?? '') : (r.usuario_accion ?? '');
+      const usuario = (usersMapCache && usersMapCache[rawUserId]) ? `${rawUserId} - ${usersMapCache[rawUserId]}` : `${rawUserId}`;
       const accion = r.accion ?? '';
-      const antes = r.json_antes ?? '';
-      const despues = r.json_despues ?? '';
+
+      // Preparar detalles
+      let antes = r.json_antes ?? '';
+      let despues = r.json_despues ?? '';
+      if ((!antes && !despues) && table === 'venta') {
+        // Sintetizar detalles para venta_aud usando su esquema
+        const beforeObj = {
+          id_venta: r.id_venta_original ?? null,
+          id_pedido: r.id_pedido_original ?? null,
+          fecha_venta: r.fecha_venta_original ? formatDateTime(r.fecha_venta_original) : null,
+          monto_cobrado: r.monto_cobrado_original ?? null,
+          estado: r.estado_original ?? null
+        };
+        const afterObj = {
+          accion: r.accion ?? null,
+          motivo: r.motivo ?? '',
+          usuario_admin: r.usuario_admin ?? null
+        };
+        try { antes = JSON.stringify(beforeObj); } catch(_) { antes = ''; }
+        try { despues = JSON.stringify(afterObj); } catch(_) { despues = ''; }
+      }
+
       return `<tr>
         <td>${id}</td>
         <td><strong>${entityId}</strong></td>
         <td>${fecha}</td>
         <td>${usuario}</td>
-        <td>${toTag(accion)}</td>
+        <td>${toTag(accion, antes, despues, table)}</td>
         <td><button class="btn btn-clear btn-sm" data-antes='${htmlEscape(antes)}' data-despues='${htmlEscape(despues)}'>Ver</button></td>
       </tr>`;
     }).join('');
@@ -216,6 +348,7 @@
   }
 
   async function loadTables(){
+    showLoading();
     try{
       const json = await apiGet({ action: 'tables' });
       const tables = json.data || [];
@@ -225,11 +358,14 @@
     }catch(e){
       console.error(e);
       alert('No se pudieron cargar las tablas');
+    } finally {
+      hideLoading();
     }
   }
 
   async function onTableChanged(){
     const table = document.getElementById('tableSelect').value;
+    showLoading();
     try{
       const json = await apiGet({ action: 'filters', table });
       const selU = document.getElementById('userSelect');
@@ -237,10 +373,16 @@
       const usuarios = json.data?.usuarios || [];
       const acciones = json.data?.acciones || [];
       selU.innerHTML = `<option value="">Todos</option>` + usuarios.map(u => `<option value="${u}">${u}</option>`).join('');
-      selT.innerHTML = `<option value="">Todas</option>` + acciones.map(a => `<option value="${a}">${a}</option>`).join('');
+      // Traducir acciones a español en el select
+      selT.innerHTML = `<option value="">Todas</option>` + acciones.map(a => {
+        const traducido = translateOperacion(a, '', '', table);
+        return `<option value="${a}">${traducido}</option>`;
+      }).join('');
       await loadData(1);
     }catch(e){
       console.error(e);
+    } finally {
+      hideLoading();
     }
   }
 
@@ -250,14 +392,24 @@
     const transaction = document.getElementById('txSelect').value;
     const start_date = document.getElementById('startDate').value;
     const end_date = document.getElementById('endDate').value;
+    showLoading();
     try{
-      const json = await apiGet({ action: 'list', table, user_id, transaction, start_date, end_date, page, limit: 20 });
+      // Para productos: si buscan DELETE, traer UPDATE también para filtrar en frontend
+      let backendTransaction = transaction;
+      if (table === 'producto' && transaction && transaction.toUpperCase() === 'DELETE') {
+        // No enviar filtro de transacción al backend, traer todo y filtrar en frontend
+        backendTransaction = '';
+      }
+      
+      const json = await apiGet({ action: 'list', table, user_id, transaction: backendTransaction, start_date, end_date, page, limit: 20 });
       renderTableHead(); // Llamar primero para actualizar headers según tabla seleccionada
       renderRows(json.data || []);
       renderPagination(json.pagination);
     }catch(e){
       console.error(e);
       alert('Error al cargar auditoría');
+    } finally {
+      hideLoading();
     }
   }
 
@@ -285,6 +437,7 @@
     const end_date = document.getElementById('endDate').value;
     
     try {
+      showLoading();
       // Asegurar mapa de usuarios (id -> nombre) una sola vez
       await ensureUsersMap();
 
@@ -309,58 +462,222 @@
       const entityIdCol = getEntityIdColumn(table);
       const entityLabel = getEntityIdLabel(table);
       
-      // Preparar datos para Excel
-      const excelData = rows.map(r => {
+      // Preparar datos para Excel en formato vertical (cada registro con sus atributos expandidos)
+      const excelData = [];
+      
+      rows.forEach((r, idx) => {
         const entityId = entityIdCol && r[entityIdCol] ? r[entityIdCol] : '-';
-        const userId = r.usuario_accion ?? '';
+        const idAud = r.id_aud ?? r.id_venta_aud ?? '';
+        // Columna de usuario según tabla
+        const userCol = table === 'venta' ? 'usuario_admin' : 'usuario_accion';
+        const userId = r[userCol] ?? '';
         const userName = usersMapCache && usersMapCache[userId] ? usersMapCache[userId] : '';
-        const antes = prettyJson(r.json_antes || '');
-        const despues = prettyJson(r.json_despues || '');
+
+        // Detalles antes/después: si no existen y es venta, sintetizar
+        let antes = r.json_antes || '';
+        let despues = r.json_despues || '';
+        if ((!antes && !despues) && table === 'venta') {
+          const beforeObj = {
+            id_venta: r.id_venta_original ?? null,
+            id_pedido: r.id_pedido_original ?? null,
+            fecha_venta: r.fecha_venta_original ? formatDateTime(r.fecha_venta_original) : null,
+            monto_cobrado: r.monto_cobrado_original ?? null,
+            estado: r.estado_original ?? null
+          };
+          const afterObj = {
+            accion: r.accion ?? null,
+            motivo: r.motivo ?? '',
+            usuario_admin: r.usuario_admin ?? null
+          };
+          try { antes = JSON.stringify(beforeObj); } catch(_) {}
+          try { despues = JSON.stringify(afterObj); } catch(_) {}
+        }
+
+        // Parsear JSON para expandir atributos
+        let antesObj = {};
+        let despuesObj = {};
+        try { antesObj = antes ? JSON.parse(antes) : {}; } catch(e) {}
+        try { despuesObj = despues ? JSON.parse(despues) : {}; } catch(e) {}
+
+        // Obtener todos los campos únicos entre antes y después
+        const allKeys = new Set([...Object.keys(antesObj), ...Object.keys(despuesObj)]);
         
-        return {
-          'ID Auditoría': r.id_aud ?? '',
-          [entityLabel]: entityId,
-          'Fecha': formatDateTime(r.fecha_accion ?? ''),
-          'ID Usuario': userId,
-          'Usuario': userName,
-          'Acción': r.accion ?? '',
-          'Datos Antes': antes,
-          'Datos Después': despues
-        };
+        // Si hay datos, agregar fila de encabezado del registro
+        if (allKeys.size > 0) {
+          // Fila de separación/encabezado
+          excelData.push({
+            'Registro': `#${idx + 1}`,
+            'ID Auditoría': idAud,
+            [entityLabel]: entityId,
+            'Fecha': formatDateTime(r.fecha_accion ?? ''),
+            'Usuario': `${userId} - ${userName}`,
+            'Acción': translateOperacion(r.accion ?? '', antes, despues, table),
+            'Campo': '',
+            'Valor Anterior': '',
+            'Valor Nuevo': ''
+          });
+
+          // Agregar una fila por cada campo modificado
+          allKeys.forEach(key => {
+            const valorAntes = antesObj[key] !== undefined ? antesObj[key] : '';
+            const valorDespues = despuesObj[key] !== undefined ? despuesObj[key] : '';
+            
+            excelData.push({
+              'Registro': '',
+              'ID Auditoría': '',
+              [entityLabel]: '',
+              'Fecha': '',
+              'Usuario': '',
+              'Acción': '',
+              'Campo': key,
+              'Valor Anterior': valorAntes,
+              'Valor Nuevo': valorDespues
+            });
+          });
+
+          // Fila vacía como separador entre registros
+          excelData.push({
+            'Registro': '',
+            'ID Auditoría': '',
+            [entityLabel]: '',
+            'Fecha': '',
+            'Usuario': '',
+            'Acción': '',
+            'Campo': '',
+            'Valor Anterior': '',
+            'Valor Nuevo': ''
+          });
+        }
       });
 
-      // Crear libro de Excel
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      
-      // Ajustar ancho de columnas
-      const colWidths = [
-        { wch: 12 }, // ID Auditoría
-        { wch: 12 }, // ID Entidad
-        { wch: 20 }, // Fecha
-        { wch: 12 }, // ID Usuario
-        { wch: 24 }, // Usuario (nombre)
-        { wch: 10 }, // Acción
-        { wch: 50 }, // Datos Antes
-        { wch: 50 }  // Datos Después
-      ];
-      ws['!cols'] = colWidths;
-      
-      // Agregar hoja al libro
-      const sheetName = `Auditoría ${titleCase(table)}`;
-      XLSX.utils.book_append_sheet(wb, ws, sheetName);
-      
-      // Generar nombre de archivo con fecha
+      // Generar HTML-Excel con colores y formato
+      let html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            font-family: Arial, sans-serif; 
+        }
+        th { 
+            background-color: #0192B3; 
+            color: #FFFFFF; 
+            font-weight: bold; 
+            padding: 10px; 
+            border: 1px solid #0164B5;
+            text-align: center;
+        }
+        td { 
+            padding: 8px; 
+            border: 1px solid #CCCCCC; 
+        }
+        .header-registro { 
+            background-color: #E3F2FD; 
+            font-weight: bold; 
+            font-size: 11pt;
+        }
+        .accion-creacion { 
+            background-color: #C8E6C9; 
+        }
+        .accion-actualizacion { 
+            background-color: #BBDEFB; 
+        }
+        .accion-eliminacion { 
+            background-color: #FFCDD2; 
+            font-weight: bold;
+        }
+        .campo-detalle { 
+            background-color: #FFFFFF; 
+        }
+        .fila-separador { 
+            background-color: #F5F5F5; 
+            height: 5px; 
+        }
+        .titulo-principal {
+            background-color: #0192B3;
+            color: #FFFFFF;
+            font-size: 18pt;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            border: 2px solid #0164B5;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td colspan="9" class="titulo-principal">
+                Auditoría de ${titleCase(table)} - ${new Date().toLocaleDateString('es-HN')}
+            </td>
+        </tr>
+        <tr>
+            <th>Registro</th>
+            <th>ID Auditoría</th>
+            <th>${entityLabel}</th>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th>Acción</th>
+            <th>Campo</th>
+            <th>Valor Anterior</th>
+            <th>Valor Nuevo</th>
+        </tr>`;
+
+      // Generar filas con colores según tipo de operación
+      excelData.forEach(row => {
+        const esHeader = row['Registro'] !== '';
+        const esSeparador = row['Registro'] === '' && row['Campo'] === '';
+        
+        let cssClass = 'campo-detalle';
+        if (esSeparador) {
+          cssClass = 'fila-separador';
+        } else if (esHeader) {
+          const accion = row['Acción'];
+          if (accion === 'Creación') cssClass = 'accion-creacion header-registro';
+          else if (accion === 'Eliminación') cssClass = 'accion-eliminacion header-registro';
+          else if (accion === 'Actualización') cssClass = 'accion-actualizacion header-registro';
+          else cssClass = 'header-registro';
+        }
+
+        html += `\n        <tr class="${cssClass}">`;
+        html += `<td>${row['Registro'] ?? ''}</td>`;
+        html += `<td>${row['ID Auditoría'] ?? ''}</td>`;
+        html += `<td>${row[entityLabel] ?? ''}</td>`;
+        html += `<td>${row['Fecha'] ?? ''}</td>`;
+        html += `<td>${row['Usuario'] ?? ''}</td>`;
+        html += `<td><b>${row['Acción'] ?? ''}</b></td>`;
+        html += `<td><b>${row['Campo'] ?? ''}</b></td>`;
+        html += `<td>${row['Valor Anterior'] ?? ''}</td>`;
+        html += `<td>${row['Valor Nuevo'] ?? ''}</td>`;
+        html += `</tr>`;
+      });
+
+      html += `
+    </table>
+</body>
+</html>`;
+
+      // Crear Blob y descargar
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
       const fecha = new Date().toISOString().slice(0,10);
-      const fileName = `Auditoria_${titleCase(table)}_${fecha}.xlsx`;
-      
-      // Descargar archivo
-      XLSX.writeFile(wb, fileName);
+      link.href = url;
+      link.download = `Auditoria_${titleCase(table)}_${fecha}.xls`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
       
       console.log(`Exportados ${rows.length} registros a Excel`);
     } catch(e) {
       console.error(e);
       alert('Error al exportar: ' + e.message);
+    } finally {
+      hideLoading();
     }
   }
 
@@ -390,6 +707,9 @@
     document.getElementById('modalClose').addEventListener('click', () => document.getElementById('detailModal').classList.add('hidden'));
     document.addEventListener('keydown', e => { if(e.key === 'Escape') document.getElementById('detailModal').classList.add('hidden'); });
   }
+
+  // Mostrar loading inmediatamente al cargar el script (antes de DOMContentLoaded)
+  showLoading();
 
   document.addEventListener('DOMContentLoaded', function(){
     initEvents();

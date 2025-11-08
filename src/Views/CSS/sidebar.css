@@ -190,3 +190,18 @@ body.sidebar-active .sidebar-content {
     .icon-bar { gap: 18px; }
     .icon-bar-container { top: 135px; }
 }
+
+/* Compactar sidebar y contenido en móviles o formato vertical estrecho */
+@media (max-width: 576px), (orientation: portrait) and (max-width: 768px) {
+    header.sidebar {
+        width: 56px; /* antes 80px */
+    }
+    body.sidebar-active .sidebar-content {
+        margin-right: 56px; /* acompasa el ancho de la barra */
+    }
+    header.sidebar .icon-bar {
+        gap: 20px;
+    }
+    .icon-bar i { font-size: 18px; }
+    .user-icon { font-size: 18px; }
+}

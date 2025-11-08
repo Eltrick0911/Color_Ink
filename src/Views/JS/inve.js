@@ -2,12 +2,59 @@
  * JavaScript para la página de inventario
  */
 
+// Utilidades de autenticación para diagnosticar tokens/usuario almacenados
+function getStoredAuth() {
+    const firebaseIdToken = sessionStorage.getItem('firebase_id_token');
+    const accessToken = sessionStorage.getItem('access_token');
+    let user = null;
+    try {
+        const raw = sessionStorage.getItem('user');
+        user = raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        console.warn('auth: no se pudo parsear sessionStorage.user', e);
+    }
+    return { firebaseIdToken, accessToken, user };
+}
+
+function logAuthState(context = 'Inventario') {
+    const { firebaseIdToken, accessToken, user } = getStoredAuth();
+    console.group(`🔐 Estado de autenticación · ${context}`);
+    console.log('firebase_id_token:', firebaseIdToken ? 'presente' : 'ausente');
+    console.log('access_token:', accessToken ? 'presente' : 'ausente');
+    if (user) {
+        console.log('user objeto completo:', user);
+        console.log('id_usuario:', user.id_usuario ?? '(no definido)');
+        console.log('id_rol:', user.id_rol ?? '(no definido)');
+        console.log('email/correo:', user.email || user.correo || '(no definido)');
+    } else {
+        console.warn('user: ausente en sessionStorage');
+    }
+    console.groupEnd();
+}
+
+// Exponer util para depuración manual desde consola
+window.authDebugDump = logAuthState;
+
+// Construir header Authorization desde sessionStorage (Firebase o JWT local)
+function getAuthHeader() {
+    const { firebaseIdToken, accessToken } = getStoredAuth();
+    const token = firebaseIdToken || accessToken;
+    if (token) {
+        return { 'Authorization': `Bearer ${token}` };
+    }
+    return {};
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Log de autenticación al entrar a inventario
+    logAuthState('DOMContentLoaded');
     // Inicializar funcionalidades de inventario
     initInventarioPage();
 });
 
 function initInventarioPage() {
+    // Segundo log al iniciar la página de inventario (por si hay race con sessionStorage)
+    logAuthState('initInventarioPage');
     // Configurar botones de acción
     setupActionButtons();
 
@@ -111,15 +158,20 @@ async function editProducto(id, codigo, producto) {
 async function deleteProducto(id, codigo, producto, row) {
     if (confirm(`¿Estás seguro de que quieres eliminar el producto "${producto}" (${codigo})?`)) {
         try {
+            const authHeader = getAuthHeader();
+            console.log('🗑️ Eliminar producto - Auth header:', authHeader);
+            
             const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...authHeader,
                 },
                 body: JSON.stringify({ id_producto: id })
             });
 
             const result = await response.json();
+            console.log('🗑️ Eliminar producto - Respuesta:', result);
 
             if (result.status === 'OK') {
                 showNotification(' Producto eliminado exitosamente', 'success');
@@ -622,12 +674,15 @@ async function handleNuevoProducto(e) {
     }
     
     try {
+        // Log rápido del estado de auth justo antes de enviar
+        logAuthState('handleNuevoProducto submit');
         console.log('Enviando datos:', data);
         
         const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=add', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                ...getAuthHeader(),
             },
             body: JSON.stringify(data)
         });
@@ -1007,6 +1062,7 @@ async function handleEditarProducto(e) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                ...getAuthHeader(),
             },
             body: JSON.stringify(data)
         });

@@ -29,6 +29,7 @@ class inveModel
      * @param float $precioVentaBase Precio de venta base
      * @param string $fechaRegistro Fecha de registro del producto
      * @param string|null $descripcion Descripción del producto (opcional)
+     * @param int $idUsuario ID del usuario que crea el producto (para auditoría)
      * @return array Respuesta con el resultado de la operación
      */
     public function addProduct(
@@ -42,7 +43,8 @@ class inveModel
         float $costoUnitario, 
         float $precioVentaBase,
         string $fechaRegistro,
-        ?string $descripcion = null
+        ?string $descripcion = null,
+        int $idUsuario = 1
     ): array {
         try {
             error_log('inveModel - addProduct: Iniciando creación de producto');
@@ -72,13 +74,9 @@ class inveModel
                 return responseHTTP::status400('Ya existe un producto con este SKU');
             }
 
-            // Establecer variable de usuario para el trigger de auditoría
-            // Usar un ID de usuario que exista en la tabla usuario (por ejemplo, 1 o el usuario actual)
-            $this->db->exec("SET @usuario_id = 1");
-            
             // Usar procedimiento almacenado para crear el producto
-            error_log('inveModel - addProduct: Llamando SP sp_crear_producto');
-            $stmt = $this->db->prepare("CALL sp_crear_producto(:id_categoria, :id_proveedor, :sku, :nombre_producto, :activo, :stock, :stock_minimo, :costo_unitario, :precio_venta_base, :fecha_registro, :descripcion)");
+            error_log('inveModel - addProduct: Llamando SP sp_crear_producto con usuario: ' . $idUsuario);
+            $stmt = $this->db->prepare("CALL sp_crear_producto(:id_categoria, :id_proveedor, :sku, :nombre_producto, :activo, :stock, :stock_minimo, :costo_unitario, :precio_venta_base, :fecha_registro, :descripcion, :id_usuario)");
             
             $stmt->bindParam(':id_categoria', $idCategoria, PDO::PARAM_INT);
             $stmt->bindParam(':id_proveedor', $idProveedor, PDO::PARAM_INT);
@@ -91,6 +89,7 @@ class inveModel
             $stmt->bindParam(':precio_venta_base', $precioVentaBase, PDO::PARAM_STR);
             $stmt->bindParam(':fecha_registro', $fechaRegistro, PDO::PARAM_STR);
             $stmt->bindParam(':descripcion', $descripcion, PDO::PARAM_STR);
+            $stmt->bindParam(':id_usuario', $idUsuario, PDO::PARAM_INT);
             
             $result = $stmt->execute();
             error_log('inveModel - addProduct: Resultado de execute: ' . ($result ? 'true' : 'false'));
@@ -409,15 +408,22 @@ class inveModel
      */
     public function updateProduct(array $data): bool|array
     {
+        error_log('========== INICIO inveModel::updateProduct ==========');
+        error_log('inveModel - updateProduct: Datos recibidos: ' . json_encode($data));
+        
         try {
             // Validar que el producto existe
+            error_log('inveModel - updateProduct: Verificando que producto existe, ID: ' . ($data['id_producto'] ?? 'NO DEFINIDO'));
             $producto = $this->getProducto($data['id_producto']);
             if (!$producto) {
+                error_log('inveModel - updateProduct: ERROR - Producto no encontrado');
                 return false;
             }
+            error_log('inveModel - updateProduct: Producto encontrado: ' . json_encode($producto));
 
-            // Establecer variable de usuario para el trigger de auditoría
-            $this->db->exec("SET @usuario_id = 1");
+            // Extraer id_usuario para auditoría (el SP lo establecerá internamente)
+            $idUsuario = isset($data['id_usuario']) ? (int)$data['id_usuario'] : 1;
+            error_log('inveModel - updateProduct: Usuario para auditoría: ' . $idUsuario);
 
             // Usar procedimiento almacenado para actualizar el producto
             // El SP sp_actualizar_producto solo actualiza: nombre_producto, descripcion, precio, stock, id_proveedor, id_categoria
@@ -425,12 +431,24 @@ class inveModel
             
             // Obtener descripcion si existe en los datos, si no usar la actual del producto o null
             $descripcion = isset($data['descripcion']) ? trim($data['descripcion']) : ($producto['descripcion'] ?? null);
+            error_log('inveModel - updateProduct: Descripción procesada: ' . ($descripcion ?? 'NULL'));
             
             // El SP usa 'precio' pero en el formulario viene como 'precio_venta_base'
             // Si viene precio_venta_base, usarlo; si no, usar precio del producto actual
             $precio = isset($data['precio_venta_base']) ? (float)$data['precio_venta_base'] : ((float)($producto['precio_venta_base'] ?? $producto['precio'] ?? 0));
+            error_log('inveModel - updateProduct: Precio procesado: ' . $precio);
             
-            $stmt = $this->db->prepare("CALL sp_actualizar_producto(:id_producto, :nombre_producto, :descripcion, :precio, :stock, :id_proveedor, :id_categoria)");
+            error_log('inveModel - updateProduct: Parámetros del SP:');
+            error_log('  - id_producto: ' . $data['id_producto']);
+            error_log('  - nombre_producto: ' . $data['nombre_producto']);
+            error_log('  - descripcion: ' . ($descripcion ?? 'NULL'));
+            error_log('  - precio: ' . $precio);
+            error_log('  - stock: ' . $data['stock']);
+            error_log('  - id_proveedor: ' . $data['id_proveedor']);
+            error_log('  - id_categoria: ' . $data['id_categoria']);
+            error_log('  - id_usuario: ' . $idUsuario);
+            
+            $stmt = $this->db->prepare("CALL sp_actualizar_producto(:id_producto, :nombre_producto, :descripcion, :precio, :stock, :id_proveedor, :id_categoria, :id_usuario)");
             
             $stmt->bindParam(':id_producto', $data['id_producto'], PDO::PARAM_INT);
             $stmt->bindParam(':nombre_producto', $data['nombre_producto'], PDO::PARAM_STR);
@@ -439,18 +457,29 @@ class inveModel
             $stmt->bindParam(':stock', $data['stock'], PDO::PARAM_INT);
             $stmt->bindParam(':id_proveedor', $data['id_proveedor'], PDO::PARAM_INT);
             $stmt->bindParam(':id_categoria', $data['id_categoria'], PDO::PARAM_INT);
+            $stmt->bindParam(':id_usuario', $idUsuario, PDO::PARAM_INT);
 
+            error_log('inveModel - updateProduct: Ejecutando SP...');
             $result = $stmt->execute();
+            error_log('inveModel - updateProduct: SP ejecutado. Resultado: ' . ($result ? 'TRUE' : 'FALSE'));
             // Limpiar cursores adicionales del CALL
             while ($stmt->nextRowset()) { /* noop */ }
             
             if ($result) {
-                return $this->getProducto($data['id_producto']);
+                error_log('inveModel - updateProduct: Obteniendo producto actualizado...');
+                $productoActualizado = $this->getProducto($data['id_producto']);
+                error_log('inveModel - updateProduct: Producto actualizado obtenido: ' . json_encode($productoActualizado));
+                error_log('========== FIN inveModel::updateProduct (ÉXITO) ==========');
+                return $productoActualizado;
             }
             
+            error_log('inveModel - updateProduct: ERROR - SP retornó FALSE');
+            error_log('========== FIN inveModel::updateProduct (FALLO) ==========');
             return false;
         } catch (\Throwable $e) {
-            error_log('Error updateProduct: ' . $e->getMessage());
+            error_log('inveModel - updateProduct: EXCEPCIÓN: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+            error_log('========== FIN inveModel::updateProduct (EXCEPCIÓN) ==========');
             return false;
         }
     }
@@ -470,13 +499,14 @@ class inveModel
                 return false;
             }
 
-            // Establecer variable de usuario para el trigger de auditoría
-            $this->db->exec("SET @usuario_id = 1");
+            // Extraer id_usuario para auditoría (el SP lo establecerá internamente)
+            $idUsuario = isset($data['id_usuario']) ? (int)$data['id_usuario'] : 1;
 
             // Usar procedimiento almacenado para desactivar el producto (soft delete)
-            error_log('inveModel - deleteProduct: Llamando SP sp_eliminar_producto');
-            $stmt = $this->db->prepare("CALL sp_eliminar_producto(:id_producto)");
+            error_log('inveModel - deleteProduct: Llamando SP sp_eliminar_producto con usuario: ' . $idUsuario);
+            $stmt = $this->db->prepare("CALL sp_eliminar_producto(:id_producto, :id_usuario)");
             $stmt->bindParam(':id_producto', $data['id_producto'], PDO::PARAM_INT);
+            $stmt->bindParam(':id_usuario', $idUsuario, PDO::PARAM_INT);
 
             $result = $stmt->execute();
             // Limpiar cursores adicionales del CALL

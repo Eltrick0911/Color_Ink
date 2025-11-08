@@ -192,11 +192,9 @@ class inveController
      */
     public function addProduct(array $headers, array $input): void
     {
-        // TEMPORAL: Desactivar autorización para testing
-        // $auth = $this->authorize($headers, [1]);
-        // if (!$auth) return;
-        
-        error_log('inveController - addProduct: MODO TESTING - Autorización desactivada');
+        // Autorización: administradores (1) y operadores (2) pueden crear productos
+        $auth = $this->authorize($headers, [1, 2]);
+        if (!$auth) return;
 
         error_log('inveController - addProduct: Iniciando creación de producto');
         error_log('inveController - addProduct: Datos recibidos: ' . json_encode($input));
@@ -230,6 +228,8 @@ class inveController
             $fechaRegistro = trim($input['fecha_registro']);
             // Descripción es opcional
             $descripcion = isset($input['descripcion']) ? trim($input['descripcion']) : null;
+            // ID de usuario autenticado (para auditoría en triggers)
+            $idUsuario = (int)($auth['id_usuario'] ?? 1);
 
             // Llamar al modelo para crear el producto
             $result = $this->inveModel->addProduct(
@@ -243,7 +243,8 @@ class inveController
                 $costoUnitario,
                 $precioVentaBase,
                 $fechaRegistro,
-                $descripcion
+                $descripcion,
+                $idUsuario
             );
 
             error_log('inveController - addProduct: Resultado del modelo: ' . json_encode($result));
@@ -688,18 +689,36 @@ class inveController
      */
     public function updateProduct(array $headers, array $input): void
     {
-        // TEMPORAL: Desactivar autorización para testing
-        // $auth = $this->authorize($headers, [1, 2]);
-        // if (!$auth) return;
+        error_log('========== INICIO updateProduct ==========');
+        error_log('inveController - updateProduct: Headers recibidos: ' . json_encode(array_keys($headers)));
+        error_log('inveController - updateProduct: Input recibido: ' . json_encode($input));
         
-        error_log('inveController - updateProduct: MODO TESTING - Autorización desactivada');
-
-        error_log('inveController - updateProduct: Datos recibidos: ' . json_encode($input));
+        // Autorización: administradores (1) y operadores (2) pueden actualizar
+        try {
+            $auth = $this->authorize($headers, [1, 2]);
+            if (!$auth) {
+                error_log('inveController - updateProduct: Autorización FALLIDA');
+                return;
+            }
+            error_log('inveController - updateProduct: Autorización exitosa. Usuario: ' . json_encode($auth));
+        } catch (\Throwable $e) {
+            error_log('inveController - updateProduct: EXCEPCIÓN en authorize: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+            responseHTTP::status500('Error de autorización: ' . $e->getMessage());
+            return;
+        }
         
         try {
+            // Inyectar id_usuario autenticado para auditoría
+            $input['id_usuario'] = (int)($auth['id_usuario'] ?? 1);
+            error_log('inveController - updateProduct: id_usuario inyectado: ' . $input['id_usuario']);
+
             $result = $this->inveModel->updateProduct($input);
             
+            error_log('inveController - updateProduct: Resultado del modelo: ' . json_encode($result));
+            
             if ($result) {
+                error_log('inveController - updateProduct: Producto actualizado exitosamente');
                 http_response_code(200);
                 $response = [
                     'status' => 'OK',
@@ -707,6 +726,7 @@ class inveController
                     'data' => $result
                 ];
             } else {
+                error_log('inveController - updateProduct: Error - No se pudo actualizar el producto');
                 http_response_code(400);
                 $response = [
                     'status' => 'ERROR',
@@ -718,9 +738,12 @@ class inveController
             echo json_encode($response);
 
         } catch (\Throwable $e) {
-            error_log('inveController - updateProduct: Error: ' . $e->getMessage());
-            echo json_encode(responseHTTP::status500());
+            error_log('inveController - updateProduct: EXCEPCIÓN: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+            http_response_code(500);
+            echo json_encode(responseHTTP::status500('Error interno: ' . $e->getMessage()));
         }
+        error_log('========== FIN updateProduct ==========');
     }
 
     /**
@@ -732,15 +755,16 @@ class inveController
      */
     public function deleteProduct(array $headers, array $input): void
     {
-        // TEMPORAL: Desactivar autorización para testing
-        // $auth = $this->authorize($headers, [1, 2]);
-        // if (!$auth) return;
-        
-        error_log('inveController - deleteProduct: MODO TESTING - Autorización desactivada');
+        // Autorización: administradores (1) y operadores (2) pueden eliminar productos
+        $auth = $this->authorize($headers, [1, 2]);
+        if (!$auth) return;
 
         error_log('inveController - deleteProduct: Datos recibidos: ' . json_encode($input));
         
         try {
+            // Inyectar id_usuario autenticado para auditoría
+            $input['id_usuario'] = (int)($auth['id_usuario'] ?? 1);
+            
             $result = $this->inveModel->deleteProduct($input);
             
             if ($result) {
