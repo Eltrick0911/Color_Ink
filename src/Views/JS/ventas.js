@@ -21,6 +21,13 @@
     /**
      * Inicializar sesión desde sessionStorage
      */
+      function getProjectBase(){
+    const parts = window.location.pathname.split('/');
+    const pIdx = parts.indexOf('public');
+    if (pIdx > 1) return '/' + parts.slice(1, pIdx).join('/');
+    const sIdx = parts.indexOf('src');
+    return sIdx > 1 ? '/' + parts.slice(1, sIdx).join('/') : '/' + (parts[1] || '');
+  }
     function initSession() {
         // Buscar usuario en sessionStorage (como los demás módulos)
         const storedUser = sessionStorage.getItem('user');
@@ -49,7 +56,7 @@
         } else {
             console.log('❌ No hay sesión activa, redirigiendo al login');
             // Redirigir al login si no hay sesión
-            window.location.href = 'http://localhost/Color_Ink/public/login';
+            window.location.replace(getProjectBase() + '/public/login');
             return false;
         }
     }
@@ -64,7 +71,7 @@
             
             if (!currentToken) {
                 console.error('❌ No hay token disponible');
-                window.location.href = 'http://localhost/Color_Ink/public/login';
+                window.location.replace(getProjectBase() + '/public/login');
                 return null;
             }
             
