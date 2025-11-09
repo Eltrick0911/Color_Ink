@@ -1,8 +1,9 @@
 # Archivos de configuración sensibles
-# src/Config/firebase_config.php  # Temporalmente comentado para funcionar en otros dispositivos
 .env
 *.env
 
+# NO subir configuración local de Firebase
+src/Config/firebase_config.php
 # Logs
 src/Logs/*.log
 
