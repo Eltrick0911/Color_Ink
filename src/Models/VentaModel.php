@@ -465,32 +465,50 @@ class VentaModel
     }
 
     /**
-     * Exportar ventas a Excel usando la vista vw_registro_ventas
+     * Exportar ventas a Excel personalizado
      */
-    public function exportarVentasExcel(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null): array
+    public function exportarVentasExcel(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null): void
     {
         try {
-            // Usar la vista vw_registro_ventas que ya tiene todos los JOINs
-            $sql = "SELECT * FROM vw_registro_ventas WHERE 1=1";
+            // Usar JOINs en lugar de la vista
+            $sql = "
+                SELECT 
+                    v.id_venta,
+                    v.fecha_venta,
+                    v.monto_cobrado,
+                    v.costo_total,
+                    v.utilidad,
+                    v.utilidad_pct,
+                    v.metodo_pago,
+                    v.estado,
+                    u.nombre_usuario as usuario,
+                    u_c.nombre_usuario as cliente,
+                    p.id_pedido
+                FROM venta v
+                JOIN pedido p ON v.id_pedido = p.id_pedido
+                JOIN usuario u ON v.id_usuario = u.id_usuario
+                JOIN usuario u_c ON p.id_usuario = u_c.id_usuario
+                WHERE 1=1
+            ";
             $params = [];
 
             // Aplicar filtros
             if (!empty($filtro)) {
-                $sql .= " AND (cliente LIKE :filtro OR usuario LIKE :filtro OR id_venta LIKE :filtro)";
+                $sql .= " AND (u_c.nombre_usuario LIKE :filtro OR u.nombre_usuario LIKE :filtro OR v.id_venta LIKE :filtro)";
                 $params[':filtro'] = "%{$filtro}%";
             }
 
             if (!empty($fechaDesde)) {
-                $sql .= " AND DATE(fecha_venta) >= :fechaDesde";
+                $sql .= " AND DATE(v.fecha_venta) >= :fechaDesde";
                 $params[':fechaDesde'] = $fechaDesde;
             }
 
             if (!empty($fechaHasta)) {
-                $sql .= " AND DATE(fecha_venta) <= :fechaHasta";
+                $sql .= " AND DATE(v.fecha_venta) <= :fechaHasta";
                 $params[':fechaHasta'] = $fechaHasta;
             }
 
-            $sql .= " ORDER BY fecha_venta DESC";
+            $sql .= " ORDER BY v.fecha_venta DESC";
 
             $stmt = $this->db->prepare($sql);
             
@@ -501,22 +519,22 @@ class VentaModel
             $stmt->execute();
             $ventas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Generar Excel
-            $this->generarArchivoExcel($ventas);
+            // Generar Excel personalizado
+            $this->generarArchivoExcelPersonalizado($ventas);
             
-            return responseHTTP::status200('Excel generado exitosamente');
         } catch (\Throwable $e) {
             error_log('VentaModel - exportarVentasExcel ERROR: ' . $e->getMessage());
-            return responseHTTP::status500();
+            header('Content-Type: application/json');
+            echo json_encode(responseHTTP::status500());
         }
     }
 
     /**
-     * Generar archivo Excel simple
+     * Generar archivo Excel personalizado
      */
-    private function generarArchivoExcel(array $ventas): void
+    private function generarArchivoExcelPersonalizado(array $ventas): void
     {
-        $filename = 'ventas_' . date('Y-m-d_H-i-s') . '.xls';
+        $filename = 'Ventas_ColorInk_' . date('Y-m-d_H-i-s') . '.xls';
         
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -524,52 +542,75 @@ class VentaModel
         header('Pragma: public');
         header('Expires: 0');
 
-        echo "<table border='1'>";
-        echo "<tr style='background-color: #d900bc; color: white; font-weight: bold;'>";
-        echo "<th>ID Venta</th>";
-        echo "<th>Fecha</th>";
-        echo "<th>Cliente</th>";
-        echo "<th>ID Pedido</th>";
-        echo "<th>Método Pago</th>";
-        echo "<th>Monto Cobrado</th>";
-        echo "<th>Costo Total</th>";
-        echo "<th>Utilidad</th>";
-        echo "<th>Margen %</th>";
-        echo "<th>Estado</th>";
-        echo "<th>Usuario</th>";
-        echo "</tr>";
-
-        foreach ($ventas as $venta) {
-            echo "<tr>";
-            echo "<td>" . htmlspecialchars($venta['id_venta']) . "</td>";
-            echo "<td>" . date('d/m/Y H:i', strtotime($venta['fecha_venta'])) . "</td>";
-            echo "<td>" . htmlspecialchars($venta['cliente']) . "</td>";
-            echo "<td>" . htmlspecialchars($venta['id_pedido']) . "</td>";
-            echo "<td>" . htmlspecialchars($venta['metodo_pago']) . "</td>";
-            echo "<td>$" . number_format($venta['monto_cobrado'], 2) . "</td>";
-            echo "<td>$" . number_format($venta['costo_total'], 2) . "</td>";
-            echo "<td>$" . number_format($venta['utilidad'], 2) . "</td>";
-            echo "<td>" . number_format($venta['utilidad_pct'], 1) . "%</td>";
-            echo "<td>" . htmlspecialchars($venta['estado']) . "</td>";
-            echo "<td>" . htmlspecialchars($venta['usuario']) . "</td>";
-            echo "</tr>";
-        }
-        
-        // Fila de totales
         $totalMonto = array_sum(array_column($ventas, 'monto_cobrado'));
         $totalCosto = array_sum(array_column($ventas, 'costo_total'));
         $totalUtilidad = $totalMonto - $totalCosto;
-        $margenPromedio = $totalCosto > 0 ? ($totalUtilidad / $totalCosto * 100) : 0;
+        $margenPromedio = $totalMonto > 0 ? ($totalUtilidad / $totalMonto * 100) : 0;
         
-        echo "<tr style='background-color: #f8f9fa; font-weight: bold;'>";
-        echo "<td colspan='5'>TOTALES</td>";
-        echo "<td>$" . number_format($totalMonto, 2) . "</td>";
-        echo "<td>$" . number_format($totalCosto, 2) . "</td>";
-        echo "<td>$" . number_format($totalUtilidad, 2) . "</td>";
-        echo "<td>" . number_format($margenPromedio, 1) . "%</td>";
-        echo "<td colspan='2'>" . count($ventas) . " ventas</td>";
-        echo "</tr>";
+        echo '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif;">';
         
-        echo "</table>";
+        // Encabezado principal
+        echo '<tr><td colspan="11" style="background-color: #d900bc; color: white; font-size: 16pt; font-weight: bold; text-align: center; padding: 15px;">REPORTE DE VENTAS - COLOR INK</td></tr>';
+        
+        // Información del reporte
+        echo '<tr><td colspan="11" style="background-color: #f8f9fa; padding: 10px; border: 1px solid #dee2e6;">';
+        echo '<b>Fecha:</b> ' . date('d/m/Y H:i:s') . ' | ';
+        echo '<b>Ventas:</b> ' . count($ventas) . ' | ';
+        echo '<b>Ingresos:</b> L ' . number_format($totalMonto, 2) . ' | ';
+        echo '<b>Utilidad:</b> L ' . number_format($totalUtilidad, 2) . ' | ';
+        echo '<b>Margen:</b> ' . number_format($margenPromedio, 1) . '%';
+        echo '</td></tr>';
+        
+        // Fila vacía
+        echo '<tr><td colspan="11" style="height: 10px;"></td></tr>';
+        
+        // Encabezados de columnas
+        echo '<tr style="background-color: #d900bc; color: white; font-weight: bold; text-align: center;">';
+        echo '<td>ID Venta</td>';
+        echo '<td>Fecha</td>';
+        echo '<td>Cliente</td>';
+        echo '<td>ID Pedido</td>';
+        echo '<td>Método Pago</td>';
+        echo '<td>Monto Cobrado</td>';
+        echo '<td>Costo Total</td>';
+        echo '<td>Utilidad</td>';
+        echo '<td>Margen %</td>';
+        echo '<td>Estado</td>';
+        echo '<td>Usuario</td>';
+        echo '</tr>';
+
+        // Datos de ventas
+        foreach ($ventas as $index => $venta) {
+            $bgColor = ($index % 2 === 0) ? '#f8f9fa' : '#ffffff';
+            $utilidad = floatval($venta['utilidad'] ?? 0);
+            $utilidadColor = $utilidad >= 0 ? '#28a745' : '#dc3545';
+            $estadoColor = strtolower($venta['estado']) === 'anulada' ? '#dc3545' : '#28a745';
+            
+            echo '<tr style="background-color: ' . $bgColor . ';">';
+            echo '<td style="text-align: center; font-weight: bold;">' . htmlspecialchars($venta['id_venta']) . '</td>';
+            echo '<td style="text-align: center;">' . date('d/m/Y H:i', strtotime($venta['fecha_venta'])) . '</td>';
+            echo '<td>' . htmlspecialchars($venta['cliente']) . '</td>';
+            echo '<td style="text-align: center; color: #d900bc; font-weight: bold;">' . htmlspecialchars($venta['id_pedido']) . '</td>';
+            echo '<td style="text-align: center;">' . htmlspecialchars($venta['metodo_pago']) . '</td>';
+            echo '<td style="text-align: right; font-weight: bold;">L ' . number_format($venta['monto_cobrado'], 2) . '</td>';
+            echo '<td style="text-align: right; font-weight: bold;">L ' . number_format($venta['costo_total'], 2) . '</td>';
+            echo '<td style="text-align: right; font-weight: bold; color: ' . $utilidadColor . ';">L ' . number_format($utilidad, 2) . '</td>';
+            echo '<td style="text-align: center; color: ' . $utilidadColor . '; font-weight: bold;">' . number_format($venta['utilidad_pct'] ?? 0, 1) . '%</td>';
+            echo '<td style="text-align: center; color: ' . $estadoColor . '; font-weight: bold;">' . htmlspecialchars($venta['estado']) . '</td>';
+            echo '<td>' . htmlspecialchars($venta['usuario']) . '</td>';
+            echo '</tr>';
+        }
+        
+        // Fila de totales
+        echo '<tr style="background-color: #e9ecef; font-weight: bold; border-top: 3px solid #d900bc;">';
+        echo '<td colspan="5" style="text-align: center; font-size: 12pt;">TOTALES</td>';
+        echo '<td style="text-align: right; font-size: 12pt;">L ' . number_format($totalMonto, 2) . '</td>';
+        echo '<td style="text-align: right; font-size: 12pt;">L ' . number_format($totalCosto, 2) . '</td>';
+        echo '<td style="text-align: right; font-size: 12pt; color: ' . ($totalUtilidad >= 0 ? '#28a745' : '#dc3545') . ';">L ' . number_format($totalUtilidad, 2) . '</td>';
+        echo '<td style="text-align: center; font-size: 12pt; color: ' . ($totalUtilidad >= 0 ? '#28a745' : '#dc3545') . ';">' . number_format($margenPromedio, 1) . '%</td>';
+        echo '<td colspan="2" style="text-align: center; font-size: 12pt;">' . count($ventas) . ' ventas</td>';
+        echo '</tr>';
+        
+        echo '</table>';
     }
 }

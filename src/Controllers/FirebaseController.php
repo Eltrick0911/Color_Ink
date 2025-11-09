@@ -138,7 +138,7 @@ class FirebaseController
     {
         try {
             // Permitir una pequeña tolerancia por desfase de reloj entre cliente y servidor
-            \Firebase\JWT\JWT::$leeway = 60; // segundos
+            \Firebase\JWT\JWT::$leeway = 120; // segundos
             $jwks = $this->fetchJwks();
             $keys = JWK::parseKeySet($jwks);
             // Firebase ID Tokens están firmados con RS256
