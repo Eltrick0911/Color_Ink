@@ -176,10 +176,14 @@ class VentaController
             $filtro = $_GET['filtro'] ?? null;
             $fechaDesde = $_GET['fecha_desde'] ?? null;
             $fechaHasta = $_GET['fecha_hasta'] ?? null;
+            $estado = $_GET['estado'] ?? null;
+            $metodoPago = $_GET['metodo_pago'] ?? null;
             $pagina = (int)($_GET['pagina'] ?? 1);
             $limite = (int)($_GET['limite'] ?? 10);
 
-            $result = $this->ventaModel->listarVentas($filtro, $fechaDesde, $fechaHasta, $pagina, $limite);
+            error_log('VentaController - Filtros: estado=' . $estado . ', metodoPago=' . $metodoPago);
+
+            $result = $this->ventaModel->listarVentas($filtro, $fechaDesde, $fechaHasta, $estado, $metodoPago, $pagina, $limite);
             echo json_encode($result);
         } catch (\Throwable $e) {
             error_log('VentaController - listarVentas ERROR: ' . $e->getMessage());
@@ -334,8 +338,10 @@ class VentaController
             $filtro = $_GET['filtro'] ?? null;
             $fechaDesde = $_GET['fecha_desde'] ?? null;
             $fechaHasta = $_GET['fecha_hasta'] ?? null;
+            $estado = $_GET['estado'] ?? null;
+            $metodoPago = $_GET['metodo_pago'] ?? null;
 
-            $this->ventaModel->exportarVentasExcel($filtro, $fechaDesde, $fechaHasta);
+            $this->ventaModel->exportarVentasExcel($filtro, $fechaDesde, $fechaHasta, $estado, $metodoPago);
         } catch (\Throwable $e) {
             error_log('VentaController - exportarExcel ERROR: ' . $e->getMessage());
             echo json_encode(responseHTTP::status500());

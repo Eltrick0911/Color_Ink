@@ -12678,3 +12678,261 @@ Stack trace:
 [09-Nov-2025 14:57:07 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
 [09-Nov-2025 14:57:11 America/Tegucigalpa] Conexión exitosa
 [09-Nov-2025 14:57:12 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 14:59:42 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 14:59:43 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 14:59:43 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 2 ventas de 12 total
+[09-Nov-2025 14:59:45 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 14:59:45 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 14:59:45 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:01:26 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:01:27 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:01:27 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 2 ventas de 12 total
+[09-Nov-2025 17:01:28 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:01:29 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:01:29 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosRoute - Method: GET
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[09-Nov-2025 17:01:29 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[09-Nov-2025 17:01:29 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 23 pedidos
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 23 pedidos de la BD
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":37,"numero_pedido":"13","id_usuario":39,"fecha_pedido":"2025-11-09 05:59:56","fecha_entrega":"2025-11-09","observaciones":"1 producto(s)","id_estado":1,"cliente_nombre":"Yor","cliente_telefono":"32537289","canal_venta":"tienda","prioridad":"urgente","detalles_producto":"[{\"categoria\":\"25\",\"colores\":\"#990000\",\"especificaciones\":\"jsjsjsj\",\"cantidad\":4,\"precio\":10,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Yor","telefono":"32537289","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"}
+[09-Nov-2025 17:01:29 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 23 pedidos
+[09-Nov-2025 17:01:30 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:01:31 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:01:31 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosRoute - Method: GET
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[09-Nov-2025 17:01:31 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[09-Nov-2025 17:01:31 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 23 pedidos
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 23 pedidos de la BD
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":37,"numero_pedido":"13","id_usuario":39,"fecha_pedido":"2025-11-09 05:59:56","fecha_entrega":"2025-11-09","observaciones":"1 producto(s)","id_estado":1,"cliente_nombre":"Yor","cliente_telefono":"32537289","canal_venta":"tienda","prioridad":"urgente","detalles_producto":"[{\"categoria\":\"25\",\"colores\":\"#990000\",\"especificaciones\":\"jsjsjsj\",\"cantidad\":4,\"precio\":10,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Yor","telefono":"32537289","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"}
+[09-Nov-2025 17:01:31 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 23 pedidos
+[09-Nov-2025 17:01:39 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:01:40 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:01:40 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:01:48 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:01:48 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:01:48 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 2 ventas de 12 total
+[09-Nov-2025 17:01:56 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:01:56 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:01:56 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:02:04 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:02:04 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:02:05 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:02:08 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:02:08 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:02:08 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:02:14 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:02:14 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:02:14 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:02:52 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:02:53 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:02:53 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:12:29 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:12:29 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:12:30 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:12:32 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:12:33 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:12:33 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 1 ventas de 1 total
+[09-Nov-2025 17:12:37 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:12:37 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:12:37 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 11 total
+[09-Nov-2025 17:13:38 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:13:38 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:13:59 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:13:59 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:13:59 America/Tegucigalpa] VentaController - Filtros: estado=, metodoPago=
+[09-Nov-2025 17:13:59 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:15:00 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:01 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:01 America/Tegucigalpa] VentaController - Filtros: estado=, metodoPago=
+[09-Nov-2025 17:15:01 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:15:03 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:03 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:03 America/Tegucigalpa] VentaController - Filtros: estado=, metodoPago=Efectivo
+[09-Nov-2025 17:15:03 America/Tegucigalpa] VentaModel - Filtro método pago: Efectivo
+[09-Nov-2025 17:15:04 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 8 ventas de 8 total
+[09-Nov-2025 17:15:08 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:10 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:10 America/Tegucigalpa] VentaController - Filtros: estado=, metodoPago=Cheque
+[09-Nov-2025 17:15:10 America/Tegucigalpa] VentaModel - Filtro método pago: Cheque
+[09-Nov-2025 17:15:10 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 0 ventas de 0 total
+[09-Nov-2025 17:15:12 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:13 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:13 America/Tegucigalpa] VentaController - Filtros: estado=, metodoPago=Transferencia
+[09-Nov-2025 17:15:13 America/Tegucigalpa] VentaModel - Filtro método pago: Transferencia
+[09-Nov-2025 17:15:13 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 2 ventas de 2 total
+[09-Nov-2025 17:15:19 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:19 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:19 America/Tegucigalpa] VentaController - Filtros: estado=, metodoPago=Tarjeta
+[09-Nov-2025 17:15:19 America/Tegucigalpa] VentaModel - Filtro método pago: Tarjeta
+[09-Nov-2025 17:15:20 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 2 ventas de 2 total
+[09-Nov-2025 17:15:26 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:26 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:26 America/Tegucigalpa] VentaController - Filtros: estado=, metodoPago=Tarjeta
+[09-Nov-2025 17:15:26 America/Tegucigalpa] VentaModel - Filtro método pago: Tarjeta
+[09-Nov-2025 17:15:26 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 0 ventas de 0 total
+[09-Nov-2025 17:15:30 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:30 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:30 America/Tegucigalpa] VentaController - Filtros: estado=, metodoPago=Tarjeta
+[09-Nov-2025 17:15:30 America/Tegucigalpa] VentaModel - Filtro método pago: Tarjeta
+[09-Nov-2025 17:15:31 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 1 ventas de 1 total
+[09-Nov-2025 17:15:35 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:35 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:35 America/Tegucigalpa] VentaController - Filtros: estado=, metodoPago=
+[09-Nov-2025 17:15:36 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:15:37 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:37 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:37 America/Tegucigalpa] VentaModel - obtenerPedidosDisponibles: Iniciando consulta
+[09-Nov-2025 17:15:37 America/Tegucigalpa] VentaModel - Estados disponibles: [{"id_estado":1,"nombre":"Entregado"},{"id_estado":2,"nombre":"Cancelado"},{"id_estado":3,"nombre":"En Proceso"}]
+[09-Nov-2025 17:15:37 America/Tegucigalpa] VentaModel - SQL Query: 
+                SELECT 
+                    p.id_pedido,
+                    p.numero_pedido,
+                    p.fecha_pedido,
+                    p.id_usuario as id_cliente,
+                    u.nombre_usuario as nombre_cliente,
+                    ep.nombre as estado_nombre,
+                    COALESCE((
+                        SELECT SUM(dp.precio_unitario * dp.cantidad)
+                        FROM detallepedido dp
+                        WHERE dp.id_pedido = p.id_pedido
+                    ), 0) as total_pedido,
+                    CONCAT(COALESCE(p.numero_pedido, CONCAT('Pedido #', p.id_pedido)), ' - Cliente: ', u.nombre_usuario) as display_text
+                FROM pedido p
+                INNER JOIN usuario u ON p.id_usuario = u.id_usuario
+                INNER JOIN cat_estado_pedido ep ON p.id_estado = ep.id_estado
+                WHERE ep.nombre = 'Entregado'
+                AND p.id_pedido NOT IN (
+                    SELECT DISTINCT v.id_pedido FROM venta v WHERE v.id_pedido IS NOT NULL
+                )
+                ORDER BY p.id_pedido DESC
+                LIMIT 50
+            
+[09-Nov-2025 17:15:37 America/Tegucigalpa] VentaModel - obtenerPedidosDisponibles: Encontrados 0 pedidos disponibles
+[09-Nov-2025 17:15:37 America/Tegucigalpa] VentaModel - DEBUG - Últimos 10 pedidos: [{"id_pedido":37,"numero_pedido":"13","estado":"Entregado"},{"id_pedido":36,"numero_pedido":"12","estado":"Cancelado"},{"id_pedido":35,"numero_pedido":"11","estado":"En Proceso"},{"id_pedido":34,"numero_pedido":"10","estado":"En Proceso"},{"id_pedido":33,"numero_pedido":"9","estado":"Entregado"},{"id_pedido":32,"numero_pedido":"8","estado":"En Proceso"},{"id_pedido":31,"numero_pedido":"7","estado":"En Proceso"},{"id_pedido":30,"numero_pedido":"6","estado":"En Proceso"},{"id_pedido":29,"numero_pedido":"5","estado":"En Proceso"},{"id_pedido":28,"numero_pedido":"4","estado":"En Proceso"}]
+[09-Nov-2025 17:15:45 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:45 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:45 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosRoute - Method: GET
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[09-Nov-2025 17:15:45 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[09-Nov-2025 17:15:45 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 23 pedidos
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 23 pedidos de la BD
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":37,"numero_pedido":"13","id_usuario":39,"fecha_pedido":"2025-11-09 05:59:56","fecha_entrega":"2025-11-09","observaciones":"1 producto(s)","id_estado":1,"cliente_nombre":"Yor","cliente_telefono":"32537289","canal_venta":"tienda","prioridad":"urgente","detalles_producto":"[{\"categoria\":\"25\",\"colores\":\"#990000\",\"especificaciones\":\"jsjsjsj\",\"cantidad\":4,\"precio\":10,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Yor","telefono":"32537289","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"}
+[09-Nov-2025 17:15:45 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 23 pedidos
+[09-Nov-2025 17:15:46 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:46 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:46 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosRoute - Method: GET
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosRoute - URL: pedidos
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos"]
+[09-Nov-2025 17:15:46 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos
+[09-Nov-2025 17:15:46 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 23 pedidos
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 23 pedidos de la BD
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":37,"numero_pedido":"13","id_usuario":39,"fecha_pedido":"2025-11-09 05:59:56","fecha_entrega":"2025-11-09","observaciones":"1 producto(s)","id_estado":1,"cliente_nombre":"Yor","cliente_telefono":"32537289","canal_venta":"tienda","prioridad":"urgente","detalles_producto":"[{\"categoria\":\"25\",\"colores\":\"#990000\",\"especificaciones\":\"jsjsjsj\",\"cantidad\":4,\"precio\":10,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Yor","telefono":"32537289","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"}
+[09-Nov-2025 17:15:46 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 23 pedidos
+[09-Nov-2025 17:15:54 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:54 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:54 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[09-Nov-2025 17:15:54 America/Tegucigalpa] PedidosRoute - Method: PUT
+[09-Nov-2025 17:15:54 America/Tegucigalpa] PedidosRoute - URL: pedidos/35/cambiar-estado
+[09-Nov-2025 17:15:54 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","35","cambiar-estado"]
+[09-Nov-2025 17:15:54 America/Tegucigalpa] PedidosRoute - Input data: {"id_estado_nuevo":1}
+[09-Nov-2025 17:15:54 America/Tegucigalpa] Nueva petición - Método: PUT, URL: pedidos/35/cambiar-estado
+[09-Nov-2025 17:15:54 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","Content-Length":"21","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","Content-Type":"application\/json","sec-ch-ua-mobile":"?0","Accept":"*\/*","Origin":"http:\/\/localhost","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:15:54 America/Tegucigalpa] Datos de entrada: {"id_estado_nuevo":1}
+[09-Nov-2025 17:15:54 America/Tegucigalpa] PedidosRoute - Parsed: Action='pedidos', ID=35, SubAction='cambiar-estado', SubID=
+[09-Nov-2025 17:15:54 America/Tegucigalpa] PedidosRoute - Routing: PUT /pedidos/35/cambiar-estado
+[09-Nov-2025 17:15:54 America/Tegucigalpa] PedidosController - cambiarEstado: Cambiando estado pedido ID: 35
+[09-Nov-2025 17:15:54 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[09-Nov-2025 17:15:54 America/Tegucigalpa] PedidosModel - getPedidoById: Obteniendo pedido ID: 35
+[09-Nov-2025 17:15:55 America/Tegucigalpa] PedidosModel - getPedidoById: Pedido 35 obtenido con 1 detalles
+[09-Nov-2025 17:15:55 America/Tegucigalpa] PedidosController - cambiarEstado: Cambiando estado a 1 por usuario 1
+[09-Nov-2025 17:15:55 America/Tegucigalpa] PedidosModel - cambiarEstadoPedido: Cambiando estado pedido 35 a 1 por usuario 1
+[09-Nov-2025 17:15:55 America/Tegucigalpa] PedidosModel - cambiarEstadoPedido: Cambio de estado exitoso
+[09-Nov-2025 17:15:55 America/Tegucigalpa] PedidosController - cambiarEstado: Estado del pedido 35 actualizado exitosamente
+[09-Nov-2025 17:15:55 America/Tegucigalpa] Fin de la petición
+[09-Nov-2025 17:15:55 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:56 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:56 America/Tegucigalpa] === PEDIDOS ROUTE ===
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosRoute - Method: GET
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosRoute - URL: pedidos/estados
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosRoute - Segments: ["pedidos","estados"]
+[09-Nov-2025 17:15:56 America/Tegucigalpa] Nueva petición - Método: GET, URL: pedidos/estados
+[09-Nov-2025 17:15:56 America/Tegucigalpa] Headers: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosRoute - Routing: GET /pedidos
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosController - findAll: Iniciando obtención de todos los pedidos
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosController - findAll: Headers recibidos: {"Host":"localhost","Connection":"keep-alive","sec-ch-ua-platform":"\"Windows\"","Authorization":"Bearer a81cb12c-e194-4d78-952c-079bcb9a38a1","User-Agent":"Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/132.0.0.0 Safari\/537.36","sec-ch-ua":"\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Google Chrome\";v=\"132\"","sec-ch-ua-mobile":"?0","Accept":"*\/*","Sec-Fetch-Site":"same-origin","Sec-Fetch-Mode":"cors","Sec-Fetch-Dest":"empty","Referer":"http:\/\/localhost\/Color_Ink\/public\/pedidos","Accept-Encoding":"gzip, deflate, br, zstd","Accept-Language":"es-MX,es;q=0.9,en-US;q=0.8,en;q=0.7,es-419;q=0.6","Cookie":"PHPSESSID=17u7ptimuegcdcf146vl6n5nvl"}
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosController - authorize: Autenticación deshabilitada para desarrollo
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosController - findAll: Usuario autenticado - ID: 1
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosModel - getAllPedidos: Obteniendo todos los pedidos
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosModel - getAllPedidos: Se encontraron 23 pedidos
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 23 pedidos de la BD
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":37,"numero_pedido":"13","id_usuario":39,"fecha_pedido":"2025-11-09 05:59:56","fecha_entrega":"2025-11-09","observaciones":"1 producto(s)","id_estado":1,"cliente_nombre":"Yor","cliente_telefono":"32537289","canal_venta":"tienda","prioridad":"urgente","detalles_producto":"[{\"categoria\":\"25\",\"colores\":\"#990000\",\"especificaciones\":\"jsjsjsj\",\"cantidad\":4,\"precio\":10,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Yor","telefono":"32537289","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"}
+[09-Nov-2025 17:15:56 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 23 pedidos
+[09-Nov-2025 17:15:56 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:57 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:57 America/Tegucigalpa] VentaController - Filtros: estado=, metodoPago=
+[09-Nov-2025 17:15:57 America/Tegucigalpa] VentaModel - listarVentas: Encontradas 10 ventas de 12 total
+[09-Nov-2025 17:15:59 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:15:59 America/Tegucigalpa] Firebase verify error: "kid" empty, unable to lookup correct key
+[09-Nov-2025 17:15:59 America/Tegucigalpa] VentaModel - obtenerPedidosDisponibles: Iniciando consulta
+[09-Nov-2025 17:15:59 America/Tegucigalpa] VentaModel - Estados disponibles: [{"id_estado":1,"nombre":"Entregado"},{"id_estado":2,"nombre":"Cancelado"},{"id_estado":3,"nombre":"En Proceso"}]
+[09-Nov-2025 17:15:59 America/Tegucigalpa] VentaModel - SQL Query: 
+                SELECT 
+                    p.id_pedido,
+                    p.numero_pedido,
+                    p.fecha_pedido,
+                    p.id_usuario as id_cliente,
+                    u.nombre_usuario as nombre_cliente,
+                    ep.nombre as estado_nombre,
+                    COALESCE((
+                        SELECT SUM(dp.precio_unitario * dp.cantidad)
+                        FROM detallepedido dp
+                        WHERE dp.id_pedido = p.id_pedido
+                    ), 0) as total_pedido,
+                    CONCAT(COALESCE(p.numero_pedido, CONCAT('Pedido #', p.id_pedido)), ' - Cliente: ', u.nombre_usuario) as display_text
+                FROM pedido p
+                INNER JOIN usuario u ON p.id_usuario = u.id_usuario
+                INNER JOIN cat_estado_pedido ep ON p.id_estado = ep.id_estado
+                WHERE ep.nombre = 'Entregado'
+                AND p.id_pedido NOT IN (
+                    SELECT DISTINCT v.id_pedido FROM venta v WHERE v.id_pedido IS NOT NULL
+                )
+                ORDER BY p.id_pedido DESC
+                LIMIT 50
+            
+[09-Nov-2025 17:15:59 America/Tegucigalpa] VentaModel - obtenerPedidosDisponibles: Encontrados 1 pedidos disponibles
+[09-Nov-2025 17:15:59 America/Tegucigalpa] VentaModel - Primer pedido encontrado: {"id_pedido":35,"numero_pedido":"11","fecha_pedido":"2025-11-05 01:10:53","id_cliente":33,"nombre_cliente":"Juan A","estado_nombre":"Entregado","total_pedido":"30.00","display_text":"11 - Cliente: Juan A"}

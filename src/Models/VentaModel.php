@@ -128,7 +128,7 @@ class VentaModel
     /**
      * Listar todas las ventas - usando JOINs ya que la vista no existe en AWS
      */
-    public function listarVentas(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null, int $pagina = 1, int $limite = 10): array
+    public function listarVentas(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null, ?string $estado = null, ?string $metodoPago = null, int $pagina = 1, int $limite = 10): array
     {
         try {
             // Usar JOINs en lugar de la vista que no existe
@@ -169,6 +169,17 @@ class VentaModel
                 $params[':fechaHasta'] = $fechaHasta;
             }
 
+            if (!empty($estado)) {
+                $sql .= " AND v.estado = :estado";
+                $params[':estado'] = $estado;
+            }
+
+            if (!empty($metodoPago)) {
+                error_log('VentaModel - Filtro método pago: ' . $metodoPago);
+                $sql .= " AND v.metodo_pago = :metodoPago";
+                $params[':metodoPago'] = $metodoPago;
+            }
+
             // Contar total de registros con consulta separada
             $countSql = "
                 SELECT COUNT(*)
@@ -188,6 +199,12 @@ class VentaModel
             }
             if (!empty($fechaHasta)) {
                 $countSql .= " AND DATE(v.fecha_venta) <= :fechaHasta";
+            }
+            if (!empty($estado)) {
+                $countSql .= " AND v.estado = :estado";
+            }
+            if (!empty($metodoPago)) {
+                $countSql .= " AND v.metodo_pago = :metodoPago";
             }
             
             $countStmt = $this->db->prepare($countSql);
@@ -510,7 +527,7 @@ class VentaModel
     /**
      * Exportar ventas a Excel personalizado
      */
-    public function exportarVentasExcel(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null): void
+    public function exportarVentasExcel(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null, ?string $estado = null, ?string $metodoPago = null): void
     {
         try {
             // Usar JOINs en lugar de la vista
@@ -549,6 +566,16 @@ class VentaModel
             if (!empty($fechaHasta)) {
                 $sql .= " AND DATE(v.fecha_venta) <= :fechaHasta";
                 $params[':fechaHasta'] = $fechaHasta;
+            }
+
+            if (!empty($estado)) {
+                $sql .= " AND v.estado = :estado";
+                $params[':estado'] = $estado;
+            }
+
+            if (!empty($metodoPago)) {
+                $sql .= " AND v.metodo_pago = :metodoPago";
+                $params[':metodoPago'] = $metodoPago;
             }
 
             $sql .= " ORDER BY v.fecha_venta DESC";

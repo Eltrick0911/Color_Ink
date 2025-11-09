@@ -146,6 +146,11 @@
         }
         if (searchInput && searchInput.value) params.append('filtro', searchInput.value);
         if (estadoSelect && estadoSelect.value) params.append('estado', estadoSelect.value);
+        const metodoPagoSelect = document.getElementById('metodoPagoSelect');
+        if (metodoPagoSelect && metodoPagoSelect.value) {
+            console.log('Enviando filtro método pago:', metodoPagoSelect.value);
+            params.append('metodo_pago', metodoPagoSelect.value);
+        }
         params.append('pagina', pagina);
         params.append('limite', itemsPerPage);
         
@@ -849,6 +854,9 @@
         try {
             const params = new URLSearchParams();
             if (searchInput && searchInput.value) params.append('filtro', searchInput.value);
+            if (estadoSelect && estadoSelect.value) params.append('estado', estadoSelect.value);
+            const metodoPagoSelect = document.getElementById('metodoPagoSelect');
+            if (metodoPagoSelect && metodoPagoSelect.value) params.append('metodo_pago', metodoPagoSelect.value);
             if (fechaDesde) {
                 params.append('fecha_desde', fechaDesde);
                 params.append('fecha_hasta', fechaHasta || fechaDesde);
@@ -993,7 +1001,7 @@
             // Event listener para filtro de método de pago
             const metodoPagoSelect = document.getElementById('metodoPagoSelect');
             if (metodoPagoSelect) {
-                metodoPagoSelect.addEventListener('change', actualizarVista);
+                metodoPagoSelect.addEventListener('change', () => cargarVentas(1));
             }
             
             // Configurar modal de confirmación de anulación
