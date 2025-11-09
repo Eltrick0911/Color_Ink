@@ -13,3 +13,4 @@ src/Logs/*.log
 # Archivos del sistema
 .DS_Store
 Thumbs.db
+src/Logs/php-error.log
