@@ -93,7 +93,9 @@
 
         // Try both route patterns when there is ambiguity
         getAllPedidos: function () {
-            const url = this.apiEntry + '?route=pedidos&caso=1';
+            // Agregar timestamp para evitar caché del navegador
+            const timestamp = new Date().getTime();
+            const url = this.apiEntry + '?route=pedidos&caso=1&_t=' + timestamp;
             console.log('PedidosMVC - getAllPedidos: URL:', url);
             console.log('PedidosMVC - getAllPedidos: Token:', this.token ? 'Presente' : 'Ausente');
             return this.request(url, { method: 'GET' })
@@ -276,9 +278,9 @@
         },
 
         formatCurrency: function (v) {
-            if (v === null || v === undefined || v === '') return '$0.00';
+            if (v === null || v === undefined || v === '') return 'L 0.00';
             const num = Number(v) || 0;
-            return num.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+            return 'L ' + num.toFixed(2);
         }
     };
 
@@ -296,6 +298,7 @@
         },
 
         renderTable: function (selector, pedidos) {
+            console.log('PedidosMVC - renderTable: Selector:', selector, 'Pedidos:', pedidos.length);
             this.tableSelector = selector;
             const table = document.querySelector(selector);
             if (!table) {
@@ -305,6 +308,7 @@
             const tbody = table.querySelector('tbody') || table;
             // Limpiar
             tbody.innerHTML = '';
+            console.log('PedidosMVC - renderTable: Tabla limpiada, renderizando', pedidos.length, 'pedidos');
 
             if (!pedidos || pedidos.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: rgba(255,255,255,0.6);">No hay pedidos para mostrar</td></tr>';
@@ -313,6 +317,13 @@
 
             pedidos.forEach(p => {
                 const tr = document.createElement('tr');
+                // Añadir atributos de filtrado y búsqueda
+                tr.dataset.estadoId = p.estadoId || '';
+                tr.dataset.estadoNombre = (p.estadoNombre || '').toLowerCase();
+                tr.dataset.searchIndex = (
+                    (p.numeroPedido || '') + ' ' + (p.cliente || '') + ' ' + (p.fecha || '') + ' ' +
+                    (p.fechaEntrega || '') + ' ' + (p.total || '') + ' ' + (p.estadoNombre || '')
+                ).toLowerCase();
                 tr.innerHTML = `
                     <td class="pedido-id">${p.numeroPedido || ''}</td>
                     <td class="pedido-cliente">${p.cliente}</td>
@@ -327,8 +338,6 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
-                
-                // Aplicar estilo al selector recién creado
                 const selector = tr.querySelector('.status-selector');
                 if (selector && p.estadoId) {
                     View.applyEstadoStyle(selector, p.estadoId);
@@ -337,6 +346,29 @@
 
             // Dejar que la vista original maneje los botones; opcionalmente emitir evento
             document.dispatchEvent(new CustomEvent('pedidos:rendered', { detail: { count: pedidos.length } }));
+        },
+        // Filtro compuesto (estado + texto)
+        applyCompositeFilter: function({ estado = '', search = '' } = {}) {
+            const tbody = document.querySelector(this.tableSelector);
+            if (!tbody) return;
+            const rows = tbody.querySelectorAll('tr');
+            const estadoFilter = String(estado).trim(); // '', '1','2','3'
+            const searchTerm = search.toLowerCase();
+            let visibles = 0;
+            rows.forEach(row => {
+                if (row.querySelector('[colspan]')) return; // Fila vacía
+                const rEstado = (row.dataset.estadoId || '').toString();
+                const rSearch = row.dataset.searchIndex || '';
+                const matchEstado = !estadoFilter || rEstado === estadoFilter;
+                const matchSearch = !searchTerm || rSearch.includes(searchTerm);
+                if (matchEstado && matchSearch) {
+                    row.style.display = '';
+                    visibles++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            document.dispatchEvent(new CustomEvent('pedidos:filtered', { detail: { visible: visibles } }));
         },
 
         renderEstadoSelect: function (currentEstadoId, pedidoId) {
@@ -466,6 +498,10 @@
         getCached: () => View.getCachedPedidos(),
         renderCached: (selector) => View.renderTable(selector, View.getCachedPedidos()),
         setToken: (t) => { Model.token = t; localStorage.setItem('token', t); },
+        // Exponer filtrado compuesto a la vista principal
+        filter: function({ estado = '', search = '' } = {}) {
+            View.applyCompositeFilter({ estado, search });
+        },
         
         // Crear pedido desde formulario
         crearPedido: async (pedidoData) => {

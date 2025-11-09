@@ -8,6 +8,11 @@
 let tokenRenewalInterval = null;
 let isRenewingToken = false;
 
+// Variables globales para paginación
+let allUsers = []; // Todos los usuarios cargados
+let currentPage = 1; // Página actual
+const usersPerPage = 10; // Usuarios por página
+
 // Configuración global de SweetAlert2
 Swal.mixin({
     customClass: {
@@ -323,6 +328,9 @@ function initGestionUsuariosPage() {
     // Configurar búsqueda
     setupSearch();
     
+    // Configurar botones de paginación
+    setupPaginationButtons();
+    
     // Cargar usuarios desde la API
     loadUsersFromAPI();
     
@@ -330,6 +338,29 @@ function initGestionUsuariosPage() {
     updateStats();
     
     console.log('Página de gestión de usuarios inicializada');
+}
+
+// Función para configurar los botones de paginación
+function setupPaginationButtons() {
+    const btnPrevPage = document.getElementById('btnPrevPage');
+    const btnNextPage = document.getElementById('btnNextPage');
+    
+    if (btnPrevPage) {
+        btnPrevPage.addEventListener('click', () => {
+            if (currentPage > 1) {
+                goToPage(currentPage - 1);
+            }
+        });
+    }
+    
+    if (btnNextPage) {
+        btnNextPage.addEventListener('click', () => {
+            const totalPages = Math.ceil(allUsers.length / usersPerPage);
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1);
+            }
+        });
+    }
 }
 
 // Función para obtener el usuario actual
@@ -556,7 +587,7 @@ function showAccessDenied() {
                     margin: 0 0 10px 0;
                     opacity: 0.9;
                     line-height: 1.6;
-                ">🚫 No tienes permisos para acceder a esta página</p>
+                ">No tienes permisos para acceder a esta página</p>
                 
                 <p style="
                     font-size: 1rem;
@@ -588,7 +619,7 @@ function showAccessDenied() {
                     " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
                         <i class="fa-solid fa-home"></i>
-                        Volver al Dashboard
+                        Volver a Inicio
                     </button>
                     
                     <button onclick="window.location.href='perfil'" style="
@@ -629,27 +660,35 @@ function showUserInfo(user) {
     // Crear banner de información del usuario
     const userInfoBanner = document.createElement('div');
     userInfoBanner.style.cssText = `
-        background: #28a745;
+        background: linear-gradient(45deg, rgba(255, 115, 0, 0.9), rgba(255, 115, 0, 0.7));
         color: white;
-        padding: 10px;
+        padding: 15px 20px;
         text-align: center;
-        font-weight: bold;
+        font-weight: 600;
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         z-index: 1000;
+        box-shadow: 0 4px 15px rgba(255, 115, 0, 0.3);
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
     `;
+    
+    const roleText = user.id_rol === 1 ? 'Administrador' : 'Usuario';
+    
     userInfoBanner.innerHTML = `
-        👤 Usuario: ${user.nombre_usuario} | 🎭 Rol: ${user.id_rol === 1 ? 'Administrador' : 'Usuario'} | 🆔 ID: ${user.id_usuario}
-        <button onclick="this.parentElement.remove()" style="float: right; background: none; border: none; color: white; font-size: 16px;">×</button>
+        <span style="color: white; font-weight: 600;">${user.nombre_usuario}</span>
+        <span style="color: rgba(255, 255, 255, 0.9); margin: 0 15px;">•</span>
+        <span style="color: white; font-weight: 600;">${roleText}</span>
     `;
+    
     document.body.insertBefore(userInfoBanner, document.body.firstChild);
     
     // Ajustar el contenido principal para el banner
     const mainContent = document.querySelector('.sidebar-content');
     if (mainContent) {
-        mainContent.style.marginTop = '50px';
+        mainContent.style.marginTop = '60px';
     }
 }
 
@@ -753,8 +792,17 @@ async function loadUsersFromAPI() {
         
         if (response.ok) {
             const data = await response.json();
-            displayUsers(data.data || []);
-            updateStatsFromData(data.data || []);
+            // Guardar todos los usuarios
+            allUsers = data.data || [];
+            // Ajustar página actual si es necesario
+            const totalPages = Math.ceil(allUsers.length / usersPerPage);
+            if (currentPage > totalPages && totalPages > 0) {
+                currentPage = totalPages;
+            } else if (allUsers.length === 0) {
+                currentPage = 1;
+            }
+            displayUsers();
+            updateStatsFromData(allUsers);
         } else {
             const errorText = await response.text();
             console.error('Error cargando usuarios:', errorText);
@@ -783,20 +831,168 @@ async function loadUsersFromAPI() {
     }
 }
 
-// Función para mostrar usuarios en la tabla
-function displayUsers(users) {
+// Función para mostrar usuarios en la tabla con paginación
+function displayUsers() {
     const tbody = document.querySelector('.usuarios-table tbody');
     if (!tbody) return;
     
     tbody.innerHTML = '';
     
-    users.forEach(user => {
+    // Calcular índices para la página actual
+    const startIndex = (currentPage - 1) * usersPerPage;
+    const endIndex = startIndex + usersPerPage;
+    const usersToShow = allUsers.slice(startIndex, endIndex);
+    
+    // Mostrar usuarios de la página actual
+    usersToShow.forEach(user => {
         const row = createUserRow(user);
         tbody.appendChild(row);
     });
     
     // Reconfigurar botones de acción después de actualizar la tabla
     setupActionButtons();
+    
+    // Actualizar controles de paginación
+    updatePaginationControls();
+}
+
+// Función para actualizar los controles de paginación
+function updatePaginationControls() {
+    const totalUsers = allUsers.length;
+    const totalPages = Math.ceil(totalUsers / usersPerPage);
+    const startIndex = (currentPage - 1) * usersPerPage;
+    const endIndex = Math.min(startIndex + usersPerPage, totalUsers);
+    
+    // Mostrar/ocultar contenedor de paginación
+    const paginationContainer = document.getElementById('paginationContainer');
+    if (paginationContainer) {
+        if (totalPages > 1) {
+            paginationContainer.style.display = 'flex';
+        } else {
+            paginationContainer.style.display = 'none';
+        }
+    }
+    
+    // Actualizar información de paginación
+    const paginationInfo = document.getElementById('paginationInfo');
+    if (paginationInfo) {
+        paginationInfo.textContent = `Mostrando ${startIndex + 1}-${endIndex} de ${totalUsers} usuarios`;
+    }
+    
+    // Actualizar botones de navegación
+    const btnPrevPage = document.getElementById('btnPrevPage');
+    const btnNextPage = document.getElementById('btnNextPage');
+    
+    if (btnPrevPage) {
+        btnPrevPage.disabled = currentPage === 1;
+    }
+    
+    if (btnNextPage) {
+        btnNextPage.disabled = currentPage === totalPages;
+    }
+    
+    // Actualizar números de página
+    updatePageNumbers(totalPages);
+}
+
+// Función para actualizar los números de página
+function updatePageNumbers(totalPages) {
+    const paginationNumbers = document.getElementById('paginationNumbers');
+    if (!paginationNumbers) return;
+    
+    paginationNumbers.innerHTML = '';
+    
+    // Mostrar máximo 5 números de página
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+    
+    // Ajustar si estamos cerca del inicio o final
+    if (endPage - startPage < 4) {
+        if (startPage === 1) {
+            endPage = Math.min(5, totalPages);
+        } else if (endPage === totalPages) {
+            startPage = Math.max(1, totalPages - 4);
+        }
+    }
+    
+    // Botón para primera página
+    if (startPage > 1) {
+        const firstBtn = createPageButton(1);
+        paginationNumbers.appendChild(firstBtn);
+        if (startPage > 2) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            ellipsis.style.cssText = 'padding: 0 10px; color: #ffffff;';
+            paginationNumbers.appendChild(ellipsis);
+        }
+    }
+    
+    // Números de página
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = createPageButton(i);
+        paginationNumbers.appendChild(pageBtn);
+    }
+    
+    // Botón para última página
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.textContent = '...';
+            ellipsis.style.cssText = 'padding: 0 10px; color: #ffffff;';
+            paginationNumbers.appendChild(ellipsis);
+        }
+        const lastBtn = createPageButton(totalPages);
+        paginationNumbers.appendChild(lastBtn);
+    }
+}
+
+// Función para crear un botón de página
+function createPageButton(pageNumber) {
+    const button = document.createElement('button');
+    button.textContent = pageNumber;
+    button.className = 'pagination-number-btn';
+    button.style.cssText = `
+        padding: 8px 12px;
+        margin: 0 4px;
+        background: ${pageNumber === currentPage ? 'linear-gradient(45deg, #667eea, #764ba2)' : 'rgba(255, 255, 255, 0.1)'};
+        color: white;
+        border: 2px solid ${pageNumber === currentPage ? 'rgba(102, 126, 234, 0.5)' : 'rgba(106, 13, 173, 0.3)'};
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: ${pageNumber === currentPage ? '700' : '500'};
+        cursor: pointer;
+        transition: all 0.3s ease;
+    `;
+    
+    if (pageNumber !== currentPage) {
+        button.addEventListener('mouseenter', function() {
+            this.style.background = 'rgba(102, 126, 234, 0.3)';
+            this.style.transform = 'translateY(-2px)';
+        });
+        button.addEventListener('mouseleave', function() {
+            this.style.background = 'rgba(255, 255, 255, 0.1)';
+            this.style.transform = 'translateY(0)';
+        });
+    }
+    
+    button.addEventListener('click', () => goToPage(pageNumber));
+    
+    return button;
+}
+
+// Función para cambiar de página
+function goToPage(page) {
+    const totalPages = Math.ceil(allUsers.length / usersPerPage);
+    if (page < 1 || page > totalPages) return;
+    
+    currentPage = page;
+    displayUsers();
+    
+    // Scroll hacia arriba de la tabla
+    const table = document.querySelector('.usuarios-table');
+    if (table) {
+        table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 // Función para crear una fila de usuario
@@ -832,11 +1028,11 @@ function createUserRow(user) {
                 </div>
                 <div class="user-details">
                     <strong>${user.nombre_usuario}</strong>
-                    <small>${user.correo}</small>
+                    <small title="${user.correo}">${user.correo}</small>
                 </div>
             </div>
         </td>
-        <td>${user.correo}</td>
+        <td class="cell-email" title="${user.correo}">${user.correo}</td>
         <td><span class="role ${roleClass}">${roleText}</span></td>
         <td><span class="status ${statusClass}">${statusText}</span></td>
         <td>${lastAccess}</td>
@@ -1348,7 +1544,7 @@ function exportUsuarios() {
             csvContent += rowData.join(',') + '\n';
         }
     });
-    
+
     // Crear y descargar archivo
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

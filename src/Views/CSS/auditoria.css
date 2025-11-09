@@ -2,16 +2,21 @@
 
 .sidebar-content {
     padding: 0 1rem 1rem;
-    max-width: 1190px;
-    margin: 0 auto;
-    width: 92%;
+    /* Hacer que la vista use todo el ancho disponible */
+    width: 100%;
+    max-width: none;
+    margin: 0; /* evitar margen lateral forzado */
     flex-grow: 1;
 }
 
 .auditoria-container { 
-    padding: 0 5px 5px;
-    max-width: 1100px;
-    margin: 0 auto;
+    /* Pequeño margen interno para que el texto no pegue a los bordes */
+    padding: 42px 12px 12px; /* agrega espacio también en la parte superior */
+    /* Extender el contenedor a pantalla completa */
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 .auditoria-header {
@@ -96,7 +101,9 @@
 .auditoria-table {
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
-    overflow: hidden;
+    /* Permitir scroll horizontal si hay muchas columnas */
+    overflow-x: auto;
+    overflow-y: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -209,3 +216,53 @@
 
 /* Asegura que el calendario de Flatpickr se muestre por encima de modales/headers */
 .flatpickr-calendar { z-index: 3000 !important; }
+
+/* Perfil móvil: botones de acciones como solo íconos y cabecera más compacta */
+@media (max-width: 576px), (orientation: portrait) and (max-width: 768px) {
+    .auditoria-header h2 { font-size: 1.4em; }
+    .header-actions { gap: 8px; }
+    .header-actions .btn {
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 0; /* oculta el texto, mantiene el ícono */
+        min-width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .header-actions .btn i { font-size: 18px; }
+
+    /* Filtros un poco más compactos sin forzar */
+    .auditoria-filters { gap: 12px; }
+    .filter-select, .date-input { padding: 10px 12px; min-width: 0; }
+}
+
+/* Reservar espacio del sidebar cuando está activo para que no tape botones/tabla */
+/* Reservar espacio del sidebar y conservar margen interno visual */
+body.sidebar-active .auditoria-container { padding-right: calc(80px + 12px); }
+@media (max-width: 576px), (orientation: portrait) and (max-width: 768px) {
+    body.sidebar-active .auditoria-container { padding-right: calc(56px + 10px); }
+}
+
+/* Overlay de carga para operaciones de red */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2500; /* por encima de tabla y debajo de flatpickr (3000) */
+}
+.loading-overlay.show { display: flex; }
+.spinner {
+    width: 56px;
+    height: 56px;
+    border: 6px solid rgba(1,146,179,0.25);
+    border-top-color: rgba(1,146,179,0.95);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 12px rgba(1,146,179,0.35);
+}
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -112,6 +112,22 @@ if (strpos($uri, '/public/') !== false) {
                     </tbody>
                 </table>
             </div>
+            
+            <!-- ===== PAGINACIÓN ===== -->
+            <div class="pagination-container" id="paginationContainer" style="display: none;">
+                <div class="pagination-info">
+                    <span id="paginationInfo">Mostrando 0 de 0 usuarios</span>
+                </div>
+                <div class="pagination-controls">
+                    <button id="btnPrevPage" class="pagination-btn" disabled>
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <div class="pagination-numbers" id="paginationNumbers"></div>
+                    <button id="btnNextPage" class="pagination-btn">
+                        Siguiente <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </main>
 
