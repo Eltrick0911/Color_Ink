@@ -677,10 +677,10 @@ function showAccessDenied() {
                 "></div>
             </div>
             <div style="
-                background: #4a148c;
+                background: #3C096C;
                 border-radius: 20px;
                 padding: 40px;
-                box-shadow: 0 8px 32px rgba(74, 20, 140, 0.5);
+                box-shadow: 0 8px 32px rgba(60, 9, 108, 0.5);
                 border: 1px solid rgba(139, 92, 246, 0.3);
                 max-width: 500px;
                 width: 100%;
@@ -1715,8 +1715,8 @@ function showUserModal(user, mode) {
         background: #000000;
         padding: 0;
         border-radius: 20px;
-        max-width: 800px;
-        width: 90%;
+        max-width: 500px;
+        width: 70%;
         max-height: 90vh;
         overflow-y: auto;
         border: 2px solid rgba(255, 115, 0, 0.3);
@@ -1840,36 +1840,36 @@ function showUserModal(user, mode) {
         </div>
         ${mode === 'edit' ? `<input type="hidden" name="id_usuario" value="${user.id_usuario}">` : ''}
         </div>
-        <div style="padding: 25px 30px; background: rgba(180, 70, 0, 0.95); border-top: 2px solid rgba(255, 115, 0, 0.3); text-align: center; display: flex; gap: 15px; justify-content: center; border-radius: 0 0 20px 20px;">
+        <div style="padding: 25px 30px; background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2)); border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 15px; justify-content: flex-end; border-radius: 0 0 20px 20px;">
             <button onclick="this.closest('.user-modal').remove()" style="
-                padding: 12px 25px;
-                background: linear-gradient(45deg, #e74c3c, #c0392b);
+                padding: 12px 24px;
+                background: linear-gradient(45deg, rgba(220, 38, 38, 0.8), rgba(185, 28, 28, 0.7));
                 color: white;
-                border: none;
-                border-radius: 25px;
-                font-size: 1rem;
+                border: 2px solid rgba(220, 38, 38, 0.3);
+                border-radius: 8px;
+                font-size: 1em;
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.3s ease;
-                box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(231, 76, 60, 0.6)'" 
-               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(231, 76, 60, 0.4)'">
+                min-width: 120px;
+            " onmouseover="this.style.background='linear-gradient(45deg, rgba(220, 38, 38, 1), rgba(185, 28, 28, 0.9))'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(220, 38, 38, 0.4)'" 
+               onmouseout="this.style.background='linear-gradient(45deg, rgba(220, 38, 38, 0.8), rgba(185, 28, 28, 0.7))'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                 Cerrar
             </button>
             ${mode === 'edit' ? `
                 <button onclick="saveUserChanges(this)" style="
-                    padding: 12px 25px;
+                    padding: 12px 24px;
                     background: linear-gradient(45deg, #27ae60, #229954);
                     color: white;
-                    border: none;
-                    border-radius: 25px;
-                    font-size: 1rem;
+                    border: 2px solid rgba(39, 174, 96, 0.3);
+                    border-radius: 8px;
+                    font-size: 1em;
                     font-weight: 600;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(39, 174, 96, 0.6)'" 
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(39, 174, 96, 0.4)'">
+                    min-width: 120px;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(39, 174, 96, 0.4)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                     Guardar
                 </button>
             ` : ''}
@@ -1953,8 +1953,8 @@ function showNewUserModal() {
         background: #000000;
         padding: 0;
         border-radius: 20px;
-        max-width: 800px;
-        width: 90%;
+        max-width: 500px;
+        width: 70%;
         max-height: 90vh;
         overflow-y: auto;
         border: 2px solid rgba(255, 115, 0, 0.3);
@@ -2076,35 +2076,35 @@ function showNewUserModal() {
             </div>
         </form>
         </div>
-        <div style="padding: 25px 30px; background: rgba(180, 70, 0, 0.95); border-top: 2px solid rgba(255, 115, 0, 0.3); text-align: center; display: flex; gap: 15px; justify-content: center; border-radius: 0 0 20px 20px;">
+        <div style="padding: 25px 30px; background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2)); border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 15px; justify-content: flex-end; border-radius: 0 0 20px 20px;">
                 <button type="button" onclick="this.closest('.user-modal').remove()" style="
-                    padding: 12px 25px;
-                background: linear-gradient(45deg, #e74c3c, #c0392b);
+                    padding: 12px 24px;
+                    background: linear-gradient(45deg, rgba(220, 38, 38, 0.8), rgba(185, 28, 28, 0.7));
                     color: white;
-                    border: none;
-                    border-radius: 25px;
-                    font-size: 1rem;
+                    border: 2px solid rgba(220, 38, 38, 0.3);
+                    border-radius: 8px;
+                    font-size: 1em;
                     font-weight: 600;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(231, 76, 60, 0.6)'" 
-               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(231, 76, 60, 0.4)'">
+                    min-width: 120px;
+            " onmouseover="this.style.background='linear-gradient(45deg, rgba(220, 38, 38, 1), rgba(185, 28, 28, 0.9))'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(220, 38, 38, 0.4)'" 
+               onmouseout="this.style.background='linear-gradient(45deg, rgba(220, 38, 38, 0.8), rgba(185, 28, 28, 0.7))'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                     Cancelar
                 </button>
             <button type="button" onclick="document.getElementById('newUserForm').requestSubmit()" style="
-                    padding: 12px 25px;
-                background: linear-gradient(45deg, #27ae60, #229954);
+                    padding: 12px 24px;
+                    background: linear-gradient(45deg, #27ae60, #229954);
                     color: white;
-                    border: none;
-                    border-radius: 25px;
-                    font-size: 1rem;
+                    border: 2px solid rgba(39, 174, 96, 0.3);
+                    border-radius: 8px;
+                    font-size: 1em;
                     font-weight: 600;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(39, 174, 96, 0.6)'" 
-               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(39, 174, 96, 0.4)'">
+                    min-width: 120px;
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(39, 174, 96, 0.4)'" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                     Crear Usuario
                 </button>
             </div>
