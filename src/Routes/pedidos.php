@@ -164,6 +164,10 @@ try {
                 // GET /estados
                 error_log("PedidosRoute - Routing: GET /estados");
                 $pedidosController->getEstados($headers);
+            } elseif ($action === 'productos') {
+                // GET /productos
+                error_log("PedidosRoute - Routing: GET /productos");
+                $pedidosController->getProductos();
             } else {
                 error_log("PedidosRoute - ERROR: Endpoint GET no encontrado - Action: $action");
                 echo json_encode(responseHTTP::status404('Endpoint no encontrado'));

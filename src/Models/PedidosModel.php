@@ -145,6 +145,7 @@ class PedidosModel
                         p.detalles_producto,
                         u.nombre_usuario,
                         u.telefono,
+                        e.id_estado AS id_estado,
                         e.nombre AS estado_nombre,
                         e.codigo AS estado_codigo,
                         COALESCE(SUM(dp.total_linea), 0) AS total_pedido
@@ -425,13 +426,10 @@ class PedidosModel
 
             // Si se proveen detalles_personalizados, forzamos inserción directa para incluir la columna (el SP no la contempla)
             if ($detallesPersonalizados !== null) {
-                // Usar total_linea si viene en los datos, de lo contrario calcularlo
-                $totalLinea = isset($detalleData['total_linea']) ? $detalleData['total_linea'] : 
-                    (($detalleData['precio_unitario'] * $detalleData['cantidad']) * 
-                    (1 - ($detalleData['descuento'] / 100)) * 
-                    (1 + ($detalleData['impuesto'] / 100)));
+                // Usar total_linea provisto (ya calculado en el Controller)
+                $totalLinea = $detalleData['total_linea'] ?? 0;
 
-                error_log("PedidosModel - createDetallePedido: INSERTANDO con total_linea=" . $totalLinea . " (cantidad=" . $detalleData['cantidad'] . ", precio_unitario=" . $detalleData['precio_unitario'] . ", descuento=" . $detalleData['descuento'] . "%, impuesto=" . $detalleData['impuesto'] . "%)");
+                error_log("PedidosModel - createDetallePedido: INSERTANDO con total_linea=$totalLinea (cantidad=" . $detalleData['cantidad'] . ", precio_unitario=" . $detalleData['precio_unitario'] . ", descuento=" . $detalleData['descuento'] . ", impuesto=" . $detalleData['impuesto'] . ")");
 
                 $sql = "INSERT INTO detallepedido (
                             producto_solicitado, cantidad, precio_unitario, descuento, impuesto, total_linea, id_pedido, id_producto, detalles_personalizados
@@ -466,11 +464,8 @@ class PedidosModel
                     ]);
                 } catch (PDOException $e) {
                     // Fallback a SQL directo
-                    // Usar total_linea si viene en los datos, de lo contrario calcularlo
-                    $totalLinea = isset($detalleData['total_linea']) ? $detalleData['total_linea'] : 
-                        (($detalleData['precio_unitario'] * $detalleData['cantidad']) * 
-                        (1 - ($detalleData['descuento'] / 100)) * 
-                        (1 + ($detalleData['impuesto'] / 100)));
+                    // Usar total_linea provisto (ya calculado en el Controller)
+                    $totalLinea = $detalleData['total_linea'] ?? 0;
 
                     $sql = "INSERT INTO detallepedido (
                                 producto_solicitado, cantidad, precio_unitario, descuento, impuesto, total_linea, id_pedido, id_producto
@@ -730,6 +725,155 @@ class PedidosModel
         $estadoFrontend = $map[$idEstado] ?? 'pendiente';
         error_log("PedidosModel - mapEstadoIdToFrontend: $idEstado -> '$estadoFrontend'");
         return $estadoFrontend;
+    }
+
+    /**
+     * Obtener lista de productos activos
+     * Retorna id_producto y nombre_producto de la tabla producto
+     */
+    public function getProductos(): array
+    {
+        try {
+            error_log("PedidosModel - getProductos: Obteniendo lista de productos activos");
+            error_log("PedidosModel - getProductos: Connection = " . ($this->connection ? 'OK' : 'NULL'));
+            
+            $sql = "SELECT id_producto, nombre_producto 
+                    FROM producto 
+                    WHERE activo = 1 
+                    ORDER BY nombre_producto ASC";
+            
+            error_log("PedidosModel - getProductos: SQL = " . $sql);
+            
+            $stmt = $this->connection->prepare($sql);
+            $stmt->execute();
+            
+            $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("PedidosModel - getProductos: Se encontraron " . count($productos) . " productos");
+            
+            if (count($productos) > 0) {
+                error_log("PedidosModel - getProductos: Primer producto = " . json_encode($productos[0]));
+            } else {
+                error_log("PedidosModel - getProductos: ADVERTENCIA - No se encontraron productos activos");
+                
+                // Verificar si hay productos sin filtro de activo
+                $stmtAll = $this->connection->prepare("SELECT COUNT(*) as total FROM producto");
+                $stmtAll->execute();
+                $total = $stmtAll->fetch(PDO::FETCH_ASSOC);
+                error_log("PedidosModel - getProductos: Total de productos en tabla (sin filtro): " . $total['total']);
+            }
+            
+            return $productos;
+        } catch (PDOException $e) {
+            error_log("PedidosModel - getProductos: Error PDO - " . $e->getMessage());
+            error_log("PedidosModel - getProductos: SQL State - " . $e->getCode());
+            throw new Exception('Error al obtener la lista de productos: ' . $e->getMessage());
+        } catch (Exception $e) {
+            error_log("PedidosModel - getProductos: Error general - " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Descontar stock de productos cuando un pedido se marca como entregado
+     * Retorna true si se actualizó correctamente, false en caso contrario
+     */
+    public function descontarStockPorPedido(int $idPedido): bool
+    {
+        try {
+            error_log("PedidosModel - descontarStockPorPedido: Iniciando descuento de stock para pedido ID: $idPedido");
+            
+            // 1. Obtener los detalles del pedido
+            $sqlPedido = "SELECT detalles_producto FROM pedidos WHERE id_pedido = ?";
+            $stmtPedido = $this->connection->prepare($sqlPedido);
+            $stmtPedido->execute([$idPedido]);
+            $pedido = $stmtPedido->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$pedido) {
+                error_log("PedidosModel - descontarStockPorPedido: Pedido no encontrado");
+                return false;
+            }
+            
+            // 2. Parsear detalles_producto
+            $detallesProducto = json_decode($pedido['detalles_producto'], true);
+            
+            if (!$detallesProducto || !is_array($detallesProducto)) {
+                error_log("PedidosModel - descontarStockPorPedido: No hay detalles de producto válidos");
+                return false;
+            }
+            
+            error_log("PedidosModel - descontarStockPorPedido: Productos a procesar: " . json_encode($detallesProducto));
+            
+            // 3. Iniciar transacción
+            $this->connection->beginTransaction();
+            
+            $productosActualizados = 0;
+            
+            // 4. Por cada producto, descontar el stock
+            foreach ($detallesProducto as $detalle) {
+                $idProducto = $detalle['categoria'] ?? null; // El ID del producto está en 'categoria'
+                $cantidad = intval($detalle['cantidad'] ?? 0);
+                
+                // Validar que tenemos un ID numérico de producto
+                if (!$idProducto || !is_numeric($idProducto) || $cantidad <= 0) {
+                    error_log("PedidosModel - descontarStockPorPedido: Producto inválido o cantidad <= 0. ID: $idProducto, Cantidad: $cantidad");
+                    continue;
+                }
+                
+                error_log("PedidosModel - descontarStockPorPedido: Descontando $cantidad unidades del producto ID: $idProducto");
+                
+                // 5. Verificar stock actual
+                $sqlStock = "SELECT stock, nombre_producto FROM producto WHERE id_producto = ?";
+                $stmtStock = $this->connection->prepare($sqlStock);
+                $stmtStock->execute([$idProducto]);
+                $producto = $stmtStock->fetch(PDO::FETCH_ASSOC);
+                
+                if (!$producto) {
+                    error_log("PedidosModel - descontarStockPorPedido: Producto ID $idProducto no encontrado en la tabla producto");
+                    continue;
+                }
+                
+                $stockActual = intval($producto['stock']);
+                $nombreProducto = $producto['nombre_producto'];
+                
+                error_log("PedidosModel - descontarStockPorPedido: Producto '$nombreProducto' - Stock actual: $stockActual, A descontar: $cantidad");
+                
+                // 6. Verificar si hay suficiente stock
+                if ($stockActual < $cantidad) {
+                    error_log("PedidosModel - descontarStockPorPedido: ADVERTENCIA - Stock insuficiente para '$nombreProducto'. Disponible: $stockActual, Requerido: $cantidad");
+                    // Continuar de todos modos y permitir stock negativo (se puede cambiar si se desea)
+                }
+                
+                // 7. Actualizar stock
+                $sqlUpdate = "UPDATE producto SET stock = stock - ? WHERE id_producto = ?";
+                $stmtUpdate = $this->connection->prepare($sqlUpdate);
+                $stmtUpdate->execute([$cantidad, $idProducto]);
+                
+                $productosActualizados++;
+                error_log("PedidosModel - descontarStockPorPedido: Stock actualizado para '$nombreProducto'. Nuevo stock: " . ($stockActual - $cantidad));
+            }
+            
+            // 8. Confirmar transacción
+            $this->connection->commit();
+            
+            error_log("PedidosModel - descontarStockPorPedido: Transacción completada. $productosActualizados productos actualizados");
+            
+            return $productosActualizados > 0;
+            
+        } catch (PDOException $e) {
+            // Revertir transacción en caso de error
+            if ($this->connection->inTransaction()) {
+                $this->connection->rollBack();
+            }
+            error_log("PedidosModel - descontarStockPorPedido: Error PDO - " . $e->getMessage());
+            throw new Exception('Error al descontar stock: ' . $e->getMessage());
+        } catch (Exception $e) {
+            // Revertir transacción en caso de error
+            if ($this->connection->inTransaction()) {
+                $this->connection->rollBack();
+            }
+            error_log("PedidosModel - descontarStockPorPedido: Error general - " . $e->getMessage());
+            throw $e;
+        }
     }
 }
 
