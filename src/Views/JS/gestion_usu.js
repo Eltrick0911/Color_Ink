@@ -10,6 +10,7 @@ let isRenewingToken = false;
 
 // Variables globales para paginación
 let allUsers = []; // Todos los usuarios cargados
+let filteredUsers = []; // Usuarios filtrados
 let currentPage = 1; // Página actual
 const usersPerPage = 10; // Usuarios por página
 
@@ -107,6 +108,101 @@ style.textContent = `
     .swal2-icon.swal2-success {
         border-color: #4caf50 !important;
         color: #4caf50 !important;
+    }
+    
+    /* Estilos para modales de bloquear y eliminar (diseño blanco) */
+    .swal-block-popup,
+    .swal-delete-popup {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+        padding: 30px !important;
+    }
+    
+    .swal-block-title,
+    .swal-delete-title {
+        color: #2c3e50 !important;
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .swal-block-content,
+    .swal-delete-content {
+        color: #34495e !important;
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+    }
+    
+    .swal-block-icon.swal2-icon-warning,
+    .swal-delete-icon.swal2-icon-warning {
+        width: 80px !important;
+        height: 80px !important;
+        border: 3px solid #e74c3c !important;
+        border-radius: 50% !important;
+        background: #e74c3c !important;
+        margin: 0 auto 20px !important;
+    }
+    
+    .swal-block-icon.swal2-icon-warning .swal2-icon-content,
+    .swal-delete-icon.swal2-icon-warning .swal2-icon-content {
+        color: #ffffff !important;
+        font-size: 3rem !important;
+        font-weight: bold !important;
+        line-height: 1 !important;
+        margin-top: 0 !important;
+    }
+    
+    .swal-block-icon.swal2-icon-warning .swal2-x-mark,
+    .swal-delete-icon.swal2-icon-warning .swal2-x-mark {
+        color: #ffffff !important;
+    }
+    
+    .swal-block-icon.swal2-icon-warning .swal2-warning-ring,
+    .swal-delete-icon.swal2-icon-warning .swal2-warning-ring {
+        border-color: transparent !important;
+    }
+    
+    .swal-block-confirm,
+    .swal-delete-confirm {
+        background: #e74c3c !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        color: #ffffff !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .swal-block-confirm:hover,
+    .swal-delete-confirm:hover {
+        background: #c0392b !important;
+    }
+    
+    .swal-block-cancel,
+    .swal-delete-cancel {
+        background: #ecf0f1 !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+        color: #2c3e50 !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .swal-block-cancel:hover,
+    .swal-delete-cancel:hover {
+        background: #bdc3c7 !important;
+    }
+    
+    .swal-block-popup .swal2-actions,
+    .swal-delete-popup .swal2-actions {
+        margin-top: 25px !important;
+        gap: 10px !important;
     }
 `;
 document.head.appendChild(style);
@@ -620,7 +716,7 @@ function showAccessDenied() {
                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
                         <i class="fa-solid fa-home"></i>
                         Volver a Inicio
-                    </button>
+                </button>
                     
                     <button onclick="window.location.href='perfil'" style="
                         padding: 15px 30px;
@@ -639,10 +735,10 @@ function showAccessDenied() {
                     " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.6)'" 
                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.4)'">
                         <i class="fa-solid fa-user"></i>
-                        Ver Mi Perfil
-                    </button>
-                </div>
+                    Ver Mi Perfil
+                </button>
             </div>
+        </div>
         </div>
         
         <style>
@@ -794,13 +890,12 @@ async function loadUsersFromAPI() {
             const data = await response.json();
             // Guardar todos los usuarios
             allUsers = data.data || [];
-            // Ajustar página actual si es necesario
-            const totalPages = Math.ceil(allUsers.length / usersPerPage);
-            if (currentPage > totalPages && totalPages > 0) {
-                currentPage = totalPages;
-            } else if (allUsers.length === 0) {
+            // Inicializar usuarios filtrados con todos los usuarios
+            filteredUsers = [...allUsers];
+            // Resetear a página 1
                 currentPage = 1;
-            }
+            // Aplicar filtros actuales si existen
+            applyFilters();
             displayUsers();
             updateStatsFromData(allUsers);
         } else {
@@ -838,10 +933,10 @@ function displayUsers() {
     
     tbody.innerHTML = '';
     
-    // Calcular índices para la página actual
+    // Calcular índices para la página actual usando usuarios filtrados
     const startIndex = (currentPage - 1) * usersPerPage;
     const endIndex = startIndex + usersPerPage;
-    const usersToShow = allUsers.slice(startIndex, endIndex);
+    const usersToShow = filteredUsers.slice(startIndex, endIndex);
     
     // Mostrar usuarios de la página actual
     usersToShow.forEach(user => {
@@ -856,14 +951,16 @@ function displayUsers() {
     updatePaginationControls();
 }
 
-// Función para actualizar los controles de paginación
+// Función para actualizar los controles de paginación (estilo auditoría)
 function updatePaginationControls() {
-    const totalUsers = allUsers.length;
+    const totalUsers = filteredUsers.length;
     const totalPages = Math.ceil(totalUsers / usersPerPage);
-    const startIndex = (currentPage - 1) * usersPerPage;
-    const endIndex = Math.min(startIndex + usersPerPage, totalUsers);
     
-    // Mostrar/ocultar contenedor de paginación
+    // Obtener contenedor de números de página
+    const paginationNumbers = document.getElementById('paginationNumbers');
+    if (!paginationNumbers) return;
+    
+    // Ocultar contenedor completo si solo hay una página o menos
     const paginationContainer = document.getElementById('paginationContainer');
     if (paginationContainer) {
         if (totalPages > 1) {
@@ -873,105 +970,56 @@ function updatePaginationControls() {
         }
     }
     
-    // Actualizar información de paginación
-    const paginationInfo = document.getElementById('paginationInfo');
-    if (paginationInfo) {
-        paginationInfo.textContent = `Mostrando ${startIndex + 1}-${endIndex} de ${totalUsers} usuarios`;
-    }
-    
-    // Actualizar botones de navegación
-    const btnPrevPage = document.getElementById('btnPrevPage');
-    const btnNextPage = document.getElementById('btnNextPage');
-    
-    if (btnPrevPage) {
-        btnPrevPage.disabled = currentPage === 1;
-    }
-    
-    if (btnNextPage) {
-        btnNextPage.disabled = currentPage === totalPages;
-    }
-    
     // Actualizar números de página
     updatePageNumbers(totalPages);
 }
 
-// Función para actualizar los números de página
+// Función para actualizar los números de página (estilo auditoría - mostrar todos)
 function updatePageNumbers(totalPages) {
     const paginationNumbers = document.getElementById('paginationNumbers');
     if (!paginationNumbers) return;
     
     paginationNumbers.innerHTML = '';
     
-    // Mostrar máximo 5 números de página
-    let startPage = Math.max(1, currentPage - 2);
-    let endPage = Math.min(totalPages, currentPage + 2);
-    
-    // Ajustar si estamos cerca del inicio o final
-    if (endPage - startPage < 4) {
-        if (startPage === 1) {
-            endPage = Math.min(5, totalPages);
-        } else if (endPage === totalPages) {
-            startPage = Math.max(1, totalPages - 4);
-        }
-    }
-    
-    // Botón para primera página
-    if (startPage > 1) {
-        const firstBtn = createPageButton(1);
-        paginationNumbers.appendChild(firstBtn);
-        if (startPage > 2) {
-            const ellipsis = document.createElement('span');
-            ellipsis.textContent = '...';
-            ellipsis.style.cssText = 'padding: 0 10px; color: #ffffff;';
-            paginationNumbers.appendChild(ellipsis);
-        }
-    }
-    
-    // Números de página
-    for (let i = startPage; i <= endPage; i++) {
+    // Mostrar todos los números de página como en auditoría
+    for (let i = 1; i <= totalPages; i++) {
         const pageBtn = createPageButton(i);
         paginationNumbers.appendChild(pageBtn);
     }
-    
-    // Botón para última página
-    if (endPage < totalPages) {
-        if (endPage < totalPages - 1) {
-            const ellipsis = document.createElement('span');
-            ellipsis.textContent = '...';
-            ellipsis.style.cssText = 'padding: 0 10px; color: #ffffff;';
-            paginationNumbers.appendChild(ellipsis);
-        }
-        const lastBtn = createPageButton(totalPages);
-        paginationNumbers.appendChild(lastBtn);
-    }
 }
 
-// Función para crear un botón de página
+// Función para crear un botón de página (estilo auditoría con naranja)
 function createPageButton(pageNumber) {
     const button = document.createElement('button');
     button.textContent = pageNumber;
-    button.className = 'pagination-number-btn';
-    button.style.cssText = `
-        padding: 8px 12px;
-        margin: 0 4px;
-        background: ${pageNumber === currentPage ? 'linear-gradient(45deg, #667eea, #764ba2)' : 'rgba(255, 255, 255, 0.1)'};
-        color: white;
-        border: 2px solid ${pageNumber === currentPage ? 'rgba(102, 126, 234, 0.5)' : 'rgba(106, 13, 173, 0.3)'};
-        border-radius: 8px;
-        font-size: 0.9rem;
-        font-weight: ${pageNumber === currentPage ? '700' : '500'};
-        cursor: pointer;
-        transition: all 0.3s ease;
-    `;
     
-    if (pageNumber !== currentPage) {
+    // Estilo similar a auditoría pero con naranja para el activo
+    if (pageNumber === currentPage) {
+        button.classList.add('active');
+    button.style.cssText = `
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: rgba(255, 115, 0, 0.6);
+        color: white;
+            border: 1px solid rgba(255, 115, 0, 0.35);
+        cursor: pointer;
+            font-weight: 600;
+        `;
+    } else {
+        button.style.cssText = `
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 115, 0, 0.35);
+            cursor: pointer;
+        `;
+        
         button.addEventListener('mouseenter', function() {
-            this.style.background = 'rgba(102, 126, 234, 0.3)';
-            this.style.transform = 'translateY(-2px)';
+            this.style.background = 'rgba(255, 115, 0, 0.2)';
         });
         button.addEventListener('mouseleave', function() {
-            this.style.background = 'rgba(255, 255, 255, 0.1)';
-            this.style.transform = 'translateY(0)';
+            this.style.background = 'rgba(255, 255, 255, 0.05)';
         });
     }
     
@@ -982,7 +1030,7 @@ function createPageButton(pageNumber) {
 
 // Función para cambiar de página
 function goToPage(page) {
-    const totalPages = Math.ceil(allUsers.length / usersPerPage);
+    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
     if (page < 1 || page > totalPages) return;
     
     currentPage = page;
@@ -1210,13 +1258,25 @@ function editUsuario(userId, userName) {
 async function blockUsuario(userId, userName, row) {
     const result = await Swal.fire({
         title: '¿Bloquear Usuario?',
-        html: `¿Estás seguro de que quieres <strong>bloquear</strong> al usuario <br><strong>"${userName}"</strong> (ID: ${userId})?`,
+        html: `¿Estás seguro de que quieres bloquear al usuario "${userName}" (ID: ${userId})?`,
         icon: 'warning',
+        iconColor: '#e74c3c',
         showCancelButton: true,
         confirmButtonText: 'Sí, bloquear',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#ff6b6b',
-        cancelButtonColor: '#667eea'
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#95a5a6',
+        buttonsStyling: true,
+        customClass: {
+            popup: 'swal-block-popup',
+            title: 'swal-block-title',
+            htmlContainer: 'swal-block-content',
+            confirmButton: 'swal-block-confirm',
+            cancelButton: 'swal-block-cancel',
+            icon: 'swal-block-icon'
+        },
+        background: '#ffffff',
+        color: '#2c3e50'
     });
     
     if (result.isConfirmed) {
@@ -1248,7 +1308,8 @@ async function blockUsuario(userId, userName, row) {
             lockButton.title = 'Desbloquear';
         }
         
-        updateStats();
+        // Recargar usuarios para mantener filtros y paginación
+        loadUsersFromAPI();
         showNotification(`Usuario ${userName} bloqueado correctamente`, 'success');
             } else {
                 showNotification(`Error bloqueando usuario: ${data.message}`, 'error');
@@ -1302,7 +1363,8 @@ async function unblockUsuario(userId, userName, row) {
             unlockButton.title = 'Bloquear';
         }
         
-        updateStats();
+        // Recargar usuarios para mantener filtros y paginación
+        loadUsersFromAPI();
         showNotification(`Usuario ${userName} desbloqueado correctamente`, 'success');
             } else {
                 showNotification(`Error desbloqueando usuario: ${data.message}`, 'error');
@@ -1317,14 +1379,26 @@ async function unblockUsuario(userId, userName, row) {
 
 async function deleteUsuario(userId, userName, row) {
     const result = await Swal.fire({
-        title: '⚠️ Eliminar Usuario',
-        html: `¿Estás seguro de que quieres <strong>ELIMINAR</strong> al usuario <br><strong>"${userName}"</strong> (ID: ${userId})?<br><br><span style="color: #ff6b6b; font-weight: bold;">⚠️ Esta acción NO se puede deshacer</span>`,
+        title: '¿Eliminar Usuario?',
+        html: `¿Estás seguro de que quieres eliminar al usuario "${userName}" (ID: ${userId})?<br><br><span style="color: #7f8c8d; font-size: 0.9em;">Esta acción no se puede deshacer</span>`,
         icon: 'warning',
+        iconColor: '#e74c3c',
         showCancelButton: true,
-        confirmButtonText: 'Sí, eliminar',
+        confirmButtonText: 'Eliminar',
         cancelButtonText: 'Cancelar',
         confirmButtonColor: '#e74c3c',
-        cancelButtonColor: '#667eea',
+        cancelButtonColor: '#95a5a6',
+        buttonsStyling: true,
+        customClass: {
+            popup: 'swal-delete-popup',
+            title: 'swal-delete-title',
+            htmlContainer: 'swal-delete-content',
+            confirmButton: 'swal-delete-confirm',
+            cancelButton: 'swal-delete-cancel',
+            icon: 'swal-delete-icon'
+        },
+        background: '#ffffff',
+        color: '#2c3e50',
         focusCancel: true
     });
     
@@ -1344,11 +1418,9 @@ async function deleteUsuario(userId, userName, row) {
                 row.style.opacity = '0.5';
                 row.style.transition = 'opacity 0.3s ease';
                 
-                setTimeout(() => {
-                    row.remove();
-                    updateStats();
+                // Recargar usuarios para mantener filtros y paginación
+                loadUsersFromAPI();
                     showNotification(`Usuario ${userName} eliminado correctamente`, 'success');
-                }, 300);
             } else {
                 // Si es error 401, intentar renovar token
                 if (response.status === 401) {
@@ -1381,28 +1453,47 @@ function setupFilters() {
     
     filterSelects.forEach(select => {
         select.addEventListener('change', function() {
-            filterUsuarios();
+            // Resetear a página 1 cuando se cambia un filtro
+            currentPage = 1;
+            applyFilters();
+            displayUsers();
         });
     });
 }
 
-function filterUsuarios() {
-    const rolFilter = document.querySelector('.filter-select:first-of-type').value;
-    const estadoFilter = document.querySelector('.filter-select:last-of-type').value;
-    const rows = document.querySelectorAll('.usuarios-table tbody tr');
+// Función para aplicar filtros a los usuarios
+function applyFilters() {
+    const rolSelect = document.querySelector('.filter-select:first-of-type');
+    const estadoSelect = document.querySelector('.filter-select:last-of-type');
     
-    rows.forEach(row => {
-        const rol = row.querySelector('.role').textContent.toLowerCase();
-        const estado = row.querySelector('.status').textContent.toLowerCase();
-        
-        const rolMatch = rolFilter === '' || rol.includes(rolFilter.toLowerCase());
-        const estadoMatch = estadoFilter === '' || estado.includes(estadoFilter.toLowerCase());
-        
-        if (rolMatch && estadoMatch) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+    const rolFilter = rolSelect?.value || '';
+    const estadoFilter = estadoSelect?.value || '';
+    
+    // Filtrar usuarios basándose en los criterios seleccionados
+    filteredUsers = allUsers.filter(user => {
+        // Filtrar por rol
+        let rolMatch = true;
+        if (rolFilter !== '') {
+            if (rolFilter === 'administrador') {
+                rolMatch = user.id_rol === 1;
+            } else if (rolFilter === 'usuario') {
+                rolMatch = user.id_rol === 2;
+            }
         }
+        
+        // Filtrar por estado
+        let estadoMatch = true;
+        if (estadoFilter !== '') {
+            const isBlocked = (user.bloqueado_hasta && new Date(user.bloqueado_hasta) > new Date()) || user.is_blacklisted;
+            
+            if (estadoFilter === 'activo') {
+                estadoMatch = !isBlocked;
+            } else if (estadoFilter === 'bloqueado') {
+                estadoMatch = isBlocked;
+            }
+        }
+        
+        return rolMatch && estadoMatch;
     });
 }
 
@@ -1418,24 +1509,28 @@ function setupSearch() {
 }
 
 function searchUsuarios(searchTerm) {
-    const rows = document.querySelectorAll('.usuarios-table tbody tr');
-    
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        let found = false;
+    if (searchTerm === '') {
+        // Si no hay término de búsqueda, aplicar solo los filtros
+        applyFilters();
+    } else {
+        // Aplicar filtros primero
+        applyFilters();
         
-        cells.forEach(cell => {
-            if (cell.textContent.toLowerCase().includes(searchTerm)) {
-                found = true;
-            }
+        // Luego filtrar por término de búsqueda
+        filteredUsers = filteredUsers.filter(user => {
+            const searchLower = searchTerm.toLowerCase();
+            return (
+                user.nombre_usuario?.toLowerCase().includes(searchLower) ||
+                user.correo?.toLowerCase().includes(searchLower) ||
+                user.telefono?.toLowerCase().includes(searchLower) ||
+                user.id_usuario?.toString().includes(searchLower)
+            );
         });
-        
-        if (found || searchTerm === '') {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
+    }
+    
+    // Resetear a página 1 cuando se busca
+    currentPage = 1;
+    displayUsers();
 }
 
 function updateStats() {
@@ -1544,7 +1639,7 @@ function exportUsuarios() {
             csvContent += rowData.join(',') + '\n';
         }
     });
-
+    
     // Crear y descargar archivo
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -1581,46 +1676,77 @@ function showUserModal(user, mode) {
     
     const modalContent = document.createElement('div');
     modalContent.style.cssText = `
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-        padding: 30px;
+        background: #000000;
+        padding: 0;
         border-radius: 20px;
-        max-width: 500px;
+        max-width: 800px;
         width: 90%;
-        max-height: 80vh;
+        max-height: 90vh;
         overflow-y: auto;
-        border: 2px solid rgba(106, 13, 173, 0.3);
+        border: 2px solid rgba(255, 115, 0, 0.3);
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(10px);
         color: white;
     `;
     
     modalContent.innerHTML = `
-        <div style="text-align: center; margin-bottom: 25px;">
             <div style="
-                background: linear-gradient(45deg, #667eea, #764ba2);
-                width: 60px;
-                height: 60px;
+            background: linear-gradient(135deg, rgba(255, 115, 0, 1), rgba(255, 115, 0, 0.9));
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        ">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="
+                    background: rgba(255, 255, 255, 0.2);
+                    padding: 14px;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin: 0 auto 15px;
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+                    border: 2px solid rgba(255, 255, 255, 0.3);
             ">
-                <i class="fa-solid fa-user" style="font-size: 1.5rem; color: white;"></i>
-            </div>
-            <h3 style="color: #667eea; margin: 0; font-size: 1.8rem; font-weight: 700;">
-                ${mode === 'view' ? '👤 Ver Usuario' : '✏️ Editar Usuario'}
-            </h3>
+                    <i class="fa-solid fa-${mode === 'view' ? 'eye' : 'edit'}" style="font-size: 1.5em; color: white;"></i>
         </div>
+                <div>
+                    <h2 style="margin: 0; font-size: 1.8em; font-weight: bold; color: white;">
+                        ${mode === 'view' ? 'Ver Usuario' : 'Editar Usuario'}
+                    </h2>
+                    <span style="font-size: 0.9em; opacity: 0.8; font-weight: 500; color: rgba(255, 255, 255, 0.9);">
+                        ID: ${user.id_usuario}
+                    </span>
+        </div>
+            </div>
+            <span class="close" onclick="this.closest('.user-modal').remove()" style="
+                color: white;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+            " onmouseover="this.style.backgroundColor='rgba(255, 255, 255, 0.2)'; this.style.transform='rotate(90deg)'" 
+               onmouseout="this.style.backgroundColor='transparent'; this.style.transform='rotate(0deg)'">&times;</span>
+        </div>
+        <div style="padding: 35px; background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05));">
         <div style="margin: 20px 0;">
             <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Nombre:</label>
             <input type="text" value="${user.nombre_usuario}" ${mode === 'view' ? 'readonly' : ''} style="
                 width: 100%; 
                 padding: 12px 15px; 
-                border: 2px solid rgba(106, 13, 173, 0.3);
+                border: 2px solid rgba(255, 115, 0, 0.3);
                 border-radius: 10px;
-                background: rgba(255, 255, 255, 0.1);
+                background: #000000;
                 color: white;
                 font-size: 1rem;
             " placeholder="Nombre del usuario">
@@ -1630,9 +1756,9 @@ function showUserModal(user, mode) {
             <input type="email" value="${user.correo}" ${mode === 'view' ? 'readonly' : ''} style="
                 width: 100%; 
                 padding: 12px 15px; 
-                border: 2px solid rgba(106, 13, 173, 0.3);
+                border: 2px solid rgba(255, 115, 0, 0.3);
                 border-radius: 10px;
-                background: rgba(255, 255, 255, 0.1);
+                background: #000000;
                 color: white;
                 font-size: 1rem;
             " placeholder="usuario@ejemplo.com">
@@ -1642,9 +1768,9 @@ function showUserModal(user, mode) {
             <input type="text" value="${user.telefono || ''}" ${mode === 'view' ? 'readonly' : ''} style="
                 width: 100%; 
                 padding: 12px 15px; 
-                border: 2px solid rgba(106, 13, 173, 0.3);
+                border: 2px solid rgba(255, 115, 0, 0.3);
                 border-radius: 10px;
-                background: rgba(255, 255, 255, 0.1);
+                background: #000000;
                 color: white;
                 font-size: 1rem;
             " placeholder="1234-5678">
@@ -1654,14 +1780,14 @@ function showUserModal(user, mode) {
             <select ${mode === 'view' ? 'disabled' : ''} style="
                 width: 100%; 
                 padding: 12px 15px; 
-                border: 2px solid rgba(106, 13, 173, 0.3);
+                border: 2px solid rgba(255, 115, 0, 0.3);
                 border-radius: 10px;
-                background: rgba(255, 255, 255, 0.1);
+                background: #000000;
                 color: white;
                 font-size: 1rem;
             ">
-                <option value="1" ${user.id_rol === 1 ? 'selected' : ''} style="background: #1a1a2e; color: white;">Administrador</option>
-                <option value="2" ${user.id_rol === 2 ? 'selected' : ''} style="background: #1a1a2e; color: white;">Usuario</option>
+                <option value="1" ${user.id_rol === 1 ? 'selected' : ''} style="background: #000000; color: white;">Administrador</option>
+                <option value="2" ${user.id_rol === 2 ? 'selected' : ''} style="background: #000000; color: white;">Usuario</option>
             </select>
         </div>
         <div style="margin: 20px 0;">
@@ -1669,18 +1795,19 @@ function showUserModal(user, mode) {
             <input type="text" value="${user.ultimo_acceso || 'Nunca'}" readonly style="
                 width: 100%; 
                 padding: 12px 15px; 
-                border: 2px solid rgba(106, 13, 173, 0.3);
+                border: 2px solid rgba(255, 115, 0, 0.3);
                 border-radius: 10px;
-                background: rgba(255, 255, 255, 0.1);
+                background: #000000;
                 color: white;
                 font-size: 1rem;
             " placeholder="Fecha de último acceso">
         </div>
         ${mode === 'edit' ? `<input type="hidden" name="id_usuario" value="${user.id_usuario}">` : ''}
-        <div style="text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+        </div>
+        <div style="padding: 25px 30px; background: rgba(180, 70, 0, 0.95); border-top: 2px solid rgba(255, 115, 0, 0.3); text-align: center; display: flex; gap: 15px; justify-content: center; border-radius: 0 0 20px 20px;">
             <button onclick="this.closest('.user-modal').remove()" style="
                 padding: 12px 25px;
-                background: linear-gradient(45deg, #667eea, #764ba2);
+                background: linear-gradient(45deg, #e74c3c, #c0392b);
                 color: white;
                 border: none;
                 border-radius: 25px;
@@ -1688,15 +1815,15 @@ function showUserModal(user, mode) {
                 font-weight: 600;
                 cursor: pointer;
                 transition: all 0.3s ease;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
-               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
+                box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(231, 76, 60, 0.6)'" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(231, 76, 60, 0.4)'">
                 Cerrar
             </button>
             ${mode === 'edit' ? `
                 <button onclick="saveUserChanges(this)" style="
                     padding: 12px 25px;
-                    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                    background: linear-gradient(45deg, #27ae60, #229954);
                     color: white;
                     border: none;
                     border-radius: 25px;
@@ -1704,9 +1831,9 @@ function showUserModal(user, mode) {
                     font-weight: 600;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.6)'" 
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.4)'">
+                    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(39, 174, 96, 0.6)'" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(39, 174, 96, 0.4)'">
                     Guardar
                 </button>
             ` : ''}
@@ -1787,45 +1914,75 @@ function showNewUserModal() {
     
     const modalContent = document.createElement('div');
     modalContent.style.cssText = `
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-        padding: 30px;
+        background: #000000;
+        padding: 0;
         border-radius: 20px;
-        max-width: 500px;
+        max-width: 800px;
         width: 90%;
-        max-height: 80vh;
+        max-height: 90vh;
         overflow-y: auto;
-        border: 2px solid rgba(106, 13, 173, 0.3);
+        border: 2px solid rgba(255, 115, 0, 0.3);
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(10px);
         color: white;
     `;
     
     modalContent.innerHTML = `
-        <div style="text-align: center; margin-bottom: 25px;">
             <div style="
-                background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-                width: 60px;
-                height: 60px;
+            background: linear-gradient(135deg, rgba(255, 115, 0, 1), rgba(255, 115, 0, 0.9));
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        ">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="
+                    background: rgba(255, 255, 255, 0.2);
+                    padding: 14px;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin: 0 auto 15px;
-                box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+                    border: 2px solid rgba(255, 255, 255, 0.3);
             ">
-                <i class="fa-solid fa-user-plus" style="font-size: 1.5rem; color: white;"></i>
+                    <i class="fa-solid fa-user-plus" style="font-size: 1.5em; color: white;"></i>
             </div>
-            <h3 style="color: #ff6b6b; margin: 0; font-size: 1.8rem; font-weight: 700;">Crear Nuevo Usuario</h3>
+                <div>
+                    <h2 style="margin: 0; font-size: 1.8em; font-weight: bold; color: white;">
+                        Crear Nuevo Usuario
+                    </h2>
         </div>
+            </div>
+            <span class="close" onclick="this.closest('.user-modal').remove()" style="
+                color: white;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+            " onmouseover="this.style.backgroundColor='rgba(255, 255, 255, 0.2)'; this.style.transform='rotate(90deg)'" 
+               onmouseout="this.style.backgroundColor='transparent'; this.style.transform='rotate(0deg)'">&times;</span>
+        </div>
+        <div style="padding: 35px; background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05));">
         <form id="newUserForm">
             <div style="margin: 20px 0;">
                 <label style="color: #ffffff; font-weight: 600; display: block; margin-bottom: 8px;">Nombre Completo:</label>
                 <input type="text" name="nombre_usuario" required style="
                     width: 100%; 
                     padding: 12px 15px; 
-                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border: 2px solid rgba(255, 115, 0, 0.3);
                     border-radius: 10px;
-                    background: rgba(255, 255, 255, 0.1);
+                    background: #000000;
                     color: white;
                     font-size: 1rem;
                 " placeholder="Ingresa el nombre completo">
@@ -1835,9 +1992,9 @@ function showNewUserModal() {
                 <input type="email" name="correo" required style="
                     width: 100%; 
                     padding: 12px 15px; 
-                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border: 2px solid rgba(255, 115, 0, 0.3);
                     border-radius: 10px;
-                    background: rgba(255, 255, 255, 0.1);
+                    background: #000000;
                     color: white;
                     font-size: 1rem;
                 " placeholder="usuario@ejemplo.com">
@@ -1847,9 +2004,9 @@ function showNewUserModal() {
                 <input type="text" name="telefono" style="
                     width: 100%; 
                     padding: 12px 15px; 
-                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border: 2px solid rgba(255, 115, 0, 0.3);
                     border-radius: 10px;
-                    background: rgba(255, 255, 255, 0.1);
+                    background: #000000;
                     color: white;
                     font-size: 1rem;
                 " placeholder="1234-5678">
@@ -1859,9 +2016,9 @@ function showNewUserModal() {
                 <input type="password" name="contrasena" required style="
                     width: 100%; 
                     padding: 12px 15px; 
-                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border: 2px solid rgba(255, 115, 0, 0.3);
                     border-radius: 10px;
-                    background: rgba(255, 255, 255, 0.1);
+                    background: #000000;
                     color: white;
                     font-size: 1rem;
                 " placeholder="Mínimo 6 caracteres">
@@ -1871,20 +2028,22 @@ function showNewUserModal() {
                 <select name="id_rol" style="
                     width: 100%; 
                     padding: 12px 15px; 
-                    border: 2px solid rgba(106, 13, 173, 0.3);
+                    border: 2px solid rgba(255, 115, 0, 0.3);
                     border-radius: 10px;
-                    background: rgba(255, 255, 255, 0.1);
+                    background: #000000;
                     color: white;
                     font-size: 1rem;
                 ">
-                    <option value="2" style="background: #1a1a2e; color: white;">Usuario</option>
-                    <option value="1" style="background: #1a1a2e; color: white;">Administrador</option>
+                    <option value="2" style="background: #000000; color: white;">Usuario</option>
+                    <option value="1" style="background: #000000; color: white;">Administrador</option>
                 </select>
             </div>
-            <div style="text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+        </form>
+        </div>
+        <div style="padding: 25px 30px; background: rgba(180, 70, 0, 0.95); border-top: 2px solid rgba(255, 115, 0, 0.3); text-align: center; display: flex; gap: 15px; justify-content: center; border-radius: 0 0 20px 20px;">
                 <button type="button" onclick="this.closest('.user-modal').remove()" style="
                     padding: 12px 25px;
-                    background: linear-gradient(45deg, #667eea, #764ba2);
+                background: linear-gradient(45deg, #e74c3c, #c0392b);
                     color: white;
                     border: none;
                     border-radius: 25px;
@@ -1892,14 +2051,14 @@ function showNewUserModal() {
                     font-weight: 600;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
+                box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(231, 76, 60, 0.6)'" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(231, 76, 60, 0.4)'">
                     Cancelar
                 </button>
-                <button type="submit" style="
+            <button type="button" onclick="document.getElementById('newUserForm').requestSubmit()" style="
                     padding: 12px 25px;
-                    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                background: linear-gradient(45deg, #27ae60, #229954);
                     color: white;
                     border: none;
                     border-radius: 25px;
@@ -1907,13 +2066,12 @@ function showNewUserModal() {
                     font-weight: 600;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.6)'" 
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 107, 107, 0.4)'">
+                box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(39, 174, 96, 0.6)'" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(39, 174, 96, 0.4)'">
                     Crear Usuario
                 </button>
             </div>
-        </form>
     `;
     
     modal.appendChild(modalContent);
