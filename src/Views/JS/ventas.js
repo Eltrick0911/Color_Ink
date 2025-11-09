@@ -14,7 +14,6 @@
     const searchInput = document.getElementById('searchInput');
     const estadoSelect = document.getElementById('estadoSelect');
     const desde = document.getElementById('desde');
-    const hasta = document.getElementById('hasta');
     const btnNuevaVenta = document.querySelector('.btn-nueva-venta');
     const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
 
@@ -136,7 +135,6 @@
         
         const params = new URLSearchParams();
         if (desde && desde.value) params.append('fecha_desde', desde.value);
-        if (hasta && hasta.value) params.append('fecha_hasta', hasta.value);
         
         const url = `${API_BASE_URL}&action=listar&${params.toString()}`;
         console.log('📥 URL de ventas:', url);
@@ -165,7 +163,7 @@
      * Formatear dinero
      */
     function formatMoney(value) {
-        return `$${parseFloat(value).toFixed(2)}`;
+        return `L${parseFloat(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
     }
 
     /**
@@ -196,10 +194,18 @@
      * Verificar si una fecha coincide con el filtro
      */
     function withinDate(dateStr) {
-        if (!desde.value) return true;
-        const d = new Date(dateStr).toDateString();
-        const filterDate = new Date(desde.value).toDateString();
-        return d === filterDate;
+        if (!desde || !desde.value) return true;
+        
+        try {
+            // Extraer solo la parte de fecha (YYYY-MM-DD) de ambas fechas
+            const ventaDateStr = dateStr.split(' ')[0]; // Tomar solo la parte de fecha
+            const filterDateStr = desde.value; // Ya está en formato YYYY-MM-DD
+            
+            return ventaDateStr === filterDateStr;
+        } catch (error) {
+            console.error('Error comparando fechas:', error);
+            return true;
+        }
     }
 
     /**
@@ -419,17 +425,21 @@
     };
 
     /**
-     * Mostrar modal para anular venta
+     * Mostrar modal para anular venta (estilo SweetAlert como pedidos)
      */
     window.mostrarModalAnular = function(id) {
-        const modal = document.getElementById('modalAnularVenta');
-        if (modal) {
-            modal.dataset.ventaId = id;
-            modal.style.display = 'block';
-            
-            // Limpiar formulario
-            document.getElementById('motivoAnulacion').value = '';
+        const venta = ventasData.find(v => v.id_venta == id);
+        if (!venta) {
+            mostrarNotificacion('Venta no encontrada', 'error');
+            return;
         }
+
+        showConfirmAnular(
+            `¿Estás seguro de que quieres anular la venta #${id}?`,
+            async (motivo) => {
+                await anularVenta(id, motivo);
+            }
+        );
     };
 
     /**
@@ -441,7 +451,6 @@
         
         if (result && result.status === 'OK') {
             mostrarNotificacion('Venta anulada correctamente', 'success');
-            cerrarModales();
             cargarVentas();
         } else {
             mostrarNotificacion(result.message || 'Error al anular la venta', 'error');
@@ -449,11 +458,119 @@
     };
 
     /**
+     * Mostrar modal de confirmación de anulación (estilo SweetAlert)
+     * @param {string} message - Mensaje principal
+     * @param {Function} onConfirm - Función a ejecutar si se confirma
+     */
+    function showConfirmAnular(message, onConfirm) {
+        return new Promise((resolve, reject) => {
+            const modal = document.getElementById('modalConfirmAnular');
+            const messageElement = document.getElementById('confirmAnularMessage');
+            const motivoInput = document.getElementById('confirmAnularMotivo');
+            const btnConfirm = document.getElementById('btnConfirmAnular');
+            const btnCancel = document.getElementById('btnCancelAnular');
+            
+            if (!modal || !messageElement || !btnConfirm || !motivoInput) {
+                console.error('Elementos del modal de confirmación no encontrados');
+                reject(new Error('Modal no disponible'));
+                return;
+            }
+            
+            // Establecer mensaje
+            messageElement.textContent = message;
+            
+            // Limpiar motivo
+            motivoInput.value = '';
+            
+            // Mostrar modal
+            modal.classList.add('show');
+            
+            // Enfocar el campo de motivo
+            setTimeout(() => motivoInput.focus(), 100);
+            
+            // Función para limpiar event listeners
+            const cleanup = () => {
+                btnConfirm.replaceWith(btnConfirm.cloneNode(true));
+                btnCancel.replaceWith(btnCancel.cloneNode(true));
+                modal.classList.remove('show');
+                // Reconfigurar listeners básicos
+                setupConfirmAnularModal();
+            };
+            
+            // Configurar botón confirmar
+            const newBtnConfirm = document.getElementById('btnConfirmAnular');
+            newBtnConfirm.addEventListener('click', async function() {
+                const motivo = document.getElementById('confirmAnularMotivo').value.trim();
+                
+                if (!motivo) {
+                    mostrarNotificacion('Debe especificar un motivo para la anulación', 'error');
+                    return;
+                }
+                
+                cleanup();
+                try {
+                    if (onConfirm) await onConfirm(motivo);
+                    resolve(true);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+            
+            // Configurar botón cancelar
+            const newBtnCancel = document.getElementById('btnCancelAnular');
+            newBtnCancel.addEventListener('click', function() {
+                cleanup();
+                resolve(false);
+            });
+            
+            // Cerrar con ESC
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    cleanup();
+                    document.removeEventListener('keydown', handleEscape);
+                    resolve(false);
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
+        });
+    }
+
+    /**
+     * Configurar modal de confirmación de anulación
+     */
+    function setupConfirmAnularModal() {
+        const modal = document.getElementById('modalConfirmAnular');
+        const btnCancel = document.getElementById('btnCancelAnular');
+        
+        if (!modal) {
+            console.error('Modal de confirmación de anulación no encontrado');
+            return;
+        }
+        
+        // Cerrar modal con botón cancelar
+        if (btnCancel) {
+            btnCancel.addEventListener('click', function() {
+                modal.classList.remove('show');
+            });
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+            }
+        });
+    }
+
+    /**
      * Registrar nueva venta
      */
     if (btnNuevaVenta) {
         btnNuevaVenta.addEventListener('click', abrirModalNuevaVenta);
     }
+
+    // Variable para almacenar datos de pedidos
+    let pedidosData = [];
 
     /**
      * Cargar pedidos disponibles para venta
@@ -471,6 +588,7 @@
                 console.log('📥 Respuesta de pedidos:', result);
                 
                 if (result && result.status === 'OK' && result.data) {
+                    pedidosData = result.data; // Guardar datos para uso posterior
                     select.innerHTML = '<option value="">Seleccione un pedido...</option>';
                     result.data.forEach(pedido => {
                         const option = document.createElement('option');
@@ -507,7 +625,7 @@
      * Cerrar modales
      */
     function cerrarModales() {
-        const modales = ['modalNuevaVenta', 'modalVerVenta', 'modalEditarVenta', 'modalAnularVenta'];
+        const modales = ['modalNuevaVenta', 'modalVerVenta', 'modalEditarVenta'];
         modales.forEach(modalId => {
             const modal = document.getElementById(modalId);
             if (modal) {
@@ -534,8 +652,8 @@
                 infoDiv.style.display = 'block';
                 const selectedText = select.options[select.selectedIndex].text;
                 detalleDiv.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(217, 0, 188, 0.1); border-radius: 6px; border-left: 4px solid rgba(217, 0, 188, 0.8);">
-                        <i class="fa-solid fa-info-circle" style="color: rgba(217, 0, 188, 0.8);"></i>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(186, 65, 156, 0.1); border-radius: 6px; border-left: 4px solid rgba(186, 65, 156, 0.8);">
+                        <i class="fa-solid fa-info-circle" style="color: rgba(186, 65, 156, 0.8);"></i>
                         <div>
                             <p style="margin: 0; font-weight: bold;">${selectedText}</p>
                             <p style="margin: 5px 0 0 0; color: #28a745; font-size: 0.9em;"><i class="fa-solid fa-check-circle"></i> Pedido listo para facturar</p>
@@ -639,26 +757,50 @@
     }
 
     /**
-     * Exportar ventas a Excel
+     * Exportar ventas a Excel personalizado
      */
-    function exportarExcel() {
+    async function exportarExcel() {
         try {
             const params = new URLSearchParams();
             if (searchInput && searchInput.value) params.append('filtro', searchInput.value);
             if (desde && desde.value) params.append('fecha_desde', desde.value);
             
-            // Agregar token para autenticación
-            const currentToken = getCurrentToken();
-            if (currentToken) {
-                params.append('token', currentToken);
-            }
-            
             const url = `${API_BASE_URL}&action=exportar-excel&${params.toString()}`;
             
-            // Abrir en nueva ventana para descarga
-            window.open(url, '_blank');
+            // Obtener token para autenticación
+            const currentToken = getCurrentToken();
+            if (!currentToken) {
+                mostrarNotificacion('Error de autenticación', 'error');
+                return;
+            }
             
-            mostrarNotificacion('Descargando archivo Excel...', 'success');
+            // Hacer petición con fetch para incluir headers de autenticación
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${currentToken}`
+                }
+            });
+            
+            if (response.ok) {
+                // Crear blob y descargar
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `Ventas_ColorInk_${new Date().toISOString().slice(0,10)}.xls`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(downloadUrl);
+                
+                mostrarNotificacion('📊 Reporte Excel descargado exitosamente', 'success');
+            } else {
+                const errorText = await response.text();
+                console.error('Error en respuesta:', errorText);
+                mostrarNotificacion('Error al generar el reporte Excel', 'error');
+            }
         } catch (error) {
             console.error('Error exportando Excel:', error);
             mostrarNotificacion('Error al exportar a Excel', 'error');
@@ -765,22 +907,8 @@
                 metodoPagoSelect.addEventListener('change', actualizarVista);
             }
             
-            // Event listener para confirmar anulación
-            const btnConfirmarAnulacion = document.getElementById('btnConfirmarAnulacion');
-            if (btnConfirmarAnulacion) {
-                btnConfirmarAnulacion.addEventListener('click', async () => {
-                    const modal = document.getElementById('modalAnularVenta');
-                    const ventaId = modal.dataset.ventaId;
-                    const motivo = document.getElementById('motivoAnulacion').value.trim();
-                    
-                    if (!motivo) {
-                        mostrarNotificacion('Debe especificar un motivo para la anulación', 'error');
-                        return;
-                    }
-                    
-                    await anularVenta(ventaId, motivo);
-                });
-            }
+            // Configurar modal de confirmación de anulación
+            setupConfirmAnularModal();
             
             // Event listener para mostrar info del pedido
             const selectPedido = document.getElementById('pedido');
