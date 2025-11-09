@@ -11,13 +11,15 @@
 </head>
 <body>
     <main class="sidebar-content">
-        <h1>Gestión de Inventario</h1>
         <div class="inventario-container">
             <div class="inventario-header">
                 <h2>Control de Stock</h2>
                 <div class="header-buttons">
                     <button class="btn-exportar-excel" title="Exportar a Excel">
                         <i class="fa-solid fa-file-excel"></i> Exportar Excel
+                    </button>
+                    <button class="btn-nuevo-proveedor">
+                        <i class="fa-solid fa-truck"></i> Proveedores
                     </button>
                     <button class="btn-nuevo-producto">
                         <i class="fa-solid fa-plus"></i> Nuevo Producto
@@ -86,6 +88,22 @@
                         <!-- Los productos se cargarán dinámicamente desde la base de datos -->
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- Paginación -->
+            <div class="pagination-container" id="paginationContainer" style="display: none;">
+                <div class="pagination-info">
+                    <span id="paginationInfo">Mostrando 0 de 0 productos</span>
+                </div>
+                <div class="pagination-controls">
+                    <button id="btnPrevPage" class="btn-pagination" disabled>
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <div id="pageNumbers" class="page-numbers"></div>
+                    <button id="btnNextPage" class="btn-pagination" disabled>
+                        Siguiente <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </main>
@@ -187,11 +205,8 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="edit_activo">Estado del Producto *</label>
-                            <select id="edit_activo" name="activo" required>
-                                <option value="1">Activo</option>
-                                <option value="0">Inactivo</option>
-                            </select>
+                            <label for="edit_estado_stock">Estado de Stock</label>
+                            <input type="text" id="edit_estado_stock" readonly style="background-color: rgba(255, 255, 255, 0.1); cursor: not-allowed;">
                         </div>
                         <div class="form-group">
                             <label for="edit_fecha_registro">Fecha de Registro</label>
@@ -231,11 +246,11 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="sku">SKU *</label>
-                            <input type="text" id="sku" name="sku" required placeholder="Ej: PROD001">
+                            <input type="text" id="sku" name="sku" required>
                         </div>
                         <div class="form-group">
                             <label for="nombre_producto">Nombre del Producto *</label>
-                            <input type="text" id="nombre_producto" name="nombre_producto" required placeholder="Ej: Papel A4 500 hojas">
+                            <input type="text" id="nombre_producto" name="nombre_producto" required>
                         </div>
                     </div>
                     
@@ -283,11 +298,10 @@
                             <label for="fecha_registro">Fecha de Registro *</label>
                             <input type="datetime-local" id="fecha_registro" name="fecha_registro" required>
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="descripcion">Descripción del Producto</label>
-                        <textarea id="descripcion" name="descripcion" rows="3" placeholder="Descripción detallada del producto..."></textarea>
+                        <div class="form-group">
+                            <label for="descripcion">Descripción del Producto</label>
+                            <textarea id="descripcion" name="descripcion" rows="1" style="resize: vertical; min-height: 40px;"></textarea>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -298,6 +312,133 @@
         </div>
     </div>
 
+    <!-- Modal para Ver Proveedores -->
+    <div id="modalVerProveedores" class="modal modal-enhanced">
+        <div class="modal-content modal-large modal-floating">
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-list"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h2>Gestión de Proveedores</h2>
+                    </div>
+                </div>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="proveedores-filters">
+                    <input type="text" placeholder="Buscar proveedores..." class="search-input" id="search-proveedores">
+                    <button class="btn-nuevo-proveedor-modal">
+                        <i class="fa-solid fa-plus"></i> Nuevo Proveedor
+                    </button>
+                </div>
+                
+                <div class="proveedores-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Contacto</th>
+                                <th>Dirección</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="proveedores-tbody">
+                            <!-- Los proveedores se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Gestión de Proveedores -->
+    <div id="modalNuevoProveedor" class="modal modal-enhanced">
+        <div class="modal-content modal-large modal-floating">
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-truck"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h2>Gestión de Proveedores</h2>
+                    </div>
+                </div>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="formNuevoProveedor" class="producto-form">
+                    <div class="form-group">
+                        <label for="descripcion_proveedor">Nombre del Proveedor *</label>
+                        <input type="text" id="descripcion_proveedor" name="descripcion_proveedor" required placeholder="Ej: Distribuidora ABC">
+                        <button type="submit" class="btn-guardar" style="margin-top: 10px;">Agregar Proveedor</button>
+                    </div>
+                </form>
+                
+                <div class="proveedores-table" style="margin-top: 30px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre del Proveedor</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="proveedores-tbody">
+                            <!-- Los proveedores se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Proveedor -->
+    <div id="modalEditarProveedor" class="modal modal-enhanced">
+        <div class="modal-content modal-medium modal-floating">
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-edit"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h2>Editar Proveedor</h2>
+                        <span class="proveedor-id-display" id="editarProveedorIdDisplay"></span>
+                    </div>
+                </div>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarProveedor" class="producto-form">
+                    <input type="hidden" id="edit_id_proveedor" name="id_proveedor">
+                    
+                    <div class="form-group">
+                        <label for="edit_descripcion_proveedor">Nombre del Proveedor *</label>
+                        <input type="text" id="edit_descripcion_proveedor" name="descripcion_proveedor" required placeholder="Ej: Distribuidora ABC">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit_forma_contacto">Forma de Contacto</label>
+                        <input type="text" id="edit_forma_contacto" name="forma_contacto" placeholder="Ej: Teléfono, Email, WhatsApp">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit_direccion">Dirección</label>
+                        <textarea id="edit_direccion" name="direccion" rows="3" placeholder="Dirección completa del proveedor..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar">Cancelar</button>
+                <button type="submit" form="formEditarProveedor" class="btn-guardar">Actualizar Proveedor</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/Color_Ink/src/Views/JS/sidebar.js"></script>
     <script src="/Color_Ink/src/Views/JS/inve.js"></script>
 </body>

@@ -313,11 +313,10 @@ function showAccessRestriction(basePath) {
             "></div>
         </div>
         <div style="
-            background: linear-gradient(135deg, #6a0dad 0%, #4a0080 50%, #8b5cf6 100%);
-            backdrop-filter: blur(10px);
+            background: #3C096C;
             border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 8px 32px rgba(106, 13, 173, 0.4);
+            box-shadow: 0 8px 32px rgba(60, 9, 108, 0.5);
             border: 1px solid rgba(139, 92, 246, 0.3);
             max-width: 500px;
             width: 100%;

@@ -108,9 +108,9 @@ header.sidebar .icon-bar {
 }
 
 .icon-bar i.fa-credit-card:hover {
-    color:  rgb(186, 65, 156);
+    color: rgb(186, 65, 156);
     transform: scale(1.1);
-    box-shadow: 0 4px 8px  rgb(186, 65, 156);
+    box-shadow: 0 4px 8px rgb(186, 65, 156);
 }
 
 /* Efectos hover para el modo sidebar - Replica exacta */
@@ -140,7 +140,7 @@ header.sidebar .icon-bar i.fa-truck:hover {
 header.sidebar .icon-bar i.fa-credit-card:hover {
     color: rgb(186, 65, 156);
     transform: scale(1.1);
-    box-shadow: 0 4px 8px  rgb(186, 65, 156);
+    box-shadow: 0 4px 8px rgb(186, 65, 156);
 }
 
 /* Hover para Auditoría */

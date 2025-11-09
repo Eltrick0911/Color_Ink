@@ -488,6 +488,52 @@ class inveController
     }
 
     /**
+     * Obtiene el siguiente SKU para una categoría específica
+     * 
+     * @param array $headers Headers de la petición
+     * @return void
+     */
+    public function getSiguienteSkuPorCategoria(array $headers): void
+    {
+        // TEMPORAL: Desactivar autorización para testing
+        error_log('inveController - getSiguienteSkuPorCategoria: MODO TESTING - Autorización desactivada');
+        error_log('inveController - getSiguienteSkuPorCategoria: $_GET completo: ' . json_encode($_GET));
+        
+        try {
+            $idCategoria = isset($_GET['id_categoria']) ? (int)$_GET['id_categoria'] : 0;
+            error_log('inveController - getSiguienteSkuPorCategoria: ID de categoría recibido: ' . $idCategoria);
+            
+            if ($idCategoria <= 0) {
+                error_log('inveController - getSiguienteSkuPorCategoria: ID de categoría inválido: ' . $idCategoria);
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'ERROR',
+                    'message' => 'ID de categoría inválido'
+                ]);
+                return;
+            }
+            
+            error_log('inveController - getSiguienteSkuPorCategoria: Llamando al modelo con ID: ' . $idCategoria);
+            $result = $this->inveModel->getSiguienteSkuPorCategoria($idCategoria);
+            error_log('inveController - getSiguienteSkuPorCategoria: Resultado del modelo: ' . json_encode($result));
+            
+            http_response_code(200);
+            $response = [
+                'status' => 'OK',
+                'message' => 'SKU obtenido exitosamente',
+                'data' => $result
+            ];
+            
+            error_log('inveController - getSiguienteSkuPorCategoria: Respuesta final: ' . json_encode($response));
+            echo json_encode($response);
+        } catch (\Throwable $e) {
+            error_log('inveController - getSiguienteSkuPorCategoria: Error: ' . $e->getMessage());
+            error_log('inveController - getSiguienteSkuPorCategoria: Stack trace: ' . $e->getTraceAsString());
+            echo json_encode(responseHTTP::status500());
+        }
+    }
+
+    /**
      * Exporta los productos a Excel con formato (HTML/Excel compatible)
      * 
      * @param array $headers Headers de la petición
@@ -787,6 +833,65 @@ class inveController
 
         } catch (\Throwable $e) {
             error_log('inveController - deleteProduct: Error: ' . $e->getMessage());
+            echo json_encode(responseHTTP::status500());
+        }
+    }
+
+    /**
+     * Agrega un nuevo proveedor
+     * 
+     * @param array $headers Headers de la petición
+     * @param array $input Datos del proveedor
+     * @return void
+     */
+    public function addProveedor(array $headers, array $input): void
+    {
+        // TEMPORAL: Desactivar autorización para testing
+        // $auth = $this->authorize($headers, [1, 2]);
+        // if (!$auth) return;
+        
+        error_log('inveController - addProveedor: MODO TESTING - Autorización desactivada');
+
+        error_log('inveController - addProveedor: Datos recibidos: ' . json_encode($input));
+        
+        // Validar datos
+        if (!isset($input['descripcion_proveedor']) || empty(trim($input['descripcion_proveedor']))) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => 'ERROR',
+                'message' => 'El nombre del proveedor es requerido'
+            ]);
+            return;
+        }
+        
+        try {
+            $descripcion = trim($input['descripcion_proveedor']);
+            $contacto = trim($input['forma_contacto'] ?? '');
+            $direccion = trim($input['direccion'] ?? '');
+            $idUsuario = 1; // Usuario por defecto para testing
+            
+            $result = $this->inveModel->addProveedor($descripcion, $contacto, $direccion, $idUsuario);
+            
+            if ($result) {
+                http_response_code(200);
+                $response = [
+                    'status' => 'OK',
+                    'message' => 'Proveedor agregado exitosamente',
+                    'data' => $result
+                ];
+            } else {
+                http_response_code(400);
+                $response = [
+                    'status' => 'ERROR',
+                    'message' => 'Error al agregar el proveedor'
+                ];
+            }
+            
+            error_log('inveController - addProveedor: Respuesta: ' . json_encode($response));
+            echo json_encode($response);
+
+        } catch (\Throwable $e) {
+            error_log('inveController - addProveedor: Error: ' . $e->getMessage());
             echo json_encode(responseHTTP::status500());
         }
     }

@@ -22,7 +22,7 @@ if (strpos($uri, '/public/') !== false) {
     <div class="container">
         <div class="login-box">
             <div class="login-header">
-                <h1>Crear cuenta</h1>
+                <h1>Crear Cuenta</h1>
                 <img src="<?php echo $basePath; ?>/src/Views/IMG/COLOR INK.gif" alt="Color Ink Logo">
             </div>
             <form id="registerForm" action="#" method="POST">

@@ -21,10 +21,12 @@ body {
 }
 
 .ventas-container {
-    width: 100%;
+    padding: 0 1rem 1rem;
+    max-width: 1190px;
+    margin: 0 auto;
+    width: 92%;
     height: 100%;
-    margin: 0;
-    padding: 0;
+    box-sizing: border-box;
 }
 
 .ventas-header {
@@ -35,17 +37,17 @@ body {
     padding-top: 0;
     margin-bottom: 8px;
     padding-bottom: 8px;
-    border-bottom: 2px solid rgba(217, 0, 188, 0.3);
+    border-bottom: 2px solid rgba(186, 65, 156, 0.3);
 }
 
 .ventas-header h2 {
-    color: rgba(217, 0, 188, 0.9);
+    color: rgba(186, 65, 156, 0.9);
     font-size: 2em;
     margin: 0;
 }
 
 .btn-nueva-venta {
-    background: linear-gradient(45deg, rgba(217, 0, 188, 0.92), rgba(217, 0, 188, 0.72));
+    background: linear-gradient(45deg, rgba(186, 65, 156, 0.92), rgba(186, 65, 156, 0.72));
     color: white;
     border: none;
     padding: 12px 24px;
@@ -59,9 +61,9 @@ body {
 }
 
 .btn-nueva-venta:hover {
-    background: linear-gradient(45deg, rgba(217, 0, 188, 1), rgba(217, 0, 188, 0.9));
+    background: linear-gradient(45deg, rgba(186, 65, 156, 1), rgba(186, 65, 156, 0.9));
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(217, 0, 188, 0.4);
+    box-shadow: 0 4px 12px rgba(186, 65, 156, 0.4);
 }
 
 /* Tarjetas de estadísticas */
@@ -73,8 +75,8 @@ body {
 }
 
 .stat-card {
-    background: linear-gradient(135deg, rgba(217, 0, 188, 0.1), rgba(217, 0, 188, 0.05));
-    border: 1px solid rgba(217, 0, 188, 0.2);
+    background: linear-gradient(135deg, rgba(186, 65, 156, 0.1), rgba(186, 65, 156, 0.05));
+    border: 1px solid rgba(186, 65, 156, 0.2);
     border-radius: 12px;
     padding: 20px;
     display: flex;
@@ -85,12 +87,12 @@ body {
 
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(217, 0, 188, 0.25);
-    border-color: rgba(217, 0, 188, 0.4);
+    box-shadow: 0 8px 25px rgba(186, 65, 156, 0.25);
+    border-color: rgba(186, 65, 156, 0.4);
 }
 
 .stat-icon {
-    background: linear-gradient(45deg, rgba(217, 0, 188, 0.95), rgba(217, 0, 188, 0.85));
+    background: linear-gradient(45deg, rgba(186, 65, 156, 0.95), rgba(186, 65, 156, 0.85));
     color: white;
     width: 60px;
     height: 60px;
@@ -110,8 +112,8 @@ body {
 }
 
 .stat-number {
-    color: rgba(217, 0, 188, 0.95);
-    font-size: 2em;
+    color: rgba(186, 65, 156, 0.95);
+    font-size: 1.4em;
     font-weight: bold;
     margin: 0;
 }
@@ -128,7 +130,7 @@ body {
     flex: 1;
     min-width: 250px;
     padding: 12px 16px;
-    border: 2px solid rgba(217, 0, 188, 0.3);
+    border: 2px solid rgba(186, 65, 156, 0.3);
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.1);
     color: white;
@@ -141,16 +143,16 @@ body {
 
 .search-input:focus {
     outline: none;
-    border-color: rgba(217, 0, 188, 0.85);
-    box-shadow: 0 0 10px rgba(217, 0, 188, 0.35);
+    border-color: rgba(186, 65, 156, 0.85);
+    box-shadow: 0 0 10px rgba(186, 65, 156, 0.35);
 }
 
 .filter-select,
 .date-input {
     padding: 12px 16px;
-    border: 2px solid rgba(217, 0, 188, 0.3);
+    border: 2px solid rgba(186, 65, 156, 0.3);
     border-radius: 8px;
-    background-color: rgba(217, 0, 188, 0.12);
+    background-color: rgba(186, 65, 156, 0.12);
     color: white;
     font-size: 1em;
     cursor: pointer;
@@ -160,7 +162,7 @@ body {
 .filter-select:focus,
 .date-input:focus {
     outline: none;
-    border-color: rgba(217, 0, 188, 0.85);
+    border-color: rgba(186, 65, 156, 0.85);
 }
 
 .filter-select option {
@@ -195,7 +197,7 @@ body {
 .btn-limpiar-filtros {
     background: linear-gradient(45deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.6));
     color: white;
-    border: 2px solid rgba(217, 0, 188, 0.3);
+    border: 2px solid rgba(186, 65, 156, 0.3);
     padding: 12px 16px;
     border-radius: 8px;
     cursor: pointer;
@@ -204,8 +206,8 @@ body {
 }
 
 .btn-limpiar-filtros:hover {
-    background: linear-gradient(45deg, rgba(217, 0, 188, 0.8), rgba(217, 0, 188, 0.6));
-    border-color: rgba(217, 0, 188, 0.8);
+    background: linear-gradient(45deg, rgba(186, 65, 156, 0.8), rgba(186, 65, 156, 0.6));
+    border-color: rgba(186, 65, 156, 0.8);
     transform: translateY(-1px);
 }
 
@@ -215,6 +217,7 @@ body {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    width: 100%;
 }
 
 .ventas-table table {
@@ -223,8 +226,8 @@ body {
 }
 
 .ventas-table th {
-    background-color: rgba(217, 0, 188, 0.18);
-    color: rgba(217, 0, 188, 0.95);
+    background-color: rgba(186, 65, 156, 0.18);
+    color: rgba(186, 65, 156, 0.95);
     padding: 16px 12px;
     text-align: left;
     font-weight: bold;
@@ -238,7 +241,7 @@ body {
 }
 
 .ventas-table tr:hover {
-    background-color: rgba(217, 0, 188, 0.1);
+    background-color: rgba(186, 65, 156, 0.1);
 }
 
 /* Estados de venta */
@@ -277,15 +280,15 @@ body {
     border-radius: 12px;
     font-size: 0.85em;
     font-weight: bold;
-    background-color: rgba(217, 0, 188, 0.15);
-    color: rgba(217, 0, 188, 0.9);
+    background-color: rgba(186, 65, 156, 0.15);
+    color: rgba(186, 65, 156, 0.9);
 }
 
 /* Botones de acción */
 .btn-action {
     background: none;
-    border: 1px solid rgba(217, 0, 188, 0.35);
-    color: rgba(217, 0, 188, 0.9);
+    border: 1px solid rgba(186, 65, 156, 0.35);
+    color: rgba(186, 65, 156, 0.9);
     padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -294,9 +297,9 @@ body {
 }
 
 .btn-action:hover {
-    background-color: rgba(217, 0, 188, 0.2);
-    color: rgba(217, 0, 188, 1);
-    border-color: rgba(217, 0, 188, 0.85);
+    background-color: rgba(186, 65, 156, 0.2);
+    color: rgba(186, 65, 156, 1);
+    border-color: rgba(186, 65, 156, 0.85);
     transform: translateY(-1px);
 }
 
@@ -320,8 +323,8 @@ body {
 
 .modal-floating {
     animation: slideInFloating 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(217, 0, 188, 0.1);
-    border: 1px solid rgba(217, 0, 188, 0.2);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(186, 65, 156, 0.1);
+    border: 1px solid rgba(186, 65, 156, 0.2);
 }
 
 .modal-large .modal-content {
@@ -335,7 +338,7 @@ body {
 }
 
 .modal-content {
-    background: linear-gradient(135deg, rgba(217, 0, 188, 0.95), rgba(217, 0, 188, 0.85));
+    background: #000000;
     margin: 2% auto;
     padding: 0;
     border-radius: 20px;
@@ -346,11 +349,11 @@ body {
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
     animation: slideIn 0.3s ease;
     position: relative;
-    border: 1px solid rgba(217, 0, 188, 0.3);
+    border: 1px solid rgba(186, 65, 156, 0.3);
 }
 
 .modal-header {
-    background: linear-gradient(135deg, rgba(217, 0, 188, 1), rgba(217, 0, 188, 0.9));
+    background: rgb(186, 65, 156);
     color: white;
     padding: 25px 30px;
     border-radius: 20px 20px 0 0;
@@ -434,8 +437,8 @@ body {
 
 .modal-body {
     padding: 35px;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05));
-    backdrop-filter: blur(10px);
+    background: #000000;
+    color: white;
 }
 
 .venta-form {
@@ -466,12 +469,13 @@ body {
 .form-group select,
 .form-group textarea {
     padding: 12px 16px;
-    border: 2px solid rgba(217, 0, 188, 0.3);
+    border: 2px solid rgba(186, 65, 156, 0.5);
     border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.8);
     color: white;
     font-size: 1em;
     transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(186, 65, 156, 0.3);
 }
 
 .form-group input::placeholder,
@@ -483,9 +487,9 @@ body {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: rgba(217, 0, 188, 0.85);
-    box-shadow: 0 0 10px rgba(217, 0, 188, 0.35);
-    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgb(186, 65, 156);
+    box-shadow: 0 0 15px rgba(186, 65, 156, 0.6);
+    background-color: rgba(0, 0, 0, 0.9);
 }
 
 .form-group select option {
@@ -505,12 +509,12 @@ body {
     padding: 15px;
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
     border-radius: 8px;
-    border: 1px solid rgba(217, 0, 188, 0.2);
+    border: 1px solid rgba(186, 65, 156, 0.2);
 }
 
 .modal-footer {
     padding: 25px 30px;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
+    background: #000000;
     border-radius: 0 0 20px 20px;
     display: flex;
     justify-content: flex-end;
@@ -535,29 +539,28 @@ body {
 }
 
 .btn-cancelar {
-    background: linear-gradient(45deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
-    color: rgba(255, 255, 255, 0.9);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
+    background: linear-gradient(45deg, #dc3545, #c82333);
+    color: white;
+    border: 2px solid #dc3545;
 }
 
 .btn-cancelar:hover {
-    background: linear-gradient(45deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.4));
+    background: linear-gradient(45deg, #c82333, #bd2130);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
 .btn-guardar {
-    background: linear-gradient(45deg, rgba(217, 0, 188, 0.9), rgba(217, 0, 188, 0.8));
+    background: linear-gradient(45deg, rgba(186, 65, 156, 0.9), rgba(186, 65, 156, 0.8));
     color: white;
-    border: 2px solid rgba(217, 0, 188, 0.6);
+    border: 2px solid rgba(186, 65, 156, 0.6);
     backdrop-filter: blur(10px);
 }
 
 .btn-guardar:hover {
-    background: linear-gradient(45deg, rgba(217, 0, 188, 1), rgba(217, 0, 188, 0.9));
+    background: linear-gradient(45deg, rgba(186, 65, 156, 1), rgba(186, 65, 156, 0.9));
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(217, 0, 188, 0.4);
+    box-shadow: 0 4px 12px rgba(186, 65, 156, 0.4);
 }
 
 .btn-anular {
@@ -584,15 +587,15 @@ body {
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05));
     padding: 25px;
     border-radius: 15px;
-    border: 1px solid rgba(217, 0, 188, 0.2);
+    border: 1px solid rgba(186, 65, 156, 0.2);
     backdrop-filter: blur(10px);
 }
 
 .venta-info-section h3 {
-    color: rgba(217, 0, 188, 0.9);
+    color: rgba(186, 65, 156, 0.9);
     margin: 0 0 15px 0;
     font-size: 1.2em;
-    border-bottom: 2px solid rgba(217, 0, 188, 0.3);
+    border-bottom: 2px solid rgba(186, 65, 156, 0.3);
     padding-bottom: 8px;
 }
 
@@ -742,4 +745,82 @@ body {
     }
 }
 
+/* Fondo gris para el modal "Ver Venta" (igual que modal de pedidos) */
+#modalVerVenta .modal-content {
+    background: linear-gradient(180deg, #2f2f2f 0%, #232323 100%) !important;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 128, 0, 0.10); /* borde verde tenue similar */
+    color: #e6e6e6;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.65);
+}
 
+/* Ajuste del body interno del modal para mantener contraste y scroll */
+#modalVerVenta .modal-body {
+    background: transparent;
+    color: #e6e6e6;
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+}
+
+/* Paneles internos dentro del modal (si existen) */
+#modalVerVenta .venta-info-section,
+#modalVerVenta .info-pedido-container {
+    background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* Si necesitas aplicar a otros modales (opcional) */
+/*
+#modalEditarVenta .modal-content,
+#modalNuevaVenta .modal-content {
+    background: linear-gradient(180deg, #2f2f2f, #232323) !important;
+}
+*/
+
+/* Ajustes: dejar cabecera rosada y página en negro;
+   aplicar fondo gris solo a la sección de información (como "ver pedidos") */
+
+/* Asegura que el modal principal mantenga fondo negro (no lo sobreescribas con gris) */
+#modalVerVenta .modal-content,
+.modal-ver-venta .modal-content {
+    background: #000000 !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(186, 65, 156, 0.30) !important; /* línea superior/contorno rosado tenue */
+    box-shadow: 0 18px 40px rgba(0,0,0,0.65) !important;
+    color: #e6e6e6 !important;
+}
+
+/* Mantener la cabecera rosada con prioridad */
+#modalVerVenta .modal-header,
+.modal-ver-venta .modal-header {
+    background: rgb(186, 65, 156) !important;
+    color: #fff !important;
+}
+
+/* Cuerpo del modal: transparente (se ve el negro de modal-content) */
+#modalVerVenta .modal-body,
+.modal-ver-venta .modal-body {
+    background: transparent !important;
+    color: #e6e6e6 !important;
+}
+
+/* Aplicar fondo gris **solo** a los paneles de información internos */
+#modalVerVenta .venta-info-section,
+#modalVerVenta .info-pedido-container,
+.modal-ver-venta .venta-info-section,
+.modal-ver-venta .info-pedido-container {
+    background: linear-gradient(180deg, #2f2f2f 0%, #232323 100%) !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 128, 0, 0.08) !important; /* borde verde tenue si lo deseas */
+    padding: 20px !important;
+    color: #e6e6e6 !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* Asegura que los textos/labels dentro de esos paneles mantengan contraste */
+#modalVerVenta .venta-info-section .detail-label,
+#modalVerVenta .info-pedido-container .detail-label,
+.modal-ver-venta .venta-info-section .detail-label,
+.modal-ver-venta .info-pedido-container .detail-label {
+    color: rgba(186, 65, 156, 0.9) !important;
+}

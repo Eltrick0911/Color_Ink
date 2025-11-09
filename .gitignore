@@ -4,7 +4,7 @@
 *.env
 
 # Logs
-src/Logs/*.log
+src/Logs/php-error.log
 
 # Archivos temporales
 *.tmp
@@ -13,3 +13,4 @@ src/Logs/*.log
 # Archivos del sistema
 .DS_Store
 Thumbs.db
+*.log

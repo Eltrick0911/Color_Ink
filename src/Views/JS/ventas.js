@@ -5,6 +5,10 @@
     let ventasData = [];
     let currentUser = null;
     let token = null;
+    let currentPage = 1;
+    let totalPages = 1;
+    let totalRecords = 0;
+    const itemsPerPage = 10;
 
     // Elementos del DOM
     const body = document.getElementById('ventasBody');
@@ -13,9 +17,10 @@
     const kpiMargen = document.getElementById('kpiMargen');
     const searchInput = document.getElementById('searchInput');
     const estadoSelect = document.getElementById('estadoSelect');
-    const desde = document.getElementById('desde');
-    const hasta = document.getElementById('hasta');
+    const fechaRange = document.getElementById('fechaRange');
     const btnNuevaVenta = document.querySelector('.btn-nueva-venta');
+    let fechaDesde = null;
+    let fechaHasta = null;
     const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
 
     /**
@@ -131,12 +136,23 @@
     /**
      * Cargar ventas desde la API
      */
-    async function cargarVentas() {
+    async function cargarVentas(pagina = 1) {
         mostrarLoading();
         
         const params = new URLSearchParams();
-        if (desde && desde.value) params.append('fecha_desde', desde.value);
-        if (hasta && hasta.value) params.append('fecha_hasta', hasta.value);
+        if (fechaDesde) {
+            params.append('fecha_desde', fechaDesde);
+            params.append('fecha_hasta', fechaHasta || fechaDesde);
+        }
+        if (searchInput && searchInput.value) params.append('filtro', searchInput.value);
+        if (estadoSelect && estadoSelect.value) params.append('estado', estadoSelect.value);
+        const metodoPagoSelect = document.getElementById('metodoPagoSelect');
+        if (metodoPagoSelect && metodoPagoSelect.value) {
+            console.log('Enviando filtro método pago:', metodoPagoSelect.value);
+            params.append('metodo_pago', metodoPagoSelect.value);
+        }
+        params.append('pagina', pagina);
+        params.append('limite', itemsPerPage);
         
         const url = `${API_BASE_URL}&action=listar&${params.toString()}`;
         console.log('📥 URL de ventas:', url);
@@ -144,8 +160,13 @@
         
         if (result && result.status === 'OK') {
             ventasData = result.data || [];
-            console.log('✅ Ventas cargadas:', ventasData.length);
+            currentPage = result.pagination?.current_page || 1;
+            totalPages = result.pagination?.total_pages || 1;
+            totalRecords = result.pagination?.total || 0;
+            console.log('✅ Ventas cargadas:', ventasData.length, 'de', totalRecords, 'total');
+            console.log('📊 Paginación:', result.pagination);
             actualizarVista();
+            actualizarPaginacion();
         } else {
             console.error('❌ Error cargando ventas:', result);
             mostrarNotificacion(result?.message || 'Error al cargar las ventas', 'error');
@@ -165,41 +186,81 @@
      * Formatear dinero
      */
     function formatMoney(value) {
-        return `$${parseFloat(value).toFixed(2)}`;
+        return `L${parseFloat(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
     }
 
     /**
-     * Filtrar datos
+     * Actualizar paginación
      */
-    function filterData() {
-        const q = (searchInput.value || '').toLowerCase();
-        const estado = estadoSelect.value;
-        const metodoPago = document.getElementById('metodoPagoSelect')?.value || '';
+    function actualizarPaginacion() {
+        const container = document.getElementById('paginationContainer');
+        const info = document.getElementById('paginationInfo');
+        const btnPrev = document.getElementById('btnPrevPage');
+        const btnNext = document.getElementById('btnNextPage');
+        const pageNumbers = document.getElementById('pageNumbers');
         
-        return ventasData.filter(item => {
-            const matchesQuery = !q || 
-                (item.cliente && item.cliente.toLowerCase().includes(q)) || 
-                (item.usuario && item.usuario.toLowerCase().includes(q)) ||
-                (item.id_venta && item.id_venta.toString().includes(q)) ||
-                (item.id_pedido && item.id_pedido.toString().includes(q));
+        if (!container || !info || !btnPrev || !btnNext || !pageNumbers) return;
+        
+        // Mostrar/ocultar paginación
+        if (totalRecords > 0) {
+            container.style.display = 'flex';
             
-            const matchesEstado = !estado || item.estado === estado;
-            const matchesMetodo = !metodoPago || item.metodo_pago === metodoPago;
+            // Actualizar información
+            const inicio = (currentPage - 1) * itemsPerPage + 1;
+            const fin = Math.min(currentPage * itemsPerPage, totalRecords);
+            info.textContent = `Mostrando ${inicio}-${fin} de ${totalRecords} ventas`;
             
-            const matchesDate = !item.fecha_venta || withinDate(item.fecha_venta);
+            // Botones anterior/siguiente
+            btnPrev.disabled = currentPage <= 1;
+            btnNext.disabled = currentPage >= totalPages;
             
-            return matchesQuery && matchesEstado && matchesMetodo && matchesDate;
-        });
+            // Números de página
+            pageNumbers.innerHTML = '';
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            
+            if (endPage - startPage + 1 < maxVisible) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-number ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => cambiarPagina(i);
+                pageNumbers.appendChild(pageBtn);
+            }
+        } else {
+            container.style.display = 'none';
+        }
+    }
+    
+    /**
+     * Cambiar página
+     */
+    function cambiarPagina(pagina) {
+        if (pagina >= 1 && pagina <= totalPages && pagina !== currentPage) {
+            cargarVentas(pagina);
+        }
     }
 
     /**
      * Verificar si una fecha coincide con el filtro
      */
     function withinDate(dateStr) {
-        if (!desde.value) return true;
-        const d = new Date(dateStr).toDateString();
-        const filterDate = new Date(desde.value).toDateString();
-        return d === filterDate;
+        if (!desde || !desde.value) return true;
+        
+        try {
+            // Extraer solo la parte de fecha (YYYY-MM-DD) de ambas fechas
+            const ventaDateStr = dateStr.split(' ')[0]; // Tomar solo la parte de fecha
+            const filterDateStr = desde.value; // Ya está en formato YYYY-MM-DD
+            
+            return ventaDateStr === filterDateStr;
+        } catch (error) {
+            console.error('Error comparando fechas:', error);
+            return true;
+        }
     }
 
     /**
@@ -279,9 +340,8 @@
      * Actualizar vista
      */
     function actualizarVista() {
-        const rows = filterData();
-        computeKPIs(rows);
-        renderTable(rows);
+        computeKPIs(ventasData);
+        renderTable(ventasData);
     }
 
     /**
@@ -419,17 +479,21 @@
     };
 
     /**
-     * Mostrar modal para anular venta
+     * Mostrar modal para anular venta (estilo SweetAlert como pedidos)
      */
     window.mostrarModalAnular = function(id) {
-        const modal = document.getElementById('modalAnularVenta');
-        if (modal) {
-            modal.dataset.ventaId = id;
-            modal.style.display = 'block';
-            
-            // Limpiar formulario
-            document.getElementById('motivoAnulacion').value = '';
+        const venta = ventasData.find(v => v.id_venta == id);
+        if (!venta) {
+            mostrarNotificacion('Venta no encontrada', 'error');
+            return;
         }
+
+        showConfirmAnular(
+            `¿Estás seguro de que quieres anular la venta #${id}?`,
+            async (motivo) => {
+                await anularVenta(id, motivo);
+            }
+        );
     };
 
     /**
@@ -441,7 +505,6 @@
         
         if (result && result.status === 'OK') {
             mostrarNotificacion('Venta anulada correctamente', 'success');
-            cerrarModales();
             cargarVentas();
         } else {
             mostrarNotificacion(result.message || 'Error al anular la venta', 'error');
@@ -449,11 +512,119 @@
     };
 
     /**
+     * Mostrar modal de confirmación de anulación (estilo SweetAlert)
+     * @param {string} message - Mensaje principal
+     * @param {Function} onConfirm - Función a ejecutar si se confirma
+     */
+    function showConfirmAnular(message, onConfirm) {
+        return new Promise((resolve, reject) => {
+            const modal = document.getElementById('modalConfirmAnular');
+            const messageElement = document.getElementById('confirmAnularMessage');
+            const motivoInput = document.getElementById('confirmAnularMotivo');
+            const btnConfirm = document.getElementById('btnConfirmAnular');
+            const btnCancel = document.getElementById('btnCancelAnular');
+            
+            if (!modal || !messageElement || !btnConfirm || !motivoInput) {
+                console.error('Elementos del modal de confirmación no encontrados');
+                reject(new Error('Modal no disponible'));
+                return;
+            }
+            
+            // Establecer mensaje
+            messageElement.textContent = message;
+            
+            // Limpiar motivo
+            motivoInput.value = '';
+            
+            // Mostrar modal
+            modal.classList.add('show');
+            
+            // Enfocar el campo de motivo
+            setTimeout(() => motivoInput.focus(), 100);
+            
+            // Función para limpiar event listeners
+            const cleanup = () => {
+                btnConfirm.replaceWith(btnConfirm.cloneNode(true));
+                btnCancel.replaceWith(btnCancel.cloneNode(true));
+                modal.classList.remove('show');
+                // Reconfigurar listeners básicos
+                setupConfirmAnularModal();
+            };
+            
+            // Configurar botón confirmar
+            const newBtnConfirm = document.getElementById('btnConfirmAnular');
+            newBtnConfirm.addEventListener('click', async function() {
+                const motivo = document.getElementById('confirmAnularMotivo').value.trim();
+                
+                if (!motivo) {
+                    mostrarNotificacion('Debe especificar un motivo para la anulación', 'error');
+                    return;
+                }
+                
+                cleanup();
+                try {
+                    if (onConfirm) await onConfirm(motivo);
+                    resolve(true);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+            
+            // Configurar botón cancelar
+            const newBtnCancel = document.getElementById('btnCancelAnular');
+            newBtnCancel.addEventListener('click', function() {
+                cleanup();
+                resolve(false);
+            });
+            
+            // Cerrar con ESC
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    cleanup();
+                    document.removeEventListener('keydown', handleEscape);
+                    resolve(false);
+                }
+            };
+            document.addEventListener('keydown', handleEscape);
+        });
+    }
+
+    /**
+     * Configurar modal de confirmación de anulación
+     */
+    function setupConfirmAnularModal() {
+        const modal = document.getElementById('modalConfirmAnular');
+        const btnCancel = document.getElementById('btnCancelAnular');
+        
+        if (!modal) {
+            console.error('Modal de confirmación de anulación no encontrado');
+            return;
+        }
+        
+        // Cerrar modal con botón cancelar
+        if (btnCancel) {
+            btnCancel.addEventListener('click', function() {
+                modal.classList.remove('show');
+            });
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+            }
+        });
+    }
+
+    /**
      * Registrar nueva venta
      */
     if (btnNuevaVenta) {
         btnNuevaVenta.addEventListener('click', abrirModalNuevaVenta);
     }
+
+    // Variable para almacenar datos de pedidos
+    let pedidosData = [];
 
     /**
      * Cargar pedidos disponibles para venta
@@ -471,6 +642,7 @@
                 console.log('📥 Respuesta de pedidos:', result);
                 
                 if (result && result.status === 'OK' && result.data) {
+                    pedidosData = result.data; // Guardar datos para uso posterior
                     select.innerHTML = '<option value="">Seleccione un pedido...</option>';
                     result.data.forEach(pedido => {
                         const option = document.createElement('option');
@@ -507,7 +679,7 @@
      * Cerrar modales
      */
     function cerrarModales() {
-        const modales = ['modalNuevaVenta', 'modalVerVenta', 'modalEditarVenta', 'modalAnularVenta'];
+        const modales = ['modalNuevaVenta', 'modalVerVenta', 'modalEditarVenta'];
         modales.forEach(modalId => {
             const modal = document.getElementById(modalId);
             if (modal) {
@@ -528,22 +700,55 @@
         const select = document.getElementById('pedido');
         const infoDiv = document.getElementById('infoPedido');
         const detalleDiv = document.getElementById('infoPedidoDetalle');
+        const montoInput = document.getElementById('monto');
         
         if (select && infoDiv && detalleDiv) {
             if (select.value && select.options[select.selectedIndex]) {
+                // Buscar el pedido seleccionado en los datos cargados
+                const pedidoSeleccionado = pedidosData.find(p => p.id_pedido == select.value);
+                
                 infoDiv.style.display = 'block';
                 const selectedText = select.options[select.selectedIndex].text;
+                
+                // Debug: mostrar qué datos tiene el pedido
+                console.log('Pedido seleccionado:', pedidoSeleccionado);
+                
+                // Llenar automáticamente el monto - buscar diferentes campos posibles
+                let montoTotal = null;
+                if (pedidoSeleccionado && montoInput) {
+                    // Buscar el monto en diferentes campos posibles
+                    montoTotal = pedidoSeleccionado.total_pedido || 
+                                pedidoSeleccionado.monto_total || 
+                                pedidoSeleccionado.total || 
+                                pedidoSeleccionado.precio_total;
+                    
+                    if (montoTotal) {
+                        montoInput.value = parseFloat(montoTotal).toFixed(2);
+                        console.log('Monto llenado automáticamente:', montoTotal);
+                    } else {
+                        console.log('No se encontró campo de monto total en el pedido');
+                    }
+                }
+                
                 detalleDiv.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(217, 0, 188, 0.1); border-radius: 6px; border-left: 4px solid rgba(217, 0, 188, 0.8);">
-                        <i class="fa-solid fa-info-circle" style="color: rgba(217, 0, 188, 0.8);"></i>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(186, 65, 156, 0.1); border-radius: 6px; border-left: 4px solid rgba(186, 65, 156, 0.8);">
+                        <i class="fa-solid fa-info-circle" style="color: rgba(186, 65, 156, 0.8);"></i>
                         <div>
                             <p style="margin: 0; font-weight: bold;">${selectedText}</p>
+                            ${montoTotal ? 
+                                `<p style="margin: 5px 0 0 0; color: #17a2b8; font-size: 0.9em;"><i class="fa-solid fa-dollar-sign"></i> Monto: L ${parseFloat(montoTotal).toFixed(2)}</p>` : 
+                                `<p style="margin: 5px 0 0 0; color: #ffc107; font-size: 0.9em;"><i class="fa-solid fa-exclamation-triangle"></i> Monto no disponible - ingrese manualmente</p>`}
                             <p style="margin: 5px 0 0 0; color: #28a745; font-size: 0.9em;"><i class="fa-solid fa-check-circle"></i> Pedido listo para facturar</p>
                         </div>
                     </div>
                 `;
             } else {
                 infoDiv.style.display = 'none';
+                // Limpiar el monto si no hay pedido seleccionado
+                if (montoInput) {
+                    montoInput.value = '';
+                }
+                console.log('Pedido deseleccionado, monto limpiado');
             }
         }
     };
@@ -622,7 +827,11 @@
         if (estadoSelect) estadoSelect.value = '';
         const metodoPagoSelect = document.getElementById('metodoPagoSelect');
         if (metodoPagoSelect) metodoPagoSelect.value = '';
-        if (desde) desde.value = '';
+        if (fechaRange) {
+            fechaRange.value = '';
+            fechaDesde = null;
+            fechaHasta = null;
+        }
         
         // Efecto visual en el botón
         const btnLimpiar = document.getElementById('btnLimpiarFiltros');
@@ -639,26 +848,56 @@
     }
 
     /**
-     * Exportar ventas a Excel
+     * Exportar ventas a Excel personalizado
      */
-    function exportarExcel() {
+    async function exportarExcel() {
         try {
             const params = new URLSearchParams();
             if (searchInput && searchInput.value) params.append('filtro', searchInput.value);
-            if (desde && desde.value) params.append('fecha_desde', desde.value);
-            
-            // Agregar token para autenticación
-            const currentToken = getCurrentToken();
-            if (currentToken) {
-                params.append('token', currentToken);
+            if (estadoSelect && estadoSelect.value) params.append('estado', estadoSelect.value);
+            const metodoPagoSelect = document.getElementById('metodoPagoSelect');
+            if (metodoPagoSelect && metodoPagoSelect.value) params.append('metodo_pago', metodoPagoSelect.value);
+            if (fechaDesde) {
+                params.append('fecha_desde', fechaDesde);
+                params.append('fecha_hasta', fechaHasta || fechaDesde);
             }
             
             const url = `${API_BASE_URL}&action=exportar-excel&${params.toString()}`;
             
-            // Abrir en nueva ventana para descarga
-            window.open(url, '_blank');
+            // Obtener token para autenticación
+            const currentToken = getCurrentToken();
+            if (!currentToken) {
+                mostrarNotificacion('Error de autenticación', 'error');
+                return;
+            }
             
-            mostrarNotificacion('Descargando archivo Excel...', 'success');
+            // Hacer petición con fetch para incluir headers de autenticación
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${currentToken}`
+                }
+            });
+            
+            if (response.ok) {
+                // Crear blob y descargar
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `Ventas_ColorInk_${new Date().toISOString().slice(0,10)}.xls`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(downloadUrl);
+                
+                mostrarNotificacion('📊 Reporte Excel descargado exitosamente', 'success');
+            } else {
+                const errorText = await response.text();
+                console.error('Error en respuesta:', errorText);
+                mostrarNotificacion('Error al generar el reporte Excel', 'error');
+            }
         } catch (error) {
             console.error('Error exportando Excel:', error);
             mostrarNotificacion('Error al exportar a Excel', 'error');
@@ -762,25 +1001,11 @@
             // Event listener para filtro de método de pago
             const metodoPagoSelect = document.getElementById('metodoPagoSelect');
             if (metodoPagoSelect) {
-                metodoPagoSelect.addEventListener('change', actualizarVista);
+                metodoPagoSelect.addEventListener('change', () => cargarVentas(1));
             }
             
-            // Event listener para confirmar anulación
-            const btnConfirmarAnulacion = document.getElementById('btnConfirmarAnulacion');
-            if (btnConfirmarAnulacion) {
-                btnConfirmarAnulacion.addEventListener('click', async () => {
-                    const modal = document.getElementById('modalAnularVenta');
-                    const ventaId = modal.dataset.ventaId;
-                    const motivo = document.getElementById('motivoAnulacion').value.trim();
-                    
-                    if (!motivo) {
-                        mostrarNotificacion('Debe especificar un motivo para la anulación', 'error');
-                        return;
-                    }
-                    
-                    await anularVenta(ventaId, motivo);
-                });
-            }
+            // Configurar modal de confirmación de anulación
+            setupConfirmAnularModal();
             
             // Event listener para mostrar info del pedido
             const selectPedido = document.getElementById('pedido');
@@ -792,8 +1017,38 @@
         }
     });
 
-    // Event listeners para filtros (fuera del DOMContentLoaded para evitar duplicados)
-    if (searchInput) searchInput.addEventListener('input', actualizarVista);
-    if (estadoSelect) estadoSelect.addEventListener('change', actualizarVista);
-    if (desde) desde.addEventListener('change', actualizarVista);
+    // Event listeners para filtros y paginación
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => cargarVentas(1), 500);
+        });
+    }
+    if (estadoSelect) estadoSelect.addEventListener('change', () => cargarVentas(1));
+    // Inicializar Flatpickr para selector de rango de fechas
+    if (fechaRange) {
+        flatpickr(fechaRange, {
+            mode: 'range',
+            dateFormat: 'Y-m-d',
+            locale: flatpickr.l10ns.es,
+            allowInput: false,
+            onChange: function(selectedDates) {
+                if (selectedDates.length === 1) {
+                    fechaDesde = selectedDates[0].toISOString().split('T')[0];
+                    fechaHasta = null;
+                } else if (selectedDates.length === 2) {
+                    fechaDesde = selectedDates[0].toISOString().split('T')[0];
+                    fechaHasta = selectedDates[1].toISOString().split('T')[0];
+                }
+                cargarVentas(1);
+            }
+        });
+    }
+    
+    // Event listeners para paginación
+    const btnPrev = document.getElementById('btnPrevPage');
+    const btnNext = document.getElementById('btnNextPage');
+    if (btnPrev) btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
+    if (btnNext) btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
 })();
