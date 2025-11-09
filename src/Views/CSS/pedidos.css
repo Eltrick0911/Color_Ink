@@ -115,6 +115,12 @@
     font-size: 1em;
     cursor: pointer;
     min-width: 200px;
+    transition: all 0.3s ease;
+}
+
+.filter-select:hover {
+    background-color: rgba(15, 100, 0, 0.6);
+    border-color: rgba(20, 152, 0, 0.6);
 }
 
 .filter-select:focus {
@@ -125,6 +131,14 @@
 .filter-select option {
     background-color: #333;
     color: white;
+}
+
+.filter-select option:hover,
+.filter-select option:focus,
+.filter-select option:checked {
+    background-color: rgba(15, 100, 0, 0.8) !important;
+    background: rgba(15, 100, 0, 0.8) !important;
+    color: white !important;
 }
 
 .pedidos-table {
@@ -432,6 +446,11 @@
     color: rgba(255, 255, 255, 0.6);
 }
 
+.form-group select:hover {
+    background-color: rgba(15, 100, 0, 0.6);
+    border-color: rgba(20, 152, 0, 0.6);
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
@@ -444,6 +463,14 @@
 .form-group select option {
     background-color: #333;
     color: white;
+}
+
+.form-group select option:hover,
+.form-group select option:focus,
+.form-group select option:checked {
+    background-color: rgba(15, 100, 0, 0.8) !important;
+    background: rgba(15, 100, 0, 0.8) !important;
+    color: white !important;
 }
 
 .form-group textarea {
@@ -658,6 +685,11 @@
     color: rgba(255, 255, 255, 0.6);
 }
 
+.product-details-form .form-group select:hover {
+    background-color: rgba(15, 100, 0, 0.6);
+    border-color: rgba(20, 152, 0, 0.6);
+}
+
 .product-details-form .form-group input:focus,
 .product-details-form .form-group select:focus,
 .product-details-form .form-group textarea:focus {
@@ -670,6 +702,14 @@
 .product-details-form .form-group select option {
     background-color: #333;
     color: white;
+}
+
+.product-details-form .form-group select option:hover,
+.product-details-form .form-group select option:focus,
+.product-details-form .form-group select option:checked {
+    background-color: rgba(15, 100, 0, 0.8) !important;
+    background: rgba(15, 100, 0, 0.8) !important;
+    color: white !important;
 }
 
 .product-details-form .form-group textarea {
@@ -975,6 +1015,11 @@
     min-width: 120px;
 }
 
+.status-selector:hover {
+    background-color: rgba(15, 100, 0, 0.6);
+    border-color: rgba(20, 152, 0, 0.6);
+}
+
 .status-selector:focus {
     outline: none;
     border-color: rgba(20, 152, 0, 0.85);
@@ -987,6 +1032,14 @@
     padding: 10px !important;
     font-size: 14px !important;
     font-weight: normal !important;
+}
+
+.status-selector option:hover,
+.status-selector option:focus,
+.status-selector option:checked {
+    background-color: rgba(15, 100, 0, 0.8) !important;
+    background: rgba(15, 100, 0, 0.8) !important;
+    color: white !important;
 }
 
 /* Status Selector Modal */
@@ -1002,6 +1055,11 @@
     min-width: 150px;
 }
 
+.status-selector-modal:hover {
+    background-color: rgba(15, 100, 0, 0.6);
+    border-color: rgba(20, 152, 0, 0.7);
+}
+
 .status-selector-modal:focus {
     outline: none;
     border-color: rgba(20, 152, 0, 1);
@@ -1015,6 +1073,153 @@
     font-size: 14px !important;
     font-weight: normal !important;
 }
+
+.status-selector-modal option:hover,
+.status-selector-modal option:focus,
+.status-selector-modal option:checked {
+    background-color: rgba(15, 100, 0, 0.8) !important;
+    background: rgba(15, 100, 0, 0.8) !important;
+    color: white !important;
+}
+
+/* Estilos específicos para navegadores - hover en opciones de select */
+/* Webkit (Chrome, Edge, Safari) */
+select option:hover {
+    background: rgba(15, 100, 0, 0.8) !important;
+    color: white !important;
+    box-shadow: 0 0 10px rgba(15, 100, 0, 0.5);
+}
+
+select option:checked {
+    background: linear-gradient(rgba(15, 100, 0, 0.3), rgba(15, 100, 0, 0.3));
+}
+
+/* Cambiar el color de highlight en navegadores Webkit */
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(15, 100, 0, 0.8);
+}
+
+/* ===== SELECT PERSONALIZADO - OVERLAY VISUAL ===== */
+/* Este overlay se muestra solo cuando el select está abierto */
+.custom-select-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99998;
+    pointer-events: none;
+    display: none;
+}
+
+.custom-select-overlay.active {
+    display: block;
+}
+
+/* Dropdown personalizado */
+.custom-select-dropdown {
+    position: fixed;
+    background: linear-gradient(145deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 2px solid rgba(20, 152, 0, 0.7);
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(20, 152, 0, 0.2);
+    z-index: 99999;
+    max-height: 350px;
+    overflow-y: auto;
+    min-width: 180px;
+    display: none;
+    backdrop-filter: blur(10px);
+    animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.custom-select-dropdown.active {
+    display: block;
+}
+
+/* Opciones del dropdown personalizado */
+.custom-select-option {
+    padding: 12px 16px;
+    color: #e8e8e8;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+}
+
+.custom-select-option::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: rgba(20, 152, 0, 0.9);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+}
+
+.custom-select-option:last-child {
+    border-bottom: none;
+}
+
+.custom-select-option:hover {
+    background: linear-gradient(90deg, rgba(15, 100, 0, 0.75) 0%, rgba(15, 100, 0, 0.35) 100%) !important;
+    color: #ffffff !important;
+    padding-left: 20px;
+    text-shadow: 0 0 8px rgba(20, 152, 0, 0.5);
+}
+
+.custom-select-option:hover::before {
+    transform: scaleY(1);
+}
+
+.custom-select-option.selected {
+    background: rgba(20, 152, 0, 0.2);
+    font-weight: 600;
+    color: #76ff5e;
+    border-left: 3px solid rgba(20, 152, 0, 0.9);
+}
+
+.custom-select-option.selected:hover {
+    background: linear-gradient(90deg, rgba(15, 100, 0, 0.85) 0%, rgba(15, 100, 0, 0.45) 100%) !important;
+    border-left: 3px solid rgba(20, 152, 0, 1);
+}
+
+/* Scrollbar del dropdown - Estilo mejorado */
+.custom-select-dropdown::-webkit-scrollbar {
+    width: 10px;
+}
+
+.custom-select-dropdown::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 5px;
+    margin: 5px 0;
+}
+
+.custom-select-dropdown::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(20, 152, 0, 0.7) 0%, rgba(20, 152, 0, 0.5) 100%);
+    border-radius: 5px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.custom-select-dropdown::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(20, 152, 0, 0.9) 0%, rgba(20, 152, 0, 0.7) 100%);
+    border-color: rgba(20, 152, 0, 0.3);
+}
+
 
 /* Status Change Section */
 .status-change-section {
@@ -1922,3 +2127,30 @@
     font-size: 0.9em;
 }
 
+/* ===== ANIMACIONES PARA NOTIFICACIONES ===== */
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Estilos adicionales para notificaciones */
+.notification {
+    animation: slideInRight 0.3s ease-out;
+}

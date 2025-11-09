@@ -17927,3 +17927,16 @@ Stack trace:
 [09-Nov-2025 14:48:05 America/Tegucigalpa] PedidosController - findAll: Se obtuvieron 23 pedidos de la BD
 [09-Nov-2025 14:48:05 America/Tegucigalpa] PedidosController - findAll: Primer pedido: {"id_pedido":37,"numero_pedido":"13","id_usuario":39,"fecha_pedido":"2025-11-09 05:59:56","fecha_entrega":"2025-11-10","observaciones":"1 producto(s)","id_estado":1,"cliente_nombre":"Yor","cliente_telefono":"32537289","canal_venta":"tienda","prioridad":"urgente","detalles_producto":"[{\"categoria\":\"25\",\"colores\":\"#990000\",\"especificaciones\":\"jsjsjsj\",\"cantidad\":4,\"precio\":10,\"descuento\":0,\"impuesto\":0,\"imagenesUrls\":\"[]\"}]","nombre_usuario":"Yor","telefono":"32537289","estado_nombre":"Entregado","estado_codigo":"ENTRG","total_pedido":"40.00"}
 [09-Nov-2025 14:48:05 America/Tegucigalpa] PedidosController - findAll: Enviando respuesta con 23 pedidos
+[09-Nov-2025 17:49:08 America/Tegucigalpa] inve route: Iniciando
+[09-Nov-2025 17:49:08 America/Tegucigalpa] inve route: Headers enviados
+[09-Nov-2025 17:49:08 America/Tegucigalpa] inve route: Imports cargados
+[09-Nov-2025 17:49:09 America/Tegucigalpa] Conexión exitosa
+[09-Nov-2025 17:49:09 America/Tegucigalpa] inve route: Controller creado
+[09-Nov-2025 17:49:09 America/Tegucigalpa] inve route: Método: GET, Acción: estadisticas
+[09-Nov-2025 17:49:09 America/Tegucigalpa] inve route: Llamando getEstadisticas
+[09-Nov-2025 17:49:09 America/Tegucigalpa] inveController - getEstadisticas: MODO TESTING - Autorización desactivada
+[09-Nov-2025 17:49:09 America/Tegucigalpa] inveController - getEstadisticas: Obteniendo estadísticas del inventario
+[09-Nov-2025 17:49:09 America/Tegucigalpa] inveModel - getEstadisticas: Llamando SP sp_obtener_estadisticas_inventario
+[09-Nov-2025 17:49:09 America/Tegucigalpa] inveController - getEstadisticas: Estadísticas obtenidas: {"total_productos":11,"stock_bajo":3,"valor_total":7320}
+[09-Nov-2025 17:49:09 America/Tegucigalpa] inveController - getEstadisticas: Respuesta final: {"status":"OK","message":"Estad\u00edsticas obtenidas exitosamente","data":{"total_productos":11,"stock_bajo":3,"valor_total":7320}}
+[09-Nov-2025 17:49:09 America/Tegucigalpa] inve route: Proceso completado
