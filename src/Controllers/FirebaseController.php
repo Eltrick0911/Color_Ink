@@ -25,12 +25,16 @@ class FirebaseController
     public function login(array $headers, array $input): void
     {
         $idToken = $this->extractBearer($headers) ?: ($input['idToken'] ?? '');
+        $corr = $headers['X-Debug-Correlation'] ?? ($input['debugCorrelationId'] ?? ('SRV-' . time()));
+        error_log("[LOGIN DBG {$corr}] Ingreso a login Firebase");
         if ($idToken === '') {
+            error_log("[LOGIN DBG {$corr}] idToken vacío");
             echo json_encode(responseHTTP::status400('idToken requerido'));
             return;
         }
-        $claims = $this->verifyIdToken($idToken);
+        $claims = $this->verifyIdToken($idToken, $corr);
         if (!$claims) {
+            error_log("[LOGIN DBG {$corr}] verifyIdToken devolvió null (401)");
             echo json_encode(responseHTTP::status401('Token inválido'));
             return;
         }
@@ -92,8 +96,8 @@ class FirebaseController
         ];
 
         // Debug: Log del payload antes de enviar
-        error_log('FirebaseController - Payload a enviar: ' . json_encode($payload));
-        error_log('FirebaseController - User desde BD: ' . json_encode($user));
+    error_log("[LOGIN DBG {$corr}] Payload a enviar: " . json_encode($payload));
+    error_log("[LOGIN DBG {$corr}] User desde BD: " . json_encode($user));
 
     $_SESSION['firebase_token'] = $idToken;
     $_SESSION['firebase_user'] = $payload;
@@ -112,7 +116,7 @@ class FirebaseController
             ]
         ];
         
-        error_log('FirebaseController - Respuesta completa: ' . json_encode($response));
+        error_log("[LOGIN DBG {$corr}] Respuesta completa: " . json_encode($response));
         
         echo json_encode($response);
     }
@@ -134,7 +138,7 @@ class FirebaseController
         echo json_encode(responseHTTP::status200('Sesión Firebase cerrada'));
     }
 
-    public function verifyIdToken(string $idToken): ?array
+    public function verifyIdToken(string $idToken, string $corr = ''): ?array
     {
         try {
             // Permitir una pequeña tolerancia por desfase de reloj entre cliente y servidor
@@ -144,17 +148,17 @@ class FirebaseController
             // Firebase ID Tokens están firmados con RS256
             $decoded = JWT::decode($idToken, $keys, ['RS256']);
             $claims = json_decode(json_encode($decoded), true);
-            if (!$this->validateFirebaseClaims($claims)) {
-                error_log('Firebase verify: claims inválidos. aud=' . ($claims['aud'] ?? 'null') . ' iss=' . ($claims['iss'] ?? 'null') . ' sub=' . ($claims['sub'] ?? 'null'));
+            if (!$this->validateFirebaseClaims($claims, $corr)) {
+                error_log('[LOGIN DBG ' . $corr . '] Firebase verify: claims inválidos. aud=' . ($claims['aud'] ?? 'null') . ' iss=' . ($claims['iss'] ?? 'null') . ' sub=' . ($claims['sub'] ?? 'null'));
                 return null;
             }
             return $claims;
         } catch (\Throwable $e) {
-            error_log('Firebase verify error: ' . $e->getMessage());
+            error_log('[LOGIN DBG ' . $corr . '] Firebase verify error: ' . $e->getMessage());
             
             // Si el token expiró, intentar manejar de manera más elegante
             if (strpos($e->getMessage(), 'expired') !== false || strpos($e->getMessage(), 'exp') !== false) {
-                error_log('FirebaseController - Token expirado, requiere renovación');
+                error_log('[LOGIN DBG ' . $corr . '] Token expirado, requiere renovación');
             }
             
             return null;
@@ -172,25 +176,26 @@ class FirebaseController
         return json_decode($json, true) ?: [];
     }
 
-    private function validateFirebaseClaims(array $claims): bool
+    private function validateFirebaseClaims(array $claims, string $corr = ''): bool
     {
         $aud = $claims['aud'] ?? '';
         $iss = $claims['iss'] ?? '';
 
         // Si no tenemos projectId configurado, usar el 'aud' del token
         $projectId = $this->projectId !== '' ? $this->projectId : $aud;
+        error_log('[LOGIN DBG ' . $corr . '] validateClaims envProjectId=' . ($this->projectId ?? 'null') . ' aud=' . $aud . ' iss=' . $iss . ' projectIdFinal=' . $projectId);
 
         if ($aud !== $projectId) {
-            error_log('Firebase validateClaims: aud no coincide. aud=' . $aud . ' projectId=' . $projectId);
+            error_log('[LOGIN DBG ' . $corr . '] Firebase validateClaims: aud no coincide. aud=' . $aud . ' projectId=' . $projectId);
             return false;
         }
         $issExpected = 'https://securetoken.google.com/' . $projectId;
         if ($iss !== $issExpected) {
-            error_log('Firebase validateClaims: iss no coincide. iss=' . $iss . ' esperado=' . $issExpected);
+            error_log('[LOGIN DBG ' . $corr . '] Firebase validateClaims: iss no coincide. iss=' . $iss . ' esperado=' . $issExpected);
             return false;
         }
         if (!isset($claims['sub']) || $claims['sub'] === '') {
-            error_log('Firebase validateClaims: sub vacío');
+            error_log('[LOGIN DBG ' . $corr . '] Firebase validateClaims: sub vacío');
             return false;
         }
         return true;

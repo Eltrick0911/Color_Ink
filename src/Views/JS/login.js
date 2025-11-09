@@ -98,8 +98,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 idToken = await cred.user.getIdToken();
                 console.log('✅ ID Token obtenido de Firebase');
+
+                // ===== DEBUG EXTRA (remover cuando se solucione el 401) =====
+                try {
+                    const firebaseOpts = firebase.app().options;
+                    console.log('🔎 DEBUG Firebase options:', firebaseOpts);
+                    const parts = idToken.split('.');
+                    if (parts.length === 3) {
+                        let header = null, payload = null;
+                        try { header = JSON.parse(atob(parts[0])); } catch(e){ header = 'ERROR_HEADER_PARSE'; }
+                        try { payload = JSON.parse(atob(parts[1])); } catch(e){ payload = 'ERROR_PAYLOAD_PARSE'; }
+                        console.log('🔎 DEBUG Token header:', header);
+                        console.log('🔎 DEBUG Token payload keys:', payload && typeof payload === 'object' ? Object.keys(payload) : payload);
+                        if (payload && payload.exp) {
+                            const mins = Math.round(((payload.exp * 1000) - Date.now()) / 60000);
+                            console.log('🔎 DEBUG Token exp en minutos restantes:', mins);
+                        }
+                        console.log('🔎 DEBUG Token aud:', payload.aud, 'iss:', payload.iss, 'sub:', payload.sub);
+                    } else {
+                        console.log('⚠️ DEBUG Token formato inesperado (partes != 3)');
+                    }
+                } catch (dbgErr) {
+                    console.log('⚠️ DEBUG Error inspeccionando token:', dbgErr);
+                }
+                // Correlation ID para trazar en backend
+                var debugCorrelationId = 'DBG-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+                console.log('� DEBUG Correlation ID generado:', debugCorrelationId);
+                // ===== FIN DEBUG EXTRA =====
             } else {
-                console.log('🔍 Firebase SDK no disponible, usando login tradicional...');
+                console.log('�🔍 Firebase SDK no disponible, usando login tradicional...');
                 // Fallback al endpoint local (JWT propio) si no hay Firebase SDK
                 const resLocal = await fetch(`${apiEntry}?route=auth&caso=1&action=login`, {
                     method: 'POST',
@@ -129,10 +156,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Enviar idToken al backend para sesión
             console.log('🔍 Enviando ID Token al backend...');
-            const res = await fetch(`${apiEntry}?route=firebase&caso=1&action=login`, {
+            const backendLoginUrl = `${apiEntry}?route=firebase&caso=1&action=login`;
+            console.log('🔎 DEBUG Backend login URL:', backendLoginUrl);
+            const res = await fetch(backendLoginUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
-                body: JSON.stringify({ idToken })
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`,
+                    'X-Debug-Correlation': debugCorrelationId
+                },
+                body: JSON.stringify({ idToken, debugCorrelationId })
             });
             console.log('Respuesta backend Firebase:', res.status, res.statusText);
             

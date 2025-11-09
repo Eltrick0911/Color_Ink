@@ -98,8 +98,35 @@ if (strpos($uri, '/public/') !== false) {
                         alert('Contraseña insegura: mínimo 6, mayúsculas, números y símbolo');
                         return;
                     }
+                    // ===== DEBUG EXTRA REGISTRO (remover al finalizar diagnóstico) =====
+                    const regCorr = 'REG-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+                    console.log('🟣 [REG DEBUG] Correlation ID:', regCorr);
+                    try {
+                        console.log('🟣 [REG DEBUG] firebase.app().options:', (typeof firebase !== 'undefined' && firebase.apps?.length) ? firebase.app().options : 'Firebase NO inicializado');
+                    } catch(_) {}
                     const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
                     await cred.user.updateProfile({ displayName: `${nombre} ${apellido}`.trim() });
+                    // Intentar obtener un ID Token para inspección de claims
+                    try {
+                        const idToken = await cred.user.getIdToken();
+                        const parts = idToken.split('.');
+                        if (parts.length === 3) {
+                            let header = null, payload = null;
+                            try { header = JSON.parse(atob(parts[0])); } catch(e){ header = 'ERR_HEADER_PARSE'; }
+                            try { payload = JSON.parse(atob(parts[1])); } catch(e){ payload = 'ERR_PAYLOAD_PARSE'; }
+                            console.log('🟣 [REG DEBUG] Token header:', header);
+                            console.log('🟣 [REG DEBUG] Token payload keys:', payload && typeof payload === 'object' ? Object.keys(payload) : payload);
+                            if (payload && payload.exp) {
+                                const mins = Math.round(((payload.exp * 1000) - Date.now()) / 60000);
+                                console.log('🟣 [REG DEBUG] Token exp minutos restantes:', mins);
+                            }
+                            console.log('🟣 [REG DEBUG] aud:', payload?.aud, 'iss:', payload?.iss, 'sub:', payload?.sub);
+                        }
+                        // Guardar para correlacionar con el primer login
+                        sessionStorage.setItem('reg_debug_correlation', regCorr);
+                    } catch (tokErr) {
+                        console.log('⚠️ [REG DEBUG] No se pudo inspeccionar token de registro:', tokErr);
+                    }
                     // Cerrar sesión para forzar flujo de login
                     await firebase.auth().signOut();
                     alert('Registro exitoso. Ahora inicia sesión con tus credenciales.');
