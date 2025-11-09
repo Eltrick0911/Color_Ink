@@ -72,7 +72,7 @@
                     <option value="Transferencia">Transferencia</option>
                     <option value="Cheque">Cheque</option>
                 </select>
-                <input type="date" id="desde" class="date-input" title="Filtrar por fecha" placeholder="Fecha">
+                <input type="text" id="fechaRange" class="date-input" title="Seleccionar fecha o rango" placeholder="Seleccionar fecha" readonly style="color: white;">
                 <button class="btn-export btn-excel" id="btnExportarExcel" title="Exportar a Excel">
                     <i class="fa-solid fa-file-excel"></i> Excel
                 </button>
@@ -100,6 +100,22 @@
                         <!-- Filas dinámicas -->
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- Paginación -->
+            <div class="pagination-container" id="paginationContainer" style="display: none;">
+                <div class="pagination-info">
+                    <span id="paginationInfo">Mostrando 0 de 0 ventas</span>
+                </div>
+                <div class="pagination-controls">
+                    <button id="btnPrevPage" class="btn-pagination" disabled>
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <div id="pageNumbers" class="page-numbers"></div>
+                    <button id="btnNextPage" class="btn-pagination" disabled>
+                        Siguiente <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </main>
@@ -264,6 +280,9 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="/Color_Ink/src/Views/JS/sidebar.js"></script>
     <script src="/Color_Ink/src/Views/JS/ventas.js"></script>
     
@@ -397,6 +416,131 @@
     @keyframes pulse {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.1); }
+    }
+    
+    /* Estilos de paginación */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding: 15px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .pagination-info {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+    }
+    
+    .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .btn-pagination {
+        background: rgba(217, 0, 188, 0.2);
+        border: 1px solid rgba(217, 0, 188, 0.5);
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+    
+    .btn-pagination:hover:not(:disabled) {
+        background: rgba(217, 0, 188, 0.4);
+        border-color: rgba(217, 0, 188, 0.8);
+    }
+    
+    .btn-pagination:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .page-numbers {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .page-number {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        min-width: 40px;
+        text-align: center;
+    }
+    
+    .page-number:hover {
+        background: rgba(217, 0, 188, 0.3);
+        border-color: rgba(217, 0, 188, 0.6);
+    }
+    
+    .page-number.active {
+        background: linear-gradient(135deg, #d900bc, #ba419c);
+        border-color: #d900bc;
+        font-weight: bold;
+    }
+    
+    /* Estilos para Flatpickr */
+    .flatpickr-calendar {
+        background: #1a1a1a !important;
+        border: 1px solid rgba(217, 0, 188, 0.3) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    .flatpickr-day {
+        color: #fff !important;
+        border: none !important;
+    }
+    
+    .flatpickr-day:hover {
+        background: rgba(217, 0, 188, 0.3) !important;
+        border-color: rgba(217, 0, 188, 0.5) !important;
+    }
+    
+    .flatpickr-day.selected {
+        background: linear-gradient(135deg, #d900bc, #ba419c) !important;
+        border-color: #d900bc !important;
+    }
+    
+    .flatpickr-day.inRange {
+        background: rgba(217, 0, 188, 0.2) !important;
+        border-color: rgba(217, 0, 188, 0.4) !important;
+    }
+    
+    .flatpickr-months .flatpickr-month {
+        color: #fff !important;
+    }
+    
+    .flatpickr-weekday {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    .flatpickr-day.prevMonthDay,
+    .flatpickr-day.nextMonthDay {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay) {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    #fechaRange {
+        color: white !important;
+        cursor: pointer;
+    }
+    
+    #fechaRange::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
     }
     </style>
 </body>

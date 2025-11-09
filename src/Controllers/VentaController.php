@@ -176,8 +176,10 @@ class VentaController
             $filtro = $_GET['filtro'] ?? null;
             $fechaDesde = $_GET['fecha_desde'] ?? null;
             $fechaHasta = $_GET['fecha_hasta'] ?? null;
+            $pagina = (int)($_GET['pagina'] ?? 1);
+            $limite = (int)($_GET['limite'] ?? 10);
 
-            $result = $this->ventaModel->listarVentas($filtro, $fechaDesde, $fechaHasta);
+            $result = $this->ventaModel->listarVentas($filtro, $fechaDesde, $fechaHasta, $pagina, $limite);
             echo json_encode($result);
         } catch (\Throwable $e) {
             error_log('VentaController - listarVentas ERROR: ' . $e->getMessage());

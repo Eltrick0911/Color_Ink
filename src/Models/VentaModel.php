@@ -128,7 +128,7 @@ class VentaModel
     /**
      * Listar todas las ventas - usando JOINs ya que la vista no existe en AWS
      */
-    public function listarVentas(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null): array
+    public function listarVentas(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null, int $pagina = 1, int $limite = 10): array
     {
         try {
             // Usar JOINs en lugar de la vista que no existe
@@ -169,7 +169,39 @@ class VentaModel
                 $params[':fechaHasta'] = $fechaHasta;
             }
 
-            $sql .= " ORDER BY v.fecha_venta DESC";
+            // Contar total de registros con consulta separada
+            $countSql = "
+                SELECT COUNT(*)
+                FROM venta v
+                JOIN pedido p ON v.id_pedido = p.id_pedido
+                JOIN usuario u ON v.id_usuario = u.id_usuario
+                JOIN usuario u_c ON p.id_usuario = u_c.id_usuario
+                WHERE 1=1
+            ";
+            
+            // Aplicar los mismos filtros
+            if (!empty($filtro)) {
+                $countSql .= " AND (u_c.nombre_usuario LIKE :filtro OR u.nombre_usuario LIKE :filtro OR v.id_venta LIKE :filtro)";
+            }
+            if (!empty($fechaDesde)) {
+                $countSql .= " AND DATE(v.fecha_venta) >= :fechaDesde";
+            }
+            if (!empty($fechaHasta)) {
+                $countSql .= " AND DATE(v.fecha_venta) <= :fechaHasta";
+            }
+            
+            $countStmt = $this->db->prepare($countSql);
+            foreach ($params as $key => $value) {
+                $countStmt->bindValue($key, $value);
+            }
+            $countStmt->execute();
+            $totalRegistros = $countStmt->fetchColumn();
+            
+            $sql .= " ORDER BY v.id_venta DESC";
+            
+            // Agregar LIMIT y OFFSET
+            $offset = ($pagina - 1) * $limite;
+            $sql .= " LIMIT {$limite} OFFSET {$offset}";
 
             $stmt = $this->db->prepare($sql);
             
@@ -180,10 +212,16 @@ class VentaModel
             $stmt->execute();
             $ventas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            error_log('VentaModel - listarVentas: Encontradas ' . count($ventas) . ' ventas');
+            error_log('VentaModel - listarVentas: Encontradas ' . count($ventas) . ' ventas de ' . $totalRegistros . ' total');
             
             $response = responseHTTP::status200('OK');
             $response['data'] = $ventas;
+            $response['pagination'] = [
+                'current_page' => $pagina,
+                'per_page' => $limite,
+                'total' => $totalRegistros,
+                'total_pages' => ceil($totalRegistros / $limite)
+            ];
             return $response;
         } catch (\Throwable $e) {
             error_log('VentaModel - listarVentas ERROR: ' . $e->getMessage());
@@ -360,7 +398,7 @@ class VentaModel
             $estados = $stmtEstados->fetchAll(PDO::FETCH_ASSOC);
             error_log('VentaModel - Estados disponibles: ' . json_encode($estados));
             
-            // Consulta simplificada para obtener pedidos
+            // Consulta con cálculo del total del pedido
             $sql = "
                 SELECT 
                     p.id_pedido,
@@ -369,6 +407,11 @@ class VentaModel
                     p.id_usuario as id_cliente,
                     u.nombre_usuario as nombre_cliente,
                     ep.nombre as estado_nombre,
+                    COALESCE((
+                        SELECT SUM(dp.precio_unitario * dp.cantidad)
+                        FROM detallepedido dp
+                        WHERE dp.id_pedido = p.id_pedido
+                    ), 0) as total_pedido,
                     CONCAT(COALESCE(p.numero_pedido, CONCAT('Pedido #', p.id_pedido)), ' - Cliente: ', u.nombre_usuario) as display_text
                 FROM pedido p
                 INNER JOIN usuario u ON p.id_usuario = u.id_usuario
@@ -550,10 +593,10 @@ class VentaModel
         echo '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif;">';
         
         // Encabezado principal
-        echo '<tr><td colspan="11" style="background-color: #d900bc; color: white; font-size: 16pt; font-weight: bold; text-align: center; padding: 15px;">REPORTE DE VENTAS - COLOR INK</td></tr>';
+        echo '<tr><td colspan="10" style="background-color: #d900bc; color: white; font-size: 16pt; font-weight: bold; text-align: center; padding: 15px;">REPORTE DE VENTAS - COLOR INK</td></tr>';
         
         // Información del reporte
-        echo '<tr><td colspan="11" style="background-color: #f8f9fa; padding: 10px; border: 1px solid #dee2e6;">';
+        echo '<tr><td colspan="10" style="background-color: #f8f9fa; padding: 10px; border: 1px solid #dee2e6;">';
         echo '<b>Fecha:</b> ' . date('d/m/Y H:i:s') . ' | ';
         echo '<b>Ventas:</b> ' . count($ventas) . ' | ';
         echo '<b>Ingresos:</b> L ' . number_format($totalMonto, 2) . ' | ';
@@ -562,7 +605,7 @@ class VentaModel
         echo '</td></tr>';
         
         // Fila vacía
-        echo '<tr><td colspan="11" style="height: 10px;"></td></tr>';
+        echo '<tr><td colspan="10" style="height: 10px;"></td></tr>';
         
         // Encabezados de columnas
         echo '<tr style="background-color: #d900bc; color: white; font-weight: bold; text-align: center;">';
@@ -570,7 +613,7 @@ class VentaModel
         echo '<td>Fecha</td>';
         echo '<td>Cliente</td>';
         echo '<td>ID Pedido</td>';
-        echo '<td>Método Pago</td>';
+        echo '<td>Metodo Pago</td>';
         echo '<td>Monto Cobrado</td>';
         echo '<td>Costo Total</td>';
         echo '<td>Utilidad</td>';
@@ -608,7 +651,7 @@ class VentaModel
         echo '<td style="text-align: right; font-size: 12pt;">L ' . number_format($totalCosto, 2) . '</td>';
         echo '<td style="text-align: right; font-size: 12pt; color: ' . ($totalUtilidad >= 0 ? '#28a745' : '#dc3545') . ';">L ' . number_format($totalUtilidad, 2) . '</td>';
         echo '<td style="text-align: center; font-size: 12pt; color: ' . ($totalUtilidad >= 0 ? '#28a745' : '#dc3545') . ';">' . number_format($margenPromedio, 1) . '%</td>';
-        echo '<td colspan="2" style="text-align: center; font-size: 12pt;">' . count($ventas) . ' ventas</td>';
+        echo '<td style="text-align: center; font-size: 12pt;">' . count($ventas) . ' ventas</td>';
         echo '</tr>';
         
         echo '</table>';
