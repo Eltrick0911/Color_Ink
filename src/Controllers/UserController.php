@@ -144,10 +144,10 @@ class UserController
         error_log('UserController - create: Iniciando creación de usuario');
         
         // Validar datos requeridos
-        $nombreUsuario = $input['nombre_usuario'] ?? '';
-        $correo = $input['correo'] ?? '';
-        $contrasena = $input['contrasena'] ?? '';
-        $telefono = $input['telefono'] ?? '';
+        $nombreUsuario = trim($input['nombre_usuario'] ?? '');
+        $correo = trim($input['correo'] ?? '');
+        $contrasena = (string)($input['contrasena'] ?? '');
+        $telefono = $input['telefono'] ?? null;
         $idRol = (int)($input['id_rol'] ?? 2);
         
         if (empty($nombreUsuario) || empty($correo) || empty($contrasena)) {
@@ -155,8 +155,30 @@ class UserController
             return;
         }
         
-        // Crear usuario en BD
-        $result = $this->userModel->createUser($nombreUsuario, $correo, $contrasena, $telefono, $idRol);
+        // Validar email
+        if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(responseHTTP::status400('Correo inválido'));
+            return;
+        }
+        
+        // Validar longitud de contraseña
+        if (strlen($contrasena) < 6) {
+            echo json_encode(responseHTTP::status400('La contraseña debe tener al menos 6 caracteres'));
+            return;
+        }
+        
+        // Verificar si el correo ya existe
+        $existente = $this->userModel->getUserByEmailOrPhone($correo);
+        if ($existente) {
+            echo json_encode(responseHTTP::status400('El correo ya está registrado'));
+            return;
+        }
+        
+        // Crear hash de la contraseña (IMPORTANTE: hashear antes de guardar)
+        $hash = Security::createPassword($contrasena);
+        
+        // Crear usuario en BD con la contraseña hasheada
+        $result = $this->userModel->createUser($nombreUsuario, $correo, $hash, $telefono, $idRol);
         
         if (isset($result['status']) && $result['status'] === 'OK') {
             // Crear usuario también en Firebase

@@ -411,6 +411,7 @@ class PedidosModel
     {
         try {
             error_log("PedidosModel - createDetallePedido: Creando detalle para pedido " . $detalleData['id_pedido']);
+            error_log("PedidosModel - createDetallePedido: DATOS COMPLETOS RECIBIDOS: " . json_encode($detalleData));
             
             // Preparar JSON de detalles personalizados si viene como array
             $detallesPersonalizados = null;
@@ -424,9 +425,13 @@ class PedidosModel
 
             // Si se proveen detalles_personalizados, forzamos inserción directa para incluir la columna (el SP no la contempla)
             if ($detallesPersonalizados !== null) {
-                $totalLinea = ($detalleData['precio_unitario'] * $detalleData['cantidad']);
-                $totalLinea = ($totalLinea * (1 - ($detalleData['descuento'] / 100)));
-                $totalLinea = ($totalLinea * (1 + ($detalleData['impuesto'] / 100)));
+                // Usar total_linea si viene en los datos, de lo contrario calcularlo
+                $totalLinea = isset($detalleData['total_linea']) ? $detalleData['total_linea'] : 
+                    (($detalleData['precio_unitario'] * $detalleData['cantidad']) * 
+                    (1 - ($detalleData['descuento'] / 100)) * 
+                    (1 + ($detalleData['impuesto'] / 100)));
+
+                error_log("PedidosModel - createDetallePedido: INSERTANDO con total_linea=" . $totalLinea . " (cantidad=" . $detalleData['cantidad'] . ", precio_unitario=" . $detalleData['precio_unitario'] . ", descuento=" . $detalleData['descuento'] . "%, impuesto=" . $detalleData['impuesto'] . "%)");
 
                 $sql = "INSERT INTO detallepedido (
                             producto_solicitado, cantidad, precio_unitario, descuento, impuesto, total_linea, id_pedido, id_producto, detalles_personalizados
@@ -443,6 +448,8 @@ class PedidosModel
                     $detalleData['id_producto'] ?? null,
                     $detallesPersonalizados
                 ]);
+                
+                error_log("PedidosModel - createDetallePedido: INSERT resultado=" . ($result ? 'EXITOSO' : 'FALLIDO') . ", id_detalle insertado=" . $this->connection->lastInsertId());
             } else {
                 // Intentar usar SP; si falla, inserción directa sin columna extra
                 try {
@@ -459,9 +466,11 @@ class PedidosModel
                     ]);
                 } catch (PDOException $e) {
                     // Fallback a SQL directo
-                    $totalLinea = ($detalleData['precio_unitario'] * $detalleData['cantidad']);
-                    $totalLinea = ($totalLinea * (1 - ($detalleData['descuento'] / 100)));
-                    $totalLinea = ($totalLinea * (1 + ($detalleData['impuesto'] / 100)));
+                    // Usar total_linea si viene en los datos, de lo contrario calcularlo
+                    $totalLinea = isset($detalleData['total_linea']) ? $detalleData['total_linea'] : 
+                        (($detalleData['precio_unitario'] * $detalleData['cantidad']) * 
+                        (1 - ($detalleData['descuento'] / 100)) * 
+                        (1 + ($detalleData['impuesto'] / 100)));
 
                     $sql = "INSERT INTO detallepedido (
                                 producto_solicitado, cantidad, precio_unitario, descuento, impuesto, total_linea, id_pedido, id_producto
@@ -521,40 +530,58 @@ class PedidosModel
         try {
             error_log("PedidosModel - updateDetallePedido: Actualizando detalle ID: $idDetalle");
             
-            // Intentar SP; si falla, fallback directo
-            try {
-                $stmt = $this->connection->prepare("CALL sp_actualizar_detalle_pedido(?, ?, ?, ?, ?, ?, ?)");
-                $result = $stmt->execute([
-                    $idDetalle,
-                    $detalleData['producto_solicitado'],
-                    $detalleData['cantidad_nueva'],
-                    $detalleData['precio_unitario_nuevo'],
-                    $detalleData['descuento_nuevo'],
-                    $detalleData['impuesto_nuevo'],
-                    $detalleData['id_usuario']
-                ]);
-            } catch (PDOException $e) {
+            // Si se proporciona detalles_personalizados, usamos UPDATE directo para incluir la columna
+            $usarDirecto = array_key_exists('detalles_personalizados', $detalleData) && $detalleData['detalles_personalizados'] !== null;
+
+            if (!$usarDirecto) {
+                try {
+                    $stmt = $this->connection->prepare("CALL sp_actualizar_detalle_pedido(?, ?, ?, ?, ?, ?, ?)");
+                    $result = $stmt->execute([
+                        $idDetalle,
+                        $detalleData['producto_solicitado'],
+                        $detalleData['cantidad_nueva'],
+                        $detalleData['precio_unitario_nuevo'],
+                        $detalleData['descuento_nuevo'],
+                        $detalleData['impuesto_nuevo'],
+                        $detalleData['id_usuario']
+                    ]);
+                } catch (PDOException $e) {
+                    $usarDirecto = true;
+                }
+            }
+
+            if ($usarDirecto) {
                 $totalLinea = ($detalleData['precio_unitario_nuevo'] * $detalleData['cantidad_nueva']);
                 $totalLinea = ($totalLinea * (1 - ($detalleData['descuento_nuevo'] / 100)));
                 $totalLinea = ($totalLinea * (1 + ($detalleData['impuesto_nuevo'] / 100)));
-                $sql = "UPDATE detallepedido
-                        SET producto_solicitado = ?,
-                            cantidad = ?,
-                            precio_unitario = ?,
-                            descuento = ?,
-                            impuesto = ?,
-                            total_linea = ?
-                        WHERE id_detalle = ?";
-                $stmt = $this->connection->prepare($sql);
-                $result = $stmt->execute([
+
+                $campos = [
+                    'producto_solicitado = ?',
+                    'cantidad = ?',
+                    'precio_unitario = ?',
+                    'descuento = ?',
+                    'impuesto = ?',
+                    'total_linea = ?'
+                ];
+                $valores = [
                     $detalleData['producto_solicitado'],
                     $detalleData['cantidad_nueva'],
                     $detalleData['precio_unitario_nuevo'],
                     $detalleData['descuento_nuevo'],
                     $detalleData['impuesto_nuevo'],
-                    $totalLinea,
-                    $idDetalle
-                ]);
+                    $totalLinea
+                ];
+
+                if (array_key_exists('detalles_personalizados', $detalleData)) {
+                    $campos[] = 'detalles_personalizados = ?';
+                    $valores[] = $detalleData['detalles_personalizados'];
+                }
+
+                $valores[] = $idDetalle; // WHERE
+
+                $sql = 'UPDATE detallepedido SET ' . implode(', ', $campos) . ' WHERE id_detalle = ?';
+                $stmt = $this->connection->prepare($sql);
+                $result = $stmt->execute($valores);
             }
             
             error_log("PedidosModel - updateDetallePedido: Actualización " . ($result ? "exitosa" : "fallida"));
@@ -586,6 +613,27 @@ class PedidosModel
             return $result;
         } catch (PDOException $e) {
             error_log("ERROR PedidosModel - deleteDetallePedido: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Eliminar todos los detalles de un pedido específico
+     */
+    public function deleteDetallesByPedidoId(int $idPedido): bool
+    {
+        try {
+            error_log("PedidosModel - deleteDetallesByPedidoId: Eliminando todos los detalles del pedido ID: $idPedido");
+            
+            $stmt = $this->connection->prepare("DELETE FROM detallepedido WHERE id_pedido = ?");
+            $result = $stmt->execute([$idPedido]);
+            
+            $rowCount = $stmt->rowCount();
+            error_log("PedidosModel - deleteDetallesByPedidoId: Se eliminaron $rowCount registros");
+            
+            return $result;
+        } catch (PDOException $e) {
+            error_log("ERROR PedidosModel - deleteDetallesByPedidoId: " . $e->getMessage());
             return false;
         }
     }

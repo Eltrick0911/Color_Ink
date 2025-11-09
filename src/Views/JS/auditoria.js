@@ -314,12 +314,67 @@
 
   function showDetails(antes, despues){
     const modal = document.getElementById('detailModal');
-    const preA = document.getElementById('jsonAntes');
-    const preD = document.getElementById('jsonDespues');
-
-    preA.textContent = prettyJson(antes);
-    preD.textContent = prettyJson(despues);
-
+    const modalBody = modal.querySelector('.modal-body');
+    
+    // Parsear JSON
+    let antesObj = {};
+    let despuesObj = {};
+    try { antesObj = antes ? JSON.parse(antes) : {}; } catch(e) { console.error('Error parsing antes:', e); }
+    try { despuesObj = despues ? JSON.parse(despues) : {}; } catch(e) { console.error('Error parsing despues:', e); }
+    
+    // Obtener todos los campos únicos
+    const allKeys = new Set([...Object.keys(antesObj), ...Object.keys(despuesObj)]);
+    
+    if(allKeys.size === 0) {
+      modalBody.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7); padding: 20px;">No hay datos para mostrar</p>';
+      modal.classList.remove('hidden');
+      return;
+    }
+    
+    // Crear tabla estructurada
+    let tableHTML = `
+      <div class="detail-table-wrapper">
+        <table class="detail-comparison-table">
+          <thead>
+            <tr>
+              <th>Campo</th>
+              <th>Valor Anterior</th>
+              <th>Valor Nuevo</th>
+            </tr>
+          </thead>
+          <tbody>`;
+    
+    // Generar filas por cada campo
+    allKeys.forEach(key => {
+      const valorAntes = antesObj[key] !== undefined ? antesObj[key] : '-';
+      const valorDespues = despuesObj[key] !== undefined ? despuesObj[key] : '-';
+      
+      // Detectar si el valor cambió
+      const changed = valorAntes !== valorDespues;
+      const rowClass = changed ? 'row-changed' : '';
+      
+      // Formatear valores (convertir objetos/arrays a string legible)
+      const formatValue = (val) => {
+        if(val === null || val === undefined) return '-';
+        if(typeof val === 'object') return JSON.stringify(val, null, 2);
+        if(typeof val === 'boolean') return val ? 'Sí' : 'No';
+        return String(val);
+      };
+      
+      tableHTML += `
+        <tr class="${rowClass}">
+          <td class="field-name"><strong>${key}</strong></td>
+          <td class="value-before">${formatValue(valorAntes)}</td>
+          <td class="value-after">${formatValue(valorDespues)}</td>
+        </tr>`;
+    });
+    
+    tableHTML += `
+          </tbody>
+        </table>
+      </div>`;
+    
+    modalBody.innerHTML = tableHTML;
     modal.classList.remove('hidden');
   }
 
@@ -335,16 +390,114 @@
   function renderPagination(p){
     const wrap = document.getElementById('pagination');
     wrap.innerHTML = '';
-    if(!p || p.pages <= 1) return;
-    const frag = document.createDocumentFragment();
-    for(let i=1;i<=p.pages;i++){
-      const btn = document.createElement('button');
-      btn.textContent = i;
-      if(i === p.page) btn.classList.add('active');
-      btn.addEventListener('click', () => loadData(i));
-      frag.appendChild(btn);
+    if(!p || p.total === 0) return;
+    
+    // Calcular rango de registros mostrados
+    const start = p.total === 0 ? 0 : (p.page - 1) * p.limit + 1;
+    const end = Math.min(p.page * p.limit, p.total);
+    
+    // Crear contenedor con contador y botones
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.justifyContent = 'space-between';
+    container.style.alignItems = 'center';
+    container.style.gap = '16px';
+    container.style.flexWrap = 'wrap';
+    
+    // Contador de registros
+    const counter = document.createElement('div');
+    counter.style.color = 'rgba(255, 255, 255, 0.85)';
+    counter.style.fontSize = '0.95em';
+    counter.style.fontWeight = '500';
+    counter.textContent = `Mostrando ${start}–${end} de ${p.total} registros`;
+    container.appendChild(counter);
+    
+    // Contenedor de botones de paginación
+    const btnWrap = document.createElement('div');
+    btnWrap.style.display = 'flex';
+    btnWrap.style.gap = '8px';
+    btnWrap.style.alignItems = 'center';
+    
+    // Botón Anterior
+    if(p.pages > 1) {
+      const prevBtn = document.createElement('button');
+      prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i> Anterior';
+      prevBtn.disabled = p.page === 1;
+      prevBtn.style.opacity = p.page === 1 ? '0.5' : '1';
+      prevBtn.style.cursor = p.page === 1 ? 'not-allowed' : 'pointer';
+      prevBtn.addEventListener('click', () => {
+        if(p.page > 1) loadData(p.page - 1);
+      });
+      btnWrap.appendChild(prevBtn);
     }
-    wrap.appendChild(frag);
+    
+    // Botones numéricos (mostrar máximo 5 páginas a la vez)
+    if(p.pages > 1) {
+      let startPage = Math.max(1, p.page - 2);
+      let endPage = Math.min(p.pages, startPage + 4);
+      
+      // Ajustar si estamos cerca del final
+      if(endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+      }
+      
+      // Primera página si no está en el rango
+      if(startPage > 1) {
+        const btn = document.createElement('button');
+        btn.textContent = '1';
+        btn.addEventListener('click', () => loadData(1));
+        btnWrap.appendChild(btn);
+        
+        if(startPage > 2) {
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '...';
+          ellipsis.style.padding = '0 8px';
+          ellipsis.style.color = 'rgba(255, 255, 255, 0.6)';
+          btnWrap.appendChild(ellipsis);
+        }
+      }
+      
+      // Páginas en el rango
+      for(let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        if(i === p.page) btn.classList.add('active');
+        btn.addEventListener('click', () => loadData(i));
+        btnWrap.appendChild(btn);
+      }
+      
+      // Última página si no está en el rango
+      if(endPage < p.pages) {
+        if(endPage < p.pages - 1) {
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '...';
+          ellipsis.style.padding = '0 8px';
+          ellipsis.style.color = 'rgba(255, 255, 255, 0.6)';
+          btnWrap.appendChild(ellipsis);
+        }
+        
+        const btn = document.createElement('button');
+        btn.textContent = p.pages;
+        btn.addEventListener('click', () => loadData(p.pages));
+        btnWrap.appendChild(btn);
+      }
+    }
+    
+    // Botón Siguiente
+    if(p.pages > 1) {
+      const nextBtn = document.createElement('button');
+      nextBtn.innerHTML = 'Siguiente <i class="fa-solid fa-chevron-right"></i>';
+      nextBtn.disabled = p.page === p.pages;
+      nextBtn.style.opacity = p.page === p.pages ? '0.5' : '1';
+      nextBtn.style.cursor = p.page === p.pages ? 'not-allowed' : 'pointer';
+      nextBtn.addEventListener('click', () => {
+        if(p.page < p.pages) loadData(p.page + 1);
+      });
+      btnWrap.appendChild(nextBtn);
+    }
+    
+    container.appendChild(btnWrap);
+    wrap.appendChild(container);
   }
 
   async function loadTables(){
@@ -401,7 +554,7 @@
         backendTransaction = '';
       }
       
-      const json = await apiGet({ action: 'list', table, user_id, transaction: backendTransaction, start_date, end_date, page, limit: 20 });
+      const json = await apiGet({ action: 'list', table, user_id, transaction: backendTransaction, start_date, end_date, page, limit: 15 });
       renderTableHead(); // Llamar primero para actualizar headers según tabla seleccionada
       renderRows(json.data || []);
       renderPagination(json.pagination);

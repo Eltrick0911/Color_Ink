@@ -28,7 +28,7 @@ if (strpos($uri, '/public/') !== false) {
     
     
     <header class="main">
-        <i class="fa-solid fa-user user-icon" onclick="resetBarPosition()"></i>
+        <i class="fa-solid fa-user user-icon" title="Mi Perfil / Gestión de Usuarios"></i>
         <div class="icon-bar-container" id="iconBarContainer">
             <div class="icon-bar">
                 <a href="index"><i class="fa-solid fa-house" onclick="resetBarPosition()" title="Inicio"></i></a>

@@ -17,6 +17,8 @@ if (strpos($uri, '/public/') !== false) {
     <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/sidebar.css">
     <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/pedidos.css">
     <link rel="icon" href="<?php echo $basePath; ?>/src/Views/IMG/LOGO.png" type="image/png">
+    <!-- SheetJS para exportación a Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <main class="sidebar-content">
@@ -24,19 +26,23 @@ if (strpos($uri, '/public/') !== false) {
         <div class="pedidos-container">
             <div class="pedidos-header">
                 <h2>Lista de Pedidos</h2>
-                <button class="btn-nuevo-pedido">
-                    <i class="fa-solid fa-plus"></i> Nuevo Pedido
-                </button>
+                <div class="header-buttons">
+                    <button class="btn-exportar-excel" id="btnExportarExcel">
+                        <i class="fa-solid fa-file-excel"></i> Exportar a Excel
+                    </button>
+                    <button class="btn-nuevo-pedido">
+                        <i class="fa-solid fa-plus"></i> Nuevo Pedido
+                    </button>
+                </div>
             </div>
             
             <div class="pedidos-filters">
                 <input type="text" placeholder="Buscar pedidos..." class="search-input">
-                <select class="filter-select">
-                    <option value="">Todos los estados</option>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="cancelado">Cancelado</option>
-                    <option value="enviado">Enviado</option>
-                 
+                <select class="filter-select" title="Filtrar por estado">
+                    <option value="">Todos</option>
+                    <option value="2">Cancelado</option>
+                    <option value="3">En Proceso</option>
+                    <option value="1">Entregado</option>
                 </select>
             </div>
 
@@ -54,26 +60,38 @@ if (strpos($uri, '/public/') !== false) {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>PED-001</td>
-                            <td>Juan Pérez</td>
-                            <td>2024-01-10</td>
-                            <td>2024-01-15</td>
-                            <td>
-                                <select class="status-selector" data-pedido-id="#001">
-                                    <option value="pendiente" selected>Pendiente</option>
-                                    <option value="procesando">Procesando</option>
-                                    <option value="enviado">Enviado</option>
-                                    <option value="entregado">Entregado</option>
-                                </select>
-                            </td>
-                            <td>$150.00</td>
-                            <td>
-                                <button class="btn-action"><i class="fa-solid fa-eye"></i></button>
-                                <button class="btn-action"><i class="fa-solid fa-edit"></i></button>
-                                <button class="btn-action"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
+                        <?php if (!empty($pedidos) && is_array($pedidos)): ?>
+                            <?php foreach ($pedidos as $pedido): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($pedido['numero_pedido'] ?? $pedido['id_pedido']) ?></td>
+                                    <td><?= htmlspecialchars($pedido['cliente_nombre'] ?? '') ?></td>
+                                    <td><?= htmlspecialchars($pedido['fecha_pedido'] ?? '') ?></td>
+                                    <td><?= htmlspecialchars($pedido['fecha_entrega'] ?? '') ?></td>
+                                    <td>
+                                        <select class="status-selector" data-pedido-id="<?= $pedido['id_pedido'] ?>">
+                                            <option value="pendiente" <?= ($pedido['estado_codigo'] ?? $pedido['id_estado']) == 'pendiente' ? 'selected' : '' ?>>Pendiente</option>
+                                            <option value="procesando" <?= ($pedido['estado_codigo'] ?? $pedido['id_estado']) == 'procesando' ? 'selected' : '' ?>>Procesando</option>
+                                            <option value="enviado" <?= ($pedido['estado_codigo'] ?? $pedido['id_estado']) == 'enviado' ? 'selected' : '' ?>>Enviado</option>
+                                            <option value="entregado" <?= ($pedido['estado_codigo'] ?? $pedido['id_estado']) == 'entregado' ? 'selected' : '' ?>>Entregado</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <?php
+                                        // Mostrar el total de la BD (total_linea del detallepedido principal)
+                                        $totalLinea = isset($pedido['total_linea']) ? $pedido['total_linea'] : null;
+                                        echo $totalLinea !== null ? 'L ' . number_format($totalLinea, 2) : '<span style="color:#888">-</span>';
+                                        ?>
+                                    </td>
+                                    <td>
+                                        <button class="btn-action"><i class="fa-solid fa-eye"></i></button>
+                                        <button class="btn-action"><i class="fa-solid fa-edit"></i></button>
+                                        <button class="btn-action"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr><td colspan="7" style="text-align:center; color:#888;">No hay pedidos registrados.</td></tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -102,9 +120,9 @@ if (strpos($uri, '/public/') !== false) {
                 <div class="status-change-section">
                     <label for="estadoPedido">Cambiar Estado:</label>
                     <select id="estadoPedido" class="status-selector-modal">
-                        <option value="pendiente">Pendiente</option>
-                        <option value="cancelado">Cancelado</option>
-                        <option value="enviado">Enviado</option>
+                        <option value="3">En Proceso</option>
+                        <option value="1">Entregado</option>
+                        <option value="2">Cancelado</option>
                     </select>
                     <button type="button" class="btn-actualizar-estado">
                         <i class="fa-solid fa-sync-alt"></i> Actualizar
@@ -164,22 +182,44 @@ if (strpos($uri, '/public/') !== false) {
                         </select>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="cantidad">Cantidad *</label>
-                            <input type="number" id="cantidad" name="cantidad" min="1" value="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="precioUnitario">Precio Unitario *</label>
-                            <input type="number" id="precioUnitario" name="precioUnitario" step="0.01" min="0" placeholder="0.00" required>
-                        </div>
-                    </div>
+                    <!-- Nota: los productos se gestionan ahora dentro del modal "Personalizado" -->
 
                     <!-- Botón para abrir detalles del producto -->
                     <div class="form-group">
                         <button type="button" class="btn-detalles-producto" id="btnDetallesProducto">
                             <i class="fa-solid fa-cog"></i> Personalizado
                         </button>
+                    </div>
+
+                    <!-- Resumen de totales del pedido -->
+                    <div id="resumenTotalesNuevoPedido" style="display:none; margin-top:20px; padding:15px; background:#f8f9fa; border-radius:8px; border:1px solid #dee2e6;">
+                        <h4 style="margin:0 0 10px 0; color:#495057;">Resumen del Pedido</h4>
+                        <div style="display:grid; gap:8px;">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Productos:</span>
+                                <strong id="resumenCantidadProductos">0</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Cantidad Total:</span>
+                                <strong id="resumenCantidadTotal">0</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span>Subtotal:</span>
+                                <strong id="resumenSubtotal">L 0.00</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; color:#dc3545;">
+                                <span>Descuento (prom. <span id="resumenPorcentajeDescuento">0</span>%):</span>
+                                <strong id="resumenMontoDescuento">L 0.00</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; color:#28a745;">
+                                <span>Impuesto (prom. <span id="resumenPorcentajeImpuesto">0</span>%):</span>
+                                <strong id="resumenMontoImpuesto">L 0.00</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:2px solid #007bff; font-size:1.1em;">
+                                <span>Total:</span>
+                                <strong id="resumenTotalGeneral" style="color:#007bff;">L 0.00</strong>
+                            </div>
+                        </div>
                     </div>
 
                 </form>
@@ -195,69 +235,103 @@ if (strpos($uri, '/public/') !== false) {
     <div id="modalDetallesProducto" class="modal">
         <div class="modal-content modal-medium">
             <div class="modal-header">
-                <h2>Detalles del Producto</h2>
+                <h2>Detalles de Productos</h2>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
+                <!-- Barra superior: botones numerados y cruz para agregar -->
+                <div id="productosNav" class="productos-nav" style="display:flex; align-items:center; gap:6px; margin-bottom:12px;">
+                    <!-- Botones de productos se generan por JS -->
+                    <button type="button" class="btn-add-producto" title="Agregar producto" style="font-size:1.2em; padding:0 10px; border-radius:50%; background:#e0e0e0; border:none; margin-left:4px;"><i class="fa-solid fa-plus"></i></button>
+                </div>
+                <!-- Contenedor de detalles del producto seleccionado -->
                 <form id="formDetallesProducto" class="product-details-form">
-                    <div class="form-group">
-                        <label for="categoriaProducto">Categoría de Producto *</label>
-                        <select id="categoriaProducto" name="categoriaProducto" required>
-                            <option value="">Seleccionar categoría</option>
-                            <option value="camisas">Camisas/Playeras</option>
-                            <option value="retratos">Retratos</option>
-                            <option value="arreglos-florales">Arreglos Florales</option>
-                            <option value="vinil">Vinil Adhesivo</option>
-                            <option value="banner">Banner</option>
-                            <option value="tarjetas">Tarjetas de Presentación</option>
-                            <option value="volantes">Volantes</option>
-                            <option value="invitaciones">Invitaciones</option>
-                            <option value="decoracion">Decoración</option>
-                            <option value="otros">Otros</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="imagenReferencia">Imagen de Referencia</label>
-                        <div class="image-upload-container">
-                            <input type="file" id="imagenReferencia" name="imagenReferencia" accept="image/*" multiple>
-                            <div class="image-preview-container" id="imagePreviewContainer">
-                                <div class="upload-placeholder">
-                                    <i class="fa-solid fa-cloud-upload-alt"></i>
-                                    <p>Arrastra imágenes aquí o haz clic para seleccionar</p>
+                    <div id="productoDetalleContainer">
+                        <div class="form-group">
+                            <label for="categoriaProducto">Categoría de Producto *</label>
+                            <select id="categoriaProducto" name="categoriaProducto" required>
+                                <option value="">Seleccionar categoría</option>
+                                <option value="camisas">Camisas/Playeras</option>
+                                <option value="retratos">Retratos</option>
+                                <option value="arreglos-florales">Arreglos Florales</option>
+                                <option value="vinil">Vinil Adhesivo</option>
+                                <option value="banner">Banner</option>
+                                <option value="tarjetas">Tarjetas de Presentación</option>
+                                <option value="volantes">Volantes</option>
+                                <option value="invitaciones">Invitaciones</option>
+                                <option value="decoracion">Decoración</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="imagenReferencia">Imagen de Referencia</label>
+                            <div class="image-upload-container">
+                                <input type="file" id="imagenReferencia" name="imagenReferencia" accept="image/*" multiple>
+                                <div class="image-preview-container" id="imagePreviewContainer">
+                                    <div class="upload-placeholder">
+                                        <i class="fa-solid fa-cloud-upload-alt"></i>
+                                        <p>Arrastra imágenes aquí o haz clic para seleccionar</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="colores">Paleta de Colores</label>
-                        <div class="color-selection">
-                            <input type="text" id="colores" name="colores" placeholder="Selecciona los colores que deseas usar" readonly>
-                            <div class="color-picker-container">
-                                <div class="color-picker-item">
-                                    <input type="color" id="colorPicker1" class="color-picker" title="Color 1" value="#000000">
-                                    <span class="color-name" id="colorName1">Color 1</span>
+                        <div class="form-group">
+                            <label for="colores">Paleta de Colores</label>
+                            <div class="color-selection">
+                                <input type="text" id="colores" name="colores" placeholder="Selecciona los colores que deseas usar" readonly>
+                                <div class="color-picker-container">
+                                    <div class="color-picker-item">
+                                        <input type="color" id="colorPicker1" class="color-picker" title="Color 1" value="#000000">
+                                        <span class="color-name" id="colorName1">Color 1</span>
+                                    </div>
+                                    <div class="color-picker-item">
+                                        <input type="color" id="colorPicker2" class="color-picker" title="Color 2" value="#000000">
+                                        <span class="color-name" id="colorName2">Color 2</span>
+                                    </div>
+                                    <div class="color-picker-item">
+                                        <input type="color" id="colorPicker3" class="color-picker" title="Color 3" value="#000000">
+                                        <span class="color-name" id="colorName3">Color 3</span>
+                                    </div>
                                 </div>
-                                <div class="color-picker-item">
-                                    <input type="color" id="colorPicker2" class="color-picker" title="Color 2" value="#000000">
-                                    <span class="color-name" id="colorName2">Color 2</span>
-                                </div>
-                                <div class="color-picker-item">
-                                    <input type="color" id="colorPicker3" class="color-picker" title="Color 3" value="#000000">
-                                    <span class="color-name" id="colorName3">Color 3</span>
+                                <div class="color-actions">
+                                    <button type="button" class="btn-limpiar-colores">
+                                        <i class="fa-solid fa-eraser"></i> Limpiar Colores
+                                    </button>
                                 </div>
                             </div>
-                            <div class="color-actions">
-                                <button type="button" class="btn-limpiar-colores">
-                                    <i class="fa-solid fa-eraser"></i> Limpiar Colores
-                                </button>
+                        </div>
+                        <div class="form-group">
+                            <label for="especificaciones">Especificaciones Técnicas/Detalles del producto</label>
+                            <textarea id="especificaciones" name="especificaciones" rows="4" placeholder="Tamaño específico, acabados, técnicas de impresión,talla etc."></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pdCantidad">Cantidad</label>
+                                <input type="number" id="pdCantidad" min="1" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="pdPrecio">Precio Unitario</label>
+                                <input type="number" id="pdPrecio" step="0.01" min="0" value="0">
                             </div>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="especificaciones">Especificaciones Técnicas/Detalles del producto</label>
-                        <textarea id="especificaciones" name="especificaciones" rows="4" placeholder="Tamaño específico, acabados, técnicas de impresión,talla etc."></textarea>
+                    <!-- Descuento, impuesto y total SIEMPRE visibles abajo -->
+                    <div class="form-group" style="margin-top:16px; border-top:1px solid #eee; padding-top:12px;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pdDescuento">Descuento (%)</label>
+                                <input type="number" id="pdDescuento" step="0.01" min="0" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="pdImpuesto">Impuesto (%)</label>
+                                <input type="number" id="pdImpuesto" step="0.01" min="0" value="0">
+                            </div>
+                        </div>
+                        <div style="margin-top:12px; padding:12px; background:#f8f9fa; border-radius:6px; border:2px solid #007bff;">
+                            <div style="font-size:1.1em; font-weight:700; color:#007bff; text-align:center;">
+                                Total: <span id="pdTotalPreview" style="font-size:1.3em;">L 0.00</span>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -285,6 +359,7 @@ if (strpos($uri, '/public/') !== false) {
             </div>
             <div class="modal-body">
                 <form id="formEditarPedido" class="pedido-form">
+                    <!-- SOLO CAMPOS GENERALES DEL PEDIDO -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="editarUsuario">Usuario</label>
@@ -295,14 +370,20 @@ if (strpos($uri, '/public/') !== false) {
                             <input type="tel" id="editarTelefono" name="telefono">
                         </div>
                     </div>
-                    
                     <div class="form-row">
                         <div class="form-group">
                             <label for="editarFechaEntrega">Fecha de Entrega</label>
                             <input type="date" id="editarFechaEntrega" name="fechaEntrega">
                         </div>
+                        <div class="form-group">
+                            <label for="editarPrioridad">Prioridad</label>
+                            <select id="editarPrioridad" name="prioridad">
+                                <option value="normal">Normal</option>
+                                <option value="alta">Alta</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                        </div>
                     </div>
-
                     <div class="form-group">
                         <label for="editarCanalVenta">Canal de Venta *</label>
                         <select id="editarCanalVenta" name="canalVenta" required>
@@ -314,89 +395,18 @@ if (strpos($uri, '/public/') !== false) {
                             <option value="telefono">Teléfono</option>
                         </select>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editarPrecioUnitario">Precio Personalizado</label>
-                            <input type="number" id="editarPrecioUnitario" name="precioUnitario" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="editarCantidad">Cantidad</label>
-                            <input type="number" id="editarCantidad" name="cantidad" min="1" value="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="editarPrioridad">Prioridad</label>
-                            <select id="editarPrioridad" name="prioridad">
-                                <option value="normal">Normal</option>
-                                <option value="alta">Alta</option>
-                                <option value="urgente">Urgente</option>
-                            </select>
-                        </div>
+                    <!-- TABLA EDITABLE DE PRODUCTOS -->
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px; display: block;">Productos del Pedido</label>
+                        <div id="tablaProductosEditablesContainer" style="margin-bottom: 15px;"></div>
+                        <button type="button" class="btn-agregar-producto" id="btnAgregarProductoEditable">
+                            <i class="fa-solid fa-plus"></i> Agregar Producto
+                        </button>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="editarCategoriaProducto">Categoría de Producto</label>
-                            <select id="editarCategoriaProducto" name="categoriaProducto">
-                                <option value="">Seleccionar categoría</option>
-                                <option value="camisas">Camisas/Playeras</option>
-                                <option value="retratos">Retratos</option>
-                                <option value="arreglos-florales">Arreglos Florales</option>
-                                <option value="vinil">Vinil Adhesivo</option>
-                                <option value="banner">Banner</option>
-                                <option value="tarjetas">Tarjetas de Presentación</option>
-                                <option value="volantes">Volantes</option>
-                                <option value="invitaciones">Invitaciones</option>
-                                <option value="decoracion">Decoración</option>
-                                <option value="otros">Otros</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="editarEspecificaciones">Especificaciones Técnicas/Detalles del producto</label>
-                        <textarea id="editarEspecificaciones" name="especificaciones" rows="4" placeholder="Tamaño específico, acabados, técnicas de impresión, talla etc."></textarea>
-                    </div>
-
-                    <!-- Sección de colores -->
-                    <div class="form-group">
-                        <label for="editarColores">Paleta de Colores</label>
-                        <div class="color-selection">
-                            <input type="text" id="editarColores" name="colores" placeholder="Selecciona los colores que deseas usar" readonly>
-                            <div class="color-picker-container">
-                                <div class="color-picker-item">
-                                    <input type="color" id="editarColorPicker1" class="color-picker" title="Color 1" value="#000000">
-                                    <span class="color-name" id="editarColorName1">Color 1</span>
-                                </div>
-                                <div class="color-picker-item">
-                                    <input type="color" id="editarColorPicker2" class="color-picker" title="Color 2" value="#000000">
-                                    <span class="color-name" id="editarColorName2">Color 2</span>
-                                </div>
-                                <div class="color-picker-item">
-                                    <input type="color" id="editarColorPicker3" class="color-picker" title="Color 3" value="#000000">
-                                    <span class="color-name" id="editarColorName3">Color 3</span>
-                                </div>
-                            </div>
-                            <div class="color-actions">
-                                <button type="button" class="btn-limpiar-colores">
-                                    <i class="fa-solid fa-eraser"></i> Limpiar Colores
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sección de imágenes -->
-                    <div class="form-group">
-                        <label for="editarImagenReferencia">Imagen de Referencia</label>
-                        <div class="image-upload-container">
-                            <input type="file" id="editarImagenReferencia" name="imagenReferencia" accept="image/*" multiple>
-                            <div class="image-preview-container" id="editarImagePreviewContainer">
-                                <div class="upload-placeholder">
-                                    <i class="fa-solid fa-cloud-upload-alt"></i>
-                                    <p>Arrastra imágenes aquí o haz clic para seleccionar</p>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- RESUMEN DE TOTALES -->
+                    <div class="form-group" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <label style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px; display: block;">Resumen del Pedido</label>
+                        <div id="resumenTotalesEdicion"></div>
                     </div>
                 </form>
             </div>
@@ -428,6 +438,28 @@ if (strpos($uri, '/public/') !== false) {
             });
         });
     </script>
+
+    <!-- Modal de confirmación de eliminación -->
+    <div id="modalConfirmDelete" class="modal-confirm-delete">
+        <div class="modal-confirm-content">
+            <div class="modal-confirm-header">
+                <svg class="icon-warning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <h3>¿Eliminar pedido?</h3>
+            </div>
+            <div class="modal-confirm-body">
+                <p id="confirmDeleteMessage">¿Estás seguro de que quieres eliminar este pedido?</p>
+                <p class="warning-text">Esta acción no se puede deshacer</p>
+            </div>
+            <div class="modal-confirm-footer">
+                <button class="btn-cancel" id="btnCancelDelete">Cancelar</button>
+                <button class="btn-delete" id="btnConfirmDelete">Eliminar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 

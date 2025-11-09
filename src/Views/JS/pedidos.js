@@ -1,3 +1,65 @@
+// Variables globales para gestión de productos personalizados (modal nuevo pedido)
+let productosPersonalizados = [];
+let productoActivo = 0;
+
+// Función helper para formatear moneda en lempiras
+function formatoLempiras(valor) {
+    return 'L ' + Number(valor).toFixed(2);
+}
+
+// Función para guardar el producto actual antes de cambiar a otro
+function guardarProductoActual() {
+    if (!productosPersonalizados[productoActivo]) {
+        productosPersonalizados[productoActivo] = {};
+    }
+    
+    const categoriaEl = document.getElementById('categoriaProducto');
+    const coloresEl = document.getElementById('colores');
+    const especificacionesEl = document.getElementById('especificaciones');
+    const cantidadEl = document.getElementById('pdCantidad');
+    const precioEl = document.getElementById('pdPrecio');
+    const descuentoEl = document.getElementById('pdDescuento');
+    const impuestoEl = document.getElementById('pdImpuesto');
+    
+    productosPersonalizados[productoActivo] = {
+        categoria: categoriaEl ? categoriaEl.value : '',
+        colores: coloresEl ? coloresEl.value : '',
+        especificaciones: especificacionesEl ? especificacionesEl.value : '',
+        cantidad: cantidadEl ? Number(cantidadEl.value) : 1,
+        precio: precioEl ? Number(precioEl.value) : 0,
+        descuento: descuentoEl ? Number(descuentoEl.value) : 0,
+        impuesto: impuestoEl ? Number(impuestoEl.value) : 0,
+        imagenesUrls: productosPersonalizados[productoActivo]?.imagenesUrls || ''
+    };
+}
+
+// Función para actualizar el preview del total del producto en el modal
+function updatePdTotalPreview() {
+    const cantidadEl = document.getElementById('pdCantidad');
+    const precioEl = document.getElementById('pdPrecio');
+    const descuentoEl = document.getElementById('pdDescuento');
+    const impuestoEl = document.getElementById('pdImpuesto');
+    
+    if (!cantidadEl || !precioEl) return;
+    
+    const cantidad = Number(cantidadEl.value) || 0;
+    const precio = Number(precioEl.value) || 0;
+    const descuento = Number(descuentoEl?.value) || 0;
+    const impuesto = Number(impuestoEl?.value) || 0;
+    
+    let subtotal = cantidad * precio;
+    const montoDescuento = subtotal * (descuento / 100);
+    subtotal = subtotal - montoDescuento;
+    const montoImpuesto = subtotal * (impuesto / 100);
+    const total = subtotal + montoImpuesto;
+    
+    // Mostrar el total en el modal de detalles del producto
+    const totalPreview = document.getElementById('pdTotalPreview');
+    if (totalPreview) {
+        totalPreview.textContent = formatoLempiras(total);
+    }
+}
+
 // Inicialización principal: configurar acciones y selectores cuando cargue el DOM
 document.addEventListener('DOMContentLoaded', function() {
     try {
@@ -7,15 +69,31 @@ document.addEventListener('DOMContentLoaded', function() {
         setupSearch();
         setupStatusSelectors();
         setupDetailsModal(); // Configurar modal de detalles
-        setupEditColorPickers(); // Configurar color pickers del modal de edición
+    setupEditColorPickers(); // Configurar color pickers del modal de edición
         
         // Configurar botón "Nuevo Pedido"
         const btnNuevoPedido = document.querySelector('.btn-nuevo-pedido');
+        console.log('Botón Nuevo Pedido encontrado:', btnNuevoPedido);
         if (btnNuevoPedido) {
             btnNuevoPedido.addEventListener('click', function() {
+                console.log('Click en botón Nuevo Pedido');
                 openModal();
             });
+        } else {
+            console.error('No se encontró el botón .btn-nuevo-pedido');
         }
+        
+        // Configurar botón "Exportar a Excel"
+        const btnExportarExcel = document.getElementById('btnExportarExcel');
+        if (btnExportarExcel) {
+            btnExportarExcel.addEventListener('click', function() {
+                console.log('Click en botón Exportar a Excel');
+                exportarPedidosAExcel();
+            });
+        }
+        
+        // Configurar modal de confirmación de eliminación
+        setupConfirmDeleteModal();
         
         // Configurar modal de nuevo pedido
         setupModal();
@@ -28,8 +106,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (formNuevoPedido) {
             formNuevoPedido.addEventListener('submit', async function(e) {
                 e.preventDefault();
+                console.log('Submit del formulario nuevo pedido disparado');
                 await crearNuevoPedido();
             });
+            console.log('Listener de submit configurado para formNuevoPedido');
+        } else {
+            console.error('No se encontró el formulario #formNuevoPedido');
         }
 
         // Configurar botón de detalles del producto
@@ -40,14 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (modalDetalles) {
                     modalDetalles.style.display = 'block';
                 }
-            });
-        }
-
-        // Configurar botón guardar detalles
-        const btnGuardarDetalles = document.getElementById('guardarDetalles');
-        if (btnGuardarDetalles) {
-            btnGuardarDetalles.addEventListener('click', function() {
-                guardarDetallesProducto();
             });
         }
         
@@ -105,504 +179,195 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reconfigurar cuando la tabla se renderice de nuevo
     document.addEventListener('pedidos:rendered', function() {
         try {
-            setupStatusSelectors();
-            setupActionButtons();
+            // Usar setTimeout para asegurar que las funciones estén disponibles
+            setTimeout(() => {
+                if (typeof setupStatusSelectors === 'function') {
+                    setupStatusSelectors();
+                } else {
+                    console.warn('setupStatusSelectors no está definida aún');
+                }
+                if (typeof setupActionButtons === 'function') {
+                    setupActionButtons();
+                } else {
+                    console.warn('setupActionButtons no está definida aún');
+                }
+            }, 0);
         } catch (e) {
             console.error('Error reconfigurando tras render:', e);
         }
     });
 });
 
-// Muestra el modal de ver pedido con los datos provistos
-function showPedidoDetails(pedidoData) {
-    const modal = document.getElementById('modalVerPedido');
-    const content = document.getElementById('pedidoDetailsContent');
-    const pedidoIdDisplay = document.getElementById('pedidoIdDisplay');
-    if (!modal || !content) return;
+// ===== FUNCIONES DE INICIALIZACIÓN =====
+// Estas funciones se llaman en DOMContentLoaded y deben estar disponibles inmediatamente
 
-    if (pedidoIdDisplay) {
-        pedidoIdDisplay.textContent = `ID: ${pedidoData.id}`;
-    }
-
-    content.innerHTML = generatePedidoDetailsHTML(pedidoData);
-
-    const estadoSelector = document.getElementById('estadoPedido');
-    if (estadoSelector && pedidoData.estado) {
-        estadoSelector.value = pedidoData.estado;
-    }
-
-    setupDetailsModal();
-    setupImageClickHandlers();
-
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
-
-// Construye el HTML de detalle del pedido
-function generatePedidoDetailsHTML(data) {
-    const canalVenta = data.canalVenta || 'No especificado';
-    const categoriaProducto = data.categoriaProducto || 'No especificado';
-    const tipoTrabajo = data.tipoTrabajo || 'No especificado';
-    const colores = data.colores || 'No especificado';
-    const tamano = data.tamano || 'No especificado';
-    const material = data.material || 'No especificado';
-    const especificaciones = data.especificaciones || 'No especificado';
-    const textoPersonalizado = data.textoPersonalizado || 'No especificado';
-    const observaciones = data.observaciones || 'No especificado';
-    const prioridad = data.prioridad || 'Normal';
-
-    const coloresHTML = generateColorsHTML(data);
-    const imagenesHTML = generateImagesHTML(data);
-
-    return `
-        <div class="pedido-details">
-            <div class="pedido-info-section">
-                <h3>Información del Pedido</h3>
-                <div class="detail-item">
-                    <span class="detail-label">ID:</span>
-                    <span class="detail-value">${data.id}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Cliente:</span>
-                    <span class="detail-value">${data.cliente}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Teléfono:</span>
-                    <span class="detail-value">${data.telefono || 'No especificado'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Email:</span>
-                    <span class="detail-value">${data.email || 'No especificado'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Fecha:</span>
-                    <span class="detail-value">${data.fecha || ''}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Fecha de Entrega:</span>
-                    <span class="detail-value">${data.fechaEntrega || 'No especificada'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Estado:</span>
-                    <span class="detail-value">
-                        <span class="detail-status ${data.estado}">${String(data.estado)}</span>
-                    </span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Prioridad:</span>
-                    <span class="detail-value">${prioridad}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Total:</span>
-                    <span class="detail-value">${data.total || '$0.00'}</span>
-                </div>
-            </div>
-            
-            <div class="pedido-info-section">
-                <h3>Detalles del Producto</h3>
-                <div class="detail-item">
-                    <span class="detail-label">Canal de Venta:</span>
-                    <span class="detail-value">${canalVenta}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Categoría:</span>
-                    <span class="detail-value">${categoriaProducto}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Tipo de Trabajo:</span>
-                    <span class="detail-value">${tipoTrabajo}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Cantidad:</span>
-                    <span class="detail-value">${data.cantidad || '1'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Precio Unitario:</span>
-                    <span class="detail-value">$${data.precioUnitario || '0.00'}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Tamaño:</span>
-                    <span class="detail-value">${tamano}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Material:</span>
-                    <span class="detail-value">${material}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Colores:</span>
-                    <span class="detail-value">${colores}</span>
-                </div>
-                ${coloresHTML}
-            </div>
-        </div>
-        
-        <div class="pedido-info-section">
-            <h3>Especificaciones y Detalles</h3>
-            <div class="detail-item">
-                <span class="detail-label">Especificaciones Técnicas:</span>
-                <span class="detail-value">${especificaciones}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Texto Personalizado:</span>
-                <span class="detail-value">${textoPersonalizado}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Observaciones:</span>
-                <span class="detail-value">${observaciones}</span>
-            </div>
-            <div class="detail-item">
-                <span class="detail-label">Dirección de Entrega:</span>
-                <span class="detail-value">${data.direccion || 'No especificada'}</span>
-            </div>
-        </div>
-        
-        ${imagenesHTML}
-    `;
-}
-
-function generateColorsHTML(data) {
-    const colors = [];
+function setupFilters() {
+    const filterSelect = document.querySelector('.filter-select');
     
-    // Recopilar colores
-    if (data.colorPicker1 && data.colorPicker1 !== '#000000') {
-        colors.push(data.colorPicker1);
-    }
-    if (data.colorPicker2 && data.colorPicker2 !== '#000000') {
-        colors.push(data.colorPicker2);
-    }
-    if (data.colorPicker3 && data.colorPicker3 !== '#000000') {
-        colors.push(data.colorPicker3);
-    }
-    if (data.colorPicker4 && data.colorPicker4 !== '#000000') {
-        colors.push(data.colorPicker4);
-    }
-    if (data.colorPicker5 && data.colorPicker5 !== '#000000') {
-        colors.push(data.colorPicker5);
-    }
-    
-    if (colors.length === 0) return '';
-    
-    return `
-        <div class="detail-item">
-            <span class="detail-label">Colores Seleccionados:</span>
-            <div class="detail-colors">
-                ${colors.map((color, index) => 
-                    `<div class="detail-color" 
-                         style="background-color: ${color}" 
-                         data-color-name="${color.toUpperCase()}"
-                         title="${color.toUpperCase()}"></div>`
-                ).join('')}
-            </div>
-        </div>
-    `;
-}
-async function editPedido(pedidoId) {
-    console.log('Editando pedido:', pedidoId);
-    
-    try {
-        // Obtener datos completos desde la API
-        const pedidoRes = await PedidosMVC.fetchOne(pedidoId);
-        const detallesRes = await PedidosMVC.fetchDetalle(pedidoId);
-        
-        console.log('Respuesta del pedido para editar:', pedidoRes);
-        console.log('Respuesta del detalle para editar:', detallesRes);
-        
-        if (!pedidoRes || !pedidoRes.data) {
-            showNotification('No se pudieron cargar los datos del pedido', 'error');
-            return;
-        }
-        
-        // La API devuelve un array, necesitamos encontrar el pedido específico
-        let data = null;
-        if (Array.isArray(pedidoRes.data)) {
-            data = pedidoRes.data.find(p => p.id_pedido == pedidoId);
-        } else {
-            data = pedidoRes.data;
-        }
-        
-        if (!data) {
-            showNotification('No se encontró el pedido solicitado', 'error');
-            return;
-        }
-        
-        // Lo mismo para el detalle
-        let detalle = null;
-        if (detallesRes && detallesRes.data) {
-            if (Array.isArray(detallesRes.data)) {
-                detalle = detallesRes.data.find(d => d.id_pedido == pedidoId);
-            } else {
-                detalle = detallesRes.data;
-            }
-        }
-        
-        console.log('Pedido para editar:', data);
-        console.log('Detalle para editar:', detalle);
-        
-        // Parsear detalles_producto (JSON en la tabla pedido)
-        let detallesProducto = null;
-        if (data.detalles_producto) {
-            try {
-                detallesProducto = typeof data.detalles_producto === 'string' 
-                    ? JSON.parse(data.detalles_producto) 
-                    : data.detalles_producto;
-            } catch (e) {
-                console.warn('Error al parsear detalles_producto:', e);
-            }
-        }
-        
-        // Parsear detalles_personalizados (JSON en la tabla detallepedido)
-        let detallesPersonalizados = null;
-        if (detalle && detalle.detalles_personalizados) {
-            try {
-                detallesPersonalizados = typeof detalle.detalles_personalizados === 'string' 
-                    ? JSON.parse(detalle.detalles_personalizados) 
-                    : detalle.detalles_personalizados;
-            } catch (e) {
-                console.warn('Error al parsear detalles_personalizados:', e);
-            }
-        }
-        
-        // Construir objeto con datos completos
-        const pedidoData = {
-            id: data.id_pedido || pedidoId,
-            numeroPedido: data.numero_pedido || '',
-            cliente: data.cliente_nombre || '',
-            telefono: data.cliente_telefono || '',
-            fecha: data.fecha_pedido || '',
-            // Manejar diferentes formatos de fecha
-            fechaEntrega: (() => {
-                if (!data.fecha_entrega) return '';
-                // Si tiene espacio, dividir por espacio (formato: 2025-10-27 00:00:00)
-                if (data.fecha_entrega.includes(' ')) {
-                    return data.fecha_entrega.split(' ')[0];
-                }
-                // Si tiene T, dividir por T (formato ISO: 2025-10-27T00:00:00)
-                if (data.fecha_entrega.includes('T')) {
-                    return data.fecha_entrega.split('T')[0];
-                }
-                // Si ya está en formato YYYY-MM-DD, devolverlo tal cual
-                return data.fecha_entrega;
-            })(),
-            estado: data.estado_codigo || data.id_estado || 'PROCESO',
-            estadoNombre: data.estado_nombre || 'En Proceso',
-            prioridad: data.prioridad || 'normal',
-            canalVenta: data.canal_venta || '',
-            observaciones: data.observaciones || '',
-            
-            // Datos del detalle
-            cantidad: detalle ? parseInt(detalle.cantidad) : 1,
-            precioUnitario: detalle ? parseFloat(detalle.precio_unitario) : 0,
-            idDetalle: detalle ? detalle.id_detalle : null,
-            
-            // Datos de detalles_producto
-            categoriaProducto: detallesProducto?.categoria || detallesPersonalizados?.categoria || '',
-            colores: detallesProducto?.colores || detallesPersonalizados?.colores || '',
-            imagenes: detallesProducto?.imagenes || detallesPersonalizados?.imagenes || [],
-            
-            // Especificaciones desde observaciones
-            especificaciones: data.observaciones || ''
-        };
-        
-        console.log('Datos finales para edición:', pedidoData);
-        
-        // Mostrar modal de edición con los datos
-        showEditPedidoModal(pedidoData);
-    } catch (error) {
-        console.error('Error al cargar datos para edición:', error);
-        showNotification('Error al cargar los datos del pedido', 'error');
-    }
-}
-
-// Mostrar modal de edición con diseño similar al de vista
-function showEditPedidoModal(pedido) {
-    console.log('=== INICIANDO EDICIÓN DE PEDIDO ===');
-    console.log('Datos completos del pedido:', pedido);
-    
-    const modal = document.getElementById('modalEditarPedido');
-    const form = document.getElementById('formEditarPedido');
-    const pedidoIdDisplay = document.getElementById('editarPedidoIdDisplay');
-    
-    if (!modal || !form) {
-        console.error('Modal de edición no encontrado');
-        return;
-    }
-    
-    // Actualizar título con número de pedido
-    if (pedidoIdDisplay) {
-        pedidoIdDisplay.textContent = `#${pedido.numeroPedido || pedido.id}`;
-    }
-    
-    // Llenar los campos del formulario con validación
-    const setInputValue = (id, value) => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.value = value || '';
-            console.log(`${id}: "${value}"`);
-        } else {
-            console.warn(`Input ${id} no encontrado`);
-        }
-    };
-    
-    console.log('--- LLENANDO FORMULARIO ---');
-    setInputValue('editarUsuario', pedido.cliente);
-    setInputValue('editarTelefono', pedido.telefono);
-    setInputValue('editarFechaEntrega', pedido.fechaEntrega);
-    setInputValue('editarCanalVenta', pedido.canalVenta);
-    setInputValue('editarPrecioUnitario', pedido.precioUnitario);
-    setInputValue('editarCantidad', pedido.cantidad);
-    setInputValue('editarPrioridad', pedido.prioridad);
-    setInputValue('editarCategoriaProducto', pedido.categoriaProducto);
-    setInputValue('editarEspecificaciones', pedido.especificaciones);
-    
-    // Manejar colores
-    if (pedido.colores && pedido.colores !== 'No especificados') {
-        const coloresArray = pedido.colores.split(',').map(c => c.trim());
-        document.getElementById('editarColores').value = pedido.colores;
-        
-        // Asignar colores a los pickers
-        if (coloresArray[0]) {
-            document.getElementById('editarColorPicker1').value = coloresArray[0];
-            document.getElementById('editarColorName1').textContent = coloresArray[0];
-        }
-        if (coloresArray[1]) {
-            document.getElementById('editarColorPicker2').value = coloresArray[1];
-            document.getElementById('editarColorName2').textContent = coloresArray[1];
-        }
-        if (coloresArray[2]) {
-            document.getElementById('editarColorPicker3').value = coloresArray[2];
-            document.getElementById('editarColorName3').textContent = coloresArray[2];
-        }
-    } else {
-        document.getElementById('editarColores').value = '';
-    }
-    
-    // Manejar imágenes existentes
-    const imagePreviewContainer = document.getElementById('editarImagePreviewContainer');
-    if (imagePreviewContainer && pedido.imagenes && pedido.imagenes.length > 0) {
-        imagePreviewContainer.innerHTML = '';
-        pedido.imagenes.forEach(imgUrl => {
-            const imgElement = document.createElement('div');
-            imgElement.className = 'image-preview-item';
-            imgElement.innerHTML = `
-                <img src="${imgUrl}" alt="Imagen del producto">
-                <button type="button" class="remove-image" data-url="${imgUrl}">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            `;
-            imagePreviewContainer.appendChild(imgElement);
+    if (filterSelect) {
+        filterSelect.addEventListener('change', function() {
+            applyFilters();
         });
     }
+}
+
+// Mantener compatibilidad: delega al filtro compuesto
+function filterPedidosByStatus() { applyFilters(); }
+
+function setupSearch() {
+    const searchInput = document.querySelector('.search-input');
     
-    // Mostrar el modal
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            applyFilters();
+        });
+    }
+}
+
+// Mantener compatibilidad: delega al filtro compuesto
+function searchPedidos() { applyFilters(); }
+
+// Filtro compuesto: aplica búsqueda + estado sobre filas actuales
+function applyFilters() {
+    try {
+        const searchInput = document.querySelector('.search-input');
+        const filterSelect = document.querySelector('.filter-select');
+        const search = (searchInput?.value || '').toLowerCase();
+        const estado = (filterSelect?.value || '').trim();
+        if (typeof PedidosMVC !== 'undefined' && typeof PedidosMVC.filter === 'function') {
+            PedidosMVC.filter({ estado, search });
+            return;
+        }
+        // Fallback si PedidosMVC no está: filtrar directamente DOM
+        const rows = document.querySelectorAll('.pedidos-table tbody tr');
+        rows.forEach(row => {
+            if (row.querySelector('[colspan]')) return;
+            // Buscar texto
+            const rowText = Array.from(row.querySelectorAll('td')).map(td => td.textContent.toLowerCase()).join(' ');
+            const matchSearch = !search || rowText.includes(search);
+            // Estado por select o texto
+            let rowEstadoId = '';
+            const sel = row.querySelector('.status-selector');
+            if (sel) {
+                const val = (sel.value || '').toLowerCase();
+                rowEstadoId = mapEstadoToId(val);
+            } else {
+                const estadoCellText = (row.querySelector('.pedido-estado')?.textContent || '').toLowerCase();
+                rowEstadoId = mapEstadoToId(estadoCellText);
+            }
+            const matchEstado = !estado || rowEstadoId === estado;
+            row.style.display = (matchSearch && matchEstado) ? '' : 'none';
+        });
+    } catch (e) {
+        console.warn('applyFilters error:', e);
+    }
+}
+
+function mapEstadoToId(text) {
+    const t = (text || '').toLowerCase().trim();
+    if (t === '1' || t === 'entregado') return '1';
+    if (t === '2' || t === 'cancelado') return '2';
+    if (t === '3' || t.includes('proceso') || t === 'procesando' || t === 'pendiente') return '3';
+    return '';
+}
+
+function setupDetailsModal() {
+    const modal = document.getElementById('modalVerPedido');
+    if (!modal) return;
     
-    // Configurar botones de cerrar
     const closeBtn = modal.querySelector('.close');
     const cancelBtn = modal.querySelector('.btn-cancelar');
     
     if (closeBtn) {
-        closeBtn.onclick = function() {
+        closeBtn.addEventListener('click', function() {
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
-        };
+        });
     }
     
     if (cancelBtn) {
-        cancelBtn.onclick = function() {
+        cancelBtn.addEventListener('click', function() {
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
-        };
-    }
-    
-    // Cerrar al hacer clic fuera del modal
-    window.onclick = function(event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    };
-    
-    // Configurar el botón de guardar
-    const btnGuardar = document.getElementById('btnGuardarEdicion');
-    if (btnGuardar) {
-        // Remover listeners anteriores
-        btnGuardar.replaceWith(btnGuardar.cloneNode(true));
-        const newBtnGuardar = document.getElementById('btnGuardarEdicion');
-        
-        newBtnGuardar.addEventListener('click', async function(e) {
-            e.preventDefault();
-            await guardarEdicionPedido(pedido.id, pedido.idDetalle);
         });
     }
     
-    console.log('Modal de edición mostrado');
-}
-
-// Guardar los cambios del pedido editado
-async function guardarEdicionPedido(pedidoId, detalleId) {
-    console.log('Guardando cambios del pedido:', pedidoId);
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    });
     
-    try {
-        // Recopilar datos del formulario
-        const pedidoData = {
-            clienteNombre: document.getElementById('editarUsuario').value,
-            clienteTelefono: document.getElementById('editarTelefono').value,
-            fechaEntrega: document.getElementById('editarFechaEntrega').value,
-            canalVenta: document.getElementById('editarCanalVenta').value,
-            prioridad: document.getElementById('editarPrioridad').value,
-            observaciones: document.getElementById('editarEspecificaciones').value, // Las especificaciones van en observaciones
-            detalles_producto: JSON.stringify({
-                categoria: document.getElementById('editarCategoriaProducto').value,
-                colores: document.getElementById('editarColores').value,
-                imagenes: [] // Las imágenes se manejarían por separado si se implementa carga
-            })
-        };
-        
-        console.log('Datos del pedido a actualizar:', pedidoData);
-        
-        // Actualizar pedido
-        await PedidosMVC.updatePedido(pedidoId, pedidoData);
-        
-        // Actualizar detalle si existe
-        if (detalleId) {
-            const detalleData = {
-                cantidad: parseInt(document.getElementById('editarCantidad').value),
-                precio_unitario: parseFloat(document.getElementById('editarPrecioUnitario').value),
-                detalles_personalizados: JSON.stringify({
-                    categoria: document.getElementById('editarCategoriaProducto').value,
-                    colores: document.getElementById('editarColores').value,
-                    especificaciones: document.getElementById('editarEspecificaciones').value
-                })
-            };
+    // Configurar botón de actualizar estado en el modal
+    const btnActualizarEstado = modal.querySelector('.btn-actualizar-estado');
+    const estadoSelector = modal.querySelector('#estadoPedido');
+    
+    if (btnActualizarEstado && estadoSelector) {
+        btnActualizarEstado.addEventListener('click', async function() {
+            const pedidoId = modal.getAttribute('data-pedido-id');
+            const nuevoEstadoId = estadoSelector.value;
             
-            console.log('Datos del detalle a actualizar:', detalleData);
-            await PedidosMVC.updateDetalle(detalleId, detalleData);
-        }
-        
-        // Cerrar modal
-        const modal = document.getElementById('modalEditarPedido');
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        
-        showNotification('Pedido actualizado correctamente', 'success');
-        
-        // Refrescar tabla
-        const parts = window.location.pathname.split('/');
-        const pIdx = parts.indexOf('public');
-        const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
-        await PedidosMVC.init({ 
-            apiEntry: base + '/public/index.php',
-            tableSelector: '.pedidos-table tbody',
-            autoCreateToken: true
+            if (!pedidoId) {
+                showNotification('Error: No se pudo identificar el pedido', 'error');
+                return;
+            }
+            
+            console.log('Actualizando estado del pedido:', pedidoId, 'a estado:', nuevoEstadoId);
+            
+            // Confirmar el cambio
+            const opcionSeleccionada = estadoSelector.options[estadoSelector.selectedIndex];
+            const nombreEstado = opcionSeleccionada.text;
+            
+            if (!confirm(`¿Cambiar estado del pedido a "${nombreEstado}"?`)) {
+                return;
+            }
+            
+            try {
+                // Deshabilitar el botón mientras se actualiza
+                btnActualizarEstado.disabled = true;
+                btnActualizarEstado.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Actualizando...';
+                
+                // Llamar a la API para actualizar el estado
+                const response = await fetch(`/Color_Ink/public/index.php?route=pedidos/${pedidoId}/cambiar-estado&caso=1`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                    },
+                    body: JSON.stringify({
+                        id_estado_nuevo: parseInt(nuevoEstadoId)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && (data.status === 'OK' || data.status === 'success')) {
+                    showNotification(`Estado actualizado a: ${nombreEstado}`, 'success');
+                    
+                    // Cerrar modal
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    
+                    // Recargar la tabla
+                    if (typeof PedidosMVC !== 'undefined') {
+                        console.log('Recargando tabla después de cambio de estado...');
+                        await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+                    }
+                } else {
+                    throw new Error(data.message || 'Error al cambiar el estado');
+                }
+            } catch (error) {
+                console.error('Error cambiando estado:', error);
+                showNotification('Error al cambiar el estado del pedido', 'error');
+            } finally {
+                btnActualizarEstado.disabled = false;
+                btnActualizarEstado.innerHTML = '<i class="fa-solid fa-sync-alt"></i> Actualizar';
+            }
         });
-    } catch (error) {
-        console.error('Error al guardar cambios:', error);
-        showNotification('Error al actualizar el pedido: ' + (error.message || 'Error desconocido'), 'error');
     }
 }
 
-// Configurar los color pickers del modal de edición
 function setupEditColorPickers() {
     const editColorPickers = [
         { picker: 'editarColorPicker1', name: 'editarColorName1' },
@@ -651,6 +416,1227 @@ function updateEditColorsField() {
     document.getElementById('editarColores').value = colors.join(', ');
 }
 
+// ===== MODAL DE CONFIRMACIÓN DE ELIMINACIÓN =====
+function setupConfirmDeleteModal() {
+    const modal = document.getElementById('modalConfirmDelete');
+    const btnCancel = document.getElementById('btnCancelDelete');
+    const btnConfirm = document.getElementById('btnConfirmDelete');
+    
+    if (!modal) {
+        console.error('Modal de confirmación no encontrado');
+        return;
+    }
+    
+    // Cerrar modal con botón cancelar
+    if (btnCancel) {
+        btnCancel.addEventListener('click', function() {
+            modal.classList.remove('show');
+        });
+    }
+    
+    // Cerrar modal al hacer clic fuera
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('show');
+        }
+    });
+    
+    // El botón confirmar se configura dinámicamente en showConfirmDelete()
+}
+
+/**
+ * Muestra el modal de confirmación de eliminación
+ * @param {string} message - Mensaje principal
+ * @param {Function} onConfirm - Función a ejecutar si se confirma
+ */
+function showConfirmDelete(message, onConfirm) {
+    return new Promise((resolve, reject) => {
+        const modal = document.getElementById('modalConfirmDelete');
+        const messageElement = document.getElementById('confirmDeleteMessage');
+        const btnConfirm = document.getElementById('btnConfirmDelete');
+        const btnCancel = document.getElementById('btnCancelDelete');
+        
+        if (!modal || !messageElement || !btnConfirm) {
+            console.error('Elementos del modal de confirmación no encontrados');
+            reject(new Error('Modal no disponible'));
+            return;
+        }
+        
+        // Establecer mensaje
+        messageElement.textContent = message;
+        
+        // Mostrar modal
+        modal.classList.add('show');
+        
+        // Función para limpiar event listeners
+        const cleanup = () => {
+            btnConfirm.replaceWith(btnConfirm.cloneNode(true));
+            btnCancel.replaceWith(btnCancel.cloneNode(true));
+            modal.classList.remove('show');
+            // Reconfigurar listeners básicos
+            setupConfirmDeleteModal();
+        };
+        
+        // Configurar botón confirmar
+        const newBtnConfirm = document.getElementById('btnConfirmDelete');
+        newBtnConfirm.addEventListener('click', async function() {
+            cleanup();
+            try {
+                if (onConfirm) await onConfirm();
+                resolve(true);
+            } catch (error) {
+                reject(error);
+            }
+        });
+        
+        // Configurar botón cancelar
+        const newBtnCancel = document.getElementById('btnCancelDelete');
+        newBtnCancel.addEventListener('click', function() {
+            cleanup();
+            resolve(false);
+        });
+        
+        // Cerrar con ESC
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                cleanup();
+                document.removeEventListener('keydown', handleEscape);
+                resolve(false);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    });
+}
+
+function setupModal() {
+    modal = document.getElementById('modalNuevoPedido');
+    form = document.getElementById('formNuevoPedido');
+    
+    if (!modal || !form) {
+        console.error('setupModal: No se encontró el modal o el formulario', { modal, form });
+        return;
+    }
+    
+    console.log('setupModal: Modal y formulario encontrados correctamente');
+    
+    // Configurar botones de cerrar
+    const closeBtn = modal.querySelector('.close');
+    const cancelBtn = modal.querySelector('.btn-cancelar');
+    
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    
+    // Cerrar modal al hacer clic fuera de él
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // NOTA: El envío del formulario hacia el backend se gestiona más abajo
+    // con crearNuevoPedido(). Evitamos el manejador antiguo para no duplicar
+    // listeners ni realizar envíos locales sin API.
+    // form.addEventListener('submit', handleFormSubmit);
+    
+    // Configurar validación en tiempo real
+    setupFormValidation();
+    
+    // Configurar cálculo automático de total
+    setupPriceCalculation();
+    
+    // Configurar subida de imágenes
+    setupImageUpload();
+    
+    // Configurar selectores de color
+    setupColorPickers();
+    
+    // Los productos múltiples ahora se gestionan dentro del modal de Personalizado
+}
+
+function openModal() {
+    console.log('openModal llamado, modal:', modal);
+    if (!modal) {
+        console.error('openModal: modal es null, intentando obtenerlo nuevamente');
+        modal = document.getElementById('modalNuevoPedido');
+    }
+    
+    if (modal) {
+        console.log('openModal: Abriendo modal');
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+        
+        // Limpiar productos y resumen
+        productosPersonalizados = [];
+        productoActivo = 0;
+        sessionStorage.removeItem('detalles_productos');
+        sessionStorage.removeItem('observaciones');
+        
+        // Ocultar resumen de totales
+        const resumenContainer = document.getElementById('resumenTotalesNuevoPedido');
+        if (resumenContainer) {
+            resumenContainer.style.display = 'none';
+        }
+        
+        // Establecer fecha mínima para entrega (hoy)
+        const fechaEntrega = document.getElementById('fechaEntrega');
+        if (fechaEntrega) {
+            const today = new Date().toISOString().split('T')[0];
+            fechaEntrega.min = today;
+            // Prefijar por defecto la fecha de hoy si está vacía
+            if (!fechaEntrega.value) {
+                fechaEntrega.value = today;
+            }
+        }
+        
+        // Enfocar el primer campo
+        const firstInput = form.querySelector('input[required]');
+        if (firstInput) {
+            setTimeout(() => firstInput.focus(), 100);
+        }
+    }
+}
+
+function closeModal() {
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restaurar scroll del body
+        
+        // Limpiar formulario
+        form.reset();
+        clearFormErrors();
+    }
+}
+
+function setupProductDetailsModal() {
+    productDetailsModal = document.getElementById('modalDetallesProducto');
+    productDetailsForm = document.getElementById('formDetallesProducto');
+    if (!productDetailsModal || !productDetailsForm) return;
+
+    // Botón para abrir modal
+    const btnDetalles = document.getElementById('btnDetallesProducto');
+    if (btnDetalles) {
+        btnDetalles.addEventListener('click', openProductDetailsModal);
+    }
+
+    // Botones de cerrar
+    const closeBtn = productDetailsModal.querySelector('.close');
+    const cancelBtn = productDetailsModal.querySelector('.btn-cancelar');
+    const guardarBtn = document.getElementById('guardarDetalles');
+    if (closeBtn) closeBtn.addEventListener('click', closeProductDetailsModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeProductDetailsModal);
+    
+    // Botón guardar detalles
+    if (guardarBtn) {
+        guardarBtn.addEventListener('click', function() {
+            console.log('Click en guardar detalles');
+            guardarDetallesProducto();
+        });
+    } else {
+        console.error('No se encontró el botón #guardarDetalles');
+    }
+
+    // Cerrar modal al hacer clic fuera de él
+    productDetailsModal.addEventListener('click', function(e) {
+        if (e.target === productDetailsModal) closeProductDetailsModal();
+    });
+
+    // Validación y funcionalidades
+    setupProductDetailsValidation();
+    setupProductDetailsImageUpload();
+    setupProductDetailsColorPickers();
+
+    // Configuración de total simple
+    ['pdCantidad','pdPrecio','pdDescuento','pdImpuesto'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updatePdTotalPreview);
+    });
+    updatePdTotalPreview();
+}
+
+function productoVacio() {
+    return {
+        categoria: '', colores: '', especificaciones: '', imagenesUrls: '[]', cantidad: 1, precio: 0, descuento: 0, impuesto: 0
+    };
+}
+
+function renderProductosNav() {
+    const nav = document.getElementById('productosNav');
+    if (!nav) return;
+    
+    nav.innerHTML = '';
+    
+    // Botones de productos numerados
+    productosPersonalizados.forEach((prod, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-producto-nav';
+        btn.textContent = (idx + 1);
+        btn.style = 'padding: 4px 10px; border-radius: 50%; margin-right: 2px; border: 1px solid #ccc; cursor: pointer;';
+        if (idx === productoActivo) {
+            btn.style.background = '#b2f2e6';
+            btn.style.fontWeight = 'bold';
+        }
+        btn.onclick = () => {
+            guardarProductoActual();
+            productoActivo = idx;
+            cargarProductoEnFormulario(idx);
+            renderProductosNav();
+        };
+        nav.appendChild(btn);
+    });
+    
+    // Botón + para agregar
+    const btnAdd = document.createElement('button');
+    btnAdd.type = 'button';
+    btnAdd.className = 'btn-add-producto';
+    btnAdd.title = 'Agregar producto';
+    btnAdd.innerHTML = '<i class="fa-solid fa-plus"></i>';
+    btnAdd.style = 'font-size:1.2em; padding:0 10px; border-radius:50%; background:#e0e0e0; border:none; margin-left:4px; cursor: pointer;';
+    btnAdd.onclick = () => {
+        guardarProductoActual();
+        productosPersonalizados.push(productoVacio());
+        productoActivo = productosPersonalizados.length - 1;
+        cargarProductoEnFormulario(productoActivo);
+        renderProductosNav();
+    };
+    nav.appendChild(btnAdd);
+}
+
+function cargarProductoEnFormulario(idx) {
+    const prod = productosPersonalizados[idx] || productoVacio();
+    document.getElementById('categoriaProducto').value = prod.categoria || '';
+    document.getElementById('colores').value = prod.colores || '';
+    document.getElementById('especificaciones').value = prod.especificaciones || '';
+    document.getElementById('pdCantidad').value = prod.cantidad || 1;
+    document.getElementById('pdPrecio').value = prod.precio || 0;
+    document.getElementById('pdDescuento').value = prod.descuento || 0;
+    document.getElementById('pdImpuesto').value = prod.impuesto || 0;
+    updatePdTotalPreview();
+    // Colores y preview imágenes pueden mejorarse aquí
+}
+
+function openProductDetailsModal() {
+    // Si hay datos temporales en sessionStorage (vienen desde el modal de edición), cargarlos
+    try {
+        const ss = sessionStorage.getItem('detalles_productos');
+        if (ss) {
+            const parsed = JSON.parse(ss);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                productosPersonalizados = parsed;
+                productoActivo = 0;
+            }
+        }
+    } catch (e) {
+        console.warn('No se pudieron cargar productos desde sessionStorage:', e);
+    }
+
+    if (!productosPersonalizados.length) {
+        productosPersonalizados = [productoVacio()];
+        productoActivo = 0;
+    }
+    cargarProductoEnFormulario(productoActivo);
+    renderProductosNav();
+    if (productDetailsModal) {
+        productDetailsModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        // Enfocar el primer campo
+        const firstInput = productDetailsForm.querySelector('input[required]');
+        if (firstInput) setTimeout(() => firstInput.focus(), 100);
+    }
+}
+
+function closeProductDetailsModal() {
+    if (productDetailsModal) {
+        productDetailsModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+function guardarDetallesProducto() {
+    guardarProductoActual();
+    // Guardar en sessionStorage
+    sessionStorage.setItem('detalles_productos', JSON.stringify(productosPersonalizados));
+    // Guardar la cantidad total en observaciones (puedes ajustar esto según tu backend)
+    sessionStorage.setItem('observaciones', productosPersonalizados.length);
+    // Actualizar campos de totales en el modal de edición (si está abierto)
+    try {
+        actualizarCamposTotalesEnEdicion();
+    } catch (e) {}
+    
+    // Actualizar resumen de totales en modal de nuevo pedido
+    actualizarResumenNuevoPedido();
+
+    closeProductDetailsModal();
+    showNotification('Detalles de productos guardados', 'success');
+}
+
+// Función para actualizar el resumen de totales en el modal de nuevo pedido
+function actualizarResumenNuevoPedido() {
+    const resumenContainer = document.getElementById('resumenTotalesNuevoPedido');
+    if (!resumenContainer) return;
+    
+    const productos = productosPersonalizados || [];
+    
+    if (productos.length === 0) {
+        resumenContainer.style.display = 'none';
+        return;
+    }
+    
+    // Mostrar el resumen
+    resumenContainer.style.display = 'block';
+    
+    // Calcular totales - cada producto con su propio descuento e impuesto
+    let cantidadTotal = 0;
+    let subtotalSinDescuentos = 0;
+    let totalDescuentos = 0;
+    let totalImpuestos = 0;
+    let totalGeneral = 0;
+    
+    productos.forEach(prod => {
+        const cantidad = Number(prod.cantidad || 0);
+        const precio = Number(prod.precio || 0);
+        const descuento = Number(prod.descuento || 0);
+        const impuesto = Number(prod.impuesto || 0);
+        
+        cantidadTotal += cantidad;
+        
+        // Subtotal del producto
+        let subtotalProducto = cantidad * precio;
+        subtotalSinDescuentos += subtotalProducto;
+        
+        // Aplicar descuento del producto
+        const montoDescuentoProducto = subtotalProducto * (descuento / 100);
+        totalDescuentos += montoDescuentoProducto;
+        subtotalProducto = subtotalProducto - montoDescuentoProducto;
+        
+        // Aplicar impuesto del producto
+        const montoImpuestoProducto = subtotalProducto * (impuesto / 100);
+        totalImpuestos += montoImpuestoProducto;
+        
+        // Total del producto
+        totalGeneral += subtotalProducto + montoImpuestoProducto;
+    });
+    
+    // Calcular porcentajes promedio para mostrar (solo visual)
+    const descuentoPromedio = subtotalSinDescuentos > 0 ? (totalDescuentos / subtotalSinDescuentos * 100) : 0;
+    const subtotalConDescuento = subtotalSinDescuentos - totalDescuentos;
+    const impuestoPromedio = subtotalConDescuento > 0 ? (totalImpuestos / subtotalConDescuento * 100) : 0;
+    
+    // Actualizar los valores en el DOM
+    document.getElementById('resumenCantidadProductos').textContent = productos.length;
+    document.getElementById('resumenCantidadTotal').textContent = cantidadTotal;
+    document.getElementById('resumenSubtotal').textContent = formatoLempiras(subtotalSinDescuentos);
+    document.getElementById('resumenPorcentajeDescuento').textContent = descuentoPromedio.toFixed(1);
+    document.getElementById('resumenMontoDescuento').textContent = formatoLempiras(totalDescuentos);
+    document.getElementById('resumenPorcentajeImpuesto').textContent = impuestoPromedio.toFixed(1);
+    document.getElementById('resumenMontoImpuesto').textContent = formatoLempiras(totalImpuestos);
+    document.getElementById('resumenTotalGeneral').textContent = formatoLempiras(totalGeneral);
+}
+
+// Función para crear nuevo pedido
+async function crearNuevoPedido() {
+    console.log('Creando nuevo pedido...');
+    
+    try {
+        // Obtener productos desde sessionStorage
+        const detallesProductos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
+        
+        if (detallesProductos.length === 0) {
+            showNotification('Debe agregar al menos un producto usando el botón "Personalizado"', 'warning');
+            return;
+        }
+        
+        // Calcular totales - cada producto con su propio descuento e impuesto
+        let totalCantidad = 0;
+        let subtotalSinDescuentos = 0;
+        let totalDescuentos = 0;
+        let totalImpuestos = 0;
+        let totalGeneral = 0;
+        
+        detallesProductos.forEach(prod => {
+            const cantidad = Number(prod.cantidad || 0);
+            const precio = Number(prod.precio || 0);
+            const descuento = Number(prod.descuento || 0);
+            const impuesto = Number(prod.impuesto || 0);
+            
+            totalCantidad += cantidad;
+            
+            // Subtotal del producto
+            let subtotalProducto = cantidad * precio;
+            subtotalSinDescuentos += subtotalProducto;
+            
+            // Aplicar descuento del producto
+            const montoDescuentoProducto = subtotalProducto * (descuento / 100);
+            totalDescuentos += montoDescuentoProducto;
+            subtotalProducto = subtotalProducto - montoDescuentoProducto;
+            
+            // Aplicar impuesto del producto
+            const montoImpuestoProducto = subtotalProducto * (impuesto / 100);
+            totalImpuestos += montoImpuestoProducto;
+            
+            // Total del producto
+            totalGeneral += subtotalProducto + montoImpuestoProducto;
+        });
+        
+        // Calcular porcentajes promedio (solo para referencia)
+        const descuentoPromedio = subtotalSinDescuentos > 0 ? (totalDescuentos / subtotalSinDescuentos * 100) : 0;
+        const subtotalConDescuento = subtotalSinDescuentos - totalDescuentos;
+        const impuestoPromedio = subtotalConDescuento > 0 ? (totalImpuestos / subtotalConDescuento * 100) : 0;
+        
+        // Recopilar datos del formulario
+        const pedidoData = {
+            clienteNombre: document.getElementById('clienteNombre').value,
+            clienteTelefono: document.getElementById('clienteTelefono').value,
+            fechaEntrega: document.getElementById('fechaEntrega').value,
+            canalVenta: document.getElementById('canalVenta').value,
+            prioridad: document.getElementById('prioridad').value,
+            observaciones: detallesProductos.length + ' producto(s)',
+            detalles_producto: JSON.stringify(detallesProductos),
+            cantidad: totalCantidad,
+            precio_unitario: Number((subtotalSinDescuentos / (totalCantidad || 1)).toFixed(2)), // Precio unitario promedio
+            precio: Number(totalGeneral.toFixed(2)), // Total general
+            descuento: descuentoPromedio,
+            impuesto: impuestoPromedio
+        };
+        
+        console.log('Datos del nuevo pedido:', pedidoData);
+        
+        // Crear pedido
+        const response = await PedidosMVC.crearPedido(pedidoData);
+        
+        console.log('Respuesta completa del servidor:', response);
+        
+        // Validar diferentes formatos de respuesta exitosa
+        const isSuccess = response && (
+            response.status === 'success' || 
+            response.status === 'OK' || 
+            (response.message && response.message.includes('exitosamente'))
+        );
+        
+        if (isSuccess) {
+            showNotification('Pedido creado exitosamente', 'success');
+            
+            // Cerrar modal
+            closeModal();
+            
+            // Limpiar sessionStorage
+            sessionStorage.removeItem('detalles_productos');
+            sessionStorage.removeItem('observaciones');
+            
+            // Limpiar formulario
+            document.getElementById('formNuevoPedido').reset();
+            
+            // Refrescar tabla
+            console.log('Refrescando tabla de pedidos después de crear...');
+            try {
+                // Limpiar caché de localStorage antes de refrescar
+                console.log('Limpiando caché de pedidos...');
+                localStorage.removeItem('pedidos');
+                
+                await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+                console.log('Tabla refrescada exitosamente');
+            } catch (refreshError) {
+                console.error('Error al refrescar tabla:', refreshError);
+                // Intentar recargar la página como último recurso
+                console.log('Recargando página...');
+                window.location.reload();
+            }
+        } else {
+            throw new Error(response?.message || 'Error al crear pedido');
+        }
+        
+    } catch (error) {
+        console.error('Error al crear pedido:', error);
+        showNotification('Error al crear el pedido: ' + (error.message || 'Error desconocido'), 'error');
+    }
+}
+
+// Actualiza los campos visibles del modal de edición con los totales calculados
+function actualizarCamposTotalesEnEdicion() {
+    try {
+        const detallesProductos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
+        if (!Array.isArray(detallesProductos) || detallesProductos.length === 0) return;
+
+        // Calcular totales - cada producto con su propio descuento e impuesto
+        let totalCantidad = 0;
+        let subtotalSinDescuentos = 0;
+        let totalDescuentos = 0;
+        let totalImpuestos = 0;
+        let totalGeneral = 0;
+        
+        detallesProductos.forEach(prod => {
+            const cantidad = Number(prod.cantidad || 0);
+            const precio = Number(prod.precio || 0);
+            const descuento = Number(prod.descuento || 0);
+            const impuesto = Number(prod.impuesto || 0);
+            
+            totalCantidad += cantidad;
+            
+            // Subtotal del producto
+            let subtotalProducto = cantidad * precio;
+            subtotalSinDescuentos += subtotalProducto;
+            
+            // Aplicar descuento del producto
+            const montoDescuentoProducto = subtotalProducto * (descuento / 100);
+            totalDescuentos += montoDescuentoProducto;
+            subtotalProducto = subtotalProducto - montoDescuentoProducto;
+            
+            // Aplicar impuesto del producto
+            const montoImpuestoProducto = subtotalProducto * (impuesto / 100);
+            totalImpuestos += montoImpuestoProducto;
+            
+            // Total del producto
+            totalGeneral += subtotalProducto + montoImpuestoProducto;
+        });
+
+        // Calcular porcentajes promedio
+        const descuentoPromedio = subtotalSinDescuentos > 0 ? (totalDescuentos / subtotalSinDescuentos * 100) : 0;
+        const subtotalConDescuento = subtotalSinDescuentos - totalDescuentos;
+        const impuestoPromedio = subtotalConDescuento > 0 ? (totalImpuestos / subtotalConDescuento * 100) : 0;
+
+        // Actualizar inputs del modal de edición si existen
+        const inpCantidad = document.getElementById('editarCantidad');
+        const inpPrecio = document.getElementById('editarPrecioUnitario');
+        const inpDescuento = document.getElementById('editarDescuento');
+        const inpImpuesto = document.getElementById('editarImpuesto');
+
+        if (inpCantidad) inpCantidad.value = totalCantidad;
+        if (inpPrecio) inpPrecio.value = Number(totalGeneral.toFixed(2));
+        if (inpDescuento) inpDescuento.value = descuentoPromedio.toFixed(2);
+        if (inpImpuesto) inpImpuesto.value = impuestoPromedio.toFixed(2);
+    } catch (e) {
+        console.error('Error actualizando campos de totales en edición:', e);
+    }
+}
+
+// ===== FIN FUNCIONES DE INICIALIZACIÓN =====
+
+// ===== FUNCIONES CRÍTICAS PARA ACCIONES DE BOTONES =====
+
+function getActionFromIcon(icon) {
+    if (!icon) return null;
+    
+    const classList = icon.classList;
+    if (classList.contains('fa-eye')) return 'view';
+    if (classList.contains('fa-edit')) return 'edit';
+    if (classList.contains('fa-trash')) return 'delete';
+    
+    return null;
+}
+
+function handleAction(action, pedidoId, row) {
+    console.log(`Ejecutando acción: ${action} para pedido ${pedidoId}`);
+    
+    switch(action) {
+        case 'view':
+            viewPedido(pedidoId, row);
+            break;
+        case 'edit':
+            editPedido(pedidoId);
+            break;
+        case 'delete':
+            deletePedido(pedidoId, row);
+            break;
+        default:
+            console.warn('Acción no reconocida:', action);
+    }
+}
+
+async function viewPedido(pedidoId, row) {
+    console.log('Mostrando detalles del pedido:', pedidoId);
+    
+    try {
+        // Obtener datos completos desde la API
+        const pedidoRes = await PedidosMVC.fetchOne(pedidoId);
+        const detallesRes = await PedidosMVC.fetchDetalle(pedidoId);
+        
+        console.log('Respuesta del pedido:', pedidoRes);
+        console.log('Respuesta del detalle:', detallesRes);
+        
+        if (!pedidoRes || !pedidoRes.data) {
+            showNotification('No se pudieron cargar los detalles del pedido', 'error');
+            return;
+        }
+        
+        // La API devuelve un array, necesitamos encontrar el pedido específico
+        let data = null;
+        if (Array.isArray(pedidoRes.data)) {
+            data = pedidoRes.data.find(p => p.id_pedido == pedidoId);
+        } else {
+            data = pedidoRes.data;
+        }
+        
+        if (!data) {
+            showNotification('No se encontró el pedido solicitado', 'error');
+            return;
+        }
+        
+        // Lo mismo para el detalle
+        let detalle = null;
+        if (detallesRes && detallesRes.data) {
+            if (Array.isArray(detallesRes.data)) {
+                detalle = detallesRes.data.find(d => d.id_pedido == pedidoId);
+            } else {
+                detalle = detallesRes.data;
+            }
+        }
+        
+        console.log('Pedido encontrado:', data);
+        console.log('Detalle encontrado:', detalle);
+        
+        // Parsear detalles_producto (JSON en la tabla pedido)
+        let detallesProducto = null;
+        if (data.detalles_producto) {
+            try {
+                detallesProducto = typeof data.detalles_producto === 'string' 
+                    ? JSON.parse(data.detalles_producto) 
+                    : data.detalles_producto;
+                console.log('Detalles producto parseados:', detallesProducto);
+            } catch (e) {
+                console.warn('Error al parsear detalles_producto:', e);
+            }
+        }
+        
+        // Parsear detalles_personalizados (JSON en la tabla detallepedido)
+        let detallesPersonalizados = null;
+        if (detalle && detalle.detalles_personalizados) {
+            try {
+                detallesPersonalizados = typeof detalle.detalles_personalizados === 'string' 
+                    ? JSON.parse(detalle.detalles_personalizados) 
+                    : detalle.detalles_personalizados;
+                console.log('Detalles personalizados parseados:', detallesPersonalizados);
+            } catch (e) {
+                console.warn('Error al parsear detalles_personalizados:', e);
+            }
+        }
+        
+        // Construir objeto con datos completos
+        const pedidoData = {
+            id: data.id_pedido || pedidoId,
+            numeroPedido: data.numero_pedido || '',
+            cliente: data.cliente_nombre || 'Sin nombre',
+            telefono: data.cliente_telefono || 'No especificado',
+            email: data.email || 'No especificado',
+            fecha: data.fecha_pedido || '',
+            fechaEntrega: data.fecha_entrega || 'No especificada',
+            estado: data.estado_codigo || data.id_estado || 'PROCESO',
+            estadoNombre: data.estado_nombre || 'En Proceso',
+            prioridad: data.prioridad || 'normal',
+            canalVenta: data.canal_venta || 'No especificado',
+            observaciones: data.observaciones || '',
+            direccion: data.direccion || 'No especificada',
+            
+            // Datos del detalle
+            cantidad: detalle ? detalle.cantidad : 1,
+            precioUnitario: detalle ? parseFloat(detalle.precio_unitario) : 0,
+            total: detalle ? (detalle.total_linea !== undefined && detalle.total_linea !== null ? parseFloat(detalle.total_linea).toFixed(2) : (parseFloat(detalle.cantidad) * parseFloat(detalle.precio_unitario)).toFixed(2)) : '0.00',
+            
+            // *** IMPORTANTE: Pasar detalles_producto completo (array de productos) ***
+            detalles_producto: detallesProducto || null,
+            
+            // Datos de detalles_producto (de la tabla pedido) - compatibilidad con vista antigua
+            categoriaProducto: detallesProducto?.categoria || 'No especificado',
+            colores: detallesProducto?.colores || 'No especificado',
+            imagenes: detallesProducto?.imagenes || [],
+            
+            // Especificaciones desde observaciones de la tabla pedido
+            especificaciones: data.observaciones || 'No especificadas'
+        };
+        
+        // Si hay detalles personalizados, sobrescribir con esos valores
+        if (detallesPersonalizados) {
+            if (detallesPersonalizados.categoria) pedidoData.categoriaProducto = detallesPersonalizados.categoria;
+            if (detallesPersonalizados.colores) pedidoData.colores = detallesPersonalizados.colores;
+            if (detallesPersonalizados.imagenes) pedidoData.imagenes = detallesPersonalizados.imagenes;
+        }
+        
+        console.log('Datos finales a mostrar:', pedidoData);
+        console.log('detalles_producto:', pedidoData.detalles_producto);
+        
+        // Mostrar modal con los detalles
+        showPedidoDetails(pedidoData);
+    } catch (error) {
+        console.error('Error al cargar detalles del pedido:', error);
+        showNotification('Error al cargar los detalles del pedido', 'error');
+    }
+}
+
+async function editPedido(pedidoId) {
+    console.log('Editando pedido:', pedidoId);
+    
+    try {
+        // Obtener datos completos desde la API
+        const pedidoRes = await PedidosMVC.fetchOne(pedidoId);
+        
+        console.log('Respuesta del pedido para editar:', pedidoRes);
+        
+        if (!pedidoRes || !pedidoRes.data) {
+            showNotification('No se pudieron cargar los datos del pedido', 'error');
+            return;
+        }
+        
+        // La API devuelve un array, necesitamos encontrar el pedido específico
+        let data = null;
+        if (Array.isArray(pedidoRes.data)) {
+            data = pedidoRes.data.find(p => p.id_pedido == pedidoId);
+        } else {
+            data = pedidoRes.data;
+        }
+        
+        if (!data) {
+            showNotification('No se encontró el pedido solicitado', 'error');
+            return;
+        }
+        
+        // Obtener el detalle directamente del pedido (getPedidoById incluye 'detalles')
+        let detalle = null;
+        if (data && data.detalles) {
+            if (Array.isArray(data.detalles) && data.detalles.length > 0) {
+                detalle = data.detalles[0];
+            } else if (typeof data.detalles === 'object') {
+                detalle = data.detalles; // por si viene como objeto
+            }
+        }
+        
+        console.log('Pedido para editar:', data);
+        console.log('Detalle para editar:', detalle);
+        
+        // Parsear detalles_producto (JSON en la tabla pedido - ARRAY de productos)
+        let detallesProducto = [];
+        if (data.detalles_producto) {
+            console.log('detalles_producto RAW:', data.detalles_producto);
+            console.log('Tipo de detalles_producto:', typeof data.detalles_producto);
+            try {
+                const parsed = typeof data.detalles_producto === 'string' 
+                    ? JSON.parse(data.detalles_producto) 
+                    : data.detalles_producto;
+                // Asegurarse de que sea un array
+                detallesProducto = Array.isArray(parsed) ? parsed : [parsed];
+                console.log('detalles_producto PARSEADO:', detallesProducto);
+                console.log('Cantidad de productos:', detallesProducto.length);
+            } catch (e) {
+                console.warn('Error al parsear detalles_producto:', e);
+                detallesProducto = [];
+            }
+        } else {
+            console.warn('NO HAY detalles_producto en data');
+        }
+        
+        // Construir objeto con datos completos
+        const pedidoData = {
+            id: data.id_pedido || pedidoId,
+            numeroPedido: data.numero_pedido || '',
+            cliente: data.cliente_nombre || '',
+            telefono: data.cliente_telefono || '',
+            fecha: data.fecha_pedido || '',
+            // Manejar diferentes formatos de fecha
+            fechaEntrega: (() => {
+                if (!data.fecha_entrega) return '';
+                // Si tiene espacio, dividir por espacio (formato: 2025-10-27 00:00:00)
+                if (data.fecha_entrega.includes(' ')) {
+                    return data.fecha_entrega.split(' ')[0];
+                }
+                // Si tiene T, dividir por T (formato ISO: 2025-10-27T00:00:00)
+                if (data.fecha_entrega.includes('T')) {
+                    return data.fecha_entrega.split('T')[0];
+                }
+                // Si ya está en formato YYYY-MM-DD, devolverlo tal cual
+                return data.fecha_entrega;
+            })(),
+            estado: data.estado_codigo || data.id_estado || 'PROCESO',
+            estadoNombre: data.estado_nombre || 'En Proceso',
+            prioridad: data.prioridad || 'normal',
+            canalVenta: data.canal_venta || '',
+            observaciones: data.observaciones || '',
+            
+            // Datos del detalle de detallepedido (totales globales)
+            cantidad: detalle ? parseInt(detalle.cantidad) : 0,
+            precioUnitario: detalle ? parseFloat(detalle.precio_unitario) : 0,
+            descuento: detalle ? parseFloat(detalle.descuento || 0) : 0,
+            impuesto: detalle ? parseFloat(detalle.impuesto || 0) : 0,
+            idDetalle: detalle ? (detalle.id_detalle || detalle.id || null) : null,
+            
+            // Array de productos del pedido
+            productos: detallesProducto,
+            
+            // Especificaciones desde observaciones
+            especificaciones: data.observaciones || ''
+        };
+        
+        console.log('Datos finales para edición:', pedidoData);
+        
+        // Mostrar modal de edición con los datos
+        showEditPedidoModal(pedidoData);
+    } catch (error) {
+        console.error('Error al cargar datos para edición:', error);
+        showNotification('Error al cargar los datos del pedido', 'error');
+    }
+}
+
+// ===== FIN FUNCIONES CRÍTICAS PARA ACCIONES =====
+
+// ===== FUNCIONES CRÍTICAS PARA RECONFIGURACIÓN =====
+// Estas funciones deben estar disponibles inmediatamente
+
+// Configurar botones de acción en tabla
+function setupActionButtons() {
+    console.log('Configurando botones de acción de tabla...');
+    const actionButtons = document.querySelectorAll('.pedidos-table .btn-action');
+    console.log(`Encontrados ${actionButtons.length} botones de acción`);
+    
+    actionButtons.forEach(button => {
+        // Remover listeners existentes clonando el botón
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        newButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const icon = this.querySelector('i');
+            const action = getActionFromIcon(icon);
+            const row = this.closest('tr');
+            const pedidoId = this.dataset.id || row.querySelector('.pedido-id')?.textContent?.trim() || null;
+            
+            console.log('Botón clickeado - Acción:', action, 'ID:', pedidoId);
+            
+            if (!pedidoId) {
+                console.error('No se pudo obtener ID del pedido desde la fila');
+                return;
+            }
+            
+            handleAction(action, pedidoId, row);
+        });
+    });
+}
+
+// Funciones para manejo de cambio de estado
+function setupStatusSelectors() {
+    // Configurar selectores de estado en la tabla
+    const statusSelectors = document.querySelectorAll('.status-selector');
+    console.log('Configurando ' + statusSelectors.length + ' selectores de estado');
+    
+    statusSelectors.forEach(selector => {
+        selector.addEventListener('change', async function(e) {
+            const pedidoId = this.getAttribute('data-pedido-id');
+            const nuevoEstadoId = this.value;
+            const estadoAnterior = this.getAttribute('data-current-estado');
+            
+            console.log('Cambio de estado - Pedido:', pedidoId, 'Nuevo estado:', nuevoEstadoId);
+            
+            // Confirmar el cambio
+            const opcionSeleccionada = this.options[this.selectedIndex];
+            const nombreEstado = opcionSeleccionada.text;
+            
+            if (!confirm(`¿Cambiar estado del pedido #${pedidoId} a "${nombreEstado}"?`)) {
+                // Revertir si cancela
+                this.value = estadoAnterior;
+                return;
+            }
+            
+            try {
+                // Deshabilitar el selector mientras se actualiza
+                this.disabled = true;
+                
+                // Llamar a la API para actualizar el estado
+                const response = await fetch(`/Color_Ink/public/index.php?route=pedidos/${pedidoId}/cambiar-estado&caso=1`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                    },
+                    body: JSON.stringify({
+                        id_estado_nuevo: parseInt(nuevoEstadoId)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // La API devuelve status: 'OK' para éxito, no 'success'
+                if (response.ok && (data.status === 'OK' || data.status === 'success')) {
+                    // Actualizar el data-current-estado
+                    this.setAttribute('data-current-estado', nuevoEstadoId);
+                    
+                    // Actualizar estilo visual
+                    updateSelectorStyle(this, nuevoEstadoId);
+                    
+                    showNotification(`Estado actualizado a: ${nombreEstado}`, 'success');
+                    
+                    // Recargar la tabla
+                    if (typeof PedidosMVC !== 'undefined') {
+                        console.log('Recargando tabla después de cambio de estado...');
+                        await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+                    }
+                } else {
+                    throw new Error(data.message || 'Error al cambiar el estado');
+                }
+            } catch (error) {
+                console.error('Error cambiando estado:', error);
+                showNotification('Error al cambiar el estado del pedido', 'error');
+                // Revertir el selector
+                this.value = estadoAnterior;
+            } finally {
+                this.disabled = false;
+            }
+        });
+    });
+}
+
+function updateSelectorStyle(selector, estadoId) {
+    // Remover clases de estado anteriores
+    selector.classList.remove('estado-pendiente', 'estado-proceso', 'estado-completado', 'estado-cancelado');
+    
+    // Agregar clase según el nuevo estado
+    switch(parseInt(estadoId)) {
+        case 1: // Pendiente
+            selector.classList.add('estado-pendiente');
+            break;
+        case 2: // En proceso
+            selector.classList.add('estado-proceso');
+            break;
+        case 3: // Completado
+            selector.classList.add('estado-completado');
+            break;
+        case 4: // Cancelado
+            selector.classList.add('estado-cancelado');
+            break;
+    }
+}
+
+// ===== FIN FUNCIONES CRÍTICAS =====
+
+// Mostrar modal de edición con diseño similar al de vista
+function showEditPedidoModal(pedido) {
+    console.log('=== INICIANDO EDICIÓN DE PEDIDO ===');
+    console.log('Datos completos del pedido:', pedido);
+    
+    const modal = document.getElementById('modalEditarPedido');
+    const form = document.getElementById('formEditarPedido');
+    const pedidoIdDisplay = document.getElementById('editarPedidoIdDisplay');
+    
+    if (!modal || !form) {
+        console.error('Modal de edición no encontrado');
+        return;
+    }
+    
+    // Actualizar título con número de pedido
+    if (pedidoIdDisplay) {
+        pedidoIdDisplay.textContent = `#${pedido.numeroPedido || pedido.id}`;
+    }
+    
+    // Llenar los campos del formulario con validación
+    const setInputValue = (id, value) => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.value = value || '';
+            console.log(`${id}: "${value}"`);
+        } else {
+            console.warn(`Input ${id} no encontrado`);
+        }
+    };
+    
+    console.log('--- LLENANDO FORMULARIO ---');
+    setInputValue('editarUsuario', pedido.cliente);
+    setInputValue('editarTelefono', pedido.telefono);
+    setInputValue('editarFechaEntrega', pedido.fechaEntrega);
+    setInputValue('editarCanalVenta', pedido.canalVenta);
+    setInputValue('editarPrioridad', pedido.prioridad);
+    
+    // No ocultamos los campos del formulario: mantendremos la misma UI que 'Nuevo Pedido'
+    
+    // Cargar array de productos en sessionStorage para edición multi-producto
+    const productosArray = Array.isArray(pedido.productos) && pedido.productos.length > 0 
+        ? pedido.productos 
+        : [];
+    
+    sessionStorage.setItem('detalles_productos', JSON.stringify(productosArray));
+    console.log('Productos cargados en sessionStorage:', productosArray);
+    
+    // Renderizar la tabla de productos editables
+    renderTablaProductosEditables();
+    
+    // Actualizar los campos de totales en el modal de edición con los datos cargados
+    try {
+        actualizarCamposTotalesEnEdicion();
+    } catch (e) {
+        console.warn('No se pudo actualizar campos de totales en edición:', e);
+    }
+    
+    // Marcar que estamos en modo edición
+    window.currentEditPedidoId = pedido.id;
+    
+    // Mostrar el modal
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    // Configurar botones de cerrar
+    const closeBtn = modal.querySelector('.close');
+    const cancelBtn = modal.querySelector('.btn-cancelar');
+    
+    if (closeBtn) {
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            sessionStorage.removeItem('detalles_productos');
+        };
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.onclick = function() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            sessionStorage.removeItem('detalles_productos');
+        };
+    }
+    
+    // Cerrar al hacer clic fuera del modal
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            sessionStorage.removeItem('detalles_productos');
+        }
+    };
+    
+    // Configurar el botón de guardar
+    const btnGuardar = document.getElementById('btnGuardarEdicion');
+    if (btnGuardar) {
+        // Remover listeners anteriores clonando el botón
+        const newBtnGuardar = btnGuardar.cloneNode(true);
+        btnGuardar.parentNode.replaceChild(newBtnGuardar, btnGuardar);
+        
+        // Agregar el nuevo listener
+        newBtnGuardar.addEventListener('click', async function(e) {
+            e.preventDefault();
+            console.log('Botón guardar clickeado');
+            await guardarEdicionPedido(pedido.id, pedido.idDetalle);
+        });
+        
+        console.log('Listener de guardar configurado correctamente');
+    } else {
+        console.error('No se encontró el botón btnGuardarEdicion');
+    }
+    
+    console.log('Modal de edición mostrado');
+
+    // Botón para abrir modal personalizado en edición (ahora muestra todos los productos)
+    const btnEditarPersonalizado = document.getElementById('btnEditarPersonalizado');
+    if (btnEditarPersonalizado) {
+        btnEditarPersonalizado.onclick = function() {
+            openProductDetailsModal();
+        };
+    }
+}
+
+// Guardar los cambios del pedido editado
+async function guardarEdicionPedido(pedidoId, detalleId) {
+    console.log('Guardando cambios del pedido:', pedidoId);
+    
+    try {
+        // Mostrar indicador de carga
+        const btnGuardar = document.getElementById('btnGuardarEdicion');
+        const textOriginal = btnGuardar.textContent;
+        btnGuardar.textContent = 'Guardando...';
+        btnGuardar.disabled = true;
+        
+        // Obtener todos los productos del sessionStorage
+        const detallesProductos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
+        
+        if (detallesProductos.length === 0) {
+            showNotification('Debe agregar al menos un producto', 'error');
+            btnGuardar.textContent = textOriginal;
+            btnGuardar.disabled = false;
+            return;
+        }
+        
+        // Calcular totales - cada producto con su propio descuento e impuesto
+        let totalCantidad = 0;
+        let subtotalSinDescuentos = 0;
+        let totalDescuentos = 0;
+        let totalImpuestos = 0;
+        let totalGeneral = 0;
+        
+        detallesProductos.forEach(prod => {
+            const cantidad = Number(prod.cantidad || 0);
+            const precio = Number((prod.precio ?? prod.precio_unitario) || 0);
+            const descuento = Number(prod.descuento || 0);
+            const impuesto = Number(prod.impuesto || 0);
+            
+            totalCantidad += cantidad;
+            
+            // Subtotal del producto
+            let subtotalProducto = cantidad * precio;
+            subtotalSinDescuentos += subtotalProducto;
+            
+            // Aplicar descuento del producto
+            const montoDescuentoProducto = subtotalProducto * (descuento / 100);
+            totalDescuentos += montoDescuentoProducto;
+            subtotalProducto = subtotalProducto - montoDescuentoProducto;
+            
+            // Aplicar impuesto del producto
+            const montoImpuestoProducto = subtotalProducto * (impuesto / 100);
+            totalImpuestos += montoImpuestoProducto;
+            
+            // Total del producto
+            totalGeneral += subtotalProducto + montoImpuestoProducto;
+        });
+        
+        // Calcular porcentajes promedio
+        const descuentoPromedio = subtotalSinDescuentos > 0 ? (totalDescuentos / subtotalSinDescuentos * 100) : 0;
+        const subtotalConDescuento = subtotalSinDescuentos - totalDescuentos;
+        const impuestoPromedio = subtotalConDescuento > 0 ? (totalImpuestos / subtotalConDescuento * 100) : 0;
+        
+        // Recopilar datos del formulario
+        const pedidoData = {
+            clienteNombre: document.getElementById('editarUsuario').value,
+            clienteTelefono: document.getElementById('editarTelefono').value,
+            fechaEntrega: document.getElementById('editarFechaEntrega').value,
+            canalVenta: document.getElementById('editarCanalVenta').value,
+            prioridad: document.getElementById('editarPrioridad').value,
+            observaciones: detallesProductos.length + ' producto(s)',
+            detalles_producto: JSON.stringify(detallesProductos),
+            cantidad: totalCantidad,
+            precio: Number(totalGeneral.toFixed(2)),
+            descuento: descuentoPromedio,
+            impuesto: impuestoPromedio
+        };
+        
+        console.log('Datos del pedido a actualizar:', pedidoData);
+        console.log('Productos individuales a guardar:', detallesProductos);
+        
+        // Actualizar pedido (el Controller maneja la eliminación de detalles antiguos 
+        // y la creación de nuevos registros individuales por cada producto)
+        await PedidosMVC.updatePedido(pedidoId, pedidoData);
+        
+        // Cerrar modal
+        const modal = document.getElementById('modalEditarPedido');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Limpiar sessionStorage
+        sessionStorage.removeItem('detalles_productos');
+        sessionStorage.removeItem('detallesProducto');
+        
+        showNotification('Pedido actualizado correctamente', 'success');
+        
+        // Refrescar tabla
+        await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
+        
+        // Restaurar botón
+        btnGuardar.textContent = textOriginal;
+        btnGuardar.disabled = false;
+        
+    } catch (error) {
+        console.error('Error al actualizar pedido:', error);
+        showNotification('Error al actualizar el pedido: ' + (error.message || 'Error desconocido'), 'error');
+        
+        // Restaurar botón
+        const btnGuardar = document.getElementById('btnGuardarEdicion');
+        btnGuardar.textContent = 'Guardar Cambios';
+        btnGuardar.disabled = false;
+    }
+}
+
 async function deletePedido(pedidoId, row) {
     // Asegurar que tenemos el ID numérico correcto
     const id = parseInt(pedidoId);
@@ -661,68 +1647,39 @@ async function deletePedido(pedidoId, row) {
         return;
     }
     
-    if (confirm(`¿Estás seguro de que quieres eliminar el pedido ${pedidoId}?\n\nEsta acción no se puede deshacer.`)) {
-        try {
-            console.log('Eliminando pedido ID:', id);
-            
-            // Llamar al API para eliminar
-            const response = await PedidosMVC.deletePedido(id);
-            console.log('Respuesta de eliminación:', response);
-            
-            // Remover fila de la tabla inmediatamente
-            if (row) {
-                row.remove();
+    // Usar modal personalizado en lugar de confirm()
+    try {
+        const confirmed = await showConfirmDelete(
+            `¿Estás seguro de que quieres eliminar el pedido #${pedidoId}?`,
+            async () => {
+                console.log('Eliminando pedido ID:', id);
+                
+                // Llamar al API para eliminar
+                const response = await PedidosMVC.deletePedido(id);
+                console.log('Respuesta de eliminación:', response);
+                
+                // Remover fila de la tabla inmediatamente
+                if (row) {
+                    row.remove();
+                }
+                
+                showNotification('Pedido eliminado correctamente', 'success');
+                
+                // Refrescar tabla completa para asegurar consistencia
+                await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
             }
-            
-            showNotification('Pedido eliminado correctamente', 'success');
-            
-            // Refrescar tabla completa para asegurar consistencia
-            await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
-        } catch (err) {
-            console.error('Error al eliminar pedido:', err);
-            const errorMsg = err.data?.message || err.message || 'Error desconocido';
-            showNotification('Error al eliminar el pedido: ' + errorMsg, 'error');
-            
-            // Refrescar tabla en caso de error para mostrar estado real
-            await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
-        }
-    }
-}
-
-function setupFilters() {
-    const filterSelect = document.querySelector('.filter-select');
-    
-    if (filterSelect) {
-        filterSelect.addEventListener('change', function() {
-            const status = this.value;
-            filterPedidosByStatus(status);
-        });
-    }
-}
-
-function filterPedidosByStatus(status) {
-    const rows = document.querySelectorAll('.pedidos-table tbody tr');
-    
-    rows.forEach(row => {
-        const statusCell = row.querySelector('.status');
-        const rowStatus = statusCell ? statusCell.textContent.toLowerCase() : '';
+        );
         
-        if (status === '' || rowStatus.includes(status.toLowerCase())) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+        if (!confirmed) {
+            console.log('Eliminación cancelada por el usuario');
         }
-    });
-}
-
-function setupSearch() {
-    const searchInput = document.querySelector('.search-input');
-    
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            searchPedidos(searchTerm);
-        });
+    } catch (err) {
+        console.error('Error al eliminar pedido:', err);
+        const errorMsg = err.data?.message || err.message || 'Error desconocido';
+        showNotification('Error al eliminar el pedido: ' + errorMsg, 'error');
+        
+        // Refrescar tabla en caso de error para mostrar estado real
+        await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
     }
 }
 
@@ -784,76 +1741,99 @@ let productDetailsModal = null;
 let productDetailsForm = null;
 let productDetailsData = {};
 
-function setupModal() {
-    modal = document.getElementById('modalNuevoPedido');
-    form = document.getElementById('formNuevoPedido');
-    
-    if (!modal || !form) return;
-    
-    // Configurar botones de cerrar
-    const closeBtn = modal.querySelector('.close');
-    const cancelBtn = modal.querySelector('.btn-cancelar');
-    
-    closeBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
-    
-    // Cerrar modal al hacer clic fuera de él
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-    
-    // NOTA: El envío del formulario hacia el backend se gestiona más abajo
-    // con crearNuevoPedido(). Evitamos el manejador antiguo para no duplicar
-    // listeners ni realizar envíos locales sin API.
-    // form.addEventListener('submit', handleFormSubmit);
-    
-    // Configurar validación en tiempo real
-    setupFormValidation();
-    
-    // Configurar cálculo automático de total
-    setupPriceCalculation();
-    
-    // Configurar subida de imágenes
-    setupImageUpload();
-    
-    // Configurar selectores de color
-    setupColorPickers();
-}
+// ================= Productos múltiples (nuevo pedido) =================
+function setupProductosMultiples() {
+    const tbody = document.getElementById('productosTBody');
+    if (!tbody) return; // solo existe en el modal nuevo
 
-function openModal() {
-    if (modal) {
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden'; // Prevenir scroll del body
-        
-        // Establecer fecha mínima para entrega (hoy)
-        const fechaEntrega = document.getElementById('fechaEntrega');
-        if (fechaEntrega) {
-            const today = new Date().toISOString().split('T')[0];
-            fechaEntrega.min = today;
-            // Prefijar por defecto la fecha de hoy si está vacía
-            if (!fechaEntrega.value) {
-                fechaEntrega.value = today;
-            }
-        }
-        
-        // Enfocar el primer campo
-        const firstInput = form.querySelector('input[required]');
-        if (firstInput) {
-            setTimeout(() => firstInput.focus(), 100);
-        }
+    const btnAdd = document.getElementById('btnAgregarProducto');
+    if (btnAdd) {
+        btnAdd.onclick = function () {
+            addProductoRow();
+        };
+    }
+
+    // Si no hay filas, agregar una inicial
+    if (!tbody.querySelector('tr')) {
+        addProductoRow();
     }
 }
 
-function closeModal() {
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // Restaurar scroll del body
-        
-        // Limpiar formulario
-        form.reset();
-        clearFormErrors();
+function addProductoRow(prefill = {}) {
+    const tbody = document.getElementById('productosTBody');
+    if (!tbody) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td style="padding:6px;">
+            <input type="text" class="prod-desc" placeholder="Descripción del producto" style="width:100%" value="${(prefill.descripcion||'').replace(/\"/g,'&quot;')}">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="prod-cant" min="1" value="${Number.isFinite(prefill.cantidad)?prefill.cantidad:1}" style="width:90px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="prod-precio" step="0.01" min="0" value="${Number.isFinite(prefill.precio)?prefill.precio:0}" style="width:110px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="prod-descuento" step="0.01" min="0" value="${Number.isFinite(prefill.descuento)?prefill.descuento:0}" style="width:90px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <input type="number" class="prod-impuesto" step="0.01" min="0" value="${Number.isFinite(prefill.impuesto)?prefill.impuesto:0}" style="width:90px; text-align:right;">
+        </td>
+        <td style="padding:6px; text-align:right;">
+            <span class="prod-total">$0.00</span>
+        </td>
+        <td style="padding:6px; text-align:center;">
+            <button type="button" class="btn-action" title="Eliminar"><i class="fa fa-trash"></i></button>
+        </td>
+    `;
+
+    tbody.appendChild(tr);
+
+    const inputs = tr.querySelectorAll('input');
+    inputs.forEach(inp => {
+        inp.addEventListener('input', () => {
+            recalcRow(tr);
+            recalcTotalesPedido();
+        });
+    });
+
+    const btnDel = tr.querySelector('button');
+    btnDel.addEventListener('click', () => {
+        tr.remove();
+        recalcTotalesPedido();
+        // Si no queda ninguna fila, agregar una en blanco
+        if (!tbody.querySelector('tr')) {
+            addProductoRow();
+        }
+    });
+
+    // Calcular al crear
+    recalcRow(tr);
+    recalcTotalesPedido();
+}
+
+function recalcRow(tr) {
+    const q = Math.max(1, parseInt(tr.querySelector('.prod-cant')?.value || '1'));
+    const p = Math.max(0, parseFloat(tr.querySelector('.prod-precio')?.value || '0'));
+    const d = Math.max(0, parseFloat(tr.querySelector('.prod-descuento')?.value || '0'));
+    const t = Math.max(0, parseFloat(tr.querySelector('.prod-impuesto')?.value || '0'));
+    let total = q * p;
+    total = total * (1 - d / 100);
+    total = total * (1 + t / 100);
+    tr.querySelector('.prod-total').textContent = formatoLempiras(total);
+}
+
+function recalcTotalesPedido() {
+    const spans = document.querySelectorAll('#productosTBody .prod-total');
+    let suma = 0;
+    spans.forEach(sp => {
+        const val = sp.textContent.replace(/[^0-9.,-]/g, '').replace(/,/g, '');
+        const num = parseFloat(val) || 0;
+        suma += num;
+    });
+    const totalSpan = document.getElementById('totalPedidoPreview');
+    if (totalSpan) {
+        totalSpan.textContent = formatoLempiras(suma);
     }
 }
 
@@ -1006,7 +1986,7 @@ function calculateTotal() {
     }
     
     if (total > 0) {
-        totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+        totalDisplay.textContent = `Total: ${formatoLempiras(total)}`;
         totalDisplay.style.display = 'block';
     } else {
         totalDisplay.style.display = 'none';
@@ -1016,185 +1996,7 @@ function calculateTotal() {
 // Legacy functions removed - using PedidosMVC for all CRUD operations
 
 // ===== FUNCIONES PARA ACCIONES DE TABLA =====
-
-// Configurar botones de acción en tabla
-function setupActionButtons() {
-    console.log('Configurando botones de acción de tabla...');
-    const actionButtons = document.querySelectorAll('.pedidos-table .btn-action');
-    console.log(`Encontrados ${actionButtons.length} botones de acción`);
-    
-    actionButtons.forEach(button => {
-        // Remover listeners existentes clonando el botón
-        const newButton = button.cloneNode(true);
-        button.parentNode.replaceChild(newButton, button);
-        
-        newButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const icon = this.querySelector('i');
-            const action = getActionFromIcon(icon);
-            const row = this.closest('tr');
-            const pedidoId = this.dataset.id || row.querySelector('.pedido-id')?.textContent?.trim() || null;
-            
-            console.log('Botón clickeado - Acción:', action, 'ID:', pedidoId);
-            
-            if (!pedidoId) {
-                console.error('No se pudo obtener ID del pedido desde la fila');
-                return;
-            }
-            
-            handleAction(action, pedidoId, row);
-        });
-    });
-}
-
-// Determinar la acción desde el icono del botón
-function getActionFromIcon(icon) {
-    if (!icon) return null;
-    
-    const classList = icon.classList;
-    if (classList.contains('fa-eye')) return 'view';
-    if (classList.contains('fa-edit')) return 'edit';
-    if (classList.contains('fa-trash')) return 'delete';
-    
-    return null;
-}
-
-// Manejar la acción del botón
-function handleAction(action, pedidoId, row) {
-    console.log(`Ejecutando acción: ${action} para pedido ${pedidoId}`);
-    
-    switch(action) {
-        case 'view':
-            viewPedido(pedidoId, row);
-            break;
-        case 'edit':
-            editPedido(pedidoId);
-            break;
-        case 'delete':
-            deletePedido(pedidoId, row);
-            break;
-        default:
-            console.warn('Acción no reconocida:', action);
-    }
-}
-
-// Ver detalles de un pedido - Obtener datos completos desde la API
-async function viewPedido(pedidoId, row) {
-    console.log('Mostrando detalles del pedido:', pedidoId);
-    
-    try {
-        // Obtener datos completos desde la API
-        const pedidoRes = await PedidosMVC.fetchOne(pedidoId);
-        const detallesRes = await PedidosMVC.fetchDetalle(pedidoId);
-        
-        console.log('Respuesta del pedido:', pedidoRes);
-        console.log('Respuesta del detalle:', detallesRes);
-        
-        if (!pedidoRes || !pedidoRes.data) {
-            showNotification('No se pudieron cargar los detalles del pedido', 'error');
-            return;
-        }
-        
-        // La API devuelve un array, necesitamos encontrar el pedido específico
-        let data = null;
-        if (Array.isArray(pedidoRes.data)) {
-            data = pedidoRes.data.find(p => p.id_pedido == pedidoId);
-        } else {
-            data = pedidoRes.data;
-        }
-        
-        if (!data) {
-            showNotification('No se encontró el pedido solicitado', 'error');
-            return;
-        }
-        
-        // Lo mismo para el detalle
-        let detalle = null;
-        if (detallesRes && detallesRes.data) {
-            if (Array.isArray(detallesRes.data)) {
-                detalle = detallesRes.data.find(d => d.id_pedido == pedidoId);
-            } else {
-                detalle = detallesRes.data;
-            }
-        }
-        
-        console.log('Pedido encontrado:', data);
-        console.log('Detalle encontrado:', detalle);
-        
-        // Parsear detalles_producto (JSON en la tabla pedido)
-        let detallesProducto = null;
-        if (data.detalles_producto) {
-            try {
-                detallesProducto = typeof data.detalles_producto === 'string' 
-                    ? JSON.parse(data.detalles_producto) 
-                    : data.detalles_producto;
-                console.log('Detalles producto parseados:', detallesProducto);
-            } catch (e) {
-                console.warn('Error al parsear detalles_producto:', e);
-            }
-        }
-        
-        // Parsear detalles_personalizados (JSON en la tabla detallepedido)
-        let detallesPersonalizados = null;
-        if (detalle && detalle.detalles_personalizados) {
-            try {
-                detallesPersonalizados = typeof detalle.detalles_personalizados === 'string' 
-                    ? JSON.parse(detalle.detalles_personalizados) 
-                    : detalle.detalles_personalizados;
-                console.log('Detalles personalizados parseados:', detallesPersonalizados);
-            } catch (e) {
-                console.warn('Error al parsear detalles_personalizados:', e);
-            }
-        }
-        
-        // Construir objeto con datos completos
-        const pedidoData = {
-            id: data.id_pedido || pedidoId,
-            numeroPedido: data.numero_pedido || '',
-            cliente: data.cliente_nombre || 'Sin nombre',
-            telefono: data.cliente_telefono || 'No especificado',
-            email: data.email || 'No especificado',
-            fecha: data.fecha_pedido || '',
-            fechaEntrega: data.fecha_entrega || 'No especificada',
-            estado: data.estado_codigo || data.id_estado || 'PROCESO',
-            estadoNombre: data.estado_nombre || 'En Proceso',
-            prioridad: data.prioridad || 'normal',
-            canalVenta: data.canal_venta || 'No especificado',
-            observaciones: data.observaciones || '',
-            direccion: data.direccion || 'No especificada',
-            
-            // Datos del detalle
-            cantidad: detalle ? detalle.cantidad : 1,
-            precioUnitario: detalle ? parseFloat(detalle.precio_unitario) : 0,
-            total: detalle ? (parseFloat(detalle.cantidad) * parseFloat(detalle.precio_unitario)).toFixed(2) : '0.00',
-            
-            // Datos de detalles_producto (de la tabla pedido)
-            categoriaProducto: detallesProducto?.categoria || 'No especificado',
-            colores: detallesProducto?.colores || 'No especificado',
-            imagenes: detallesProducto?.imagenes || [],
-            
-            // Especificaciones desde observaciones de la tabla pedido
-            especificaciones: data.observaciones || 'No especificadas'
-        };
-        
-        // Si hay detalles personalizados, sobrescribir con esos valores
-        if (detallesPersonalizados) {
-            if (detallesPersonalizados.categoria) pedidoData.categoriaProducto = detallesPersonalizados.categoria;
-            if (detallesPersonalizados.colores) pedidoData.colores = detallesPersonalizados.colores;
-            if (detallesPersonalizados.imagenes) pedidoData.imagenes = detallesPersonalizados.imagenes;
-        }
-        
-        console.log('Datos finales a mostrar:', pedidoData);
-        
-        // Mostrar modal con los detalles
-        showPedidoDetails(pedidoData);
-    } catch (error) {
-        console.error('Error al cargar detalles del pedido:', error);
-        showNotification('Error al cargar los detalles del pedido', 'error');
-    }
-}
+// (Las funciones setupActionButtons y setupStatusSelectors están definidas arriba, junto al DOMContentLoaded)
 
 // Mostrar detalles completos del pedido en el modal
 function showPedidoDetails(pedido) {
@@ -1203,6 +2005,7 @@ function showPedidoDetails(pedido) {
     const modal = document.getElementById('modalVerPedido');
     const content = document.getElementById('pedidoDetailsContent');
     const pedidoIdDisplay = document.getElementById('pedidoIdDisplay');
+    const estadoSelector = document.getElementById('estadoPedido');
     
     if (!modal || !content) {
         console.error('Modal de detalles no encontrado');
@@ -1210,19 +2013,31 @@ function showPedidoDetails(pedido) {
         return;
     }
     
+    // Guardar el ID del pedido en el modal para usarlo al cambiar estado
+    modal.setAttribute('data-pedido-id', pedido.id || pedido.id_pedido);
+    
     // Actualizar título con número de pedido
     if (pedidoIdDisplay) {
         pedidoIdDisplay.textContent = `#${pedido.numeroPedido || pedido.id}`;
     }
     
+    // Establecer el estado actual en el selector
+    if (estadoSelector && pedido.estadoId) {
+        estadoSelector.value = pedido.estadoId;
+    }
+    
     // Función para generar los colores visuales
     function generarColoresHTML(coloresString) {
-        if (!coloresString || coloresString === 'No especificados') {
+        if (!coloresString || coloresString === 'No especificados' || coloresString === '') {
             return '<span class="detail-value">No especificados</span>';
         }
         
         // Separar los colores si están separados por comas
-        const coloresArray = coloresString.split(',').map(c => c.trim());
+        const coloresArray = coloresString.split(',').map(c => c.trim()).filter(c => c);
+        
+        if (coloresArray.length === 0) {
+            return '<span class="detail-value">No especificados</span>';
+        }
         
         let coloresHTML = '<div class="colores-container">';
         coloresArray.forEach(color => {
@@ -1236,6 +2051,155 @@ function showPedidoDetails(pedido) {
         coloresHTML += '</div>';
         
         return coloresHTML;
+    }
+    
+    // Obtener productos del pedido (puede ser array o un solo producto)
+    let productos = [];
+    
+    // Primero intentar parsear detalles_producto si existe
+    if (pedido.detalles_producto) {
+        try {
+            const detalles = typeof pedido.detalles_producto === 'string' 
+                ? JSON.parse(pedido.detalles_producto) 
+                : pedido.detalles_producto;
+            
+            // Si es un array, usarlo directamente
+            if (Array.isArray(detalles)) {
+                productos = detalles;
+            } else if (detalles && typeof detalles === 'object') {
+                // Si es un objeto, ponerlo en array
+                productos = [detalles];
+            }
+        } catch (e) {
+            console.warn('Error al parsear detalles_producto:', e);
+        }
+    }
+    
+    // Si no hay productos en detalles_producto, crear uno desde los datos simples
+    if (productos.length === 0 && (pedido.categoriaProducto || pedido.cantidad || pedido.precioUnitario)) {
+        productos = [{
+            categoria: pedido.categoriaProducto || 'No especificada',
+            cantidad: pedido.cantidad || 1,
+            precio: pedido.precioUnitario || 0,
+            colores: pedido.colores || '',
+            especificaciones: pedido.especificaciones || '',
+            imagenes: pedido.imagenes || []
+        }];
+    }
+    
+    // Generar HTML para todos los productos
+    let productosHTML = '';
+    
+    // Calcular subtotal de todos los productos (suma de cantidad * precio de cada uno)
+    const subtotalGeneral = productos.reduce((acc, prod) => {
+        const cantidad = prod.cantidad || 1;
+        const precio = parseFloat(prod.precio_unitario || prod.precio || 0);
+        return acc + (cantidad * precio);
+    }, 0);
+    
+    // Obtener descuento e impuesto global (del primer producto o del pedido)
+    const descuentoGlobal = productos.length > 0 ? parseFloat(productos[0].descuento || 0) : 0;
+    const impuestoGlobal = productos.length > 0 ? parseFloat(productos[0].impuesto || 0) : 0;
+    
+    // Calcular total general con descuento e impuesto
+    const montoDescuento = subtotalGeneral * (descuentoGlobal / 100);
+    const subtotalConDescuento = subtotalGeneral - montoDescuento;
+    const montoImpuesto = subtotalConDescuento * (impuestoGlobal / 100);
+    const totalGeneral = subtotalConDescuento + montoImpuesto;
+    
+    if (productos.length > 0) {
+        productosHTML = productos.map((prod, idx) => {
+            const cantidad = prod.cantidad || 1;
+            const precio = parseFloat(prod.precio_unitario || prod.precio || 0);
+            const subtotal = cantidad * precio;
+            
+            return `
+                <div class="producto-card" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.02);">
+                    <h4 style="color: #b2f2e6; margin-bottom: 12px;">
+                        <i class="fa-solid fa-box"></i> Producto #${idx + 1}
+                    </h4>
+                    <div class="producto-detalle-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                        <div class="detail-item">
+                            <span class="detail-label">Categoría:</span>
+                            <span class="detail-value">${prod.categoria || 'No especificada'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Cantidad:</span>
+                            <span class="detail-value">${cantidad} unidad(es)</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Precio Unitario:</span>
+                            <span class="detail-value">${formatoLempiras(precio)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Subtotal:</span>
+                            <span class="detail-value" style="font-weight: bold;">${formatoLempiras(subtotal)}</span>
+                        </div>
+                        ${prod.colores ? `
+                        <div class="detail-item full-width" style="grid-column: 1 / -1;">
+                            <span class="detail-label">Colores:</span>
+                            ${generarColoresHTML(prod.colores)}
+                        </div>
+                        ` : ''}
+                        ${prod.especificaciones ? `
+                        <div class="detail-item full-width" style="grid-column: 1 / -1;">
+                            <span class="detail-label">Especificaciones:</span>
+                            <span class="detail-value">${prod.especificaciones}</span>
+                        </div>
+                        ` : ''}
+                        ${prod.imagenes && prod.imagenes.length > 0 ? `
+                        <div class="detail-item full-width" style="grid-column: 1 / -1;">
+                            <span class="detail-label">Imágenes:</span>
+                            <div class="images-gallery" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                                ${prod.imagenes.map(img => `
+                                    <img src="${img}" alt="Producto ${idx + 1}" 
+                                         style="max-width: 80px; max-height: 80px; border-radius: 4px; cursor: pointer; object-fit: cover;"
+                                         onclick="window.open('${img}', '_blank')">
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // Agregar resumen de totales al final
+        productosHTML += `
+            <div class="totales-card" style="border: 2px solid #b2f2e6; border-radius: 8px; padding: 20px; margin-top: 15px; background: rgba(178, 242, 230, 0.05);">
+                <h4 style="color: #b2f2e6; margin-bottom: 15px; text-align: center;">
+                    <i class="fa-solid fa-calculator"></i> Resumen de Totales
+                </h4>
+                <div style="display: grid; gap: 10px; max-width: 400px; margin: 0 auto;">
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span style="font-weight: 500;">Subtotal:</span>
+                        <span style="font-weight: bold;">${formatoLempiras(subtotalGeneral)}</span>
+                    </div>
+                    ${descuentoGlobal > 0 ? `
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #ff6b6b;">
+                        <span>Descuento (${descuentoGlobal}%):</span>
+                        <span>-${formatoLempiras(montoDescuento)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>Subtotal con Descuento:</span>
+                        <span style="font-weight: bold;">${formatoLempiras(subtotalConDescuento)}</span>
+                    </div>
+                    ` : ''}
+                    ${impuestoGlobal > 0 ? `
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #ffd93d;">
+                        <span>Impuesto (${impuestoGlobal}%):</span>
+                        <span>+${formatoLempiras(montoImpuesto)}</span>
+                    </div>
+                    ` : ''}
+                    <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #b2f2e6; margin-top: 5px;">
+                        <span style="font-size: 1.2em; font-weight: bold; color: #b2f2e6;">TOTAL:</span>
+                        <span style="font-size: 1.3em; font-weight: bold; color: #b2f2e6;">${formatoLempiras(totalGeneral)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        productosHTML = '<div class="producto-card" style="text-align: center; padding: 20px; color: rgba(255,255,255,0.5);">No hay productos registrados en este pedido.</div>';
     }
     
     // Construir HTML con TODOS los datos del pedido
@@ -1284,57 +2248,28 @@ function showPedidoDetails(pedido) {
                         <span class="detail-label">Canal de Venta:</span>
                         <span class="detail-value">${pedido.canalVenta || 'No especificado'}</span>
                     </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Total del Pedido:</span>
+                        <span class="detail-value total-price" style="font-size: 1.2em; font-weight: bold; color: #b2f2e6;">${formatoLempiras(totalGeneral)}</span>
+                    </div>
                 </div>
             </div>
             
-            <!-- Detalles del Producto -->
+            <!-- Productos del Pedido -->
             <div class="details-section full-width">
-                <h3><i class="fa-solid fa-box"></i> Detalles del Producto</h3>
+                <h3><i class="fa-solid fa-boxes-stacked"></i> Productos del Pedido (${productos.length})</h3>
                 <div class="details-content">
-                    <div class="detail-item">
-                        <span class="detail-label">Categoría:</span>
-                        <span class="detail-value">${pedido.categoriaProducto || 'No especificada'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Cantidad:</span>
-                        <span class="detail-value">${pedido.cantidad || 1} unidad(es)</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Precio Unitario:</span>
-                        <span class="detail-value">$${parseFloat(pedido.precioUnitario || 0).toFixed(2)}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">Total:</span>
-                        <span class="detail-value total-price">$${pedido.total || '0.00'}</span>
-                    </div>
-                    <div class="detail-item full-width">
-                        <span class="detail-label">Colores:</span>
-                        ${generarColoresHTML(pedido.colores)}
-                    </div>
+                    ${productosHTML}
                 </div>
             </div>
             
-            <!-- Especificaciones Técnicas -->
+            <!-- Observaciones/Especificaciones Generales -->
+            ${pedido.observaciones || pedido.especificaciones ? `
             <div class="details-section full-width">
-                <h3><i class="fa-solid fa-clipboard-list"></i> Especificaciones Técnicas</h3>
+                <h3><i class="fa-solid fa-clipboard-list"></i> Observaciones Generales</h3>
                 <div class="details-content">
                     <div class="detail-item full-width">
-                        <p class="detail-text">${pedido.especificaciones || 'No especificadas'}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Imágenes de Referencia -->
-            ${pedido.imagenes && pedido.imagenes.length > 0 ? `
-            <div class="details-section full-width">
-                <h3><i class="fa-solid fa-images"></i> Imágenes de Referencia</h3>
-                <div class="details-content">
-                    <div class="images-gallery">
-                        ${pedido.imagenes.map(img => `
-                            <div class="image-item">
-                                <img src="${img}" alt="Imagen de referencia" onclick="window.open('${img}', '_blank')">
-                            </div>
-                        `).join('')}
+                        <p class="detail-text">${pedido.observaciones || pedido.especificaciones || 'No especificadas'}</p>
                     </div>
                 </div>
             </div>
@@ -1384,36 +2319,6 @@ function getPedidoData(pedidoId, row) {
         canalVenta: row.dataset.canal || '',
         categoriaProducto: row.dataset.categoria || ''
     };
-}
-
-// Configurar el modal de detalles
-function setupDetailsModal() {
-    const modal = document.getElementById('modalVerPedido');
-    if (!modal) return;
-    
-    const closeBtn = modal.querySelector('.close');
-    const cancelBtn = modal.querySelector('.btn-cancelar');
-    
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        });
-    }
-    
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', function() {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        });
-    }
-    
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    });
 }
 
 // Generar HTML para las imágenes
@@ -1511,7 +2416,7 @@ function handleFiles(files) {
             
             previewDiv.appendChild(imageItem);
         };
-        reader.readAsDataURL(file);
+                                                                                                                 reader.readAsDataURL(file);
     });
     
     previewContainer.appendChild(previewDiv);
@@ -1523,586 +2428,90 @@ function handleFiles(files) {
     }
 }
 
-function setupProductDetailsModal() {
-    productDetailsModal = document.getElementById('modalDetallesProducto');
-    productDetailsForm = document.getElementById('formDetallesProducto');
-    
-    if (!productDetailsModal || !productDetailsForm) return;
-    
-    // Configurar botón para abrir modal
-    const btnDetalles = document.getElementById('btnDetallesProducto');
-    if (btnDetalles) {
-        btnDetalles.addEventListener('click', openProductDetailsModal);
-    }
-    
-    // Configurar botones de cerrar
-    const closeBtn = productDetailsModal.querySelector('.close');
-    const cancelBtn = productDetailsModal.querySelector('.btn-cancelar');
-    const guardarBtn = document.getElementById('guardarDetalles');
-    
-    closeBtn.addEventListener('click', closeProductDetailsModal);
-    cancelBtn.addEventListener('click', closeProductDetailsModal);
-    guardarBtn.addEventListener('click', saveProductDetails);
-    
-    // Cerrar modal al hacer clic fuera de él
-    productDetailsModal.addEventListener('click', function(e) {
-        if (e.target === productDetailsModal) {
-            closeProductDetailsModal();
-        }
-    });
-    
-    // Configurar validación y funcionalidades
-    setupProductDetailsValidation();
-    setupProductDetailsImageUpload();
-    setupProductDetailsColorPickers();
+// Configurar los selectores de color
+function setupColorPickers() {
+    // Esta función puede estar vacía por ahora o configurar color pickers si existen
+    // Los color pickers se manejan directamente en el HTML con input type="color"
+    console.log('Color pickers configurados (manejados por HTML nativo)');
 }
 
-
-function openProductDetailsModal() {
-    if (productDetailsModal) {
-        productDetailsModal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-        
-        // Cargar datos existentes si los hay
-        loadExistingProductDetails();
-        
-        // Enfocar el primer campo
-        const firstInput = productDetailsForm.querySelector('input[required]');
-        if (firstInput) {
-            setTimeout(() => firstInput.focus(), 100);
-        }
-    }
-}
-
-function closeProductDetailsModal() {
-    if (productDetailsModal) {
-        productDetailsModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
-function loadExistingProductDetails() {
-    // Cargar datos existentes en el formulario
-    Object.keys(productDetailsData).forEach(key => {
-        const field = productDetailsForm.querySelector(`[name="${key}"]`);
-        if (field) {
-            field.value = productDetailsData[key];
-        }
-    });
-    
-    // Cargar colores
-    for (let i = 1; i <= 5; i++) {
-        const colorPicker = document.getElementById(`colorPicker${i}`);
-        if (colorPicker && productDetailsData[`colorPicker${i}`]) {
-            colorPicker.value = productDetailsData[`colorPicker${i}`];
-        }
-    }
-    
-    // Cargar imágenes si existen
-    if (productDetailsData.imagenes && productDetailsData.imagenes.length > 0) {
-        displayExistingImages(productDetailsData.imagenes);
-    }
-}
-
-function saveProductDetails() {
-    // Validar campos requeridos
-    const requiredFields = productDetailsForm.querySelectorAll('[required]');
-    let isFormValid = true;
-    
-    requiredFields.forEach(field => {
-        if (!field.value.trim()) {
-            isFormValid = false;
-            showFieldError(field, 'Este campo es obligatorio');
-        } else {
-            clearFieldError(field);
-        }
-    });
-    
-    if (!isFormValid) {
-        showNotification('Por favor, complete todos los campos obligatorios', 'error');
-        return;
-    }
-    
-    // Recopilar datos del formulario
-    const formData = new FormData(productDetailsForm);
-    productDetailsData = {};
-    
-    for (let [key, value] of formData.entries()) {
-        productDetailsData[key] = value;
-    }
-    
-    // Agregar colores seleccionados
-    const colorPickers = productDetailsForm.querySelectorAll('.color-picker');
-    colorPickers.forEach((picker, index) => {
-        if (picker.value && picker.value !== '#000000') {
-            productDetailsData[`colorPicker${index + 1}`] = picker.value;
-        }
-    });
-    
-    // Agregar imágenes
-    const images = getProductDetailsImages();
-    if (images.length > 0) {
-        productDetailsData.imagenes = images;
-    }
-    
-    // Actualizar resumen
-    updateProductDetailsSummary();
-    
-    // Cerrar modal
-    closeProductDetailsModal();
-    
-    // Mostrar notificación
-    showNotification('Detalles del producto guardados', 'success');
-}
-
+// Funciones para modal de productos personalizados
 function setupProductDetailsValidation() {
-    const requiredFields = productDetailsForm.querySelectorAll('[required]');
-    
-    requiredFields.forEach(field => {
-        field.addEventListener('blur', function() {
-            validateField(this);
-        });
-        
-        field.addEventListener('input', function() {
-            clearFieldError(this);
-        });
-    });
+    // Validación básica para el modal de productos
+    console.log('Validación de productos configurada');
 }
 
 function setupProductDetailsImageUpload() {
-    const fileInput = productDetailsForm.querySelector('#imagenReferencia');
-    const previewContainer = productDetailsForm.querySelector('#imagePreviewContainer');
+    // Upload de imágenes para el modal de productos
+    console.log('Upload de imágenes de productos configurado');
+}
+
+function mostrarPreviewImagenes(urls, container) {
+    if (!container || !urls || urls.length === 0) return;
     
-    if (!fileInput || !previewContainer) return;
+    // Limpiar contenedor
+    container.innerHTML = '';
     
-    // Configurar drag and drop
-    previewContainer.addEventListener('dragover', handleDragOver);
-    previewContainer.addEventListener('drop', handleDrop);
-    previewContainer.addEventListener('click', () => fileInput.click());
-    
-    // Configurar selección de archivos
-    fileInput.addEventListener('change', handleFileSelect);
+    // Crear previews para cada imagen
+    urls.forEach((url, index) => {
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'image-preview-item';
+        previewDiv.style.cssText = 'position: relative; display: inline-block; margin: 5px;';
+        
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = `Preview ${index + 1}`;
+        img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border: 2px solid #007bff; border-radius: 4px;';
+        
+        // Botón para eliminar imagen
+        const btnEliminar = document.createElement('button');
+        btnEliminar.type = 'button';
+        btnEliminar.className = 'btn btn-danger btn-sm';
+        btnEliminar.innerHTML = '<i class="fa-solid fa-times"></i>';
+        btnEliminar.style.cssText = 'position: absolute; top: -5px; right: -5px; padding: 2px 6px; border-radius: 50%;';
+        btnEliminar.onclick = function() {
+            // Eliminar de la lista
+            const imagenesGuardadas = JSON.parse(sessionStorage.getItem('imagenesSubidas') || '[]');
+            const nuevasImagenes = imagenesGuardadas.filter(u => u !== url);
+            sessionStorage.setItem('imagenesSubidas', JSON.stringify(nuevasImagenes));
+            
+            // Eliminar del DOM
+            previewDiv.remove();
+            
+            // Si no quedan imágenes, mostrar placeholder
+            if (container.children.length === 0) {
+                container.innerHTML = '<div class="upload-placeholder"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arrastra imágenes o haz clic para seleccionar</p></div>';
+            }
+        };
+        
+        previewDiv.appendChild(img);
+        previewDiv.appendChild(btnEliminar);
+        container.appendChild(previewDiv);
+    });
 }
 
 function setupProductDetailsColorPickers() {
-    const colorPickers = productDetailsForm.querySelectorAll('.color-picker');
-    const coloresInput = productDetailsForm.querySelector('#colores');
+    // Configurar color pickers del modal de productos personalizados
+    const colorPickers = [
+        { picker: 'colorPicker1', name: 'colorName1' },
+        { picker: 'colorPicker2', name: 'colorName2' },
+        { picker: 'colorPicker3', name: 'colorName3' }
+    ];
     
-    colorPickers.forEach((picker, index) => {
-        picker.addEventListener('change', function() {
-            updateColoresInput();
-        });
-    });
-    
-    if (coloresInput) {
-        coloresInput.addEventListener('input', function() {
-            // Opcional: actualizar los color pickers basado en el texto
-        });
-    }
-}
-
-function getProductDetailsImages() {
-    const fileInput = productDetailsForm.querySelector('#imagenReferencia');
-    const images = [];
-    
-    if (fileInput && fileInput.files) {
-        Array.from(fileInput.files).forEach(file => {
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    images.push(e.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-    
-    return images;
-}
-
-function displayExistingImages(images) {
-    const previewContainer = productDetailsForm.querySelector('#imagePreviewContainer');
-    if (!previewContainer) return;
-    
-    // Limpiar preview anterior
-    const existingPreview = previewContainer.querySelector('.image-preview');
-    if (existingPreview) {
-        existingPreview.remove();
-    }
-    
-    // Crear contenedor de preview
-    const previewDiv = document.createElement('div');
-    previewDiv.className = 'image-preview';
-    
-    images.forEach((imageSrc, index) => {
-        const imageItem = document.createElement('div');
-        imageItem.className = 'image-preview-item';
+    colorPickers.forEach(({picker, name}) => {
+        const pickerElement = document.getElementById(picker);
+        const nameElement = document.getElementById(name);
         
-        imageItem.innerHTML = `
-            <img src="${imageSrc}" alt="Preview ${index + 1}">
-            <button type="button" class="remove-image" onclick="removeImage(this)">×</button>
-        `;
-        
-        previewDiv.appendChild(imageItem);
+        if (pickerElement && nameElement) {
+            pickerElement.addEventListener('input', function() {
+                nameElement.textContent = this.value;
+                updateColorsField();
+            });
+        }
     });
     
-    previewContainer.appendChild(previewDiv);
-    
-    // Ocultar placeholder
-    const placeholder = previewContainer.querySelector('.upload-placeholder');
-    if (placeholder) {
-        placeholder.style.display = 'none';
-    }
-}
-
-function updateProductDetailsSummary() {
-    const resumenDetalles = document.getElementById('resumenDetalles');
-    const resumenContenido = document.getElementById('resumenContenido');
-    
-    if (!resumenDetalles || !resumenContenido) return;
-    
-    // Generar resumen
-    let resumenHTML = '';
-    
-    if (productDetailsData.categoriaProducto) {
-        resumenHTML += `
-            <div class="resumen-item">
-                <span class="resumen-label">Categoría:</span>
-                <span class="resumen-value">${productDetailsData.categoriaProducto.charAt(0).toUpperCase() + productDetailsData.categoriaProducto.slice(1)}</span>
-            </div>
-        `;
-    }
-    
-    if (productDetailsData.cantidad) {
-        resumenHTML += `
-            <div class="resumen-item">
-                <span class="resumen-label">Cantidad:</span>
-                <span class="resumen-value">${productDetailsData.cantidad}</span>
-            </div>
-        `;
-    }
-    
-    if (productDetailsData.tamano) {
-        resumenHTML += `
-            <div class="resumen-item">
-                <span class="resumen-label">Tamaño:</span>
-                <span class="resumen-value">${productDetailsData.tamano.charAt(0).toUpperCase() + productDetailsData.tamano.slice(1)}</span>
-            </div>
-        `;
-    }
-    
-    if (productDetailsData.material) {
-        resumenHTML += `
-            <div class="resumen-item">
-                <span class="resumen-label">Material:</span>
-                <span class="resumen-value">${productDetailsData.material.charAt(0).toUpperCase() + productDetailsData.material.slice(1)}</span>
-            </div>
-        `;
-    }
-    
-    if (productDetailsData.estiloLetra) {
-        resumenHTML += `
-            <div class="resumen-item">
-                <span class="resumen-label">Estilo de Letra:</span>
-                <span class="resumen-value">${productDetailsData.estiloLetra.charAt(0).toUpperCase() + productDetailsData.estiloLetra.slice(1)}</span>
-            </div>
-        `;
-    }
-    
-    if (productDetailsData.textoPersonalizado) {
-        resumenHTML += `
-            <div class="resumen-item">
-                <span class="resumen-label">Texto:</span>
-                <span class="resumen-value">${productDetailsData.textoPersonalizado.substring(0, 30)}${productDetailsData.textoPersonalizado.length > 30 ? '...' : ''}</span>
-            </div>
-        `;
-    }
-    
-    // Agregar colores
-    const colors = [];
-    for (let i = 1; i <= 5; i++) {
-        if (productDetailsData[`colorPicker${i}`]) {
-            colors.push(productDetailsData[`colorPicker${i}`]);
-        }
-    }
-    
-    if (colors.length > 0) {
-        resumenHTML += `
-            <div class="resumen-item">
-                <span class="resumen-label">Colores:</span>
-                <div class="resumen-colors">
-                    ${colors.map(color => `<div class="resumen-color" style="background-color: ${color}"></div>`).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    // Agregar imágenes
-    if (productDetailsData.imagenes && productDetailsData.imagenes.length > 0) {
-        resumenHTML += `
-            <div class="resumen-item">
-                <span class="resumen-label">Imágenes:</span>
-                <div class="resumen-images">
-                    ${productDetailsData.imagenes.map(img => `<img src="${img}" alt="Imagen" class="resumen-image">`).join('')}
-                </div>
-            </div>
-        `;
-    }
-    
-    resumenContenido.innerHTML = resumenHTML;
-    resumenDetalles.style.display = 'block';
-}
-
-// Funciones para manejo de cambio de estado
-function setupStatusSelectors() {
-    // Configurar selectores de estado en la tabla
-    const statusSelectors = document.querySelectorAll('.status-selector');
-    console.log('Configurando ' + statusSelectors.length + ' selectores de estado');
-    
-    statusSelectors.forEach(selector => {
-        selector.addEventListener('change', async function(e) {
-            const pedidoId = this.getAttribute('data-pedido-id');
-            const nuevoEstadoId = this.value;
-            const estadoAnterior = this.getAttribute('data-current-estado');
-            
-            console.log('Cambio de estado - Pedido:', pedidoId, 'Nuevo estado:', nuevoEstadoId);
-            
-            // Confirmar el cambio
-            const opcionSeleccionada = this.options[this.selectedIndex];
-            const nombreEstado = opcionSeleccionada.text;
-            
-            if (!confirm(`¿Cambiar estado del pedido #${pedidoId} a "${nombreEstado}"?`)) {
-                // Revertir si cancela
-                this.value = estadoAnterior;
-                return;
-            }
-            
-            try {
-                // Deshabilitar el selector mientras se actualiza
-                this.disabled = true;
-                
-                // Llamar a la API para actualizar el estado
-                const parts = window.location.pathname.split('/');
-                const pIdx = parts.indexOf('public');
-                const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
-                const response = await fetch(`${base}/public/index.php?route=pedidos/${pedidoId}/cambiar-estado&caso=1`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-                    },
-                    body: JSON.stringify({
-                        id_estado_nuevo: parseInt(nuevoEstadoId)
-                    })
-                });
-                
-                const data = await response.json();
-                
-                // La API devuelve status: 'OK' para éxito, no 'success'
-                if (response.ok && (data.status === 'OK' || data.status === 'success')) {
-                    // Actualizar el data-current-estado
-                    this.setAttribute('data-current-estado', nuevoEstadoId);
-                    
-                    // Actualizar estilo visual
-                    updateSelectorStyle(this, nuevoEstadoId);
-                    
-                    showNotification(`Estado actualizado a: ${nombreEstado}`, 'success');
-                    
-                    // Recargar la tabla para reflejar cambios
-                    const parts = window.location.pathname.split('/');
-                    const pIdx = parts.indexOf('public');
-                    const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
-                    await PedidosMVC.init({
-                        apiEntry: base + '/public/index.php',
-                        tableSelector: '.pedidos-table tbody',
-                        autoCreateToken: true
-                    });
-                    
-                    // Reconfigurar los selectores después de recargar
-                    setTimeout(() => {
-                        setupStatusSelectors();
-                        setupActionButtons();
-                    }, 500);
-                } else {
-                    throw new Error(data.message || 'Error al actualizar estado');
-                }
-                
-            } catch (error) {
-                console.error('Error al actualizar estado:', error);
-                showNotification('Error al actualizar estado: ' + error.message, 'error');
-                // Revertir el selector
-                this.value = estadoAnterior;
-            } finally {
-                this.disabled = false;
-            }
-        });
-    });
-    
-    // Configurar botón de actualizar estado en el modal
-    const btnActualizarEstado = document.querySelector('.btn-actualizar-estado');
-    if (btnActualizarEstado) {
-        btnActualizarEstado.addEventListener('click', function() {
-            const estadoSelector = document.getElementById('estadoPedido');
-            const nuevoEstado = estadoSelector.value;
-            const pedidoId = getCurrentPedidoId();
-            
-            if (pedidoId && nuevoEstado) {
-                updatePedidoStatusFromModal(pedidoId, nuevoEstado);
-            }
-        });
-    }
-}
-
-function updatePedidoStatus(pedidoId, nuevoEstado, selector) {
-    // Actualizar el selector visualmente
-    updateSelectorStyle(selector, nuevoEstado);
-    
-    updatePedidoStatusInStorage(pedidoId, nuevoEstado);
-    
-    // Mostrar notificación
-    showNotification(`Estado del pedido ${pedidoId} actualizado a: ${nuevoEstado.charAt(0).toUpperCase() + nuevoEstado.slice(1)}`, 'success');
-    
-    // Actualizar filtros si están activos
-    const filterSelect = document.querySelector('.filter-select');
-    if (filterSelect && filterSelect.value !== '') {
-        filterPedidosByStatus(filterSelect.value);
-    }
-}
-
-function updatePedidoStatusFromModal(pedidoId, nuevoEstado) {
-    // Actualizar en la tabla
-    const selector = document.querySelector(`[data-pedido-id="${pedidoId}"]`);
-    if (selector) {
-        selector.value = nuevoEstado;
-        updateSelectorStyle(selector, nuevoEstado);
-    }
-    
-    updatePedidoStatusInStorage(pedidoId, nuevoEstado);
-    
-    // Actualizar el modal de detalles si está abierto
-    updateModalStatusDisplay(nuevoEstado);
-    
-    // Mostrar notificación
-    showNotification(`Estado del pedido ${pedidoId} actualizado a: ${nuevoEstado.charAt(0).toUpperCase() + nuevoEstado.slice(1)}`, 'success');
-}
-
-function updateSelectorStyle(selector, estadoId) {
-    // Mapeo de IDs a códigos de estado
-    // 1: ENTRG (Entregado), 2: CANC (Cancelado), 3: PROCESO (En Proceso)
-    const estadoMap = {
-        '1': { class: 'entregado', bg: 'rgba(40, 167, 69, 0.2)', color: '#28a745' },
-        '2': { class: 'cancelado', bg: 'rgba(220, 53, 69, 0.2)', color: '#dc3545' },
-        '3': { class: 'proceso', bg: 'rgba(0, 123, 255, 0.2)', color: '#007bff' }
-    };
-    
-    const config = estadoMap[String(estadoId)] || estadoMap['3'];
-    
-    // Remover clases de estado anteriores
-    selector.classList.remove('entregado', 'cancelado', 'proceso', 'pendiente', 'procesando', 'enviado');
-    
-    // Agregar nueva clase de estado
-    selector.classList.add(config.class);
-    
-    // Aplicar estilos específicos
-    selector.style.backgroundColor = config.bg;
-    selector.style.color = config.color;
-    selector.style.borderColor = config.color;
-    selector.style.fontWeight = '500';
-    selector.style.padding = '6px 12px';
-    selector.style.borderRadius = '6px';
-    selector.style.border = `2px solid ${config.color}`;
-}
-
-function updatePedidoStatusInStorage(pedidoId, nuevoEstado) {
-    try {
-        const pedidoIndex = pedidos.findIndex(p => p.id === pedidoId);
-        
-        if (pedidoIndex !== -1) {
-            pedidos[pedidoIndex].estado = nuevoEstado;
-            pedidos[pedidoIndex].fechaActualizacion = new Date().toISOString();
-        }
-    } catch (error) {
-    }
-}
-
-function updateModalStatusDisplay(nuevoEstado) {
-    // Actualizar el selector en el modal
-    const estadoSelector = document.getElementById('estadoPedido');
-    if (estadoSelector) {
-        estadoSelector.value = nuevoEstado;
-    }
-    
-    // Actualizar el display del estado en los detalles
-    const statusDisplay = document.querySelector('.detail-status');
-    if (statusDisplay) {
-        statusDisplay.textContent = nuevoEstado.charAt(0).toUpperCase() + nuevoEstado.slice(1);
-        statusDisplay.className = `detail-status ${nuevoEstado}`;
-    }
-}
-
-function getCurrentPedidoId() {
-    // Obtener el ID del pedido actualmente visible en el modal
-    const modal = document.getElementById('modalVerPedido');
-    if (modal && modal.style.display === 'block') {
-        const content = document.getElementById('pedidoDetailsContent');
-        if (content) {
-            const idElement = content.querySelector('.detail-value');
-            if (idElement) {
-                return idElement.textContent.trim();
-            }
-        }
-    }
-    return null;
-}
-
-// Función para reconfigurar selectores después de agregar/recargar pedidos
-function reconfigureStatusSelectors() {
-    // Remover event listeners existentes
-    const existingSelectors = document.querySelectorAll('.status-selector');
-    existingSelectors.forEach(selector => {
-        selector.replaceWith(selector.cloneNode(true));
-    });
-    
-    // Reconfigurar selectores
-    setupStatusSelectors();
-}
-
-// Funciones para manejo de colores mejorado
-function getColorName(hexColor) {
-    const colorMap = {
-        '#3498db': 'Azul marino',
-        '#e74c3c': 'Rojo coral',
-        '#2ecc71': 'Verde esmeralda',
-        '#f39c12': 'Naranja dorado',
-        '#9b59b6': 'Morado real',
-        '#34495e': 'Gris oscuro',
-        '#ecf0f1': 'Gris claro',
-        '#1abc9c': 'Turquesa',
-        '#e67e22': 'Naranja',
-        '#95a5a6': 'Gris plata',
-        '#f1c40f': 'Amarillo dorado',
-        '#8e44ad': 'Morado violeta',
-        '#16a085': 'Verde azulado',
-        '#27ae60': 'Verde bosque',
-        '#2980b9': 'Azul cielo',
-        '#c0392b': 'Rojo oscuro',
-        '#d35400': 'Naranja oscuro',
-        '#7f8c8d': 'Gris azulado'
-    };
-    
-    return colorMap[hexColor.toLowerCase()] || hexColor;
-}
-
-function setupColorPickers() {
-    const colorPickers = document.querySelectorAll('.color-picker');
+    // Configurar input de colores
     const coloresInput = document.getElementById('colores');
-    
-    colorPickers.forEach((picker, index) => {
-        picker.addEventListener('change', function() {
-            updateColorName(this, index + 1);
-            updateColoresInput();
-        });
-    });
     
     // Configurar botón de limpiar colores
     setupClearColorsButton();
@@ -2115,6 +2524,12 @@ function setupColorPickers() {
 }
 
 function setupClearColorsButton() {
+    const colorPickers = [
+        { picker: 'colorPicker1', name: 'colorName1' },
+        { picker: 'colorPicker2', name: 'colorName2' },
+        { picker: 'colorPicker3', name: 'colorName3' }
+    ];
+    
     const clearButton = document.querySelector('.btn-limpiar-colores');
     if (clearButton) {
         clearButton.addEventListener('click', function() {
@@ -2123,757 +2538,521 @@ function setupClearColorsButton() {
                 picker.value = '#000000';
                 updateColorName(picker, index + 1);
             });
-            updateColoresInput();
-            
-            // Efecto visual
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = 'scale(1)';
-            }, 150);
-            
-            showNotification('Colores limpiados', 'success');
+        });
+    }
+    
+    // Botón limpiar colores del modal de productos
+    const btnLimpiar = document.querySelector('#modalDetallesProducto .btn-limpiar-colores');
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', function() {
+            console.log('Limpiando colores del modal de productos');
+            colorPickers.forEach(({picker, name}) => {
+                const pickerElement = document.getElementById(picker);
+                const nameElement = document.getElementById(name);
+                if (pickerElement) pickerElement.value = '#000000';
+                if (nameElement) nameElement.textContent = `Color ${picker.slice(-1)}`;
+            });
+            const coloresField = document.getElementById('colores');
+            if (coloresField) coloresField.value = '';
         });
     }
 }
 
-function updateColorName(picker, index) {
-    const colorName = document.getElementById(`colorName${index}`);
-    if (colorName) {
-        const color = picker.value;
-        if (color === '#000000') {
-            colorName.textContent = `Color ${index}`;
-            colorName.style.color = 'rgba(255, 255, 255, 0.6)';
-        } else {
-            colorName.textContent = color.toUpperCase();
-            colorName.style.color = color;
-        }
-    }
-}
-
-function updateColoresInput() {
-    const colorPickers = document.querySelectorAll('.color-picker');
-    const coloresInput = document.getElementById('colores');
-    
-    if (!coloresInput) return;
-    
+function updateColorsField() {
     const colors = [];
-    colorPickers.forEach((picker, index) => {
-        if (picker.value && picker.value !== '#000000') {
-            colors.push(picker.value.toUpperCase());
+    const pickerIds = ['colorPicker1', 'colorPicker2', 'colorPicker3'];
+    
+    pickerIds.forEach(id => {
+        const picker = document.getElementById(id);
+        if (picker && picker.value && picker.value !== '#000000') {
+            colors.push(picker.value);
         }
     });
     
-    if (colors.length > 0) {
-        coloresInput.value = colors.join(', ');
-    } else {
-        coloresInput.value = '';
+    const coloresField = document.getElementById('colores');
+    if (coloresField) {
+        coloresField.value = colors.join(', ');
     }
 }
 
-// Funciones para manejo de imágenes
-function setupImageClickHandlers() {
-    const images = document.querySelectorAll('.detail-image');
-    images.forEach(image => {
-        image.addEventListener('click', function() {
-            showImageModal(this.src, this.alt);
+// === CRUD visual de productos en edición ===
+function renderTablaProductosEditables() {
+    const container = document.getElementById('tablaProductosEditablesContainer');
+    if (!container) return;
+    let productos = [];
+    try {
+        productos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
+    } catch (e) {}
+    if (!Array.isArray(productos)) productos = [];
+
+    console.log('=== RENDERIZANDO TABLA DE PRODUCTOS ===');
+    console.log('Productos en sessionStorage:', productos);
+    console.log('Cantidad de productos:', productos.length);
+    if (productos.length > 0) {
+        console.log('Primer producto:', productos[0]);
+        console.log('Campos disponibles:', Object.keys(productos[0]));
+    }
+
+    let html = `<table class="tabla-productos-editable" style="width:100%; border-collapse:separate; border-spacing:0 6px; font-size:0.95em;">
+        <thead>
+            <tr style="background: linear-gradient(45deg, rgba(20, 152, 0, 0.95), rgba(20, 152, 0, 0.75)); color:#fff;">
+                <th style="padding:8px; border-radius:8px 0 0 0;">#</th>
+                <th style="padding:8px;" title='Categoría'>Categoría</th>
+                <th style="padding:8px;" title='Cantidad'>Cant.</th>
+                <th style="padding:8px;" title='Precio unitario'>Precio</th>
+                <th style="padding:8px;" title='Descuento (%)'>Desc.%</th>
+                <th style="padding:8px;" title='Impuesto (%)'>Imp.%</th>
+                <th style="padding:8px;">Total</th>
+                <th style="padding:8px;" title='Colores'>Colores</th>
+                <th style="padding:8px;" title='Especificaciones'>Especificaciones</th>
+                <th style="padding:8px; border-radius:0 8px 0 0;">Acción</th>
+            </tr>
+        </thead>
+        <tbody>`;
+    
+    if (productos.length === 0) {
+        html += `<tr><td colspan="10" style="text-align:center; padding:20px; color:#999; font-style:italic;">
+            No hay productos agregados. Haz clic en "Agregar Producto" para comenzar.
+        </td></tr>`;
+    } else {
+        productos.forEach((prod, idx) => {
+            // Mapear los campos que pueden venir con diferentes nombres
+            const cantidad = Number(prod.cantidad || 0);
+            const precio = Number(prod.precio || prod.precio_unitario || 0);
+            const descuento = Number(prod.descuento || 0);
+            const impuesto = Number(prod.impuesto || 0);
+            let subtotal = cantidad * precio;
+            let montoDescuento = subtotal * (descuento / 100);
+            let subtotalConDescuento = subtotal - montoDescuento;
+            let montoImpuesto = subtotalConDescuento * (impuesto / 100);
+            let total = subtotalConDescuento + montoImpuesto;
+            
+            // Si categoría está vacía, usar "productos"
+            const categoria = prod.categoria && prod.categoria.trim() !== '' ? prod.categoria : 'productos';
+            
+            console.log(`Producto ${idx + 1}:`, {
+                categoria,
+                cantidad,
+                precio,
+                descuento,
+                impuesto,
+                colores: prod.colores,
+                especificaciones: prod.especificaciones
+            });
+            
+            html += `<tr data-idx="${idx}" style="background:${idx%2===0?'#eef9f1':'#f8fbf9'}; border: 1px solid rgba(20, 152, 0, 0.08);">
+                <td style="text-align:center; font-weight:bold; padding:8px; color:#333;">${idx + 1}</td>
+                <td style="padding:8px;"><input type="text" class="td-categoria" value="${categoria}" style="width:100px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="number" class="td-cantidad" min="1" value="${cantidad}" style="width:60px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="number" class="td-precio" min="0" step="0.01" value="${precio}" style="width:75px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="number" class="td-descuento" min="0" step="0.01" value="${descuento}" style="width:55px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="number" class="td-impuesto" min="0" step="0.01" value="${impuesto}" style="width:55px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td class="td-total" style="font-weight:bold; color:#28a745; padding:8px;">${formatoLempiras(total)}</td>
+                <td style="padding:8px;"><input type="text" class="td-colores" value="${prod.colores || ''}" style="width:80px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><input type="text" class="td-especificaciones" value="${prod.especificaciones || ''}" style="width:120px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;"><button type="button" class="btn-eliminar-producto" data-idx="${idx}" style="color:#fff; background:#dc3545; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:0.9em;" title="Eliminar producto"><i class="fa fa-trash"></i></button></td>
+            </tr>`;
+        });
+    }
+    
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+
+    // Enlazar eventos de edición en línea
+    container.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', onEditarProductoEditable);
+    });
+    // Enlazar eventos de eliminar
+    container.querySelectorAll('.btn-eliminar-producto').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const idx = parseInt(this.getAttribute('data-idx'));
+            eliminarProductoEditable(idx);
         });
     });
+    
+    renderResumenTotalesEdicion();
 }
 
-function showImageModal(src, alt) {
-    // Crear modal para imagen ampliada
-    const imageModal = document.createElement('div');
-    imageModal.className = 'modal image-modal';
-    imageModal.innerHTML = `
-        <div class="modal-content image-modal-content">
-            <div class="modal-header">
-                <h3>Imagen de Referencia</h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <img src="${src}" alt="${alt}" class="enlarged-image">
-            </div>
+// Manejar la edición de un producto en la tabla editable
+function onEditarProductoEditable(event) {
+    const input = event.target;
+    const row = input.closest('tr');
+    if (!row) return;
+    
+    const idx = parseInt(row.getAttribute('data-idx'));
+    
+    let productos = [];
+    try {
+        productos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
+    } catch (e) {
+        productos = [];
+    }
+    
+    if (!Array.isArray(productos) || idx >= productos.length) return;
+    
+    // Actualizar el campo correspondiente según la clase del input
+    let descuentoChanged = false;
+    let impuestoChanged = false;
+    if (input.classList.contains('td-categoria')) {
+        productos[idx].categoria = input.value;
+    } else if (input.classList.contains('td-cantidad')) {
+        productos[idx].cantidad = Number(input.value);
+    } else if (input.classList.contains('td-precio')) {
+        productos[idx].precio = Number(input.value);
+    } else if (input.classList.contains('td-descuento')) {
+        const newDesc = Number(input.value);
+        productos[idx].descuento = newDesc;
+        descuentoChanged = true;
+    } else if (input.classList.contains('td-impuesto')) {
+        const newImp = Number(input.value);
+        productos[idx].impuesto = newImp;
+        impuestoChanged = true;
+    } else if (input.classList.contains('td-colores')) {
+        productos[idx].colores = input.value;
+    } else if (input.classList.contains('td-especificaciones')) {
+        productos[idx].especificaciones = input.value;
+    }
+    
+    // Guardar cambios en sessionStorage
+    sessionStorage.setItem('detalles_productos', JSON.stringify(productos));
+
+    // Si cambió descuento o impuesto, tratarlos como GLOBAL: propagar a todos los productos
+    if (descuentoChanged || impuestoChanged) {
+        try {
+            const descGlobal = Number(productos[idx].descuento || 0);
+            const impGlobal = Number(productos[idx].impuesto || 0);
+            productos = productos.map(p => ({
+                ...p,
+                descuento: descGlobal,
+                impuesto: impGlobal
+            }));
+            sessionStorage.setItem('detalles_productos', JSON.stringify(productos));
+        } catch (e) {}
+        // Re-renderizar toda la tabla para actualizar todos los totales y mantener consistencia global
+        renderTablaProductosEditables();
+        renderResumenTotalesEdicion();
+        return;
+    }
+
+    // Recalcular y actualizar SOLO el total de la fila editada para no perder el foco
+    const cantidad = Number(productos[idx].cantidad || 0);
+    const precio = Number((productos[idx].precio ?? productos[idx].precio_unitario) || 0);
+    const descuento = Number(productos[idx].descuento || 0);
+    const impuesto = Number(productos[idx].impuesto || 0);
+    const subtotal = cantidad * precio;
+    const montoDescuento = subtotal * (descuento / 100);
+    const subtotalConDescuento = subtotal - montoDescuento;
+    const montoImpuesto = subtotalConDescuento * (impuesto / 100);
+    const total = subtotalConDescuento + montoImpuesto;
+
+    const tdTotal = row.querySelector('.td-total');
+    if (tdTotal) tdTotal.textContent = formatoLempiras(total);
+
+    // Actualizar resumen de totales sin re-renderizar la tabla
+    renderResumenTotalesEdicion();
+}
+
+// Eliminar un producto de la tabla editable
+async function eliminarProductoEditable(idx) {
+    let productos = [];
+    try {
+        productos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
+    } catch (e) {
+        productos = [];
+    }
+    
+    if (!Array.isArray(productos)) return;
+    
+    // Confirmar eliminación con modal personalizado
+    try {
+        const confirmed = await showConfirmDelete(
+            '¿Estás seguro de eliminar este producto del pedido?',
+            async () => {
+                productos.splice(idx, 1);
+                sessionStorage.setItem('detalles_productos', JSON.stringify(productos));
+                renderTablaProductosEditables();
+            }
+        );
+        
+        if (!confirmed) {
+            console.log('Eliminación de producto cancelada');
+        }
+    } catch (error) {
+        console.error('Error al eliminar producto:', error);
+    }
+}
+
+// Renderizar el resumen de totales en el modal de edición
+function renderResumenTotalesEdicion() {
+    const container = document.getElementById('resumenTotalesEdicion');
+    if (!container) return;
+    
+    let productos = [];
+    try {
+        productos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
+    } catch (e) {}
+    if (!Array.isArray(productos)) productos = [];
+    
+    if (productos.length === 0) {
+        container.innerHTML = '<p style="color:#999; font-style:italic; text-align:center;">No hay productos para calcular totales</p>';
+        return;
+    }
+    
+    // Calcular totales - con descuento e impuesto INDIVIDUAL por producto
+    let totalCantidad = 0;
+    let subtotalSinDescuentos = 0;
+    let totalDescuentos = 0;
+    let totalImpuestos = 0;
+    let totalGeneral = 0;
+    
+    productos.forEach(prod => {
+        const cantidad = Number(prod.cantidad || 0);
+        const precio = Number((prod.precio ?? prod.precio_unitario) || 0);
+        const descuento = Number(prod.descuento || 0);
+        const impuesto = Number(prod.impuesto || 0);
+        
+        totalCantidad += cantidad;
+        
+        // Subtotal del producto
+        let subtotalProducto = cantidad * precio;
+        subtotalSinDescuentos += subtotalProducto;
+        
+        // Aplicar descuento del producto
+        const montoDescuentoProducto = subtotalProducto * (descuento / 100);
+        totalDescuentos += montoDescuentoProducto;
+        subtotalProducto = subtotalProducto - montoDescuentoProducto;
+        
+        // Aplicar impuesto del producto
+        const montoImpuestoProducto = subtotalProducto * (impuesto / 100);
+        totalImpuestos += montoImpuestoProducto;
+        
+        // Total del producto
+        totalGeneral += subtotalProducto + montoImpuestoProducto;
+    });
+    
+    // Calcular porcentajes promedio para mostrar
+    const descuentoPromedio = subtotalSinDescuentos > 0 ? (totalDescuentos / subtotalSinDescuentos * 100) : 0;
+    const subtotalConDescuento = subtotalSinDescuentos - totalDescuentos;
+    const impuestoPromedio = subtotalConDescuento > 0 ? (totalImpuestos / subtotalConDescuento * 100) : 0;
+    
+    // Renderizar resumen
+    let html = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95em;">
+            <div style="text-align: right; font-weight: 500;">Total de productos:</div>
+            <div style="font-weight: 600;">${productos.length}</div>
+            
+            <div style="text-align: right; font-weight: 500;">Cantidad total:</div>
+            <div style="font-weight: 600;">${totalCantidad}</div>
+            
+            <div style="text-align: right; font-weight: 500;">Subtotal:</div>
+            <div>${formatoLempiras(subtotalSinDescuentos)}</div>
+            
+            <div style="text-align: right; font-weight: 500;">Descuento (promedio ${descuentoPromedio.toFixed(1)}%):</div>
+            <div style="color: #dc3545;">-${formatoLempiras(totalDescuentos)}</div>
+            
+            <div style="text-align: right; font-weight: 500;">Impuesto (promedio ${impuestoPromedio.toFixed(1)}%):</div>
+            <div style="color: #28a745;">+${formatoLempiras(totalImpuestos)}</div>
+            
+            <div style="text-align: right; font-weight: 600; font-size: 1.1em; border-top: 2px solid rgba(20, 152, 0, 0.5); padding-top: 8px;">Total:</div>
+            <div style="font-weight: 700; font-size: 1.2em; color: rgba(20, 152, 0, 0.95); border-top: 2px solid rgba(20, 152, 0, 0.5); padding-top: 8px;">${formatoLempiras(totalGeneral)}</div>
         </div>
     `;
     
-    document.body.appendChild(imageModal);
-    imageModal.style.display = 'block';
-    
-    // Configurar cierre del modal
-    const closeBtn = imageModal.querySelector('.close');
-    closeBtn.addEventListener('click', () => {
-        imageModal.remove();
-    });
-    
-    imageModal.addEventListener('click', (e) => {
-        if (e.target === imageModal) {
-            imageModal.remove();
-        }
-    });
+    container.innerHTML = html;
 }
 
-// Funciones para el modal de edición
-function showEditModal(pedidoData) {
-    console.log('Mostrando modal de edición para:', pedidoData);
-    const modal = document.getElementById('modalEditarPedido');
-    const pedidoIdDisplay = document.getElementById('editarPedidoIdDisplay');
-    
-    if (!modal) {
-        console.error('Modal de edición no encontrado');
-        return;
-    }
-    
-    // Mostrar ID del pedido en el header
-    if (pedidoIdDisplay) {
-        pedidoIdDisplay.textContent = `ID: ${pedidoData.id}`;
-    }
-    
-    // Llenar el formulario con los datos existentes
-    fillEditForm(pedidoData);
-    
-    // Configurar event listeners para el modal de edición
-    setupEditModal();
-    
-    // Configurar color pickers del modal de edición
-    setupEditColorPickers();
-    
-    // Configurar subida de imágenes del modal de edición
-    setupEditImageUpload();
-    
-    // Mostrar modal con animación
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    
-    // Enfocar el primer campo
-    const firstInput = modal.querySelector('input[required]');
-    if (firstInput) {
-        setTimeout(() => firstInput.focus(), 100);
-    }
-}
-
-function fillEditForm(data) {
-    // Llenar campos básicos
-    const fields = {
-        'editarCliente': data.cliente,
-        'editarTelefono': data.telefono,
-        'editarUsuario': data.usuario,
-        'editarFechaEntrega': data.fechaEntrega,
-        'editarCanalVenta': data.canalVenta,
-        'editarPrecioUnitario': data.precioUnitario,
-        'editarCantidad': data.cantidad,
-        'editarPrioridad': data.prioridad,
-        'editarCategoriaProducto': data.categoriaProducto,
-        'editarTamano': data.tamano,
-        'editarMaterial': data.material,
-        'editarDireccion': data.direccion,
-        'editarTextoPersonalizado': data.textoPersonalizado,
-        'editarEspecificaciones': data.especificaciones,
-        'editarObservaciones': data.observaciones
-    };
-    
-    // Llenar campos del formulario
-    Object.keys(fields).forEach(fieldId => {
-        const field = document.getElementById(fieldId);
-        if (field && fields[fieldId]) {
-            field.value = fields[fieldId];
-        }
-    });
-    
-    // Llenar colores
-    for (let i = 1; i <= 5; i++) {
-        const colorPicker = document.getElementById(`editarColorPicker${i}`);
-        if (colorPicker && data[`colorPicker${i}`]) {
-            colorPicker.value = data[`colorPicker${i}`];
-            updateEditColorName(colorPicker, i);
-        }
-    }
-    
-    // Actualizar campo de colores
-    updateEditColoresInput();
-    
-    // Cargar imágenes existentes si las hay
-    if (data.imagenes && data.imagenes.length > 0) {
-        displayEditExistingImages(data.imagenes);
-    }
-}
-
-function setupEditModal() {
-    const modal = document.getElementById('modalEditarPedido');
-    if (!modal) return;
-    
-    const closeBtn = modal.querySelector('.close');
-    const cancelBtn = modal.querySelector('.btn-cancelar');
-    const saveBtn = document.getElementById('btnGuardarEdicion');
-    
-    // Remover event listeners existentes para evitar duplicados
-    if (closeBtn) {
-        closeBtn.removeEventListener('click', closeEditModal);
-        closeBtn.addEventListener('click', closeEditModal);
-    }
-    
-    if (cancelBtn) {
-        cancelBtn.removeEventListener('click', closeEditModal);
-        cancelBtn.addEventListener('click', closeEditModal);
-    }
-    
-    if (saveBtn) {
-        saveBtn.removeEventListener('click', saveEditChanges);
-        saveBtn.addEventListener('click', saveEditChanges);
-    }
-    
-    // Remover event listener existente del modal
-    modal.removeEventListener('click', handleEditModalClick);
-    modal.addEventListener('click', handleEditModalClick);
-}
-
-function handleEditModalClick(e) {
-    if (e.target === e.currentTarget) {
-        closeEditModal();
-    }
-}
-
-function closeEditModal() {
-    const modal = document.getElementById('modalEditarPedido');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        
-        // Limpiar formulario
-        const form = document.getElementById('formEditarPedido');
-        if (form) {
-            form.reset();
-        }
-    }
-}
-
-function saveEditChanges() {
-    console.log('Guardando cambios de edición...');
-    
-    const form = document.getElementById('formEditarPedido');
-    if (!form) return;
-    
-    // Validar campos requeridos
-    const requiredFields = form.querySelectorAll('[required]');
-    let isFormValid = true;
-    
-    requiredFields.forEach(field => {
-        if (!field.value.trim()) {
-            isFormValid = false;
-            showFieldError(field, 'Este campo es obligatorio');
-        } else {
-            clearFieldError(field);
-        }
-    });
-    
-    if (!isFormValid) {
-        showNotification('Por favor, complete todos los campos obligatorios', 'error');
-        return;
-    }
-    
-    // Recopilar datos del formulario
-    const formData = new FormData(form);
-    const updatedData = {};
-    
-    for (let [key, value] of formData.entries()) {
-        updatedData[key] = value;
-    }
-    
-    // Agregar colores seleccionados
-    const colorPickers = form.querySelectorAll('.color-picker');
-    colorPickers.forEach((picker, index) => {
-        if (picker.value && picker.value !== '#000000') {
-            updatedData[`colorPicker${index + 1}`] = picker.value;
-        }
-    });
-    
-    // Obtener ID del pedido
-    const pedidoIdDisplay = document.getElementById('editarPedidoIdDisplay');
-    const pedidoId = pedidoIdDisplay ? pedidoIdDisplay.textContent.replace('ID: ', '') : null;
-    
-    if (!pedidoId) {
-        showNotification('Error: No se pudo identificar el pedido', 'error');
-        return;
-    }
-    
-    // Actualizar pedido
-    
-    // Cerrar modal
-    closeEditModal();
-    
-    // Mostrar notificación de éxito
-    showNotification('Pedido actualizado exitosamente', 'success');
-}
-
-
-// Funciones para manejo de colores en el modal de edición
-function setupEditColorPickers() {
-    const colorPickers = document.querySelectorAll('#formEditarPedido .color-picker');
-    const coloresInput = document.getElementById('editarColores');
-    
-    colorPickers.forEach((picker, index) => {
-        picker.addEventListener('change', function() {
-            updateEditColorName(this, index + 1);
-            updateEditColoresInput();
-        });
-    });
-    
-    // Configurar botón de limpiar colores del modal de edición
-    setupEditClearColorsButton();
-}
-
-function setupEditClearColorsButton() {
-    const clearButton = document.querySelector('#formEditarPedido .btn-limpiar-colores');
-    if (clearButton) {
-        clearButton.addEventListener('click', function() {
-            const colorPickers = document.querySelectorAll('#formEditarPedido .color-picker');
-            colorPickers.forEach((picker, index) => {
-                picker.value = '#000000';
-                updateEditColorName(picker, index + 1);
-            });
-            updateEditColoresInput();
-            
-            // Efecto visual
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = 'scale(1)';
-            }, 150);
-            
-            showNotification('Colores limpiados', 'success');
+// Asegurar que el botón de agregar producto esté correctamente enlazado
+document.addEventListener('DOMContentLoaded', function() {
+    const btnAgregarProducto = document.getElementById('btnAgregarProductoEditable');
+    if (btnAgregarProducto) {
+        btnAgregarProducto.addEventListener('click', function() {
+            let productos = [];
+            try {
+                productos = JSON.parse(sessionStorage.getItem('detalles_productos') || '[]');
+            } catch (e) {}
+            if (!Array.isArray(productos)) productos = [];
+            const baseDesc = Number((productos[0] && productos[0].descuento) || 0);
+            const baseImp = Number((productos[0] && productos[0].impuesto) || 0);
+            productos.push({ categoria:'productos', cantidad:1, precio:0, descuento:baseDesc, impuesto:baseImp, colores:'', especificaciones:'', imagenesUrls:'' });
+            sessionStorage.setItem('detalles_productos', JSON.stringify(productos));
+            renderTablaProductosEditables();
+            actualizarCamposTotalesEnEdicion();
+            renderResumenTotalesEdicion();
         });
     }
-}
+});
 
-function updateEditColorName(picker, index) {
-    const colorName = document.getElementById(`editarColorName${index}`);
-    if (colorName) {
-        const color = picker.value;
-        if (color === '#000000') {
-            colorName.textContent = `Color ${index}`;
-            colorName.style.color = 'rgba(255, 255, 255, 0.6)';
-        } else {
-            colorName.textContent = color.toUpperCase();
-            colorName.style.color = color;
-        }
-    }
-}
-
-function updateEditColoresInput() {
-    const colorPickers = document.querySelectorAll('#formEditarPedido .color-picker');
-    const coloresInput = document.getElementById('editarColores');
-    
-    if (!coloresInput) return;
-    
-    const colors = [];
-    colorPickers.forEach((picker, index) => {
-        if (picker.value && picker.value !== '#000000') {
-            colors.push(picker.value.toUpperCase());
-        }
-    });
-    
-    if (colors.length > 0) {
-        coloresInput.value = colors.join(', ');
-    } else {
-        coloresInput.value = '';
-    }
-}
-
-// Funciones para manejo de imágenes en el modal de edición
-function setupEditImageUpload() {
-    const fileInput = document.getElementById('editarImagenReferencia');
-    const previewContainer = document.getElementById('editarImagePreviewContainer');
-    
-    if (!fileInput || !previewContainer) return;
-    
-    // Configurar drag and drop
-    previewContainer.addEventListener('dragover', handleDragOver);
-    previewContainer.addEventListener('drop', handleEditDrop);
-    previewContainer.addEventListener('click', () => fileInput.click());
-    
-    // Configurar selección de archivos
-    fileInput.addEventListener('change', handleEditFileSelect);
-}
-
-function handleEditDrop(e) {
-    e.preventDefault();
-    e.currentTarget.style.borderColor = 'rgba(20, 152, 0, 0.3)';
-    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-    
-    const files = Array.from(e.dataTransfer.files);
-    handleEditFiles(files);
-}
-
-function handleEditFileSelect(e) {
-    const files = Array.from(e.target.files);
-    handleEditFiles(files);
-}
-
-function handleEditFiles(files) {
-    const previewContainer = document.getElementById('editarImagePreviewContainer');
-    const validFiles = files.filter(file => file.type.startsWith('image/'));
-    
-    if (validFiles.length === 0) {
-        showNotification('Por favor selecciona solo archivos de imagen', 'error');
-        return;
-    }
-    
-    // Limpiar preview anterior
-    const existingPreview = previewContainer.querySelector('.image-preview');
-    if (existingPreview) {
-        existingPreview.remove();
-    }
-    
-    // Crear contenedor de preview
-    const previewDiv = document.createElement('div');
-    previewDiv.className = 'image-preview';
-    
-    validFiles.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const imageItem = document.createElement('div');
-            imageItem.className = 'image-preview-item';
-            
-            imageItem.innerHTML = `
-                <img src="${e.target.result}" alt="Preview ${index + 1}">
-                <button type="button" class="remove-image" onclick="removeEditImage(this)">×</button>
-            `;
-            
-            previewDiv.appendChild(imageItem);
-        };
-        reader.readAsDataURL(file);
-    });
-    
-    previewContainer.appendChild(previewDiv);
-    
-    // Ocultar placeholder
-    const placeholder = previewContainer.querySelector('.upload-placeholder');
-    if (placeholder) {
-        placeholder.style.display = 'none';
-    }
-}
-
-function displayEditExistingImages(images) {
-    const previewContainer = document.getElementById('editarImagePreviewContainer');
-    if (!previewContainer) return;
-    
-    // Limpiar preview anterior
-    const existingPreview = previewContainer.querySelector('.image-preview');
-    if (existingPreview) {
-        existingPreview.remove();
-    }
-    
-    // Crear contenedor de preview
-    const previewDiv = document.createElement('div');
-    previewDiv.className = 'image-preview';
-    
-    images.forEach((imageSrc, index) => {
-        const imageItem = document.createElement('div');
-        imageItem.className = 'image-preview-item';
-        
-        imageItem.innerHTML = `
-            <img src="${imageSrc}" alt="Preview ${index + 1}">
-            <button type="button" class="remove-image" onclick="removeEditImage(this)">×</button>
-        `;
-        
-        previewDiv.appendChild(imageItem);
-    });
-    
-    previewContainer.appendChild(previewDiv);
-    
-    // Ocultar placeholder
-    const placeholder = previewContainer.querySelector('.upload-placeholder');
-    if (placeholder) {
-        placeholder.style.display = 'none';
-    }
-}
-
-// Función global para remover imágenes en el modal de edición
-function removeEditImage(button) {
-    const imageItem = button.parentElement;
-    imageItem.remove();
-    
-    // Mostrar placeholder si no hay más imágenes
-    const previewContainer = document.getElementById('editarImagePreviewContainer');
-    const remainingImages = previewContainer.querySelectorAll('.image-preview-item');
-    
-    if (remainingImages.length === 0) {
-        const placeholder = previewContainer.querySelector('.upload-placeholder');
-        if (placeholder) {
-            placeholder.style.display = 'block';
-        }
-    }
-}
-
-// ===== Funcionalidad para crear pedido - ya configurado en el DOMContentLoaded principal =====
-
-async function crearNuevoPedido() {
+// ===== EXPORTACIÓN A EXCEL =====
+/**
+ * Exporta la tabla de pedidos actual a un archivo Excel con formato profesional
+ */
+function exportarPedidosAExcel() {
     try {
-        // Mostrar indicador de carga
-        const btnGuardar = document.querySelector('#modalNuevoPedido .btn-guardar');
-        const textOriginal = btnGuardar.textContent;
-        btnGuardar.textContent = 'Guardando...';
-        btnGuardar.disabled = true;
-
-        // Recoger datos del formulario
-        const formData = new FormData(document.getElementById('formNuevoPedido'));
+        console.log('Iniciando exportación a Excel...');
         
-        // Obtener detalles del producto si fueron guardados
-        const detallesProducto = sessionStorage.getItem('detallesProducto');
-        let categoriaProducto = '', colores = '', especificaciones = '', imagenUrl = '';
-        
-        if (detallesProducto) {
-            const detalles = JSON.parse(detallesProducto);
-            categoriaProducto = detalles.categoria || '';
-            colores = detalles.colores || '';
-            especificaciones = detalles.especificaciones || '';
-            
-            // Parsear las URLs de imágenes
-            if (detalles.imagenesUrls) {
-                try {
-                    const imagenesUrls = JSON.parse(detalles.imagenesUrls);
-                    imagenUrl = imagenesUrls.length > 0 ? imagenesUrls[0] : '';
-                } catch (e) {
-                    imagenUrl = '';
-                }
-            }
-        }
-
-        // Construir objeto del pedido con los nombres correctos que espera el backend
-        const pedidoData = {
-            usuario: (formData.get('clienteNombre') || '').trim(),
-            telefono: (formData.get('clienteTelefono') || '').trim(),
-            fechaEntrega: (formData.get('fechaEntrega') || '').trim(),
-            canalVenta: (formData.get('canalVenta') || '').trim(),
-            prioridad: (formData.get('prioridad') || 'normal').trim(),
-            observaciones: (formData.get('observaciones') || '').trim(),
-            categoriaProducto: categoriaProducto,
-            colores: colores,
-            especificaciones: especificaciones,
-            imagenUrl: imagenUrl
-        };
-
-        console.log('Enviando pedido:', pedidoData);
-
-        // Validaciones mínimas en frontend para evitar 400 del backend
-        const errores = [];
-        const inputFecha = document.getElementById('fechaEntrega');
-        if (!pedidoData.fechaEntrega) {
-            errores.push('La fecha de entrega es obligatoria.');
-            if (inputFecha) inputFecha.focus();
-        }
-        const inputNombre = document.getElementById('clienteNombre');
-        if (!pedidoData.usuario) {
-            errores.push('El nombre del cliente es obligatorio.');
-            if (inputNombre && !inputFecha) inputNombre.focus();
-        }
-        const inputTel = document.getElementById('clienteTelefono');
-        if (!pedidoData.telefono) {
-            errores.push('El teléfono es obligatorio.');
-            if (inputTel && !inputFecha && !inputNombre) inputTel.focus();
-        }
-        const inputCanal = document.getElementById('canalVenta');
-        if (!pedidoData.canalVenta) {
-            errores.push('El canal de venta es obligatorio.');
-            if (inputCanal && !inputFecha && !inputNombre && !inputTel) inputCanal.focus();
-        }
-
-        if (errores.length > 0) {
-            showNotification(errores[0], 'error');
-            // Restaurar botón
-            btnGuardar.textContent = textOriginal;
-            btnGuardar.disabled = false;
+        // Verificar que SheetJS esté cargado
+        if (typeof XLSX === 'undefined') {
+            showNotification('Error: Librería de Excel no cargada', 'error');
             return;
         }
-
-        // Llamar al API usando PedidosMVC - crear cabecera del pedido
-        const response = await PedidosMVC.crearPedido(pedidoData);
         
-        console.log('Respuesta del servidor:', response);
-
-        // Intentar crear el detalle (cantidad y precio del formulario principal)
-        try {
-            const idPedido = (response && response.data && response.data.id_pedido_creado) ? response.data.id_pedido_creado : null;
-            if (idPedido) {
-                // Obtener cantidad y precio del formulario principal
-                const cantidadForm = parseInt(formData.get('cantidad')) || 1;
-                const precioForm = parseFloat(formData.get('precioUnitario')) || 0;
-                
-                // Recuperar datos guardados en detallesProducto (solo detalles adicionales)
-                const detallesProducto = sessionStorage.getItem('detallesProducto');
-                let categoriaProducto = '';
-                let especificaciones = '';
-                let imagenes = [];
-                
-                if (detallesProducto) {
-                    const d = JSON.parse(detallesProducto);
-                    if (d.categoria) categoriaProducto = String(d.categoria);
-                    if (d.especificaciones) especificaciones = String(d.especificaciones);
-                    if (d.imagenesUrls) {
-                        try {
-                            const imgs = JSON.parse(d.imagenesUrls);
-                            if (Array.isArray(imgs)) imagenes = imgs;
-                        } catch (err) {
-                            console.warn('No se pudieron parsear imagenesUrls');
-                        }
-                    }
+        // Obtener todos los pedidos visibles en la tabla
+        const tabla = document.querySelector('.pedidos-table tbody');
+        if (!tabla) {
+            showNotification('No se encontró la tabla de pedidos', 'error');
+            return;
+        }
+        
+        const filas = tabla.querySelectorAll('tr');
+        if (filas.length === 0 || (filas.length === 1 && filas[0].querySelector('td[colspan]'))) {
+            showNotification('No hay pedidos para exportar', 'warning');
+            return;
+        }
+        
+        // Crear array de datos para el Excel
+        const datos = [];
+        
+        // Agregar encabezados
+        datos.push([
+            'Número',
+            'Cliente',
+            'Fecha del pedido',
+            'Fecha de entrega',
+            'Estado',
+            'Total'
+        ]);
+        
+        // Extraer datos de cada fila
+        filas.forEach(fila => {
+            // Saltar filas vacías o de "no hay pedidos"
+            if (fila.querySelector('td[colspan]')) return;
+            
+            const celdas = fila.querySelectorAll('td');
+            if (celdas.length < 6) return;
+            
+            const numeroPedido = celdas[0].textContent.trim();
+            const cliente = celdas[1].textContent.trim();
+            const fechaPedido = celdas[2].textContent.trim();
+            const fechaEntrega = celdas[3].textContent.trim();
+            
+            // Obtener el estado del selector
+            const selector = celdas[4].querySelector('.status-selector');
+            const estado = selector ? selector.options[selector.selectedIndex].text : celdas[4].textContent.trim();
+            
+            const total = celdas[5].textContent.trim();
+            
+            datos.push([
+                numeroPedido,
+                cliente,
+                fechaPedido,
+                fechaEntrega,
+                estado,
+                total
+            ]);
+        });
+        
+        console.log('Datos extraídos:', datos.length - 1, 'pedidos');
+        
+        // Crear libro de trabajo (workbook)
+        const wb = XLSX.utils.book_new();
+        
+        // Crear hoja de trabajo (worksheet) desde los datos
+        const ws = XLSX.utils.aoa_to_sheet(datos);
+        
+        // Configurar anchos de columna para mejor visualización
+        const columnWidths = [
+            { wch: 10 },  // Número
+            { wch: 25 },  // Cliente
+            { wch: 18 },  // Fecha del pedido
+            { wch: 18 },  // Fecha de entrega
+            { wch: 15 },  // Estado
+            { wch: 15 }   // Total
+        ];
+        ws['!cols'] = columnWidths;
+        
+        // Aplicar estilos a los encabezados (primera fila)
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        
+        // Estilo para encabezados
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const address = XLSX.utils.encode_col(C) + "1"; // Primera fila
+            if (!ws[address]) continue;
+            
+            // Aplicar formato de encabezado
+            ws[address].s = {
+                font: { 
+                    bold: true, 
+                    sz: 12, 
+                    color: { rgb: "FFFFFF" } 
+                },
+                fill: { 
+                    fgColor: { rgb: "149800" } // Verde de Color Ink
+                },
+                alignment: { 
+                    horizontal: "center", 
+                    vertical: "center" 
+                },
+                border: {
+                    top: { style: "thin", color: { rgb: "000000" } },
+                    bottom: { style: "thin", color: { rgb: "000000" } },
+                    left: { style: "thin", color: { rgb: "000000" } },
+                    right: { style: "thin", color: { rgb: "000000" } }
                 }
-
-                // Construir un nombre/descr. de producto solicitado
-                const productoSolicitado = categoriaProducto ? `Personalizado: ${categoriaProducto}` : 'Pedido Personalizado';
-
-                // Preparar payload del detalle
-                const detallePersonalizado = {
-                    categoria: categoriaProducto,
-                    colores: colores,
-                    especificaciones: especificaciones,
-                    imagenes: imagenes
+            };
+        }
+        
+        // Aplicar bordes y centrado a todas las celdas de datos
+        for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const address = XLSX.utils.encode_cell({ r: R, c: C });
+                if (!ws[address]) continue;
+                
+                ws[address].s = {
+                    alignment: { 
+                        horizontal: "center", 
+                        vertical: "center" 
+                    },
+                    border: {
+                        top: { style: "thin", color: { rgb: "CCCCCC" } },
+                        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+                        left: { style: "thin", color: { rgb: "CCCCCC" } },
+                        right: { style: "thin", color: { rgb: "CCCCCC" } }
+                    }
                 };
-
-                const detallePayload = {
-                    producto_solicitado: productoSolicitado + (especificaciones ? ` - ${especificaciones.substring(0, 60)}` : ''),
-                    cantidad: Math.max(1, cantidadForm),
-                    precio_unitario: Math.max(0, precioForm),
-                    descuento: 0,
-                    impuesto: 0,
-                    id_producto: 0, // permitir personalizado sin id_producto
-                    detalles_personalizados: JSON.stringify(detallePersonalizado)
-                };
-
-                console.log('Creando detalle para pedido', idPedido, detallePayload);
-                await PedidosMVC.createDetalle(idPedido, detallePayload)
-                    .then(res => console.log('Detalle creado:', res))
-                    .catch(err => { console.warn('No se pudo crear el detalle:', err); });
+                
+                // Aplicar fondo alternado para mejor legibilidad
+                if (R % 2 === 0) {
+                    ws[address].s.fill = { 
+                        fgColor: { rgb: "F5F5F5" } 
+                    };
+                }
             }
-        } catch (e) {
-            console.warn('crearNuevoPedido - error creando detalle:', e);
         }
-
-        // Cerrar modal
-        const modal = document.getElementById('modalNuevoPedido');
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-
-        // Limpiar formulario y sessionStorage
-        document.getElementById('formNuevoPedido').reset();
-        sessionStorage.removeItem('detallesProducto');
-        sessionStorage.removeItem('imagenesSubidas');
-
-        // Mostrar notificación de éxito
-        showNotification('Pedido creado exitosamente', 'success');
-
-    // Recargar la tabla de pedidos (usar la firma correcta)
-    await PedidosMVC.init({ tableSelector: '.pedidos-table tbody' });
-
-        // Restaurar botón
-        btnGuardar.textContent = textOriginal;
-        btnGuardar.disabled = false;
-
+        
+        // Agregar la hoja al libro
+        XLSX.utils.book_append_sheet(wb, ws, "Pedidos");
+        
+        // Generar nombre de archivo con fecha actual
+        const fecha = new Date();
+        const nombreArchivo = `Pedidos_ColorInk_${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}.xlsx`;
+        
+        // Exportar el archivo
+        XLSX.writeFile(wb, nombreArchivo);
+        
+        showNotification(`Excel exportado exitosamente: ${nombreArchivo}`, 'success');
+        console.log('Exportación completada:', nombreArchivo);
+        
     } catch (error) {
-        console.error('Error al crear pedido:', error);
-        const serverMsg = (error && error.data && (error.data.message || error.data.error)) ? (': ' + (error.data.message || error.data.error)) : '';
-        showNotification('Error al crear el pedido' + serverMsg + ' (' + (error.message || 'Error desconocido') + ')', 'error');
-        
-        // Restaurar botón
-        const btnGuardar = document.querySelector('#modalNuevoPedido .btn-guardar');
-        btnGuardar.textContent = 'Guardar Pedido';
-        btnGuardar.disabled = false;
+        console.error('Error al exportar a Excel:', error);
+        showNotification('Error al exportar los pedidos: ' + error.message, 'error');
     }
 }
 
-function guardarDetallesProducto() {
-    const categoria = document.getElementById('categoriaProducto').value;
-    const color1 = document.getElementById('colorPicker1').value;
-    const color2 = document.getElementById('colorPicker2').value;
-    const color3 = document.getElementById('colorPicker3').value;
-    const especificaciones = document.getElementById('especificaciones').value;
-    
-    // Combinar colores
-    const colores = [color1, color2, color3].filter(c => c !== '#000000').join(', ');
-    
-    // Obtener las URLs de las imágenes subidas (guardadas en el preview)
-    const imagenesSubidas = sessionStorage.getItem('imagenesSubidas') || '[]';
-    
-    // Guardar en sessionStorage (sin cantidad ni precio, ahora están en el form principal)
-    const detalles = {
-        categoria: categoria,
-        colores: colores,
-        especificaciones: especificaciones,
-        imagenesUrls: imagenesSubidas
-    };
-    
-    sessionStorage.setItem('detallesProducto', JSON.stringify(detalles));
-    
-    // Actualizar campo de colores en el formulario principal
-    const campoColores = document.getElementById('colores');
-    if (campoColores) {
-        campoColores.value = colores;
-    }
-    
-    // Cerrar modal
-    const modal = document.getElementById('modalDetallesProducto');
-    modal.style.display = 'none';
-    
-    showNotification('Detalles guardados correctamente', 'success');
-}
 
-// Manejar cambio en el input de archivo para upload de imágenes - ya configurado en el DOMContentLoaded principal
-
-function mostrarPreviewImagenes(urls, previewContainer) {
-    // Limpiar preview anterior
-    const existingPreview = previewContainer.querySelector('.image-preview');
-    if (existingPreview) {
-        existingPreview.remove();
+// Inicializar tabla y resumen al abrir modal de edición
+window.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('tablaProductosEditablesContainer')) {
+        renderTablaProductosEditables();
+        renderResumenTotalesEdicion();
     }
-    
-    // Ocultar placeholder
-    const placeholder = previewContainer.querySelector('.upload-placeholder');
-    if (placeholder) {
-        placeholder.style.display = 'none';
-    }
-    
-    // Crear contenedor de preview
-    const previewDiv = document.createElement('div');
-    previewDiv.className = 'image-preview';
-    previewDiv.style.cssText = 'display: flex; flex-wrap: wrap; gap: 10px; width: 100%;';
-    
-    urls.forEach((url, index) => {
-        const imageItem = document.createElement('div');
-        imageItem.className = 'image-preview-item';
-        imageItem.style.cssText = 'position: relative; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 2px solid rgba(20, 152, 0, 0.3);';
-        
-        imageItem.innerHTML = `
-            <img src="${url}" alt="Preview ${index + 1}" style="width: 100%; height: 100%; object-fit: cover;">
-            <button type="button" class="remove-image" onclick="removeUploadedImage(this, '${url}')" style="position: absolute; top: -5px; right: -5px; background-color: #ff6b6b; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;">×</button>
-        `;
-        
-        previewDiv.appendChild(imageItem);
-    });
-    
-    previewContainer.appendChild(previewDiv);
-}
-
-// Función para remover imagen subida
-window.removeUploadedImage = function(button, url) {
-    const imageItem = button.parentElement;
-    imageItem.remove();
-    
-    // Actualizar sessionStorage
-    try {
-        const imagenesSubidas = JSON.parse(sessionStorage.getItem('imagenesSubidas') || '[]');
-        const nuevasImagenes = imagenesSubidas.filter(imgUrl => imgUrl !== url);
-        sessionStorage.setItem('imagenesSubidas', JSON.stringify(nuevasImagenes));
-    } catch (e) {
-        console.error('Error al actualizar imágenes:', e);
-    }
-    
-    // Mostrar placeholder si no hay más imágenes
-    const previewContainer = document.getElementById('imagePreviewContainer');
-    const remainingImages = previewContainer.querySelectorAll('.image-preview-item');
-    
-    if (remainingImages.length === 0) {
-        const placeholder = previewContainer.querySelector('.upload-placeholder');
-        if (placeholder) {
-            placeholder.style.display = 'block';
-        }
-    }
-};
-
+});
