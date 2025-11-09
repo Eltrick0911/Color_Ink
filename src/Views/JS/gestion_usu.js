@@ -110,99 +110,134 @@ style.textContent = `
         color: #4caf50 !important;
     }
     
-    /* Estilos para modales de bloquear y eliminar (diseño blanco) */
+    /* Estilos para modales de bloquear y eliminar (igual a pedidos) */
     .swal-block-popup,
     .swal-delete-popup {
         background: #ffffff !important;
         border-radius: 12px !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-        padding: 30px !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+        padding: 0 !important;
+        max-width: 450px !important;
+        width: 90% !important;
     }
     
     .swal-block-title,
     .swal-delete-title {
-        color: #2c3e50 !important;
-        font-size: 1.5rem !important;
+        color: #333 !important;
+        font-size: 24px !important;
         font-weight: 600 !important;
-        margin-bottom: 15px !important;
+        margin: 0 !important;
+        padding: 0 30px 20px !important;
+        text-align: center !important;
+        border-bottom: 1px solid #e5e5e5 !important;
+    }
+    
+    .swal-block-popup .swal2-header,
+    .swal-delete-popup .swal2-header {
+        padding: 30px 30px 20px !important;
+        text-align: center !important;
+        border-bottom: 1px solid #e5e5e5 !important;
     }
     
     .swal-block-content,
     .swal-delete-content {
-        color: #34495e !important;
-        font-size: 1rem !important;
-        line-height: 1.6 !important;
+        color: #555 !important;
+        font-size: 16px !important;
+        line-height: 1.5 !important;
+        padding: 25px 30px !important;
+        text-align: center !important;
+        margin: 0 !important;
     }
     
     .swal-block-icon.swal2-icon-warning,
     .swal-delete-icon.swal2-icon-warning {
-        width: 80px !important;
-        height: 80px !important;
-        border: 3px solid #e74c3c !important;
+        width: 70px !important;
+        height: 70px !important;
+        border: 3px solid #dc3545 !important;
         border-radius: 50% !important;
-        background: #e74c3c !important;
-        margin: 0 auto 20px !important;
+        background: #dc3545 !important;
+        margin: 0 auto 15px !important;
+        color: #ffffff !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
     
     .swal-block-icon.swal2-icon-warning .swal2-icon-content,
     .swal-delete-icon.swal2-icon-warning .swal2-icon-content {
         color: #ffffff !important;
-        font-size: 3rem !important;
+        font-size: 2.5rem !important;
         font-weight: bold !important;
         line-height: 1 !important;
         margin-top: 0 !important;
     }
     
-    .swal-block-icon.swal2-icon-warning .swal2-x-mark,
-    .swal-delete-icon.swal2-icon-warning .swal2-x-mark {
-        color: #ffffff !important;
-    }
-    
     .swal-block-icon.swal2-icon-warning .swal2-warning-ring,
     .swal-delete-icon.swal2-icon-warning .swal2-warning-ring {
         border-color: transparent !important;
+        display: none !important;
+    }
+    
+    .swal-block-icon.swal2-icon-warning::before,
+    .swal-delete-icon.swal2-icon-warning::before {
+        display: none !important;
     }
     
     .swal-block-confirm,
     .swal-delete-confirm {
-        background: #e74c3c !important;
+        background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%) !important;
         border: none !important;
         border-radius: 8px !important;
-        padding: 10px 24px !important;
-        font-size: 1rem !important;
-        font-weight: 500 !important;
+        padding: 12px 24px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
         color: #ffffff !important;
-        box-shadow: none !important;
+        box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3) !important;
         transition: all 0.2s ease !important;
+        flex: 1 !important;
     }
     
     .swal-block-confirm:hover,
     .swal-delete-confirm:hover {
-        background: #c0392b !important;
+        background: linear-gradient(135deg, #ff5555 0%, #dd0000 100%) !important;
+        box-shadow: 0 6px 16px rgba(255, 68, 68, 0.4) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    .swal-block-confirm:active,
+    .swal-delete-confirm:active {
+        transform: translateY(0) !important;
+        box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3) !important;
     }
     
     .swal-block-cancel,
     .swal-delete-cancel {
-        background: #ecf0f1 !important;
+        background: #f5f5f5 !important;
         border: none !important;
         border-radius: 8px !important;
-        padding: 10px 24px !important;
-        font-size: 1rem !important;
-        font-weight: 500 !important;
-        color: #2c3e50 !important;
+        padding: 12px 24px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        color: #666 !important;
         box-shadow: none !important;
         transition: all 0.2s ease !important;
+        flex: 1 !important;
     }
     
     .swal-block-cancel:hover,
     .swal-delete-cancel:hover {
-        background: #bdc3c7 !important;
+        background: #e0e0e0 !important;
+        transform: translateY(-1px) !important;
     }
     
     .swal-block-popup .swal2-actions,
     .swal-delete-popup .swal2-actions {
-        margin-top: 25px !important;
-        gap: 10px !important;
+        padding: 20px 30px 30px !important;
+        display: flex !important;
+        gap: 12px !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        border-top: none !important;
     }
 `;
 document.head.appendChild(style);
@@ -642,11 +677,10 @@ function showAccessDenied() {
                 "></div>
             </div>
             <div style="
-                background: linear-gradient(135deg, #6a0dad 0%, #4a0080 50%, #8b5cf6 100%);
-                backdrop-filter: blur(10px);
+                background: #4a148c;
                 border-radius: 20px;
                 padding: 40px;
-                box-shadow: 0 8px 32px rgba(106, 13, 173, 0.4);
+                box-shadow: 0 8px 32px rgba(74, 20, 140, 0.5);
                 border: 1px solid rgba(139, 92, 246, 0.3);
                 max-width: 500px;
                 width: 100%;
@@ -1258,15 +1292,16 @@ function editUsuario(userId, userName) {
 async function blockUsuario(userId, userName, row) {
     const result = await Swal.fire({
         title: '¿Bloquear Usuario?',
-        html: `¿Estás seguro de que quieres bloquear al usuario "${userName}" (ID: ${userId})?`,
+        html: `¿Estás seguro de que quieres bloquear al usuario "${userName}" (ID: ${userId})?<br><br><span style="color: #999; font-size: 14px; font-weight: 500;">Esta acción puede restringir el acceso del usuario</span>`,
         icon: 'warning',
-        iconColor: '#e74c3c',
+        iconColor: '#dc3545',
         showCancelButton: true,
-        confirmButtonText: 'Sí, bloquear',
+        confirmButtonText: 'Bloquear',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#e74c3c',
-        cancelButtonColor: '#95a5a6',
+        confirmButtonColor: '#ff4444',
+        cancelButtonColor: '#f5f5f5',
         buttonsStyling: true,
+        reverseButtons: false,
         customClass: {
             popup: 'swal-block-popup',
             title: 'swal-block-title',
@@ -1276,7 +1311,7 @@ async function blockUsuario(userId, userName, row) {
             icon: 'swal-block-icon'
         },
         background: '#ffffff',
-        color: '#2c3e50'
+        color: '#333'
     });
     
     if (result.isConfirmed) {
@@ -1380,15 +1415,16 @@ async function unblockUsuario(userId, userName, row) {
 async function deleteUsuario(userId, userName, row) {
     const result = await Swal.fire({
         title: '¿Eliminar Usuario?',
-        html: `¿Estás seguro de que quieres eliminar al usuario "${userName}" (ID: ${userId})?<br><br><span style="color: #7f8c8d; font-size: 0.9em;">Esta acción no se puede deshacer</span>`,
+        html: `¿Estás seguro de que quieres eliminar al usuario "${userName}" (ID: ${userId})?<br><br><span style="color: #999; font-size: 14px; font-weight: 500;">Esta acción no se puede deshacer</span>`,
         icon: 'warning',
-        iconColor: '#e74c3c',
+        iconColor: '#dc3545',
         showCancelButton: true,
         confirmButtonText: 'Eliminar',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#e74c3c',
-        cancelButtonColor: '#95a5a6',
+        confirmButtonColor: '#ff4444',
+        cancelButtonColor: '#f5f5f5',
         buttonsStyling: true,
+        reverseButtons: false,
         customClass: {
             popup: 'swal-delete-popup',
             title: 'swal-delete-title',
@@ -1398,7 +1434,7 @@ async function deleteUsuario(userId, userName, row) {
             icon: 'swal-delete-icon'
         },
         background: '#ffffff',
-        color: '#2c3e50',
+        color: '#333',
         focusCancel: true
     });
     

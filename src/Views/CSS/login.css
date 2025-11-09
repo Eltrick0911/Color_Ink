@@ -294,3 +294,31 @@ body {
     color: #650062; 
     opacity: 0.8; 
 }
+
+#forgotPassword {
+    color: #710064; /* Mismo color que #goRegister */
+    font-family: 'Playfair Display', serif; /* Misma fuente que #goRegister */
+    font-size: 16px; /* Mismo tamaño que #goRegister */
+    font-weight: 700; /* Mismo peso que #goRegister */
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#forgotPassword:hover {
+    color: #650062; 
+    opacity: 0.8; 
+}
+
+#goLogin {
+    color: #ffffff; /* Color blanco */
+    font-family: 'Playfair Display', serif; /* Misma fuente que #goRegister */
+    font-size: 16px; /* Mismo tamaño que #goRegister */
+    font-weight: 700; /* Mismo peso que #goRegister */
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#goLogin:hover {
+    color: #e6c3ff; 
+    opacity: 0.9; 
+}
