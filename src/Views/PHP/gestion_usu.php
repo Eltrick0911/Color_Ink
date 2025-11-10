@@ -29,8 +29,8 @@ if (strpos($uri, '/public/') !== false) {
     </script>
     
     <main class="sidebar-content">
-        <h1>Gestión de Usuarios</h1>
         <div class="usuarios-container">
+            <h1>Gestión de Usuarios</h1>
             <div class="usuarios-header">
                 <h2>Control de Usuarios</h2>
                 <button class="btn-nuevo-usuario">

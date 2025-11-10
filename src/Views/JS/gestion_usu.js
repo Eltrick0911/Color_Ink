@@ -488,7 +488,7 @@ function setupPaginationButtons() {
     
     if (btnNextPage) {
         btnNextPage.addEventListener('click', () => {
-            const totalPages = Math.ceil(allUsers.length / usersPerPage);
+            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
             if (currentPage < totalPages) {
                 goToPage(currentPage + 1);
             }
@@ -992,33 +992,53 @@ function updatePaginationControls() {
     const totalUsers = filteredUsers.length;
     const totalPages = Math.ceil(totalUsers / usersPerPage);
     
-    // Obtener contenedor de números de página
-    const paginationNumbers = document.getElementById('paginationNumbers');
-    if (!paginationNumbers) return;
-    
-    // Ocultar contenedor completo si solo hay una página o menos
     const paginationContainer = document.getElementById('paginationContainer');
-    if (paginationContainer) {
-        if (totalPages > 1) {
-            paginationContainer.style.display = 'flex';
-        } else {
-            paginationContainer.style.display = 'none';
-        }
+    const paginationInfo = document.getElementById('paginationInfo');
+    const paginationNumbers = document.getElementById('paginationNumbers');
+    const btnPrevPage = document.getElementById('btnPrevPage');
+    const btnNextPage = document.getElementById('btnNextPage');
+    
+    if (!paginationContainer || !paginationInfo || !paginationNumbers || !btnPrevPage || !btnNextPage) {
+        return;
     }
     
-    // Actualizar números de página
-    updatePageNumbers(totalPages);
+    // Mostrar/ocultar paginación
+    if (totalUsers > 0) {
+        paginationContainer.style.display = 'flex';
+        
+        // Actualizar información de paginación (formato como inventarios)
+        const inicio = (currentPage - 1) * usersPerPage + 1;
+        const fin = Math.min(currentPage * usersPerPage, totalUsers);
+        paginationInfo.textContent = `Mostrando ${inicio}-${fin} de ${totalUsers} usuarios`;
+        
+        // Botones anterior/siguiente
+        btnPrevPage.disabled = currentPage <= 1;
+        btnNextPage.disabled = currentPage >= totalPages;
+        
+        // Números de página
+        updatePageNumbers(totalPages);
+    } else {
+        paginationContainer.style.display = 'none';
+    }
 }
 
-// Función para actualizar los números de página (estilo auditoría - mostrar todos)
+// Función para actualizar los números de página (estilo inventarios - máximo 5 visibles)
 function updatePageNumbers(totalPages) {
     const paginationNumbers = document.getElementById('paginationNumbers');
     if (!paginationNumbers) return;
     
     paginationNumbers.innerHTML = '';
     
-    // Mostrar todos los números de página como en auditoría
-    for (let i = 1; i <= totalPages; i++) {
+    // Mostrar máximo 5 números de página como en inventarios
+    const maxVisible = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    
+    if (endPage - startPage + 1 < maxVisible) {
+        startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
         const pageBtn = createPageButton(i);
         paginationNumbers.appendChild(pageBtn);
     }
@@ -1029,35 +1049,12 @@ function createPageButton(pageNumber) {
     const button = document.createElement('button');
     button.textContent = pageNumber;
     
-    // Estilo similar a auditoría pero con naranja para el activo
+    // Usar clases CSS en lugar de estilos inline (estilo inventarios)
     if (pageNumber === currentPage) {
         button.classList.add('active');
-    button.style.cssText = `
-            padding: 6px 10px;
-            border-radius: 6px;
-            background: rgba(255, 115, 0, 0.6);
-        color: white;
-            border: 1px solid rgba(255, 115, 0, 0.35);
-        cursor: pointer;
-            font-weight: 600;
-        `;
-    } else {
-        button.style.cssText = `
-            padding: 6px 10px;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            border: 1px solid rgba(255, 115, 0, 0.35);
-            cursor: pointer;
-        `;
-        
-        button.addEventListener('mouseenter', function() {
-            this.style.background = 'rgba(255, 115, 0, 0.2)';
-        });
-        button.addEventListener('mouseleave', function() {
-            this.style.background = 'rgba(255, 255, 255, 0.05)';
-        });
     }
+    
+    // No aplicar estilos inline, dejar que el CSS maneje los estilos
     
     button.addEventListener('click', () => goToPage(pageNumber));
     
@@ -1071,8 +1068,9 @@ function goToPage(page) {
     
     currentPage = page;
     displayUsers();
+    updatePaginationControls();
     
-    // Scroll hacia arriba de la tabla
+    // Scroll suave hacia arriba de la tabla (como en inventarios)
     const table = document.querySelector('.usuarios-table');
     if (table) {
         table.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1362,13 +1360,27 @@ async function blockUsuario(userId, userName, row) {
 async function unblockUsuario(userId, userName, row) {
     const result = await Swal.fire({
         title: '¿Desbloquear Usuario?',
-        html: `¿Estás seguro de que quieres <strong>desbloquear</strong> al usuario <br><strong>"${userName}"</strong> (ID: ${userId})?`,
-        icon: 'question',
+        html: `¿Estás seguro de que quieres <strong>desbloquear</strong> al usuario <strong>&quot;${userName}&quot;</strong> (ID: ${userId})?<br><br><span style="color: #999; font-size: 14px; font-weight: 500;">Esta acción permitirá que el usuario vuelva a acceder al sistema</span>`,
+        icon: 'warning',
+        iconColor: '#ff0000',
         showCancelButton: true,
         confirmButtonText: 'Sí, desbloquear',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#4caf50',
-        cancelButtonColor: '#667eea'
+        confirmButtonColor: '#ff4444',
+        cancelButtonColor: '#f5f5f5',
+        buttonsStyling: true,
+        reverseButtons: false,
+        customClass: {
+            popup: 'swal-block-popup',
+            title: 'swal-block-title',
+            htmlContainer: 'swal-block-content',
+            confirmButton: 'swal-block-confirm',
+            cancelButton: 'swal-block-cancel',
+            icon: 'swal-block-icon'
+        },
+        background: '#000000',
+        color: '#ffffff',
+        focusCancel: true
     });
     
     if (result.isConfirmed) {
