@@ -133,6 +133,11 @@ try {
                 $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
                 error_log('inve route: Input recibido: ' . json_encode($input));
                 $controller->marcarAlertaAtendida($headers, $input);
+            } elseif ($action === 'add-proveedor') {
+                error_log('inve route: Llamando addProveedor');
+                $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+                error_log('inve route: Input recibido: ' . json_encode($input));
+                $controller->addProveedor($headers, $input);
             } else {
                 error_log('inve route: Acción POST no válida: ' . $action);
                 http_response_code(400);
