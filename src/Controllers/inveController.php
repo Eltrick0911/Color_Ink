@@ -488,6 +488,52 @@ class inveController
     }
 
     /**
+     * Obtiene el siguiente SKU para una categoría específica
+     * 
+     * @param array $headers Headers de la petición
+     * @return void
+     */
+    public function getSiguienteSkuPorCategoria(array $headers): void
+    {
+        // TEMPORAL: Desactivar autorización para testing
+        error_log('inveController - getSiguienteSkuPorCategoria: MODO TESTING - Autorización desactivada');
+        error_log('inveController - getSiguienteSkuPorCategoria: $_GET completo: ' . json_encode($_GET));
+        
+        try {
+            $idCategoria = isset($_GET['id_categoria']) ? (int)$_GET['id_categoria'] : 0;
+            error_log('inveController - getSiguienteSkuPorCategoria: ID de categoría recibido: ' . $idCategoria);
+            
+            if ($idCategoria <= 0) {
+                error_log('inveController - getSiguienteSkuPorCategoria: ID de categoría inválido: ' . $idCategoria);
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'ERROR',
+                    'message' => 'ID de categoría inválido'
+                ]);
+                return;
+            }
+            
+            error_log('inveController - getSiguienteSkuPorCategoria: Llamando al modelo con ID: ' . $idCategoria);
+            $result = $this->inveModel->getSiguienteSkuPorCategoria($idCategoria);
+            error_log('inveController - getSiguienteSkuPorCategoria: Resultado del modelo: ' . json_encode($result));
+            
+            http_response_code(200);
+            $response = [
+                'status' => 'OK',
+                'message' => 'SKU obtenido exitosamente',
+                'data' => $result
+            ];
+            
+            error_log('inveController - getSiguienteSkuPorCategoria: Respuesta final: ' . json_encode($response));
+            echo json_encode($response);
+        } catch (\Throwable $e) {
+            error_log('inveController - getSiguienteSkuPorCategoria: Error: ' . $e->getMessage());
+            error_log('inveController - getSiguienteSkuPorCategoria: Stack trace: ' . $e->getTraceAsString());
+            echo json_encode(responseHTTP::status500());
+        }
+    }
+
+    /**
      * Exporta los productos a Excel con formato (HTML/Excel compatible)
      * 
      * @param array $headers Headers de la petición
