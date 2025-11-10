@@ -940,7 +940,7 @@ async function guardarDetallesProducto() {
         
         // Verificar que productosDisponibles esté cargado
         if (!productosDisponibles || productosDisponibles.length === 0) {
-            console.warn('⚠️ productosDisponibles está vacío, intentando recargar...');
+            console.warn('productosDisponibles está vacío, intentando recargar...');
             try {
                 await cargarProductos();
             } catch (e) {
@@ -963,16 +963,16 @@ async function guardarDetallesProducto() {
                 const stockMinimo = parseInt(producto.stock_minimo) || 0;
                 const nombreProducto = producto.nombre_producto || 'Producto';
                 
-                console.log(`✓ Validando stock: ${nombreProducto}`);
+                console.log(`Validando stock: ${nombreProducto}`);
                 console.log(`  - Stock disponible: ${stockDisponible}`);
                 console.log(`  - Cantidad solicitada: ${cantidadSolicitada}`);
                 console.log(`  - Stock mínimo: ${stockMinimo}`);
                 
                 // BLOQUEAR si no hay stock suficiente
                 if (stockDisponible <= 0) {
-                    console.error('❌ BLOQUEADO - Stock agotado');
+                    console.error('BLOQUEADO - Stock agotado');
                     showNotification(
-                        `STOCK AGOTADO: El producto '${nombreProducto}' no tiene unidades disponibles en inventario.`,
+                        `<strong>${nombreProducto}</strong><br>Stock: 0 unidades`,
                         'error',
                         10000
                     );
@@ -980,9 +980,9 @@ async function guardarDetallesProducto() {
                 }
                 
                 if (stockDisponible < cantidadSolicitada) {
-                    console.error('❌ BLOQUEADO - Stock insuficiente');
+                    console.error('BLOQUEADO - Stock insuficiente');
                     showNotification(
-                        `STOCK INSUFICIENTE: El producto '${nombreProducto}' solo tiene ${stockDisponible} unidades disponibles. No se pueden solicitar ${cantidadSolicitada} unidades.`,
+                        `<strong>${nombreProducto}</strong><br>Stock disponible: ${stockDisponible} unidades`,
                         'error',
                         10000
                     );
@@ -991,23 +991,23 @@ async function guardarDetallesProducto() {
                 
                 // Advertencia de stock bajo (no bloquea)
                 if (stockDisponible <= stockMinimo) {
-                    console.warn('⚠️ Advertencia - Stock bajo');
+                    console.warn('Advertencia - Stock bajo');
                     showNotification(
-                        `ADVERTENCIA: El producto '${nombreProducto}' tiene stock bajo (${stockDisponible} unidades, mínimo recomendado: ${stockMinimo})`,
+                        `<strong>${nombreProducto}</strong><br>Stock bajo: ${stockDisponible} unidades`,
                         'warning',
                         8000
                     );
                 }
                 
-                console.log('✓ Validación de stock exitosa');
+                console.log('Validación de stock exitosa');
             } else {
-                console.warn('⚠️ No se encontró el producto con ID:', idProducto, 'en la lista');
+                console.warn('No se encontró el producto con ID:', idProducto, 'en la lista');
             }
         } catch (error) {
-            console.error('❌ Error al validar stock:', error);
+            console.error('Error al validar stock:', error);
         }
     } else {
-        console.log('ℹ️ Producto personalizado (sin ID) o sin validar stock');
+        console.log('Producto personalizado (sin ID) o sin validar stock');
     }
     
     // Guardar en sessionStorage
@@ -1989,45 +1989,151 @@ function searchPedidos(searchTerm) {
 }
 
 function showNotification(message, type = 'info', duration = 3000) {
-    // Crear notificación temporal
+    // Crear notificación compacta y elegante
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
-    notification.textContent = message;
     
-    // Colores según el tipo
-    let bgColor = 'rgba(20, 152, 0, 0.95)'; // Verde por defecto
-    if (type === 'error' || type === 'critical') {
-        bgColor = 'rgba(220, 20, 60, 0.95)'; // Rojo para errores críticos
-    } else if (type === 'warning') {
-        bgColor = 'rgba(255, 165, 0, 0.95)'; // Naranja para advertencias
-    } else if (type === 'success') {
-        bgColor = 'rgba(20, 152, 0, 0.95)'; // Verde para éxito
+    // Configurar colores según el tipo
+    let accentColor, glowColor, titulo;
+    
+    switch(type) {
+        case 'success':
+            accentColor = '#00d9a3';
+            glowColor = 'rgba(0, 217, 163, 0.3)';
+            titulo = 'OPERACIÓN EXITOSA';
+            break;
+        case 'error':
+            accentColor = '#ff4757';
+            glowColor = 'rgba(255, 71, 87, 0.3)';
+            titulo = 'Producto Agotado';
+            break;
+        case 'warning':
+            accentColor = '#ffa502';
+            glowColor = 'rgba(255, 165, 2, 0.3)';
+            titulo = 'ADVERTENCIA';
+            break;
+        case 'info':
+        default:
+            accentColor = '#5352ed';
+            glowColor = 'rgba(83, 82, 237, 0.3)';
+            titulo = 'INFORMACIÓN';
+            break;
     }
     
-    // Estilos de la notificación
+    // Estructura HTML compacta sin icono
+    notification.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 6px; position: relative;">
+            <div style="
+                position: absolute;
+                left: -14px;
+                top: 0;
+                width: 3px;
+                height: 100%;
+                background: ${accentColor};
+                border-radius: 12px 0 0 12px;
+                box-shadow: 0 0 15px ${glowColor};
+            "></div>
+            <div style="
+                font-weight: 700; 
+                font-size: 13px; 
+                line-height: 1.3;
+                color: ${accentColor};
+                letter-spacing: 0.5px;
+            ">
+                ${titulo}
+            </div>
+            <div style="
+                font-weight: 400; 
+                font-size: 12px; 
+                line-height: 1.4; 
+                color: #d1d5db;
+                letter-spacing: 0.1px;
+            ">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    // Estilos de la notificación más angosta
     notification.style.cssText = `
         position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: ${bgColor};
-        color: white;
-        padding: 15px 25px;
+        top: 24px;
+        right: 24px;
+        background: rgba(26, 26, 26, 0.98);
+        padding: 12px 14px;
         border-radius: 8px;
-        z-index: 100000;
-        font-weight: bold;
-        font-size: 14px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-        max-width: 400px;
+        z-index: 10000;
+        box-shadow: 
+            0 15px 40px rgba(0, 0, 0, 0.5),
+            0 0 1px rgba(255, 255, 255, 0.1) inset,
+            0 5px 20px ${glowColor};
+        max-width: 280px;
+        min-width: 240px;
         word-wrap: break-word;
-        animation: slideInRight 0.3s ease-out;
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        animation: slideInRightSmooth 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     `;
+    
+    // Agregar barra de progreso sutil
+    const progressBar = document.createElement('div');
+    progressBar.style.cssText = `
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        background: ${accentColor};
+        width: 100%;
+        transform-origin: left;
+        box-shadow: 0 0 10px ${glowColor};
+        animation: shrinkProgress ${duration}ms linear;
+    `;
+    notification.appendChild(progressBar);
+    
+    // Agregar animaciones CSS si no existen
+    if (!document.getElementById('notification-animations')) {
+        const style = document.createElement('style');
+        style.id = 'notification-animations';
+        style.textContent = `
+            @keyframes slideInRightSmooth {
+                from {
+                    transform: translateX(120%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOutRightSmooth {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(120%);
+                    opacity: 0;
+                }
+            }
+            @keyframes shrinkProgress {
+                from {
+                    transform: scaleX(1);
+                }
+                to {
+                    transform: scaleX(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
     
     document.body.appendChild(notification);
     
     // Remover después del tiempo especificado
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease-in';
-        setTimeout(() => notification.remove(), 300);
+        notification.style.animation = 'slideOutRightSmooth 0.4s cubic-bezier(0.6, 0, 0.8, 0.2)';
+        setTimeout(() => notification.remove(), 400);
     }, duration);
 }
 
