@@ -89,6 +89,9 @@ try {
             } elseif ($action === 'ultimo-id') {
                 error_log('inve route: Llamando getUltimoIdProducto');
                 $controller->getUltimoIdProducto($headers);
+            } elseif ($action === 'siguiente-sku') {
+                error_log('inve route: Llamando getSiguienteSkuPorCategoria');
+                $controller->getSiguienteSkuPorCategoria($headers);
             } elseif ($action === 'alertas-stock') {
                 error_log('inve route: Llamando getAlertasStock');
                 $controller->getAlertasStock($headers);
