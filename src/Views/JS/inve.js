@@ -1,7 +1,3 @@
-/**
- * JavaScript para la página de inventario
- */
-
 // Utilidades de autenticación para diagnosticar tokens/usuario almacenados
 function getStoredAuth() {
     const firebaseIdToken = sessionStorage.getItem('firebase_id_token');
@@ -355,6 +351,37 @@ function setupModal() {
 
     // Configurar formulario de edición
     setupEditarProducto();
+    
+    // Configurar listener de categoría para generar SKU (se configura una vez al inicio)
+    setupCategoriaSkuListener();
+}
+
+// Función para configurar el listener de categoría que genera SKU automáticamente
+function setupCategoriaSkuListener() {
+    // Usar delegación de eventos para que funcione incluso si el select se recrea
+    document.addEventListener('change', async function(e) {
+        if (e.target && e.target.id === 'id_categoria') {
+            const idCategoria = e.target.value;
+            const selectElement = e.target;
+            const categoriaTexto = selectElement.options[selectElement.selectedIndex]?.text || 'N/A';
+            
+            console.log(' 📋 Categoría seleccionada (delegación de eventos):');
+            console.log('   - ID:', idCategoria);
+            console.log('   - Texto:', categoriaTexto);
+            console.log('   - Elemento completo:', selectElement);
+            
+            if (idCategoria && idCategoria !== '') {
+                await generarSkuPorCategoria(idCategoria);
+            } else {
+                // Si no hay categoría seleccionada, limpiar SKU
+                const skuInput = document.getElementById('sku');
+                if (skuInput) {
+                    skuInput.value = '';
+                }
+            }
+        }
+    });
+    console.log(' ✅ Listener de categoría configurado (delegación de eventos)');
 }
 
 async function openNuevoProductoModal() {
@@ -378,41 +405,10 @@ async function openNuevoProductoModal() {
                 console.log(' Fecha establecida:', localDateTime);
             }
             
-            // Obtener último ID y configurar generación automática de SKU
-            try {
-                const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=ultimo-id');
-                const data = await response.json();
-                
-                if (data.status === 'OK' && data.data) {
-                    const siguienteId = data.data.siguiente_id || 1;
-                    console.log(' Siguiente ID de producto:', siguienteId);
-                    
-                    // Guardar el siguiente ID en una variable global
-                    window.siguienteIdProducto = siguienteId;
-                    
-                    // Auto-llenar SKU inicial con formato temporal (se actualizará cuando se escriba el nombre)
-                    const skuInput = document.getElementById('sku');
-                    if (skuInput) {
-                        skuInput.value = `PROD-${siguienteId}`;
-                        console.log(' SKU inicial generado:', skuInput.value);
-                    }
-                    
-                    // Configurar listener para generar SKU automáticamente cuando se escriba el nombre
-                    const nombreInput = document.getElementById('nombre_producto');
-                    
-                    if (nombreInput && skuInput) {
-                        // Remover listener anterior si existe
-                        nombreInput.removeEventListener('input', generarSKU);
-                        
-                        // Agregar nuevo listener
-                        nombreInput.addEventListener('input', generarSKU);
-                        
-                        console.log(' Listener para generar SKU configurado');
-                    }
-                }
-            } catch (error) {
-                console.error(' Error obteniendo último ID:', error);
-                window.siguienteIdProducto = 1; // Valor por defecto
+            // Limpiar SKU al abrir el modal (se generará automáticamente cuando se seleccione una categoría)
+            const skuInput = document.getElementById('sku');
+            if (skuInput) {
+                skuInput.value = '';
             }
         }
         
@@ -431,12 +427,52 @@ async function openNuevoProductoModal() {
     }
 }
 
-// Función para generar SKU automáticamente basado en el nombre del producto
+// Función para generar SKU automáticamente basado en la categoría
+async function generarSkuPorCategoria(idCategoria) {
+    const skuInput = document.getElementById('sku');
+    
+    if (!skuInput || !idCategoria) {
+        console.error(' Error: skuInput o idCategoria no válidos', { skuInput: !!skuInput, idCategoria });
+        return;
+    }
+    
+    try {
+        console.log(' Generando SKU para categoría ID:', idCategoria);
+        const url = `/Color_Ink/public/index.php?route=inve&caso=1&action=siguiente-sku&id_categoria=${idCategoria}`;
+        console.log(' URL de petición:', url);
+        
+        const response = await fetch(url);
+        console.log(' Respuesta recibida, status:', response.status);
+        
+        const data = await response.json();
+        console.log(' Datos recibidos:', data);
+        
+        if (data.status === 'OK' && data.data && data.data.sku_completo) {
+            skuInput.value = data.data.sku_completo;
+            console.log(' ✅ SKU generado automáticamente por categoría:', data.data.sku_completo);
+        } else {
+            console.error(' ❌ Error generando SKU:', data.message || 'Datos incompletos');
+            console.error(' Datos recibidos:', data);
+            skuInput.value = '';
+        }
+    } catch (error) {
+        console.error(' ❌ Error obteniendo SKU por categoría:', error);
+        console.error(' Stack trace:', error.stack);
+        skuInput.value = '';
+    }
+}
+
+// Función para generar SKU automáticamente basado en el nombre del producto (mantenida por compatibilidad)
 function generarSKU() {
     const nombreInput = document.getElementById('nombre_producto');
     const skuInput = document.getElementById('sku');
     
     if (!nombreInput || !skuInput) return;
+    
+    // Si ya hay un SKU generado por categoría, no sobrescribirlo
+    if (skuInput.value && skuInput.value.includes('-')) {
+        return;
+    }
     
     const nombre = nombreInput.value.trim();
     const siguienteId = window.siguienteIdProducto || 1;
