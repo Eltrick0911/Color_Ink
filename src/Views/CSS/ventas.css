@@ -744,3 +744,83 @@ body {
         text-align: center;
     }
 }
+
+/* Fondo gris para el modal "Ver Venta" (igual que modal de pedidos) */
+#modalVerVenta .modal-content {
+    background: linear-gradient(180deg, #2f2f2f 0%, #232323 100%) !important;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 128, 0, 0.10); /* borde verde tenue similar */
+    color: #e6e6e6;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.65);
+}
+
+/* Ajuste del body interno del modal para mantener contraste y scroll */
+#modalVerVenta .modal-body {
+    background: transparent;
+    color: #e6e6e6;
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+}
+
+/* Paneles internos dentro del modal (si existen) */
+#modalVerVenta .venta-info-section,
+#modalVerVenta .info-pedido-container {
+    background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* Si necesitas aplicar a otros modales (opcional) */
+/*
+#modalEditarVenta .modal-content,
+#modalNuevaVenta .modal-content {
+    background: linear-gradient(180deg, #2f2f2f, #232323) !important;
+}
+*/
+
+/* Ajustes: dejar cabecera rosada y página en negro;
+   aplicar fondo gris solo a la sección de información (como "ver pedidos") */
+
+/* Asegura que el modal principal mantenga fondo negro (no lo sobreescribas con gris) */
+#modalVerVenta .modal-content,
+.modal-ver-venta .modal-content {
+    background: #000000 !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(186, 65, 156, 0.30) !important; /* línea superior/contorno rosado tenue */
+    box-shadow: 0 18px 40px rgba(0,0,0,0.65) !important;
+    color: #e6e6e6 !important;
+}
+
+/* Mantener la cabecera rosada con prioridad */
+#modalVerVenta .modal-header,
+.modal-ver-venta .modal-header {
+    background: rgb(186, 65, 156) !important;
+    color: #fff !important;
+}
+
+/* Cuerpo del modal: transparente (se ve el negro de modal-content) */
+#modalVerVenta .modal-body,
+.modal-ver-venta .modal-body {
+    background: transparent !important;
+    color: #e6e6e6 !important;
+}
+
+/* Aplicar fondo gris **solo** a los paneles de información internos */
+#modalVerVenta .venta-info-section,
+#modalVerVenta .info-pedido-container,
+.modal-ver-venta .venta-info-section,
+.modal-ver-venta .info-pedido-container {
+    background: linear-gradient(180deg, #2f2f2f 0%, #232323 100%) !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 128, 0, 0.08) !important; /* borde verde tenue si lo deseas */
+    padding: 20px !important;
+    color: #e6e6e6 !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* Asegura que los textos/labels dentro de esos paneles mantengan contraste */
+#modalVerVenta .venta-info-section .detail-label,
+#modalVerVenta .info-pedido-container .detail-label,
+.modal-ver-venta .venta-info-section .detail-label,
+.modal-ver-venta .info-pedido-container .detail-label {
+    color: rgba(186, 65, 156, 0.9) !important;
+}

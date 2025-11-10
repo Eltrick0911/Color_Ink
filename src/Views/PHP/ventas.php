@@ -269,7 +269,7 @@
                 <p id="confirmAnularMessage">¿Estás seguro de que quieres anular esta venta?</p>
                 <div class="form-group" style="margin-top: 15px;">
                     <label for="confirmAnularMotivo" style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">Motivo de anulación *</label>
-                    <textarea id="confirmAnularMotivo" rows="3" placeholder="Especifique el motivo de la anulación..." style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 6px; font-family: inherit; resize: vertical; min-height: 80px;"></textarea>
+                    <textarea id="confirmAnularMotivo" rows="3" placeholder="Especifique el motivo de la anulación..." style="width: 100%; padding: 10px; border: 2px solid #555; border-radius: 6px; font-family: inherit; resize: vertical; min-height: 80px; background: #2a2a2a; color: #fff; box-shadow: none !important;"></textarea>
                 </div>
                 <p class="warning-text">Esta acción no se puede deshacer</p>
             </div>
@@ -310,7 +310,7 @@
     .modal-confirm-content {
         background: #1a1a1a;
         border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 105, 180, 0.4);
         max-width: 450px;
         width: 90%;
         padding: 0;

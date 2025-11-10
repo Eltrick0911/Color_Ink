@@ -96,13 +96,13 @@ style.textContent = `
     }
     
     .swal2-icon {
-        border-color: #ff6b6b !important;
-        color: #ff6b6b !important;
+        border-color: #ff0000 !important;
+        color: #ff0000 !important;
     }
     
     .swal2-icon.swal2-warning {
-        border-color: #ffa726 !important;
-        color: #ffa726 !important;
+        border-color: #ff0000 !important;
+        color: #ff0000 !important;
     }
     
     .swal2-icon.swal2-success {
@@ -110,38 +110,39 @@ style.textContent = `
         color: #4caf50 !important;
     }
     
-    /* Estilos para modales de bloquear y eliminar (igual a pedidos) */
+    /* Estilos para modales de bloquear y eliminar (fondo negro) */
     .swal-block-popup,
     .swal-delete-popup {
-        background: #ffffff !important;
+        background: #000000 !important;
         border-radius: 12px !important;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
         padding: 0 !important;
         max-width: 450px !important;
         width: 90% !important;
+        border: 2px solid rgba(255, 115, 0, 0.3) !important;
     }
     
     .swal-block-title,
     .swal-delete-title {
-        color: #333 !important;
+        color: #ffffff !important;
         font-size: 24px !important;
         font-weight: 600 !important;
         margin: 0 !important;
         padding: 0 30px 20px !important;
         text-align: center !important;
-        border-bottom: 1px solid #e5e5e5 !important;
+        border-bottom: 1px solid rgba(255, 115, 0, 0.3) !important;
     }
     
     .swal-block-popup .swal2-header,
     .swal-delete-popup .swal2-header {
         padding: 30px 30px 20px !important;
         text-align: center !important;
-        border-bottom: 1px solid #e5e5e5 !important;
+        border-bottom: 1px solid rgba(255, 115, 0, 0.3) !important;
     }
     
     .swal-block-content,
     .swal-delete-content {
-        color: #555 !important;
+        color: #ffffff !important;
         font-size: 16px !important;
         line-height: 1.5 !important;
         padding: 25px 30px !important;
@@ -153,9 +154,9 @@ style.textContent = `
     .swal-delete-icon.swal2-icon-warning {
         width: 70px !important;
         height: 70px !important;
-        border: 3px solid #dc3545 !important;
+        border: 3px solid #ff0000 !important;
         border-radius: 50% !important;
-        background: #dc3545 !important;
+        background: #ff0000 !important;
         margin: 0 auto 15px !important;
         color: #ffffff !important;
         display: flex !important;
@@ -212,22 +213,23 @@ style.textContent = `
     
     .swal-block-cancel,
     .swal-delete-cancel {
-        background: #f5f5f5 !important;
+        background: linear-gradient(45deg, #667eea, #764ba2) !important;
         border: none !important;
         border-radius: 8px !important;
         padding: 12px 24px !important;
         font-size: 15px !important;
         font-weight: 600 !important;
-        color: #666 !important;
-        box-shadow: none !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
         transition: all 0.2s ease !important;
         flex: 1 !important;
     }
     
     .swal-block-cancel:hover,
     .swal-delete-cancel:hover {
-        background: #e0e0e0 !important;
+        background: linear-gradient(45deg, #7c8aed, #8b5fc7) !important;
         transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
     }
     
     .swal-block-popup .swal2-actions,
