@@ -11,6 +11,9 @@ use Dotenv\Dotenv;
 //activamos la configuración de los errores 
 errorlogs::activa_error_logs();
 
+// Establecer zona horaria de PHP para que coincida con MySQL
+date_default_timezone_set('America/Tegucigalpa');
+
 /* cargamos nuestras variables de entorno de nuestra conexion a BD*/
 $dotenv = Dotenv::createImmutable(dirname(__DIR__,2));
 $dotenv->load(); 
