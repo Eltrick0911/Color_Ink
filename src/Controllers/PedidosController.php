@@ -220,8 +220,8 @@ class PedidosController
                                     'cantidad' => $cantidad,
                                     'precio_unitario' => $precioBase, // Precio base antes de descuentos/impuestos
                                     'total_linea' => $totalLinea, // Total después de descuento e impuesto
-                                    'descuento' => $descuento, // En porcentaje
-                                    'impuesto' => $impuesto, // En porcentaje
+                                    'descuento' => $montoDescuento, // MONTO EN DINERO del descuento
+                                    'impuesto' => $montoImpuesto, // MONTO EN DINERO del impuesto
                                     'id_pedido' => (int)$idPedido,
                                     'id_producto' => null, // Pedido personalizado no tiene id_producto
                                     'id_usuario' => (int)$user['id_usuario'],
@@ -514,8 +514,8 @@ class PedidosController
                                     'cantidad' => $cantidad,
                                     'precio_unitario' => $precioBase, // Precio base antes de descuentos/impuestos
                                     'total_linea' => $totalLinea, // Total después de descuento e impuesto
-                                    'descuento' => $descuento, // En porcentaje
-                                    'impuesto' => $impuesto, // En porcentaje
+                                    'descuento' => $montoDescuento, // MONTO EN DINERO del descuento
+                                    'impuesto' => $montoImpuesto, // MONTO EN DINERO del impuesto
                                     'id_pedido' => (int)$id,
                                     'id_producto' => null, // Pedido personalizado no tiene id_producto
                                     'id_usuario' => (int)$user['id_usuario'],
@@ -588,6 +588,25 @@ class PedidosController
             $success = $this->pedidosModel->cambiarEstadoPedido($id, $idEstadoNuevo, $idUsuario);
             
             if ($success) {
+                // Si el nuevo estado es "Entregado" (ID = 1), descontar stock de productos
+                if ($idEstadoNuevo == 1) {
+                    error_log("PedidosController - cambiarEstado: Pedido marcado como ENTREGADO. Descontando stock...");
+                    try {
+                        $stockDescontado = $this->pedidosModel->descontarStockPorPedido($id);
+                        if ($stockDescontado) {
+                            error_log("PedidosController - cambiarEstado: Stock descontado exitosamente para pedido $id");
+                        } else {
+                            error_log("PedidosController - cambiarEstado: No se descontó stock (posiblemente sin productos válidos)");
+                        }
+                    } catch (\Exception $e) {
+                        error_log("PedidosController - cambiarEstado: ERROR al descontar stock - " . $e->getMessage());
+                        // No retornar error, el cambio de estado ya se hizo
+                        // Pero informar al usuario
+                        echo json_encode(responseHTTP::status200('Estado actualizado. ADVERTENCIA: Error al descontar stock: ' . $e->getMessage()));
+                        return;
+                    }
+                }
+                
                 error_log("PedidosController - cambiarEstado: Estado del pedido $id actualizado exitosamente");
                 echo json_encode(responseHTTP::status200('Estado del pedido actualizado exitosamente'));
             } else {
@@ -681,6 +700,19 @@ class PedidosController
                 'id_usuario' => $user['id_usuario'], // Usar usuario autenticado
                 'detalles_personalizados' => $detallesPersonalizados
             ];
+            
+            // Calcular total_linea si no viene en el input
+            // Asumimos que descuento e impuesto vienen como MONTOS EN DINERO
+            $cantidad = $detalleData['cantidad'];
+            $precioUnitario = $detalleData['precio_unitario'];
+            $descuento = $detalleData['descuento'];
+            $impuesto = $detalleData['impuesto'];
+            
+            $subtotal = $precioUnitario * $cantidad;
+            $totalLinea = $subtotal - $descuento + $impuesto;
+            $detalleData['total_linea'] = $totalLinea;
+            
+            error_log("PedidosController - crearDetalle: Calculado total_linea=$totalLinea (subtotal=$subtotal, descuento=$descuento, impuesto=$impuesto)");
 
             // Normalizar id_producto: permitir productos personalizados (sin id de catálogo)
             $idProductoOriginal = $detalleData['id_producto'];
@@ -902,6 +934,46 @@ class PedidosController
             echo json_encode(responseHTTP::status500('Error: ' . $e->getMessage()));
         }
     }
+
+    /**
+     * Obtener lista de productos activos
+     * GET /productos
+     */
+    public function getProductos(): void
+    {
+        try {
+            error_log("PedidosController - getProductos: Iniciando obtención de productos");
+            
+            $headers = getallheaders();
+            $user = $this->authorize($headers);
+            
+            if (!$user) {
+                error_log('PedidosController - getProductos: Autorización fallida');
+                echo json_encode(responseHTTP::status401('No autorizado'));
+                return;
+            }
+
+            $productos = $this->pedidosModel->getProductos();
+            error_log("PedidosController - getProductos: Se obtuvieron " . count($productos) . " productos");
+            error_log("PedidosController - getProductos: Productos = " . json_encode($productos));
+            
+            // Construir respuesta manualmente para asegurar que data no sea null
+            $response = [
+                'status' => 'OK',
+                'message' => 'Productos obtenidos exitosamente',
+                'data' => $productos
+            ];
+            
+            error_log("PedidosController - getProductos: Respuesta final = " . json_encode($response));
+            
+            header('Content-Type: application/json');
+            echo json_encode($response);
+        } catch (\Exception $e) {
+            error_log("ERROR PedidosController - getProductos: " . $e->getMessage());
+            echo json_encode(responseHTTP::status500('Error: ' . $e->getMessage()));
+        }
+    }
 }
+
 
 

@@ -2,6 +2,9 @@
 let productosPersonalizados = [];
 let productoActivo = 0;
 
+// Variable global para almacenar productos disponibles de la BD
+let productosDisponibles = [];
+
 // Función helper para formatear moneda en lempiras
 function formatoLempiras(valor) {
     return 'L ' + Number(valor).toFixed(2);
@@ -58,6 +61,94 @@ function updatePdTotalPreview() {
     if (totalPreview) {
         totalPreview.textContent = formatoLempiras(total);
     }
+}
+
+// Función para cargar productos desde la base de datos
+async function cargarProductos() {
+    try {
+        console.log('Cargando productos desde el servidor...');
+        const basePath = window.location.pathname.split('/public/')[0] || '';
+        const url = `${basePath}/public/productos?caso=api`;
+        console.log('URL de productos:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+
+        if (!response.ok) {
+            throw new Error(`Error al cargar productos: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Respuesta de productos:', data);
+
+        if (data.status === 'OK' && data.data) {
+            // Guardar productos en variable global para uso en otras funciones
+            productosDisponibles = data.data;
+            
+            const selectProducto = document.getElementById('categoriaProducto');
+            if (!selectProducto) {
+                console.error('No se encontró el select #categoriaProducto');
+                return;
+            }
+
+            console.log('Select encontrado:', selectProducto);
+            console.log('Opciones actuales:', selectProducto.options.length);
+
+            // Limpiar opciones existentes excepto la primera (placeholder)
+            while (selectProducto.options.length > 1) {
+                selectProducto.remove(1);
+            }
+
+            // Agregar productos desde la base de datos
+            if (data.data.length === 0) {
+                console.warn('No hay productos en la base de datos');
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '(No hay productos disponibles)';
+                option.disabled = true;
+                selectProducto.appendChild(option);
+            } else {
+                data.data.forEach(producto => {
+                    const option = document.createElement('option');
+                    option.value = producto.id_producto;
+                    option.textContent = producto.nombre_producto;
+                    selectProducto.appendChild(option);
+                    console.log(`Producto agregado: ${producto.nombre_producto} (ID: ${producto.id_producto})`);
+                });
+
+                console.log(`Se cargaron ${data.data.length} productos exitosamente`);
+            }
+        } else {
+            console.error('Respuesta inesperada del servidor:', data);
+            alert('Error: No se pudieron cargar los productos. Respuesta del servidor inválida.');
+        }
+    } catch (error) {
+        console.error('Error al cargar productos:', error);
+        alert('Error al cargar productos: ' + error.message);
+    }
+}
+
+// Función auxiliar para generar opciones de select de productos
+function generarOpcionesProductos(valorSeleccionado = '') {
+    let options = '<option value="">Seleccionar producto</option>';
+    
+    if (productosDisponibles.length === 0) {
+        options += '<option value="" disabled>(No hay productos disponibles)</option>';
+    } else {
+        productosDisponibles.forEach(producto => {
+            const selected = (valorSeleccionado == producto.id_producto || valorSeleccionado === producto.nombre_producto) ? 'selected' : '';
+            options += `<option value="${producto.id_producto}" ${selected}>${producto.nombre_producto}</option>`;
+        });
+    }
+    
+    return options;
 }
 
 // Inicialización principal: configurar acciones y selectores cuando cargue el DOM
@@ -319,7 +410,13 @@ function setupDetailsModal() {
             const opcionSeleccionada = estadoSelector.options[estadoSelector.selectedIndex];
             const nombreEstado = opcionSeleccionada.text;
             
-            if (!confirm(`¿Cambiar estado del pedido a "${nombreEstado}"?`)) {
+            // Usar modal personalizado en lugar de confirm()
+            const confirmed = await showConfirmStatus(
+                `¿Cambiar estado del pedido a "${nombreEstado}"?`,
+                null
+            );
+            
+            if (!confirmed) {
                 return;
             }
             
@@ -508,6 +605,68 @@ function showConfirmDelete(message, onConfirm) {
     });
 }
 
+/**
+ * Muestra el modal de confirmación de cambio de estado
+ * @param {string} message - Mensaje principal
+ * @param {Function} onConfirm - Función a ejecutar si se confirma
+ */
+function showConfirmStatus(message, onConfirm) {
+    return new Promise((resolve, reject) => {
+        const modal = document.getElementById('modalConfirmStatus');
+        const messageElement = document.getElementById('confirmStatusMessage');
+        const btnConfirm = document.getElementById('btnConfirmStatus');
+        const btnCancel = document.getElementById('btnCancelStatus');
+        
+        if (!modal || !messageElement || !btnConfirm) {
+            console.error('Elementos del modal de confirmación de estado no encontrados');
+            reject(new Error('Modal no disponible'));
+            return;
+        }
+        
+        // Establecer mensaje
+        messageElement.textContent = message;
+        
+        // Mostrar modal
+        modal.classList.add('show');
+        
+        // Función para limpiar event listeners
+        const cleanup = () => {
+            btnConfirm.replaceWith(btnConfirm.cloneNode(true));
+            btnCancel.replaceWith(btnCancel.cloneNode(true));
+            modal.classList.remove('show');
+        };
+        
+        // Configurar botón confirmar
+        const newBtnConfirm = document.getElementById('btnConfirmStatus');
+        newBtnConfirm.addEventListener('click', async function() {
+            cleanup();
+            try {
+                if (onConfirm) await onConfirm();
+                resolve(true);
+            } catch (error) {
+                reject(error);
+            }
+        });
+        
+        // Configurar botón cancelar
+        const newBtnCancel = document.getElementById('btnCancelStatus');
+        newBtnCancel.addEventListener('click', function() {
+            cleanup();
+            resolve(false);
+        });
+        
+        // Cerrar con ESC
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                cleanup();
+                document.removeEventListener('keydown', handleEscape);
+                resolve(false);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    });
+}
+
 function setupModal() {
     modal = document.getElementById('modalNuevoPedido');
     form = document.getElementById('formNuevoPedido');
@@ -564,6 +723,9 @@ function openModal() {
         console.log('openModal: Abriendo modal');
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+        
+        // Cargar productos desde la base de datos
+        cargarProductos();
         
         // Limpiar productos y resumen
         productosPersonalizados = [];
@@ -673,7 +835,8 @@ function renderProductosNav() {
         btn.textContent = (idx + 1);
         btn.style = 'padding: 4px 10px; border-radius: 50%; margin-right: 2px; border: 1px solid #ccc; cursor: pointer;';
         if (idx === productoActivo) {
-            btn.style.background = '#b2f2e6';
+            btn.style.background = 'rgba(20, 152, 0, 0.7)';
+            btn.style.color = 'white';
             btn.style.fontWeight = 'bold';
         }
         btn.onclick = () => {
@@ -1328,7 +1491,12 @@ function setupStatusSelectors() {
             const opcionSeleccionada = this.options[this.selectedIndex];
             const nombreEstado = opcionSeleccionada.text;
             
-            if (!confirm(`¿Cambiar estado del pedido #${pedidoId} a "${nombreEstado}"?`)) {
+            const confirmed = await showConfirmStatus(
+                `¿Cambiar estado del pedido #${pedidoId} a "${nombreEstado}"?`,
+                null
+            );
+            
+            if (!confirmed) {
                 // Revertir si cancela
                 this.value = estadoAnterior;
                 return;
@@ -1406,9 +1574,15 @@ function updateSelectorStyle(selector, estadoId) {
 // ===== FIN FUNCIONES CRÍTICAS =====
 
 // Mostrar modal de edición con diseño similar al de vista
-function showEditPedidoModal(pedido) {
+async function showEditPedidoModal(pedido) {
     console.log('=== INICIANDO EDICIÓN DE PEDIDO ===');
     console.log('Datos completos del pedido:', pedido);
+    
+    // Cargar productos si aún no se han cargado
+    if (productosDisponibles.length === 0) {
+        console.log('Cargando productos para el modal de edición...');
+        await cargarProductos();
+    }
     
     const modal = document.getElementById('modalEditarPedido');
     const form = document.getElementById('formEditarPedido');
@@ -1715,7 +1889,7 @@ function showNotification(message, type = 'info') {
         position: fixed;
         top: 20px;
         right: 20px;
-        background-color: ${type === 'success' ? '#28a745' : '#007bff'};
+        background-color: ${type === 'success' ? 'rgba(20, 152, 0, 0.95)' : 'rgba(20, 152, 0, 0.95)'};
         color: white;
         padding: 12px 20px;
         border-radius: 6px;
@@ -1999,8 +2173,14 @@ function calculateTotal() {
 // (Las funciones setupActionButtons y setupStatusSelectors están definidas arriba, junto al DOMContentLoaded)
 
 // Mostrar detalles completos del pedido en el modal
-function showPedidoDetails(pedido) {
+async function showPedidoDetails(pedido) {
     console.log('showPedidoDetails llamada con:', pedido);
+    
+    // Cargar productos si aún no se han cargado
+    if (productosDisponibles.length === 0) {
+        console.log('Cargando productos para el modal de visualización...');
+        await cargarProductos();
+    }
     
     const modal = document.getElementById('modalVerPedido');
     const content = document.getElementById('pedidoDetailsContent');
@@ -2113,15 +2293,26 @@ function showPedidoDetails(pedido) {
             const precio = parseFloat(prod.precio_unitario || prod.precio || 0);
             const subtotal = cantidad * precio;
             
+            // Obtener nombre del producto desde productosDisponibles si es un ID
+            let nombreProducto = prod.categoria || 'No especificada';
+            
+            // Si categoria es un número (ID), buscar el nombre en productosDisponibles
+            if (!isNaN(nombreProducto) && productosDisponibles.length > 0) {
+                const productoEncontrado = productosDisponibles.find(p => p.id_producto == nombreProducto);
+                if (productoEncontrado) {
+                    nombreProducto = productoEncontrado.nombre_producto;
+                }
+            }
+            
             return `
                 <div class="producto-card" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.02);">
-                    <h4 style="color: #b2f2e6; margin-bottom: 12px;">
+                    <h4 style="color: rgba(20, 152, 0, 0.95); margin-bottom: 12px;">
                         <i class="fa-solid fa-box"></i> Producto #${idx + 1}
                     </h4>
                     <div class="producto-detalle-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
                         <div class="detail-item">
-                            <span class="detail-label">Categoría:</span>
-                            <span class="detail-value">${prod.categoria || 'No especificada'}</span>
+                            <span class="detail-label">Producto:</span>
+                            <span class="detail-value">${nombreProducto}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Cantidad:</span>
@@ -2166,14 +2357,14 @@ function showPedidoDetails(pedido) {
         
         // Agregar resumen de totales al final
         productosHTML += `
-            <div class="totales-card" style="border: 2px solid #b2f2e6; border-radius: 8px; padding: 20px; margin-top: 15px; background: rgba(178, 242, 230, 0.05);">
-                <h4 style="color: #b2f2e6; margin-bottom: 15px; text-align: center;">
+            <div class="totales-card" style="border: 2px solid rgba(20, 152, 0, 0.7); border-radius: 8px; padding: 20px; margin-top: 15px; background: linear-gradient(135deg, rgba(30, 30, 30, 0.8), rgba(20, 20, 20, 0.9));">
+                <h4 style="color: rgba(20, 152, 0, 0.95); margin-bottom: 15px; text-align: center;">
                     <i class="fa-solid fa-calculator"></i> Resumen de Totales
                 </h4>
                 <div style="display: grid; gap: 10px; max-width: 400px; margin: 0 auto;">
                     <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                        <span style="font-weight: 500;">Subtotal:</span>
-                        <span style="font-weight: bold;">${formatoLempiras(subtotalGeneral)}</span>
+                        <span style="font-weight: 500; color: rgba(255, 255, 255, 0.9);">Subtotal:</span>
+                        <span style="font-weight: bold; color: rgba(255, 255, 255, 0.95);">${formatoLempiras(subtotalGeneral)}</span>
                     </div>
                     ${descuentoGlobal > 0 ? `
                     <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #ff6b6b;">
@@ -2181,8 +2372,8 @@ function showPedidoDetails(pedido) {
                         <span>-${formatoLempiras(montoDescuento)}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                        <span>Subtotal con Descuento:</span>
-                        <span style="font-weight: bold;">${formatoLempiras(subtotalConDescuento)}</span>
+                        <span style="color: rgba(255, 255, 255, 0.9);">Subtotal con Descuento:</span>
+                        <span style="font-weight: bold; color: rgba(255, 255, 255, 0.95);">${formatoLempiras(subtotalConDescuento)}</span>
                     </div>
                     ` : ''}
                     ${impuestoGlobal > 0 ? `
@@ -2191,9 +2382,9 @@ function showPedidoDetails(pedido) {
                         <span>+${formatoLempiras(montoImpuesto)}</span>
                     </div>
                     ` : ''}
-                    <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #b2f2e6; margin-top: 5px;">
-                        <span style="font-size: 1.2em; font-weight: bold; color: #b2f2e6;">TOTAL:</span>
-                        <span style="font-size: 1.3em; font-weight: bold; color: #b2f2e6;">${formatoLempiras(totalGeneral)}</span>
+                    <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid rgba(20, 152, 0, 0.7); margin-top: 5px;">
+                        <span style="font-size: 1.2em; font-weight: bold; color: rgba(20, 152, 0, 1);">TOTAL:</span>
+                        <span style="font-size: 1.3em; font-weight: bold; color: rgba(20, 152, 0, 1);">${formatoLempiras(totalGeneral)}</span>
                     </div>
                 </div>
             </div>
@@ -2461,7 +2652,7 @@ function mostrarPreviewImagenes(urls, container) {
         const img = document.createElement('img');
         img.src = url;
         img.alt = `Preview ${index + 1}`;
-        img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border: 2px solid #007bff; border-radius: 4px;';
+        img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border: 2px solid rgba(20, 152, 0, 0.7); border-radius: 4px;';
         
         // Botón para eliminar imagen
         const btnEliminar = document.createElement('button');
@@ -2642,7 +2833,11 @@ function renderTablaProductosEditables() {
             
             html += `<tr data-idx="${idx}" style="background:${idx%2===0?'#eef9f1':'#f8fbf9'}; border: 1px solid rgba(20, 152, 0, 0.08);">
                 <td style="text-align:center; font-weight:bold; padding:8px; color:#333;">${idx + 1}</td>
-                <td style="padding:8px;"><input type="text" class="td-categoria" value="${categoria}" style="width:100px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
+                <td style="padding:8px;">
+                    <select class="td-categoria" style="width:120px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;">
+                        ${generarOpcionesProductos(categoria)}
+                    </select>
+                </td>
                 <td style="padding:8px;"><input type="number" class="td-cantidad" min="1" value="${cantidad}" style="width:60px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
                 <td style="padding:8px;"><input type="number" class="td-precio" min="0" step="0.01" value="${precio}" style="width:75px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
                 <td style="padding:8px;"><input type="number" class="td-descuento" min="0" step="0.01" value="${descuento}" style="width:55px; padding:4px 6px; border:1px solid rgba(20, 152, 0, 0.45); border-radius:4px; background:#fff; color:#333;"></td>
@@ -2658,10 +2853,16 @@ function renderTablaProductosEditables() {
     html += `</tbody></table>`;
     container.innerHTML = html;
 
-    // Enlazar eventos de edición en línea
+    // Enlazar eventos de edición en línea para inputs
     container.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', onEditarProductoEditable);
     });
+    
+    // Enlazar eventos de edición en línea para selects
+    container.querySelectorAll('select').forEach(select => {
+        select.addEventListener('change', onEditarProductoEditable);
+    });
+    
     // Enlazar eventos de eliminar
     container.querySelectorAll('.btn-eliminar-producto').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -2838,22 +3039,22 @@ function renderResumenTotalesEdicion() {
     // Renderizar resumen
     let html = `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95em;">
-            <div style="text-align: right; font-weight: 500;">Total de productos:</div>
-            <div style="font-weight: 600;">${productos.length}</div>
+            <div style="text-align: right; font-weight: 500; color: rgba(255, 255, 255, 0.85);">Total de productos:</div>
+            <div style="font-weight: 600; color: rgba(255, 255, 255, 0.95);">${productos.length}</div>
             
-            <div style="text-align: right; font-weight: 500;">Cantidad total:</div>
-            <div style="font-weight: 600;">${totalCantidad}</div>
+            <div style="text-align: right; font-weight: 500; color: rgba(255, 255, 255, 0.85);">Cantidad total:</div>
+            <div style="font-weight: 600; color: rgba(255, 255, 255, 0.95);">${totalCantidad}</div>
             
-            <div style="text-align: right; font-weight: 500;">Subtotal:</div>
-            <div>${formatoLempiras(subtotalSinDescuentos)}</div>
+            <div style="text-align: right; font-weight: 500; color: rgba(255, 255, 255, 0.85);">Subtotal:</div>
+            <div style="color: rgba(255, 255, 255, 0.95);">${formatoLempiras(subtotalSinDescuentos)}</div>
             
-            <div style="text-align: right; font-weight: 500;">Descuento (promedio ${descuentoPromedio.toFixed(1)}%):</div>
+            <div style="text-align: right; font-weight: 500; color: rgba(255, 255, 255, 0.85);">Descuento (promedio ${descuentoPromedio.toFixed(1)}%):</div>
             <div style="color: #dc3545;">-${formatoLempiras(totalDescuentos)}</div>
             
-            <div style="text-align: right; font-weight: 500;">Impuesto (promedio ${impuestoPromedio.toFixed(1)}%):</div>
+            <div style="text-align: right; font-weight: 500; color: rgba(255, 255, 255, 0.85);">Impuesto (promedio ${impuestoPromedio.toFixed(1)}%):</div>
             <div style="color: #28a745;">+${formatoLempiras(totalImpuestos)}</div>
             
-            <div style="text-align: right; font-weight: 600; font-size: 1.1em; border-top: 2px solid rgba(20, 152, 0, 0.5); padding-top: 8px;">Total:</div>
+            <div style="text-align: right; font-weight: 600; font-size: 1.1em; border-top: 2px solid rgba(20, 152, 0, 0.5); padding-top: 8px; color: rgba(255, 255, 255, 0.9);">Total:</div>
             <div style="font-weight: 700; font-size: 1.2em; color: rgba(20, 152, 0, 0.95); border-top: 2px solid rgba(20, 152, 0, 0.5); padding-top: 8px;">${formatoLempiras(totalGeneral)}</div>
         </div>
     `;
