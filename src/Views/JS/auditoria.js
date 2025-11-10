@@ -550,7 +550,8 @@
       if (table === 'producto' && transaction && transaction.toUpperCase() === 'DELETE') {
         backendTransaction = '';
       }
-      const params = { action: 'list', table, user_id, transaction: backendTransaction, page, limit: 15 };
+      // Ajuste: reducir paginación de 15 a 10 elementos por página para consistencia con módulo ventas
+      const params = { action: 'list', table, user_id, transaction: backendTransaction, page, limit: 10 };
       if (fechaDesde) params.start_date = fechaDesde;
       if (fechaHasta) params.end_date = fechaHasta;
       const json = await apiGet(params);
@@ -594,7 +595,7 @@
       
       const rows = json.data || [];
       if(rows.length === 0){
-        alert('No hay datos para exportar');
+        mostrarNotificacion('No hay datos para exportar', 'info');
         return;
       }
 
@@ -812,9 +813,11 @@
       URL.revokeObjectURL(url);
       
       console.log(`Exportados ${rows.length} registros a Excel`);
+      // Notificación de éxito estilo ventas
+      mostrarNotificacion(`📊 Reporte Excel de ${titleCase(table)} descargado (${rows.length} registros)`, 'success');
     } catch(e) {
       console.error(e);
-      alert('Error al exportar: ' + e.message);
+      mostrarNotificacion('Error al cargar auditoría', 'error');
     } finally {
       hideLoading();
     }
@@ -846,7 +849,8 @@
       window.flatpickr(fechaRange, {
         mode: 'range',
         dateFormat: 'Y-m-d',
-        locale: window.flatpickr.l10ns.es,
+        // Fallback seguro: si locale ES no está cargado aún, evitar error y usar default
+        locale: (window.flatpickr?.l10ns?.es) ? window.flatpickr.l10ns.es : 'default',
         allowInput: false,
         onChange: function(selectedDates) {
           if (selectedDates.length === 1) {
@@ -868,6 +872,23 @@
     document.getElementById('btnPrint').addEventListener('click', () => window.print());
     document.getElementById('modalClose').addEventListener('click', () => document.getElementById('detailModal').classList.add('hidden'));
     document.addEventListener('keydown', e => { if(e.key === 'Escape') document.getElementById('detailModal').classList.add('hidden'); });
+  }
+
+  // Reutilizable: mostrar notificación (similar a ventas.js) si no existe ya en página
+  function mostrarNotificacion(mensaje, tipo = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${tipo}`;
+    const icon = tipo === 'success' ? 'fa-check-circle' : tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    notification.innerHTML = `<i class="fa-solid ${icon}"></i><span>${mensaje}</span>`;
+    notification.style.cssText = `position: fixed; top: 20px; right: 20px; padding: 15px 20px; background: ${tipo === 'success' ? 'linear-gradient(45deg, #28a745, #20c997)' : tipo === 'error' ? 'linear-gradient(45deg, #dc3545, #e74c3c)' : 'linear-gradient(45deg, #17a2b8, #20c997)'}; color: #fff; border-radius: 10px; z-index: 10001; box-shadow: 0 4px 20px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 10px; font-weight: 500; animation: slideInRight 0.3s ease-out; max-width: 400px;`;
+    document.body.appendChild(notification);
+    setTimeout(() => { notification.style.animation = 'slideOutRight 0.3s ease-out'; setTimeout(() => notification.remove(), 300); }, 4000);
+    if (!document.getElementById('notification-styles')) {
+      const style = document.createElement('style');
+      style.id = 'notification-styles';
+      style.textContent = `@keyframes slideInRight { from { transform: translateX(100%); opacity:0;} to { transform: translateX(0); opacity:1;} } @keyframes slideOutRight { from { transform: translateX(0); opacity:1;} to { transform: translateX(100%); opacity:0;} }`;
+      document.head.appendChild(style);
+    }
   }
 
   // Mostrar loading inmediatamente al cargar el script (antes de DOMContentLoaded)

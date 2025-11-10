@@ -24,6 +24,8 @@ if (strpos($uri, '/public/') !== false) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Locale ES para Flatpickr (evita 'invalid locale undefined') -->
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
 </head>
 <body>
     <main class="sidebar-content">
