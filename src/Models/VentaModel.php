@@ -497,7 +497,7 @@ class VentaModel
         try {
             error_log('VentaModel - registrarAuditoria: Intentando registrar auditoría para venta ID=' . $idVenta);
             
-            // Insertar auditoría simple
+            // Insertar auditoría con la acción correcta
             $stmt = $this->db->prepare("
                 INSERT INTO venta_aud (
                     id_venta_original, id_pedido_original, fecha_venta_original,
@@ -505,12 +505,12 @@ class VentaModel
                 )
                 SELECT 
                     v.id_venta, v.id_pedido, v.fecha_venta, v.monto_cobrado, v.estado, 
-                    'ANULADA', ?, ?
+                    ?, ?, ?
                 FROM venta v
                 WHERE v.id_venta = ?
             ");
             
-            $result = $stmt->execute([$usuarioAdmin, $motivo, $idVenta]);
+            $result = $stmt->execute([$accion, $usuarioAdmin, $motivo, $idVenta]);
             
             if ($result) {
                 error_log('VentaModel - registrarAuditoria: Auditoría registrada exitosamente');

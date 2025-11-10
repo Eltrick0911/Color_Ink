@@ -577,9 +577,9 @@ class inveModel
             $idUsuario = isset($data['id_usuario']) ? (int)$data['id_usuario'] : 1;
             error_log('inveModel - updateProduct: Usuario para auditoría: ' . $idUsuario);
 
-            // Usar procedimiento almacenado para actualizar el producto
-            // El SP sp_actualizar_producto solo actualiza: nombre_producto, descripcion, precio, stock, id_proveedor, id_categoria
-            error_log('inveModel - updateProduct: Llamando SP sp_actualizar_producto');
+            // Actualizar el producto usando UPDATE directo para incluir el SKU
+            // El SP sp_actualizar_producto no incluye el SKU, por lo que usamos UPDATE directo
+            error_log('inveModel - updateProduct: Actualizando producto con UPDATE directo (incluye SKU)');
             
             // Obtener descripcion si existe en los datos, si no usar la actual del producto o null
             $descripcion = isset($data['descripcion']) ? trim($data['descripcion']) : ($producto['descripcion'] ?? null);
@@ -590,6 +590,10 @@ class inveModel
             $precio = isset($data['precio_venta_base']) ? (float)$data['precio_venta_base'] : ((float)($producto['precio_venta_base'] ?? $producto['precio'] ?? 0));
             error_log('inveModel - updateProduct: Precio procesado: ' . $precio);
             
+            // Obtener SKU si existe en los datos, si no usar el actual del producto
+            $sku = isset($data['sku']) ? trim($data['sku']) : ($producto['sku'] ?? null);
+            error_log('inveModel - updateProduct: SKU procesado: ' . ($sku ?? 'NULL'));
+            
             error_log('inveModel - updateProduct: Parámetros del SP:');
             error_log('  - id_producto: ' . $data['id_producto']);
             error_log('  - nombre_producto: ' . $data['nombre_producto']);
@@ -598,9 +602,22 @@ class inveModel
             error_log('  - stock: ' . $data['stock']);
             error_log('  - id_proveedor: ' . $data['id_proveedor']);
             error_log('  - id_categoria: ' . $data['id_categoria']);
+            error_log('  - sku: ' . ($sku ?? 'NULL'));
             error_log('  - id_usuario: ' . $idUsuario);
             
-            $stmt = $this->db->prepare("CALL sp_actualizar_producto(:id_producto, :nombre_producto, :descripcion, :precio, :stock, :id_proveedor, :id_categoria, :id_usuario)");
+            // Actualizar el producto usando UPDATE directo para incluir el SKU
+            // ya que el SP no lo incluye
+            $sql = "UPDATE producto SET 
+                        nombre_producto = :nombre_producto,
+                        descripcion = :descripcion,
+                        precio_venta_base = :precio,
+                        stock = :stock,
+                        id_proveedor = :id_proveedor,
+                        id_categoria = :id_categoria,
+                        sku = :sku
+                    WHERE id_producto = :id_producto";
+            
+            $stmt = $this->db->prepare($sql);
             
             $stmt->bindParam(':id_producto', $data['id_producto'], PDO::PARAM_INT);
             $stmt->bindParam(':nombre_producto', $data['nombre_producto'], PDO::PARAM_STR);
@@ -609,13 +626,11 @@ class inveModel
             $stmt->bindParam(':stock', $data['stock'], PDO::PARAM_INT);
             $stmt->bindParam(':id_proveedor', $data['id_proveedor'], PDO::PARAM_INT);
             $stmt->bindParam(':id_categoria', $data['id_categoria'], PDO::PARAM_INT);
-            $stmt->bindParam(':id_usuario', $idUsuario, PDO::PARAM_INT);
+            $stmt->bindParam(':sku', $sku, PDO::PARAM_STR);
 
-            error_log('inveModel - updateProduct: Ejecutando SP...');
+            error_log('inveModel - updateProduct: Ejecutando UPDATE...');
             $result = $stmt->execute();
-            error_log('inveModel - updateProduct: SP ejecutado. Resultado: ' . ($result ? 'TRUE' : 'FALSE'));
-            // Limpiar cursores adicionales del CALL
-            while ($stmt->nextRowset()) { /* noop */ }
+            error_log('inveModel - updateProduct: UPDATE ejecutado. Resultado: ' . ($result ? 'TRUE' : 'FALSE'));
             
             if ($result) {
                 error_log('inveModel - updateProduct: Obteniendo producto actualizado...');
@@ -746,6 +761,164 @@ class inveModel
         } catch (\Throwable $e) {
             error_log('inveModel - marcarAlertaAtendida ERROR: ' . $e->getMessage());
             return responseHTTP::status500('Error al marcar alerta: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Agrega un nuevo proveedor usando stored procedure
+     * 
+     * @param string $descripcion Nombre del proveedor
+     * @param string $contacto Forma de contacto
+     * @param string $direccion Dirección del proveedor
+     * @param int $idUsuario ID del usuario que crea el proveedor
+     * @return array|bool Resultado de la operación
+     */
+    public function addProveedor(string $descripcion, string $contacto = '', string $direccion = '', int $idUsuario = 1): array|bool
+    {
+        try {
+            error_log('inveModel - addProveedor: Creando proveedor: ' . $descripcion);
+            
+            // Verificar si ya existe un proveedor con el mismo nombre
+            $checkStmt = $this->db->prepare("SELECT id_proveedor FROM proveedor WHERE descripcion_proveedor = :descripcion");
+            $checkStmt->bindParam(':descripcion', $descripcion, PDO::PARAM_STR);
+            $checkStmt->execute();
+            
+            if ($checkStmt->fetch()) {
+                error_log('inveModel - addProveedor: ERROR - Proveedor ya existe: ' . $descripcion);
+                return false;
+            }
+            
+            // Usar stored procedure para crear proveedor
+            error_log('inveModel - addProveedor: Llamando SP sp_crear_proveedor');
+            $stmt = $this->db->prepare("CALL sp_crear_proveedor(:descripcion, :contacto, :direccion)");
+            
+            $stmt->bindParam(':descripcion', $descripcion, PDO::PARAM_STR);
+            $stmt->bindParam(':contacto', $contacto, PDO::PARAM_STR);
+            $stmt->bindParam(':direccion', $direccion, PDO::PARAM_STR);
+            
+            $result = $stmt->execute();
+            
+            // Limpiar cursores adicionales del CALL
+            while ($stmt->nextRowset()) { /* noop */ }
+            
+            if ($result) {
+                $idProveedor = $this->db->lastInsertId();
+                error_log('inveModel - addProveedor: Proveedor creado con ID: ' . $idProveedor);
+                
+                return [
+                    'id_proveedor' => $idProveedor,
+                    'descripcion_proveedor' => $descripcion,
+                    'activo' => 1
+                ];
+            } else {
+                $errorInfo = $stmt->errorInfo();
+                error_log('inveModel - addProveedor: ERROR en SP: ' . json_encode($errorInfo));
+                return false;
+            }
+            
+        } catch (\Throwable $e) {
+            error_log('inveModel - addProveedor ERROR: ' . $e->getMessage());
+            error_log('inveModel - addProveedor Stack trace: ' . $e->getTraceAsString());
+            return false;
+        }
+    }
+
+    /**
+     * Obtiene la lista completa de proveedores con todos los campos
+     * 
+     * @return array Lista completa de proveedores
+     */
+    public function getProveedoresCompletos(): array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id_proveedor, descripcion_proveedor, forma_contacto, direccion, activo
+                FROM proveedor 
+                ORDER BY descripcion_proveedor
+            ");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (\Throwable $e) {
+            error_log('Error getProveedoresCompletos: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Obtiene un proveedor específico por ID
+     * 
+     * @param int $id ID del proveedor
+     * @return array|null Datos del proveedor
+     */
+    public function getProveedor(int $id): ?array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT id_proveedor, descripcion_proveedor, forma_contacto, direccion, activo
+                FROM proveedor 
+                WHERE id_proveedor = :id
+            ");
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (\Throwable $e) {
+            error_log('Error getProveedor: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Actualiza un proveedor existente
+     * 
+     * @param array $data Datos del proveedor
+     * @return bool|array Resultado de la operación
+     */
+    public function updateProveedor(array $data): bool|array
+    {
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE proveedor SET 
+                    descripcion_proveedor = :descripcion,
+                    forma_contacto = :contacto,
+                    direccion = :direccion
+                WHERE id_proveedor = :id
+            ");
+            
+            $stmt->bindParam(':id', $data['id_proveedor'], PDO::PARAM_INT);
+            $stmt->bindParam(':descripcion', $data['descripcion_proveedor'], PDO::PARAM_STR);
+            $stmt->bindParam(':contacto', $data['forma_contacto'], PDO::PARAM_STR);
+            $stmt->bindParam(':direccion', $data['direccion'], PDO::PARAM_STR);
+            
+            $result = $stmt->execute();
+            
+            if ($result) {
+                return $this->getProveedor($data['id_proveedor']);
+            }
+            
+            return false;
+        } catch (\Throwable $e) {
+            error_log('Error updateProveedor: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Elimina un proveedor (marca como inactivo)
+     * 
+     * @param int $id ID del proveedor
+     * @return bool Resultado de la operación
+     */
+    public function deleteProveedor(int $id): bool
+    {
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE proveedor SET activo = 0 WHERE id_proveedor = :id
+            ");
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (\Throwable $e) {
+            error_log('Error deleteProveedor: ' . $e->getMessage());
+            return false;
         }
     }
 }

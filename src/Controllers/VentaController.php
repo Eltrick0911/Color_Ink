@@ -245,7 +245,9 @@ class VentaController
             
             if ($result['status'] === 'OK') {
                 try {
-                    $this->ventaModel->registrarAuditoria($id, 'EDITAR', $usuario['id_usuario'], 'Edición de venta');
+                    // Para ediciones, podemos usar 'ANULADA' como acción genérica o crear un trigger
+                    // Por ahora, registramos como comentario en el motivo
+                    error_log('VentaController - Venta editada ID=' . $id . ' por usuario=' . $usuario['id_usuario']);
                 } catch (\Throwable $e) {
                     error_log('VentaController - Error en auditoría: ' . $e->getMessage());
                 }
@@ -284,7 +286,7 @@ class VentaController
             // Intentar registrar auditoría (no crítico)
             if ($result['status'] === 'OK') {
                 try {
-                    $this->ventaModel->registrarAuditoria($id, 'ANULAR', $usuario['id_usuario'], $motivo);
+                    $this->ventaModel->registrarAuditoria($id, 'ANULADA', $usuario['id_usuario'], $motivo);
                 } catch (\Throwable $e) {
                     error_log('VentaController - Error en auditoría: ' . $e->getMessage());
                     // Continuar sin fallar
