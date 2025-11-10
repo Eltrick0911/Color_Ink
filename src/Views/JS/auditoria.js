@@ -43,8 +43,8 @@
   const apiBase = apiEntry + '?route=audit&caso=1';
   const apiUserBase = apiEntry + '?route=user&caso=1';
   let usersMapCache = null; // cache de id_usuario -> nombre_usuario
-  let fpStart = null; // instancia flatpickr para startDate
-  let fpEnd = null;   // instancia flatpickr para endDate
+  let fechaDesde = null; // fecha inicio seleccionada (YYYY-MM-DD)
+  let fechaHasta = null; // fecha fin seleccionada (YYYY-MM-DD)
   let loadingEl = null; // overlay de carga
   let isFirstDataLoad = true; // mostrar overlay solo en la primera carga de datos
   let pendingLoads = 0; // contador para anidar llamadas durante la carga inicial
@@ -540,22 +540,21 @@
   }
 
   async function loadData(page){
-    const table = document.getElementById('tableSelect').value;
-    const user_id = document.getElementById('userSelect').value;
-    const transaction = document.getElementById('txSelect').value;
-    const start_date = document.getElementById('startDate').value;
-    const end_date = document.getElementById('endDate').value;
+  const table = document.getElementById('tableSelect').value;
+  const user_id = document.getElementById('userSelect').value;
+  const transaction = document.getElementById('txSelect').value;
+  // fechas globales
     showLoading();
     try{
-      // Para productos: si buscan DELETE, traer UPDATE también para filtrar en frontend
       let backendTransaction = transaction;
       if (table === 'producto' && transaction && transaction.toUpperCase() === 'DELETE') {
-        // No enviar filtro de transacción al backend, traer todo y filtrar en frontend
         backendTransaction = '';
       }
-      
-      const json = await apiGet({ action: 'list', table, user_id, transaction: backendTransaction, start_date, end_date, page, limit: 15 });
-      renderTableHead(); // Llamar primero para actualizar headers según tabla seleccionada
+      const params = { action: 'list', table, user_id, transaction: backendTransaction, page, limit: 15 };
+      if (fechaDesde) params.start_date = fechaDesde;
+      if (fechaHasta) params.end_date = fechaHasta;
+      const json = await apiGet(params);
+      renderTableHead();
       renderRows(json.data || []);
       renderPagination(json.pagination);
     }catch(e){
@@ -569,14 +568,13 @@
   function clearFilters(){
     document.getElementById('userSelect').value = '';
     document.getElementById('txSelect').value = '';
-    // Limpiar correctamente flatpickr y valores visibles
-    try { if (fpStart) fpStart.clear(); } catch(_) {}
-    try { if (fpEnd) fpEnd.clear(); } catch(_) {}
-    // Asegurar inputs base también queden vacíos
-    document.getElementById('startDate').value = '';
-    document.getElementById('endDate').value = '';
+    const fechaRange = document.getElementById('fechaRange');
+    if (fechaRange && fechaRange._flatpickr) fechaRange._flatpickr.clear();
+    fechaDesde = null;
+    fechaHasta = null;
     loadData(1);
   }
+  
 
   function titleCase(s){
     return s.charAt(0).toUpperCase() + s.slice(1);
@@ -586,25 +584,13 @@
     const table = document.getElementById('tableSelect').value;
     const user_id = document.getElementById('userSelect').value;
     const transaction = document.getElementById('txSelect').value;
-    const start_date = document.getElementById('startDate').value;
-    const end_date = document.getElementById('endDate').value;
-    
     try {
       showLoading();
-      // Asegurar mapa de usuarios (id -> nombre) una sola vez
       await ensureUsersMap();
-
-      // Obtener TODOS los datos sin paginación
-      const json = await apiGet({ 
-        action: 'list', 
-        table, 
-        user_id, 
-        transaction, 
-        start_date, 
-        end_date, 
-        page: 1, 
-        limit: 10000 // Límite alto para obtener todos los registros
-      });
+      const params = { action: 'list', table, user_id, transaction, page: 1, limit: 10000 };
+      if (fechaDesde) params.start_date = fechaDesde;
+      if (fechaHasta) params.end_date = fechaHasta;
+      const json = await apiGet(params);
       
       const rows = json.data || [];
       if(rows.length === 0){
@@ -853,7 +839,30 @@
 
   function initEvents(){
     document.getElementById('tableSelect').addEventListener('change', onTableChanged);
-    document.getElementById('btnSearch').addEventListener('click', () => loadData(1));
+    document.getElementById('userSelect').addEventListener('change', () => loadData(1));
+    document.getElementById('txSelect').addEventListener('change', () => loadData(1));
+    const fechaRange = document.getElementById('fechaRange');
+    if (fechaRange && window.flatpickr) {
+      window.flatpickr(fechaRange, {
+        mode: 'range',
+        dateFormat: 'Y-m-d',
+        locale: window.flatpickr.l10ns.es,
+        allowInput: false,
+        onChange: function(selectedDates) {
+          if (selectedDates.length === 1) {
+            fechaDesde = selectedDates[0].toISOString().split('T')[0];
+            fechaHasta = null;
+          } else if (selectedDates.length === 2) {
+            fechaDesde = selectedDates[0].toISOString().split('T')[0];
+            fechaHasta = selectedDates[1].toISOString().split('T')[0];
+          } else {
+            fechaDesde = null;
+            fechaHasta = null;
+          }
+          loadData(1);
+        }
+      });
+    }
     document.getElementById('btnClear').addEventListener('click', clearFilters);
     document.getElementById('btnExport').addEventListener('click', exportToExcel);
     document.getElementById('btnPrint').addEventListener('click', () => window.print());
@@ -866,23 +875,6 @@
 
   document.addEventListener('DOMContentLoaded', function(){
     initEvents();
-    // Inicializar calendario si está disponible
-    try {
-      if (window.flatpickr) {
-        fpStart = window.flatpickr('#startDate', {
-          dateFormat: 'Y-m-d',
-          altInput: true,
-          altFormat: 'd/m/Y',
-          allowInput: true,
-        });
-        fpEnd = window.flatpickr('#endDate', {
-          dateFormat: 'Y-m-d',
-          altInput: true,
-          altFormat: 'd/m/Y',
-          allowInput: true,
-        });
-      }
-    } catch (e) { console.warn('Flatpickr no disponible:', e); }
     renderTableHead();
     // Cargar mapa de usuarios en segundo plano y luego tablas
     ensureUsersMap().finally(() => {
