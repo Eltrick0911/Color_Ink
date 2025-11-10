@@ -318,6 +318,158 @@ class inveModel
     }
 
     /**
+     * Obtiene el siguiente número de SKU para una categoría específica
+     * 
+     * @param int $idCategoria ID de la categoría
+     * @return array Array con prefijo, siguiente_numero y sku_completo
+     */
+    public function getSiguienteSkuPorCategoria(int $idCategoria): array
+    {
+        try {
+            error_log('inveModel - getSiguienteSkuPorCategoria: Obteniendo SKU para categoría ID: ' . $idCategoria);
+            
+            // Obtener información de la categoría usando stored procedure
+            error_log('inveModel - getSiguienteSkuPorCategoria: Llamando SP sp_obtener_categoria con ID: ' . $idCategoria);
+            $stmt = $this->db->prepare("CALL sp_obtener_categoria(:id_categoria)");
+            $stmt->bindParam(':id_categoria', $idCategoria, PDO::PARAM_INT);
+            $stmt->execute();
+            $categoria = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Limpiar cursores adicionales del CALL
+            while ($stmt->nextRowset()) { /* noop */ }
+            
+            error_log('inveModel - getSiguienteSkuPorCategoria: Resultado del SP: ' . json_encode($categoria));
+            
+            if (!$categoria) {
+                error_log('inveModel - getSiguienteSkuPorCategoria: Categoría no encontrada para ID: ' . $idCategoria);
+                return [
+                    'prefijo' => 'PROD',
+                    'siguiente_numero' => 1,
+                    'sku_completo' => 'PROD-001'
+                ];
+            }
+            
+            // Generar prefijo basado en el nombre de la categoría
+            $nombreCategoria = strtoupper(trim($categoria['descripcion']));
+            error_log('inveModel - getSiguienteSkuPorCategoria: Nombre de categoría: ' . $nombreCategoria);
+            $prefijo = $this->generarPrefijoDesdeNombre($nombreCategoria);
+            error_log('inveModel - getSiguienteSkuPorCategoria: Prefijo generado: ' . $prefijo);
+            
+            // Buscar el último SKU con este prefijo
+            $stmt = $this->db->prepare("
+                SELECT sku 
+                FROM producto 
+                WHERE sku LIKE :prefijo_pattern 
+                ORDER BY CAST(SUBSTRING_INDEX(sku, '-', -1) AS UNSIGNED) DESC 
+                LIMIT 1
+            ");
+            $prefijoPattern = $prefijo . '-%';
+            $stmt->bindParam(':prefijo_pattern', $prefijoPattern, PDO::PARAM_STR);
+            $stmt->execute();
+            $ultimoSku = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $siguienteNumero = 1;
+            if ($ultimoSku && isset($ultimoSku['sku'])) {
+                // Extraer el número del último SKU
+                $partes = explode('-', $ultimoSku['sku']);
+                $ultimoNumero = isset($partes[1]) ? (int)$partes[1] : 0;
+                $siguienteNumero = $ultimoNumero + 1;
+                error_log('inveModel - getSiguienteSkuPorCategoria: Último SKU encontrado: ' . $ultimoSku['sku'] . ', siguiente número: ' . $siguienteNumero);
+            } else {
+                error_log('inveModel - getSiguienteSkuPorCategoria: No se encontró SKU previo, empezando desde 1');
+            }
+            
+            // Formatear el número: con ceros a la izquierda si < 100, sin ceros si >= 100
+            if ($siguienteNumero < 100) {
+                $numeroFormateado = str_pad($siguienteNumero, 3, '0', STR_PAD_LEFT);
+            } else {
+                $numeroFormateado = (string)$siguienteNumero;
+            }
+            
+            $skuCompleto = $prefijo . '-' . $numeroFormateado;
+            
+            error_log('inveModel - getSiguienteSkuPorCategoria: SKU generado - ' . $skuCompleto);
+            
+            return [
+                'prefijo' => $prefijo,
+                'siguiente_numero' => $siguienteNumero,
+                'sku_completo' => $skuCompleto
+            ];
+        } catch (\Throwable $e) {
+            error_log('Error getSiguienteSkuPorCategoria: ' . $e->getMessage());
+            return [
+                'prefijo' => 'PROD',
+                'siguiente_numero' => 1,
+                'sku_completo' => 'PROD-001'
+            ];
+        }
+    }
+
+    /**
+     * Genera un prefijo de SKU basado en el nombre de la categoría
+     * 
+     * @param string $nombreCategoria Nombre de la categoría
+     * @return string Prefijo generado (siempre 4 caracteres)
+     */
+    private function generarPrefijoDesdeNombre(string $nombreCategoria): string
+    {
+        error_log('inveModel - generarPrefijoDesdeNombre: Nombre recibido: ' . $nombreCategoria);
+        
+        // Asegurar que esté en mayúsculas y sin espacios al inicio/final
+        $nombre = strtoupper(trim($nombreCategoria));
+        error_log('inveModel - generarPrefijoDesdeNombre: Nombre después de trim y mayúsculas: ' . $nombre);
+        
+        // Remover acentos
+        $nombre = $this->removerAcentos($nombre);
+        error_log('inveModel - generarPrefijoDesdeNombre: Nombre después de remover acentos: ' . $nombre);
+        
+        // Obtener solo letras (mayúsculas) - eliminar espacios, números y caracteres especiales
+        $letras = preg_replace('/[^A-Z]/', '', $nombre);
+        error_log('inveModel - generarPrefijoDesdeNombre: Letras extraídas: "' . $letras . '" (longitud: ' . strlen($letras) . ')');
+        
+        // Si el nombre tiene 4 o más letras, tomar las primeras 4
+        if (strlen($letras) >= 4) {
+            $prefijo = substr($letras, 0, 4);
+            error_log('inveModel - generarPrefijoDesdeNombre: Prefijo generado (primeras 4 letras): ' . $prefijo);
+            return $prefijo;
+        }
+        
+        // Si tiene menos de 4 letras pero tiene algunas, usar todas y completar con X si es necesario hasta 4
+        if (strlen($letras) > 0) {
+            $prefijo = str_pad($letras, 4, 'X', STR_PAD_RIGHT);
+            error_log('inveModel - generarPrefijoDesdeNombre: Prefijo generado (con relleno): ' . $prefijo);
+            return $prefijo;
+        }
+        
+        // Si no hay letras, usar prefijo genérico
+        error_log('inveModel - generarPrefijoDesdeNombre: ERROR - No se encontraron letras en: "' . $nombreCategoria . '"');
+        error_log('inveModel - generarPrefijoDesdeNombre: Procesado: "' . $nombre . '", Letras: "' . $letras . '"');
+        return 'PROD';
+    }
+
+    /**
+     * Remueve acentos de una cadena
+     * 
+     * @param string $texto Texto con acentos
+     * @return string Texto sin acentos (mantiene mayúsculas/minúsculas originales)
+     */
+    private function removerAcentos(string $texto): string
+    {
+        $acentos = [
+            'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u',
+            'Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U',
+            'ñ' => 'n', 'Ñ' => 'N',
+            'à' => 'a', 'è' => 'e', 'ì' => 'i', 'ò' => 'o', 'ù' => 'u',
+            'À' => 'A', 'È' => 'E', 'Ì' => 'I', 'Ò' => 'O', 'Ù' => 'U',
+            'ä' => 'a', 'ë' => 'e', 'ï' => 'i', 'ö' => 'o', 'ü' => 'u',
+            'Ä' => 'A', 'Ë' => 'E', 'Ï' => 'I', 'Ö' => 'O', 'Ü' => 'U'
+        ];
+        $resultado = strtr($texto, $acentos);
+        error_log('inveModel - removerAcentos: Entrada: "' . $texto . '", Salida: "' . $resultado . '"');
+        return $resultado;
+    }
+
+    /**
      * Obtiene la lista de productos con información de categoría y proveedor
      * 
      * @return array Lista de productos
