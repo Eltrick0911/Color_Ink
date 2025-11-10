@@ -297,25 +297,45 @@
             try { return JSON.parse(localStorage.getItem('pedidos') || '[]'); } catch (e) { return []; }
         },
 
-        renderTable: function (selector, pedidos) {
-            console.log('PedidosMVC - renderTable: Selector:', selector, 'Pedidos:', pedidos.length);
+        // Variables de paginación
+        currentPage: 1,
+        itemsPerPage: 10,
+        allPedidos: [],
+
+        renderTable: function (selector, pedidos, isFiltered = false) {
+            console.log('PedidosMVC - renderTable: Selector:', selector, 'Pedidos:', pedidos.length, 'isFiltered:', isFiltered);
             this.tableSelector = selector;
+            
+            // Solo actualizar allPedidos si NO es una vista filtrada
+            if (!isFiltered) {
+                this.allPedidos = pedidos; // Guardar todos los pedidos solo cuando viene data fresca
+                this.filteredPedidos = pedidos; // Inicialmente, los filtrados son todos
+            }
+            
             const table = document.querySelector(selector);
             if (!table) {
                 console.warn('Tabla de pedidos no encontrada:', selector);
                 return;
             }
             const tbody = table.querySelector('tbody') || table;
-            // Limpiar
-            tbody.innerHTML = '';
-            console.log('PedidosMVC - renderTable: Tabla limpiada, renderizando', pedidos.length, 'pedidos');
-
+            
             if (!pedidos || pedidos.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: rgba(255,255,255,0.6);">No hay pedidos para mostrar</td></tr>';
+                this.renderPagination(0);
                 return;
             }
 
-            pedidos.forEach(p => {
+            // Calcular paginación
+            const totalPages = Math.ceil(pedidos.length / this.itemsPerPage);
+            const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+            const endIndex = startIndex + this.itemsPerPage;
+            const paginatedPedidos = pedidos.slice(startIndex, endIndex);
+
+            // Limpiar
+            tbody.innerHTML = '';
+            console.log('PedidosMVC - renderTable: Mostrando', paginatedPedidos.length, 'de', pedidos.length, 'pedidos (Página', this.currentPage, 'de', totalPages + ')');
+
+            paginatedPedidos.forEach(p => {
                 const tr = document.createElement('tr');
                 // Añadir atributos de filtrado y búsqueda
                 tr.dataset.estadoId = p.estadoId || '';
@@ -344,31 +364,211 @@
                 }
             });
 
+            // Renderizar controles de paginación
+            this.renderPagination(pedidos.length);
+
             // Dejar que la vista original maneje los botones; opcionalmente emitir evento
-            document.dispatchEvent(new CustomEvent('pedidos:rendered', { detail: { count: pedidos.length } }));
+            document.dispatchEvent(new CustomEvent('pedidos:rendered', { detail: { count: paginatedPedidos.length, total: pedidos.length } }));
         },
-        // Filtro compuesto (estado + texto)
-        applyCompositeFilter: function({ estado = '', search = '' } = {}) {
-            const tbody = document.querySelector(this.tableSelector);
-            if (!tbody) return;
-            const rows = tbody.querySelectorAll('tr');
-            const estadoFilter = String(estado).trim(); // '', '1','2','3'
-            const searchTerm = search.toLowerCase();
-            let visibles = 0;
-            rows.forEach(row => {
-                if (row.querySelector('[colspan]')) return; // Fila vacía
-                const rEstado = (row.dataset.estadoId || '').toString();
-                const rSearch = row.dataset.searchIndex || '';
-                const matchEstado = !estadoFilter || rEstado === estadoFilter;
-                const matchSearch = !searchTerm || rSearch.includes(searchTerm);
-                if (matchEstado && matchSearch) {
-                    row.style.display = '';
-                    visibles++;
-                } else {
-                    row.style.display = 'none';
+
+        renderPagination: function(totalItems) {
+            const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+            
+            // Buscar el contenedor específico de paginación
+            let paginationContainer = document.querySelector('#paginationWrapper .pagination-container');
+            
+            if (!paginationContainer) {
+                // Buscar el wrapper principal
+                const wrapper = document.querySelector('#paginationWrapper');
+                if (!wrapper) {
+                    console.warn('No se encontró el contenedor #paginationWrapper');
+                    return;
                 }
+                
+                // Crear el contenedor de paginación
+                paginationContainer = document.createElement('div');
+                paginationContainer.className = 'pagination-container';
+                wrapper.appendChild(paginationContainer);
+            }
+            
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = `
+                    <div class="pagination-info">
+                        Mostrando ${totalItems} pedido${totalItems !== 1 ? 's' : ''}
+                    </div>
+                `;
+                return;
+            }
+            
+            const startItem = ((this.currentPage - 1) * this.itemsPerPage) + 1;
+            const endItem = Math.min(this.currentPage * this.itemsPerPage, totalItems);
+            
+            // Generar números de página (máximo 5 visibles)
+            let pageNumbers = [];
+            let startPage, endPage;
+            
+            if (totalPages <= 5) {
+                // Mostrar todas las páginas si son 5 o menos
+                startPage = 1;
+                endPage = totalPages;
+            } else {
+                // Mostrar 5 páginas alrededor de la actual
+                if (this.currentPage <= 3) {
+                    startPage = 1;
+                    endPage = 5;
+                } else if (this.currentPage >= totalPages - 2) {
+                    startPage = totalPages - 4;
+                    endPage = totalPages;
+                } else {
+                    startPage = this.currentPage - 2;
+                    endPage = this.currentPage + 2;
+                }
+            }
+            
+            // Generar los botones de números
+            let pageButtonsHTML = '';
+            
+            // Botón Primera página
+            pageButtonsHTML += `
+                <button class="btn-pagination btn-first" ${this.currentPage === 1 ? 'disabled' : ''} 
+                    title="Primera página">
+                    <i class="fa fa-angle-double-left"></i>
+                </button>
+            `;
+            
+            // Botón Anterior
+            pageButtonsHTML += `
+                <button class="btn-pagination btn-prev" ${this.currentPage === 1 ? 'disabled' : ''}
+                    title="Página anterior">
+                    <i class="fa fa-angle-left"></i>
+                </button>
+            `;
+            
+            // Números de página
+            for (let i = startPage; i <= endPage; i++) {
+                const isActive = i === this.currentPage;
+                pageButtonsHTML += `
+                    <button class="btn-pagination btn-page ${isActive ? 'active' : ''}" 
+                        data-page="${i}"
+                        title="Ir a página ${i}">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            // Botón Siguiente
+            pageButtonsHTML += `
+                <button class="btn-pagination btn-next" ${this.currentPage === totalPages ? 'disabled' : ''}
+                    title="Página siguiente">
+                    <i class="fa fa-angle-right"></i>
+                </button>
+            `;
+            
+            // Botón Última página
+            pageButtonsHTML += `
+                <button class="btn-pagination btn-last" ${this.currentPage === totalPages ? 'disabled' : ''}
+                    title="Última página">
+                    <i class="fa fa-angle-double-right"></i>
+                </button>
+            `;
+            
+            paginationContainer.innerHTML = `
+                <div class="pagination-info">
+                    ${startItem}-${endItem} de ${totalItems}
+                </div>
+                <div class="pagination-buttons">
+                    ${pageButtonsHTML}
+                </div>
+            `;
+            
+            // Agregar event listeners
+            const btnFirst = paginationContainer.querySelector('.btn-first');
+            const btnPrev = paginationContainer.querySelector('.btn-prev');
+            const btnNext = paginationContainer.querySelector('.btn-next');
+            const btnLast = paginationContainer.querySelector('.btn-last');
+            const pageButtons = paginationContainer.querySelectorAll('.btn-page');
+            
+            if (btnFirst) btnFirst.addEventListener('click', () => this.goToPage(1));
+            if (btnPrev) btnPrev.addEventListener('click', () => this.goToPage(this.currentPage - 1));
+            if (btnNext) btnNext.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+            if (btnLast) btnLast.addEventListener('click', () => this.goToPage(totalPages));
+            
+            pageButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const page = parseInt(btn.dataset.page);
+                    this.goToPage(page);
+                });
             });
-            document.dispatchEvent(new CustomEvent('pedidos:filtered', { detail: { visible: visibles } }));
+        },
+
+        goToPage: function(pageNumber) {
+            const totalPages = Math.ceil(this.filteredPedidos.length / this.itemsPerPage);
+            if (pageNumber < 1 || pageNumber > totalPages) return;
+            
+            this.currentPage = pageNumber;
+            this.renderTable(this.tableSelector, this.filteredPedidos);
+            
+            // Scroll suave hacia arriba de la tabla
+            const table = document.querySelector(this.tableSelector);
+            if (table) {
+                table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        },
+        
+        filteredPedidos: [],
+        
+        // Filtro compuesto (estado + texto) - ahora trabaja con paginación
+        applyCompositeFilter: function({ estado = '', search = '' } = {}) {
+            if (!this.allPedidos || this.allPedidos.length === 0) return;
+            
+            const estadoFilter = String(estado).trim();
+            const searchTerm = search.toLowerCase();
+            
+            console.log('🔍 Filtro aplicado:', { estadoFilter, searchTerm, totalPedidos: this.allPedidos.length });
+            
+            // Debug: mostrar primer pedido para ver estructura
+            if (this.allPedidos.length > 0) {
+                console.log('📦 Ejemplo de pedido:', {
+                    estadoId: this.allPedidos[0].estadoId,
+                    estadoNombre: this.allPedidos[0].estadoNombre,
+                    estado: this.allPedidos[0].estado,
+                    raw: this.allPedidos[0].raw?.id_estado
+                });
+            }
+            
+            // Filtrar los pedidos
+            this.filteredPedidos = this.allPedidos.filter(pedido => {
+                // Crear índice de búsqueda
+                const searchIndex = (
+                    (pedido.numeroPedido || '') + ' ' + 
+                    (pedido.cliente || '') + ' ' + 
+                    (pedido.fecha || '') + ' ' +
+                    (pedido.fechaEntrega || '') + ' ' + 
+                    (pedido.total || '') + ' ' + 
+                    (pedido.estadoNombre || '')
+                ).toLowerCase();
+                
+                const matchEstado = !estadoFilter || String(pedido.estadoId) === estadoFilter;
+                const matchSearch = !searchTerm || searchIndex.includes(searchTerm);
+                
+                return matchEstado && matchSearch;
+            });
+            
+            console.log('✅ Pedidos filtrados:', this.filteredPedidos.length);
+            
+            // Resetear a la primera página
+            this.currentPage = 1;
+            
+            // Re-renderizar la tabla con los pedidos filtrados
+            this.renderTable(this.tableSelector, this.filteredPedidos, true); // ← true = isFiltered
+            
+            // Emitir evento
+            document.dispatchEvent(new CustomEvent('pedidos:filtered', { 
+                detail: { 
+                    visible: this.filteredPedidos.length,
+                    total: this.allPedidos.length
+                } 
+            }));
         },
 
         renderEstadoSelect: function (currentEstadoId, pedidoId) {
