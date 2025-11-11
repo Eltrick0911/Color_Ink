@@ -21,6 +21,13 @@ if (strpos($uri, '/public/') !== false) {
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
+    
+    <script>
+        if (typeof window.authGuard === 'function') {
+            window.authGuard();
+        }
+    </script>
+    
     <main class="sidebar-content">
         <h1>Gestión de Pedidos</h1>
         <div class="pedidos-container">
@@ -429,6 +436,7 @@ if (strpos($uri, '/public/') !== false) {
         </div>
     </div>
 
+    <script src="<?php echo $basePath; ?>/src/Views/JS/login.js"></script>
     <script src="<?php echo $basePath; ?>/src/Views/JS/sidebar.js"></script>
     <script src="<?php echo $basePath; ?>/src/Views/JS/pedidosmvc.js"></script>
     <script src="<?php echo $basePath; ?>/src/Views/JS/pedidos.js"></script>
