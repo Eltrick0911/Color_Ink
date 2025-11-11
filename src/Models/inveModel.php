@@ -831,15 +831,23 @@ class inveModel
     public function getProveedoresCompletos(): array
     {
         try {
+            error_log('inveModel - getProveedoresCompletos: Ejecutando consulta');
+            
+
+            
             $stmt = $this->db->prepare("
-                SELECT id_proveedor, descripcion_proveedor, forma_contacto, direccion, activo
+                SELECT id_proveedor, descripcion_proveedor, forma_contacto, direccion
                 FROM proveedor 
                 ORDER BY descripcion_proveedor
             ");
             $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            error_log('inveModel - getProveedoresCompletos: Resultado: ' . json_encode($result));
+            error_log('inveModel - getProveedoresCompletos: Cantidad de resultados: ' . count($result));
+            return $result;
         } catch (\Throwable $e) {
             error_log('Error getProveedoresCompletos: ' . $e->getMessage());
+            error_log('Error getProveedoresCompletos stack: ' . $e->getTraceAsString());
             return [];
         }
     }
@@ -854,7 +862,7 @@ class inveModel
     {
         try {
             $stmt = $this->db->prepare("
-                SELECT id_proveedor, descripcion_proveedor, forma_contacto, direccion, activo
+                SELECT id_proveedor, descripcion_proveedor, forma_contacto, direccion
                 FROM proveedor 
                 WHERE id_proveedor = :id
             ");
@@ -903,7 +911,7 @@ class inveModel
     }
 
     /**
-     * Elimina un proveedor (marca como inactivo)
+     * Elimina un proveedor (eliminación física)
      * 
      * @param int $id ID del proveedor
      * @return bool Resultado de la operación
@@ -912,7 +920,7 @@ class inveModel
     {
         try {
             $stmt = $this->db->prepare("
-                UPDATE proveedor SET activo = 0 WHERE id_proveedor = :id
+                DELETE FROM proveedor WHERE id_proveedor = :id
             ");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             return $stmt->execute();
