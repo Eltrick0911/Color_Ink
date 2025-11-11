@@ -2110,7 +2110,7 @@ async function handleNuevoProveedor(e) {
     };
     
     try {
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=add-proveedor', {
+        const response = await fetch('/Color_Ink/src/Routes/inve.php?action=add-proveedor', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2160,7 +2160,7 @@ function openVerProveedoresModal() {
 async function loadProveedoresTable() {
     try {
         console.log('Cargando tabla de proveedores...');
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=proveedores-completos', {
+        const response = await fetch('/Color_Ink/src/Routes/inve.php?action=proveedores-completos', {
             headers: {
                 ...getAuthHeader(),
             }
@@ -2307,7 +2307,7 @@ async function deleteProveedor(id, nombre) {
     
     if (result.isConfirmed) {
         try {
-            const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=delete-proveedor', {
+            const response = await fetch('/Color_Ink/src/Routes/inve.php?action=delete-proveedor', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

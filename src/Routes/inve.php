@@ -70,6 +70,9 @@ try {
             if ($action === 'proveedores') {
                 error_log('inve route: Llamando getProveedores');
                 $controller->getProveedores($headers);
+            } elseif ($action === 'proveedores-completos') {
+                error_log('inve route: Llamando getProveedoresCompletos');
+                $controller->getProveedoresCompletos($headers);
             } elseif ($action === 'categorias') {
                 error_log('inve route: Llamando getCategorias');
                 $controller->getCategorias($headers);
@@ -138,6 +141,11 @@ try {
                 $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
                 error_log('inve route: Input recibido: ' . json_encode($input));
                 $controller->addProveedor($headers, $input);
+            } elseif ($action === 'delete-proveedor') {
+                error_log('inve route: Llamando deleteProveedor');
+                $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+                error_log('inve route: Input recibido: ' . json_encode($input));
+                $controller->deleteProveedor($headers, $input);
             } else {
                 error_log('inve route: Acción POST no válida: ' . $action);
                 http_response_code(400);
