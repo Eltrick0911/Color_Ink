@@ -176,8 +176,14 @@ class VentaController
             $filtro = $_GET['filtro'] ?? null;
             $fechaDesde = $_GET['fecha_desde'] ?? null;
             $fechaHasta = $_GET['fecha_hasta'] ?? null;
+            $estado = $_GET['estado'] ?? null;
+            $metodoPago = $_GET['metodo_pago'] ?? null;
+            $pagina = (int)($_GET['pagina'] ?? 1);
+            $limite = (int)($_GET['limite'] ?? 10);
 
-            $result = $this->ventaModel->listarVentas($filtro, $fechaDesde, $fechaHasta);
+            error_log('VentaController - Filtros: estado=' . $estado . ', metodoPago=' . $metodoPago);
+
+            $result = $this->ventaModel->listarVentas($filtro, $fechaDesde, $fechaHasta, $estado, $metodoPago, $pagina, $limite);
             echo json_encode($result);
         } catch (\Throwable $e) {
             error_log('VentaController - listarVentas ERROR: ' . $e->getMessage());
@@ -239,7 +245,9 @@ class VentaController
             
             if ($result['status'] === 'OK') {
                 try {
-                    $this->ventaModel->registrarAuditoria($id, 'EDITAR', $usuario['id_usuario'], 'Edición de venta');
+                    // Para ediciones, podemos usar 'ANULADA' como acción genérica o crear un trigger
+                    // Por ahora, registramos como comentario en el motivo
+                    error_log('VentaController - Venta editada ID=' . $id . ' por usuario=' . $usuario['id_usuario']);
                 } catch (\Throwable $e) {
                     error_log('VentaController - Error en auditoría: ' . $e->getMessage());
                 }
@@ -278,7 +286,7 @@ class VentaController
             // Intentar registrar auditoría (no crítico)
             if ($result['status'] === 'OK') {
                 try {
-                    $this->ventaModel->registrarAuditoria($id, 'ANULAR', $usuario['id_usuario'], $motivo);
+                    $this->ventaModel->registrarAuditoria($id, 'ANULADA', $usuario['id_usuario'], $motivo);
                 } catch (\Throwable $e) {
                     error_log('VentaController - Error en auditoría: ' . $e->getMessage());
                     // Continuar sin fallar
@@ -332,8 +340,10 @@ class VentaController
             $filtro = $_GET['filtro'] ?? null;
             $fechaDesde = $_GET['fecha_desde'] ?? null;
             $fechaHasta = $_GET['fecha_hasta'] ?? null;
+            $estado = $_GET['estado'] ?? null;
+            $metodoPago = $_GET['metodo_pago'] ?? null;
 
-            $this->ventaModel->exportarVentasExcel($filtro, $fechaDesde, $fechaHasta);
+            $this->ventaModel->exportarVentasExcel($filtro, $fechaDesde, $fechaHasta, $estado, $metodoPago);
         } catch (\Throwable $e) {
             error_log('VentaController - exportarExcel ERROR: ' . $e->getMessage());
             echo json_encode(responseHTTP::status500());
@@ -357,6 +367,32 @@ class VentaController
             echo json_encode($result);
         } catch (\Throwable $e) {
             error_log('VentaController - obtenerPedidosDisponibles ERROR: ' . $e->getMessage());
+            echo json_encode(responseHTTP::status500());
+        }
+    }
+
+    /**
+     * POST /api/ventas/recalcular-costos - Recalcular costos de ventas existentes
+     */
+    public function recalcularCostos(): void
+    {
+        try {
+            $usuario = $this->validarAutenticacion();
+            
+            if (!$usuario) {
+                echo json_encode(responseHTTP::status401('No autenticado'));
+                return;
+            }
+
+            if (!$this->validarRol($usuario['id_rol'], true)) {
+                echo json_encode(responseHTTP::status401('Solo Administrador puede recalcular costos'));
+                return;
+            }
+
+            $result = $this->ventaModel->recalcularCostosVentas();
+            echo json_encode($result);
+        } catch (\Throwable $e) {
+            error_log('VentaController - recalcularCostos ERROR: ' . $e->getMessage());
             echo json_encode(responseHTTP::status500());
         }
     }

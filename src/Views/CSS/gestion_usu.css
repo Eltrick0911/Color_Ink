@@ -1,29 +1,33 @@
 .sidebar-content {
-    padding: 0 1rem 1rem;
-    max-width: 1390px;
-    margin: 0 auto;
-    width: 92%; /* Asegura que tome el ancho disponible dentro de los márgenes */
+    padding: 20px;
+    margin: 0;
+    width: calc(100% - 40px);
     flex-grow: 1; /* Permite que el contenedor principal crezca */
+    box-sizing: border-box;
+    transition: margin-right 0.5s ease-in-out;
 }
 
-/* Evitar que el sidebar (derecha) tape contenido en esta vista */
+.usuarios-container h1 {
+    color: rgba(255, 115, 0, 0.749);
+    font-size: 2em;
+    margin: 0 0 20px 0;
+    text-align: left;
+    width: 100%;
+}
+
+/* Ajuste cuando el sidebar está activo - el margin-right lo maneja sidebar.css */
 body.sidebar-active .sidebar-content {
-    /* deja el margen global y añade un colchón interno para tablas anchas */
-    margin-right: 0 !important; /* anula el empuje global de sidebar.css que corría el contenido a la izquierda */
-    padding-right: calc(80px + 12px);
-}
-
-/* Ajuste para móviles donde el sidebar es más angosto */
-@media (max-width: 576px), (orientation: portrait) and (max-width: 768px) {
-    body.sidebar-active .sidebar-content {
-        padding-right: calc(56px + 10px);
-    }
+    width: calc(100% - 40px - 80px); /* 100% menos padding (40px) menos sidebar (80px) */
+    /* margin-right: 80px lo maneja sidebar.css automáticamente */
 }
 
 .usuarios-container {
-    padding: 0 20px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 0 1rem 1rem;
+    max-width: 1190px;
+    margin-left: 3%; /* Margen izquierdo más grande */
+    margin-right: 1%; /* Margen derecho más pequeño */
+    width: 96%; /* Contenido más grande */
+    box-sizing: border-box;
 }
 
 .usuarios-header {
@@ -317,7 +321,41 @@ body.sidebar-active .sidebar-content {
 }
 
 /* Responsive design */
+@media (max-width: 1200px) {
+    .sidebar-content {
+        width: calc(100% - 40px);
+        padding: 20px;
+    }
+    
+    body.sidebar-active .sidebar-content {
+        width: calc(100% - 40px - 80px);
+        /* margin-right: 80px lo maneja sidebar.css automáticamente */
+    }
+    
+    .usuarios-container {
+        max-width: 100%;
+        width: 97%; /* Contenido más grande en pantallas medianas */
+        margin-left: 2.5%; /* Margen izquierdo más grande */
+        margin-right: 0.5%; /* Margen derecho más pequeño */
+    }
+}
+
 @media (max-width: 768px) {
+    .sidebar-content {
+        width: calc(100% - 40px);
+        padding: 15px 10px;
+    }
+    
+    body.sidebar-active .sidebar-content {
+        width: calc(100% - 40px - 80px);
+        /* margin-right: 80px lo maneja sidebar.css automáticamente */
+    }
+    
+    .usuarios-container {
+        width: 99%; /* Contenido más grande en pantallas pequeñas */
+        margin-left: 0.5%; /* Margen izquierdo más grande */
+        margin-right: 0.5%; /* Márgenes iguales en pantallas pequeñas */
+    }
     .usuarios-header {
         flex-direction: column;
         gap: 20px;
@@ -354,7 +392,41 @@ body.sidebar-active .sidebar-content {
     }
 }
 
+@media (max-width: 576px), (orientation: portrait) and (max-width: 768px) {
+    .sidebar-content {
+        width: calc(100% - 40px);
+        padding: 15px 10px;
+    }
+    
+    body.sidebar-active .sidebar-content {
+        width: calc(100% - 40px - 56px); /* 100% menos padding (40px) menos sidebar (56px en móviles) */
+        /* margin-right: 56px lo maneja sidebar.css automáticamente (móviles) */
+    }
+    
+    .usuarios-container {
+        width: 99%;
+        margin-left: 0.5%;
+        margin-right: 0.5%;
+    }
+}
+
 @media (max-width: 480px) {
+    .sidebar-content {
+        width: calc(100% - 40px);
+        padding: 12px 8px;
+    }
+    
+    body.sidebar-active .sidebar-content {
+        width: calc(100% - 40px - 56px); /* 100% menos padding (40px) menos sidebar (56px en móviles) */
+        /* margin-right: 56px lo maneja sidebar.css automáticamente (móviles) */
+    }
+    
+    .usuarios-container {
+        width: 99%;
+        margin-left: 0.5%;
+        margin-right: 0.5%;
+    }
+    
     .usuarios-stats {
         grid-template-columns: 1fr;
     }
@@ -538,95 +610,104 @@ body.sidebar-active .sidebar-content {
     margin-top: 20px;
 }
 
-/* ===== ESTILOS DE PAGINACIÓN ===== */
+/* ===== ESTILOS DE PAGINACIÓN (Estilo Inventarios con color naranja) ===== */
 .pagination-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 30px;
-    padding: 20px;
-    background: #000000;
-    border-radius: 15px;
-    border: 2px solid rgba(106, 13, 173, 0.3);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    margin-top: 20px;
+    padding: 15px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .pagination-info {
-    color: #ffffff;
-    font-size: 1rem;
-    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
 }
 
 .pagination-controls {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .pagination-btn {
-    padding: 10px 20px;
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    color: white;
-    border: 2px solid rgba(106, 13, 173, 0.3);
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-weight: 600;
+    background: rgba(255, 115, 0, 0.2);
+    border: 1px solid rgba(255, 115, 0, 0.5);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 14px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .pagination-btn:hover:not(:disabled) {
-    background: linear-gradient(45deg, #764ba2, #667eea);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: rgba(255, 115, 0, 0.4);
+    border-color: rgba(255, 115, 0, 0.8);
 }
 
 .pagination-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.1);
 }
 
 .pagination-numbers {
     display: flex;
-    align-items: center;
     gap: 5px;
+    align-items: center;
 }
 
-.pagination-number-btn {
-    padding: 8px 12px;
-    margin: 0 4px;
+.pagination-numbers button {
     background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 2px solid rgba(106, 13, 173, 0.3);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 14px;
+    min-width: 40px;
+    text-align: center;
 }
 
-.pagination-number-btn:hover {
-    background: rgba(102, 126, 234, 0.3);
-    transform: translateY(-2px);
+.pagination-numbers button:hover:not(.active) {
+    background: rgba(255, 115, 0, 0.3);
+    border-color: rgba(255, 115, 0, 0.6);
 }
 
+.pagination-numbers button.active {
+    background: linear-gradient(135deg, rgba(255, 115, 0, 0.9), rgba(255, 87, 34, 0.8));
+    border-color: rgba(255, 115, 0, 0.9);
+    font-weight: bold;
+}
+
+/* Responsive para paginación */
 @media (max-width: 768px) {
     .pagination-container {
         flex-direction: column;
-        gap: 15px;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .pagination-info {
+        text-align: center;
+        width: 100%;
     }
     
     .pagination-controls {
-        width: 100%;
         justify-content: center;
+        width: 100%;
     }
     
     .pagination-btn {
-        padding: 8px 15px;
-        font-size: 0.85rem;
+        padding: 6px 12px;
+        font-size: 13px;
     }
 }

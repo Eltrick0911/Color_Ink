@@ -26,7 +26,15 @@ class connectionDB{
             $opt = [\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC];
             $pdo = new PDO(self::$host,self::$user,self::$pass, $opt);
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            error_log("Conexión exitosa");
+            
+            // Establecer zona horaria de Tegucigalpa, Honduras (UTC-6)
+            // Esto afecta NOW(), CURDATE(), CURTIME() y TIMESTAMP en todas las queries
+            $pdo->exec("SET time_zone = '-06:00'");
+            
+            // Verificar que se aplicó correctamente (log temporal)
+            $tz = $pdo->query("SELECT @@session.time_zone, NOW() as hora_actual")->fetch();
+            error_log("Conexión exitosa - Zona horaria: " . $tz['@@session.time_zone'] . " - Hora MySQL: " . $tz['hora_actual']);
+            
             return $pdo;
         }catch(\PDOException $e){
             error_log("Error en la conexión a la BD! ERROR: ".$e);

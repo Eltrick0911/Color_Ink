@@ -70,6 +70,9 @@ try {
             if ($action === 'proveedores') {
                 error_log('inve route: Llamando getProveedores');
                 $controller->getProveedores($headers);
+            } elseif ($action === 'proveedores-completos') {
+                error_log('inve route: Llamando getProveedoresCompletos');
+                $controller->getProveedoresCompletos($headers);
             } elseif ($action === 'categorias') {
                 error_log('inve route: Llamando getCategorias');
                 $controller->getCategorias($headers);
@@ -89,6 +92,9 @@ try {
             } elseif ($action === 'ultimo-id') {
                 error_log('inve route: Llamando getUltimoIdProducto');
                 $controller->getUltimoIdProducto($headers);
+            } elseif ($action === 'siguiente-sku') {
+                error_log('inve route: Llamando getSiguienteSkuPorCategoria');
+                $controller->getSiguienteSkuPorCategoria($headers);
             } elseif ($action === 'alertas-stock') {
                 error_log('inve route: Llamando getAlertasStock');
                 $controller->getAlertasStock($headers);
@@ -130,6 +136,16 @@ try {
                 $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
                 error_log('inve route: Input recibido: ' . json_encode($input));
                 $controller->marcarAlertaAtendida($headers, $input);
+            } elseif ($action === 'add-proveedor') {
+                error_log('inve route: Llamando addProveedor');
+                $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+                error_log('inve route: Input recibido: ' . json_encode($input));
+                $controller->addProveedor($headers, $input);
+            } elseif ($action === 'delete-proveedor') {
+                error_log('inve route: Llamando deleteProveedor');
+                $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+                error_log('inve route: Input recibido: ' . json_encode($input));
+                $controller->deleteProveedor($headers, $input);
             } else {
                 error_log('inve route: Acción POST no válida: ' . $action);
                 http_response_code(400);

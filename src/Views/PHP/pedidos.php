@@ -95,6 +95,9 @@ if (strpos($uri, '/public/') !== false) {
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Contenedor de paginación fuera de la tabla -->
+            <div id="paginationWrapper"></div>
         </div>
     </main>
 
@@ -139,7 +142,14 @@ if (strpos($uri, '/public/') !== false) {
     <div id="modalNuevoPedido" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Nuevo Pedido</h2>
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h2>Nuevo Pedido</h2>
+                    </div>
+                </div>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
@@ -192,32 +202,32 @@ if (strpos($uri, '/public/') !== false) {
                     </div>
 
                     <!-- Resumen de totales del pedido -->
-                    <div id="resumenTotalesNuevoPedido" style="display:none; margin-top:20px; padding:15px; background:#f8f9fa; border-radius:8px; border:1px solid #dee2e6;">
-                        <h4 style="margin:0 0 10px 0; color:#495057;">Resumen del Pedido</h4>
-                        <div style="display:grid; gap:8px;">
-                            <div style="display:flex; justify-content:space-between;">
+                    <div id="resumenTotalesNuevoPedido" class="resumen-totales-container" style="display:none;">
+                        <h4>Resumen del Pedido</h4>
+                        <div class="resumen-totales-grid">
+                            <div class="resumen-totales-row">
                                 <span>Productos:</span>
                                 <strong id="resumenCantidadProductos">0</strong>
                             </div>
-                            <div style="display:flex; justify-content:space-between;">
+                            <div class="resumen-totales-row">
                                 <span>Cantidad Total:</span>
                                 <strong id="resumenCantidadTotal">0</strong>
                             </div>
-                            <div style="display:flex; justify-content:space-between;">
+                            <div class="resumen-totales-row">
                                 <span>Subtotal:</span>
                                 <strong id="resumenSubtotal">L 0.00</strong>
                             </div>
-                            <div style="display:flex; justify-content:space-between; color:#dc3545;">
+                            <div class="resumen-totales-row descuento">
                                 <span>Descuento (prom. <span id="resumenPorcentajeDescuento">0</span>%):</span>
                                 <strong id="resumenMontoDescuento">L 0.00</strong>
                             </div>
-                            <div style="display:flex; justify-content:space-between; color:#28a745;">
+                            <div class="resumen-totales-row impuesto">
                                 <span>Impuesto (prom. <span id="resumenPorcentajeImpuesto">0</span>%):</span>
                                 <strong id="resumenMontoImpuesto">L 0.00</strong>
                             </div>
-                            <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:2px solid #007bff; font-size:1.1em;">
+                            <div class="resumen-totales-row total">
                                 <span>Total:</span>
-                                <strong id="resumenTotalGeneral" style="color:#007bff;">L 0.00</strong>
+                                <strong id="resumenTotalGeneral">L 0.00</strong>
                             </div>
                         </div>
                     </div>
@@ -235,7 +245,14 @@ if (strpos($uri, '/public/') !== false) {
     <div id="modalDetallesProducto" class="modal">
         <div class="modal-content modal-medium">
             <div class="modal-header">
-                <h2>Detalles de Productos</h2>
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h2>Detalles de Productos</h2>
+                    </div>
+                </div>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
@@ -248,19 +265,10 @@ if (strpos($uri, '/public/') !== false) {
                 <form id="formDetallesProducto" class="product-details-form">
                     <div id="productoDetalleContainer">
                         <div class="form-group">
-                            <label for="categoriaProducto">Categoría de Producto *</label>
+                            <label for="categoriaProducto">Producto *</label>
                             <select id="categoriaProducto" name="categoriaProducto" required>
-                                <option value="">Seleccionar categoría</option>
-                                <option value="camisas">Camisas/Playeras</option>
-                                <option value="retratos">Retratos</option>
-                                <option value="arreglos-florales">Arreglos Florales</option>
-                                <option value="vinil">Vinil Adhesivo</option>
-                                <option value="banner">Banner</option>
-                                <option value="tarjetas">Tarjetas de Presentación</option>
-                                <option value="volantes">Volantes</option>
-                                <option value="invitaciones">Invitaciones</option>
-                                <option value="decoracion">Decoración</option>
-                                <option value="otros">Otros</option>
+                                <option value="">Seleccionar producto</option>
+                                <!-- Las opciones se cargan dinámicamente desde la base de datos -->
                             </select>
                         </div>
                         <div class="form-group">
@@ -327,9 +335,9 @@ if (strpos($uri, '/public/') !== false) {
                                 <input type="number" id="pdImpuesto" step="0.01" min="0" value="0">
                             </div>
                         </div>
-                        <div style="margin-top:12px; padding:12px; background:#f8f9fa; border-radius:6px; border:2px solid #007bff;">
-                            <div style="font-size:1.1em; font-weight:700; color:#007bff; text-align:center;">
-                                Total: <span id="pdTotalPreview" style="font-size:1.3em;">L 0.00</span>
+                        <div style="margin-top:12px; padding:15px; background: linear-gradient(135deg, rgba(50, 50, 50, 0.9), rgba(40, 40, 40, 0.95)); border-radius:8px; border:2px solid rgba(20, 152, 0, 0.6);">
+                            <div style="font-size:1.1em; font-weight:700; color: rgba(20, 152, 0, 0.95); text-align:center;">
+                                Total: <span id="pdTotalPreview" style="font-size:1.3em; color: rgba(20, 152, 0, 1);">L 0.00</span>
                             </div>
                         </div>
                     </div>
@@ -404,8 +412,8 @@ if (strpos($uri, '/public/') !== false) {
                         </button>
                     </div>
                     <!-- RESUMEN DE TOTALES -->
-                    <div class="form-group" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
-                        <label style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px; display: block;">Resumen del Pedido</label>
+                    <div class="form-group resumen-totales-container">
+                        <label style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px; display: block; color: rgba(20, 152, 0, 0.95);">Resumen del Pedido</label>
                         <div id="resumenTotalesEdicion"></div>
                     </div>
                 </form>
@@ -457,6 +465,26 @@ if (strpos($uri, '/public/') !== false) {
             <div class="modal-confirm-footer">
                 <button class="btn-cancel" id="btnCancelDelete">Cancelar</button>
                 <button class="btn-delete" id="btnConfirmDelete">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Cambio de Estado -->
+    <div id="modalConfirmStatus" class="modal-confirm-status">
+        <div class="modal-confirm-content">
+            <div class="modal-confirm-header">
+                <svg class="icon-status" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <h3>¿Cambiar estado del pedido?</h3>
+            </div>
+            <div class="modal-confirm-body">
+                <p id="confirmStatusMessage">¿Estás seguro de que quieres cambiar el estado?</p>
+            </div>
+            <div class="modal-confirm-footer">
+                <button class="btn-cancel" id="btnCancelStatus">Cancelar</button>
+                <button class="btn-confirm" id="btnConfirmStatus">Confirmar</button>
             </div>
         </div>
     </div>

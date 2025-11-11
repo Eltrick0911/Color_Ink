@@ -178,6 +178,40 @@ class PedidosController
                                 error_log("PedidosController - create: ===== PRODUCTO #" . ($index + 1) . " =====");
                                 error_log("PedidosController - create: Producto RAW: " . json_encode($producto));
                                 
+                                // VALIDAR STOCK ANTES DE CREAR EL DETALLE
+                                $idProductoCatalogo = isset($producto['id_producto']) ? (int)$producto['id_producto'] : 0;
+                                if ($idProductoCatalogo > 0) {
+                                    $productoInfo = $this->inveModel->getProducto((string)$idProductoCatalogo);
+                                    
+                                    if ($productoInfo) {
+                                        $stockDisponible = (int)($productoInfo['stock'] ?? 0);
+                                        $stockMinimo = (int)($productoInfo['stock_minimo'] ?? 0);
+                                        $nombreProductoCatalogo = $productoInfo['nombre_producto'] ?? 'Producto';
+                                        $cantidadSolicitada = (int)($producto['cantidad'] ?? 1);
+                                        
+                                        error_log("PedidosController - create: Validando stock para '{$nombreProductoCatalogo}' - Disponible: {$stockDisponible}, Solicitado: {$cantidadSolicitada}");
+                                        
+                                        // BLOQUEAR si no hay stock suficiente
+                                        if ($stockDisponible <= 0) {
+                                            error_log("PedidosController - create: BLOQUEADO - Stock agotado para producto ID $idProductoCatalogo");
+                                            echo json_encode(responseHTTP::status400(
+                                                "STOCK AGOTADO: El producto '{$nombreProductoCatalogo}' no tiene unidades disponibles en inventario."
+                                            ));
+                                            return;
+                                        }
+                                        
+                                        if ($stockDisponible < $cantidadSolicitada) {
+                                            error_log("PedidosController - create: BLOQUEADO - Stock insuficiente para producto ID $idProductoCatalogo");
+                                            echo json_encode(responseHTTP::status400(
+                                                "STOCK INSUFICIENTE: El producto '{$nombreProductoCatalogo}' solo tiene {$stockDisponible} unidades disponibles. No se pueden solicitar {$cantidadSolicitada} unidades."
+                                            ));
+                                            return;
+                                        }
+                                        
+                                        error_log("PedidosController - create: ✓ Stock validado exitosamente para '{$nombreProductoCatalogo}'");
+                                    }
+                                }
+                                
                                 // Calcular el total_linea para este producto específico
                                 $cantidad = (int)($producto['cantidad'] ?? 1);
                                 $precioBase = (float)($producto['precio'] ?? 0);
@@ -220,8 +254,8 @@ class PedidosController
                                     'cantidad' => $cantidad,
                                     'precio_unitario' => $precioBase, // Precio base antes de descuentos/impuestos
                                     'total_linea' => $totalLinea, // Total después de descuento e impuesto
-                                    'descuento' => $descuento, // En porcentaje
-                                    'impuesto' => $impuesto, // En porcentaje
+                                    'descuento' => $montoDescuento, // MONTO EN DINERO del descuento
+                                    'impuesto' => $montoImpuesto, // MONTO EN DINERO del impuesto
                                     'id_pedido' => (int)$idPedido,
                                     'id_producto' => null, // Pedido personalizado no tiene id_producto
                                     'id_usuario' => (int)$user['id_usuario'],
@@ -514,8 +548,8 @@ class PedidosController
                                     'cantidad' => $cantidad,
                                     'precio_unitario' => $precioBase, // Precio base antes de descuentos/impuestos
                                     'total_linea' => $totalLinea, // Total después de descuento e impuesto
-                                    'descuento' => $descuento, // En porcentaje
-                                    'impuesto' => $impuesto, // En porcentaje
+                                    'descuento' => $montoDescuento, // MONTO EN DINERO del descuento
+                                    'impuesto' => $montoImpuesto, // MONTO EN DINERO del impuesto
                                     'id_pedido' => (int)$id,
                                     'id_producto' => null, // Pedido personalizado no tiene id_producto
                                     'id_usuario' => (int)$user['id_usuario'],
@@ -588,6 +622,25 @@ class PedidosController
             $success = $this->pedidosModel->cambiarEstadoPedido($id, $idEstadoNuevo, $idUsuario);
             
             if ($success) {
+                // Si el nuevo estado es "Entregado" (ID = 1), descontar stock de productos
+                if ($idEstadoNuevo == 1) {
+                    error_log("PedidosController - cambiarEstado: Pedido marcado como ENTREGADO. Descontando stock...");
+                    try {
+                        $stockDescontado = $this->pedidosModel->descontarStockPorPedido($id);
+                        if ($stockDescontado) {
+                            error_log("PedidosController - cambiarEstado: Stock descontado exitosamente para pedido $id");
+                        } else {
+                            error_log("PedidosController - cambiarEstado: No se descontó stock (posiblemente sin productos válidos)");
+                        }
+                    } catch (\Exception $e) {
+                        error_log("PedidosController - cambiarEstado: ERROR al descontar stock - " . $e->getMessage());
+                        // No retornar error, el cambio de estado ya se hizo
+                        // Pero informar al usuario
+                        echo json_encode(responseHTTP::status200('Estado actualizado. ADVERTENCIA: Error al descontar stock: ' . $e->getMessage()));
+                        return;
+                    }
+                }
+                
                 error_log("PedidosController - cambiarEstado: Estado del pedido $id actualizado exitosamente");
                 echo json_encode(responseHTTP::status200('Estado del pedido actualizado exitosamente'));
             } else {
@@ -681,6 +734,19 @@ class PedidosController
                 'id_usuario' => $user['id_usuario'], // Usar usuario autenticado
                 'detalles_personalizados' => $detallesPersonalizados
             ];
+            
+            // Calcular total_linea si no viene en el input
+            // Asumimos que descuento e impuesto vienen como MONTOS EN DINERO
+            $cantidad = $detalleData['cantidad'];
+            $precioUnitario = $detalleData['precio_unitario'];
+            $descuento = $detalleData['descuento'];
+            $impuesto = $detalleData['impuesto'];
+            
+            $subtotal = $precioUnitario * $cantidad;
+            $totalLinea = $subtotal - $descuento + $impuesto;
+            $detalleData['total_linea'] = $totalLinea;
+            
+            error_log("PedidosController - crearDetalle: Calculado total_linea=$totalLinea (subtotal=$subtotal, descuento=$descuento, impuesto=$impuesto)");
 
             // Normalizar id_producto: permitir productos personalizados (sin id de catálogo)
             $idProductoOriginal = $detalleData['id_producto'];
@@ -695,36 +761,63 @@ class PedidosController
                 return;
             }
 
-            // Si hay un producto del inventario (id_producto válido), descontar stock
+            // VALIDAR STOCK ANTES DE CREAR EL PEDIDO
+            // Si no hay stock suficiente, BLOQUEAR la creación del pedido
+            $stockInfo = null;
             if ($idProductoOriginal > 0) {
-                error_log("PedidosController - crearDetalle: Descontando stock para producto ID: $idProductoOriginal, cantidad: " . $detalleData['cantidad']);
-                $resultadoStock = $this->inveModel->descontarStock($idProductoOriginal, $detalleData['cantidad']);
+                // Verificar stock disponible usando el modelo de inventario
+                $producto = $this->inveModel->getProducto((string)$idProductoOriginal);
                 
-                if ($resultadoStock['status'] !== 'OK') {
-                    error_log("PedidosController - crearDetalle: Error al descontar stock - " . ($resultadoStock['message'] ?? 'Error desconocido'));
-                    echo json_encode(responseHTTP::status400($resultadoStock['message'] ?? 'Error al descontar stock del inventario'));
-                    return;
+                if ($producto) {
+                    $stockDisponible = (int)($producto['stock'] ?? 0);
+                    $stockMinimo = (int)($producto['stock_minimo'] ?? 0);
+                    $nombreProducto = $producto['nombre_producto'] ?? 'Producto';
+                    $cantidadSolicitada = (int)$detalleData['cantidad'];
+                    
+                    error_log("PedidosController - crearDetalle: Producto '{$nombreProducto}' (ID $idProductoOriginal) - Stock disponible: {$stockDisponible}, Cantidad solicitada: {$cantidadSolicitada}");
+                    
+                    // BLOQUEAR si no hay stock suficiente
+                    if ($stockDisponible <= 0) {
+                        error_log("PedidosController - crearDetalle: BLOQUEADO - Stock agotado");
+                        echo json_encode(responseHTTP::status400(
+                            "STOCK AGOTADO: El producto '{$nombreProducto}' no tiene unidades disponibles en inventario."
+                        ));
+                        return;
+                    }
+                    
+                    if ($stockDisponible < $cantidadSolicitada) {
+                        error_log("PedidosController - crearDetalle: BLOQUEADO - Stock insuficiente");
+                        echo json_encode(responseHTTP::status400(
+                            "STOCK INSUFICIENTE: El producto '{$nombreProducto}' solo tiene {$stockDisponible} unidades disponibles. No se pueden solicitar {$cantidadSolicitada} unidades."
+                        ));
+                        return;
+                    }
+                    
+                    // Advertencia de stock bajo (no bloquea, solo informa)
+                    if ($stockDisponible <= $stockMinimo) {
+                        error_log("PedidosController - crearDetalle: ADVERTENCIA - Stock bajo pero suficiente");
+                        $stockInfo = [
+                            'alerta' => 'warning',
+                            'mensaje' => "ADVERTENCIA: El producto '{$nombreProducto}' tiene stock bajo ({$stockDisponible} unidades, mínimo recomendado: {$stockMinimo})",
+                            'stock_actual' => $stockDisponible
+                        ];
+                    }
+                } else {
+                    error_log("PedidosController - crearDetalle: No se pudo obtener información del producto ID $idProductoOriginal");
                 }
-                
-                error_log("PedidosController - crearDetalle: Stock descontado exitosamente. Stock actualizado: " . ($resultadoStock['data']['stock_actualizado'] ?? 'N/A'));
             }
 
-            error_log("PedidosController - crearDetalle: Datos válidos, creando detalle");
+            error_log("PedidosController - crearDetalle: Validación de stock exitosa, creando detalle");
 
             $success = $this->pedidosModel->createDetallePedido($detalleData);
             
             if ($success) {
                 error_log("PedidosController - crearDetalle: Detalle creado exitosamente para pedido $idPedido");
                 
-                // Preparar respuesta con información del stock si se descontó
+                // Preparar respuesta con información del stock
                 $responseData = ['message' => 'Detalle de pedido creado exitosamente'];
-                if ($idProductoOriginal > 0 && isset($resultadoStock['data'])) {
-                    $responseData['stock_info'] = [
-                        'id_producto' => $resultadoStock['data']['id_producto'],
-                        'stock_actualizado' => $resultadoStock['data']['stock_actualizado'],
-                        'alerta_stock' => ($resultadoStock['data']['stock_actualizado'] ?? 0) <= 0 ? 'Producto agotado' : 
-                                        (($resultadoStock['data']['stock_actualizado'] ?? 999) <= 3 ? 'Stock bajo' : null)
-                    ];
+                if ($stockInfo) {
+                    $responseData['stock_info'] = $stockInfo;
                 }
                 
                 $resp = responseHTTP::status200('Detalle de pedido creado exitosamente');
@@ -902,6 +995,46 @@ class PedidosController
             echo json_encode(responseHTTP::status500('Error: ' . $e->getMessage()));
         }
     }
+
+    /**
+     * Obtener lista de productos activos
+     * GET /productos
+     */
+    public function getProductos(): void
+    {
+        try {
+            error_log("PedidosController - getProductos: Iniciando obtención de productos");
+            
+            $headers = getallheaders();
+            $user = $this->authorize($headers);
+            
+            if (!$user) {
+                error_log('PedidosController - getProductos: Autorización fallida');
+                echo json_encode(responseHTTP::status401('No autorizado'));
+                return;
+            }
+
+            $productos = $this->pedidosModel->getProductos();
+            error_log("PedidosController - getProductos: Se obtuvieron " . count($productos) . " productos");
+            error_log("PedidosController - getProductos: Productos = " . json_encode($productos));
+            
+            // Construir respuesta manualmente para asegurar que data no sea null
+            $response = [
+                'status' => 'OK',
+                'message' => 'Productos obtenidos exitosamente',
+                'data' => $productos
+            ];
+            
+            error_log("PedidosController - getProductos: Respuesta final = " . json_encode($response));
+            
+            header('Content-Type: application/json');
+            echo json_encode($response);
+        } catch (\Exception $e) {
+            error_log("ERROR PedidosController - getProductos: " . $e->getMessage());
+            echo json_encode(responseHTTP::status500('Error: ' . $e->getMessage()));
+        }
+    }
 }
+
 
 

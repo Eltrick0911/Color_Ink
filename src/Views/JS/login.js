@@ -53,13 +53,55 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const email = document.querySelector('#email')?.value?.trim();
                 if (!email) {
-                    alert('Escribe tu correo en el campo Correo Electrónico y vuelve a intentar.');
+                    await Swal.fire({
+                        title: 'Correo requerido',
+                        text: 'Escribe tu correo en el campo Correo Electrónico y vuelve a intentar.',
+                        icon: 'warning',
+                        confirmButtonText: 'Entendido',
+                        background: '#000000',
+                        color: '#ffffff',
+                        confirmButtonColor: '#ff7300',
+                        customClass: {
+                            popup: 'swal-dark-popup',
+                            title: 'swal-dark-title',
+                            htmlContainer: 'swal-dark-content',
+                            confirmButton: 'swal-dark-confirm'
+                        }
+                    });
                     return;
                 }
                 await firebase.auth().sendPasswordResetEmail(email);
-                alert('Te enviamos un correo para restablecer tu contraseña.');
+                await Swal.fire({
+                    title: 'Correo enviado',
+                    text: 'Te enviamos un correo para restablecer tu contraseña.',
+                    icon: 'success',
+                    confirmButtonText: 'Entendido',
+                    background: '#000000',
+                    color: '#ffffff',
+                    confirmButtonColor: '#ff7300',
+                    customClass: {
+                        popup: 'swal-dark-popup',
+                        title: 'swal-dark-title',
+                        htmlContainer: 'swal-dark-content',
+                        confirmButton: 'swal-dark-confirm'
+                    }
+                });
             } catch (err) {
-                alert(err.message || 'No se pudo enviar el correo de recuperación');
+                await Swal.fire({
+                    title: 'Error',
+                    text: err.message || 'No se pudo enviar el correo de recuperación',
+                    icon: 'error',
+                    confirmButtonText: 'Entendido',
+                    background: '#000000',
+                    color: '#ffffff',
+                    confirmButtonColor: '#ff7300',
+                    customClass: {
+                        popup: 'swal-dark-popup',
+                        title: 'swal-dark-title',
+                        htmlContainer: 'swal-dark-content',
+                        confirmButton: 'swal-dark-confirm'
+                    }
+                });
             }
         });
     }
@@ -88,7 +130,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (!firebase.apps || firebase.apps.length === 0) {
                     console.log('❌ Firebase no está inicializado');
-                    alert('Firebase no está inicializado. Verifica tu firebaseConfig en login.html y recarga con Ctrl+F5.');
+                    await Swal.fire({
+                        title: 'Error de configuración',
+                        text: 'Firebase no está inicializado. Verifica tu firebaseConfig en login.html y recarga con Ctrl+F5.',
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                        background: '#000000',
+                        color: '#ffffff',
+                        confirmButtonColor: '#ff7300',
+                        customClass: {
+                            popup: 'swal-dark-popup',
+                            title: 'swal-dark-title',
+                            htmlContainer: 'swal-dark-content',
+                            confirmButton: 'swal-dark-confirm'
+                        }
+                    });
                     return;
                 }
                 
@@ -214,7 +270,27 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('URL destino:', dashboardUrl);
             window.location.href = dashboardUrl;
         } catch (err) {
-            alert(err.message || 'Error de autenticación');
+            let errorMessage = 'Error de autenticación';
+            if (err.message.includes('wrong-password') || err.message.includes('user-not-found') || err.message.includes('invalid-credential') || err.message.includes('invalid-login-credentials')) {
+                errorMessage = 'Credenciales Incorrectas';
+            } else {
+                errorMessage = err.message || 'Error de autenticación';
+            }
+            await Swal.fire({
+                title: 'Error de autenticación',
+                text: errorMessage,
+                icon: 'error',
+                confirmButtonText: 'Entendido',
+                background: '#000000',
+                color: '#ffffff',
+                confirmButtonColor: '#8b5cf6',
+                customClass: {
+                    popup: 'swal-dark-popup',
+                    title: 'swal-dark-title',
+                    htmlContainer: 'swal-dark-content',
+                    confirmButton: 'swal-dark-confirm'
+                }
+            });
         }
     });
 });

@@ -11,7 +11,6 @@
 </head>
 <body>
     <main class="sidebar-content">
-        <h1>Gestión de Ventas</h1>
         <div class="ventas-container">
             <div class="ventas-header">
                 <h2>Registro de Ventas</h2>
@@ -73,7 +72,7 @@
                     <option value="Transferencia">Transferencia</option>
                     <option value="Cheque">Cheque</option>
                 </select>
-                <input type="date" id="desde" class="date-input" title="Filtrar por fecha">
+                <input type="text" id="fechaRange" class="date-input" title="Seleccionar fecha o rango" placeholder="Seleccionar fecha" readonly style="color: white;">
                 <button class="btn-export btn-excel" id="btnExportarExcel" title="Exportar a Excel">
                     <i class="fa-solid fa-file-excel"></i> Excel
                 </button>
@@ -101,6 +100,22 @@
                         <!-- Filas dinámicas -->
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- Paginación -->
+            <div class="pagination-container" id="paginationContainer" style="display: none;">
+                <div class="pagination-info">
+                    <span id="paginationInfo">Mostrando 0 de 0 ventas</span>
+                </div>
+                <div class="pagination-controls">
+                    <button id="btnPrevPage" class="btn-pagination" disabled>
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <div id="pageNumbers" class="page-numbers"></div>
+                    <button id="btnNextPage" class="btn-pagination" disabled>
+                        Siguiente <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </main>
@@ -239,41 +254,294 @@
         </div>
     </div>
 
-    <!-- Modal para Confirmar Anulación -->
-    <div id="modalAnularVenta" class="modal">
-        <div class="modal-content modal-small">
-            <div class="modal-header">
-                <div class="modal-header-content">
-                    <div class="modal-icon warning">
-                        <i class="fa-solid fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="modal-title-section">
-                        <h2>Anular Venta</h2>
-                        <span class="modal-subtitle">Esta acción no se puede deshacer</span>
-                    </div>
+    <!-- Modal de confirmación de anulación (estilo SweetAlert) -->
+    <div id="modalConfirmAnular" class="modal-confirm-delete">
+        <div class="modal-confirm-content">
+            <div class="modal-confirm-header">
+                <svg class="icon-warning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <h3>¿Anular venta?</h3>
+            </div>
+            <div class="modal-confirm-body">
+                <p id="confirmAnularMessage">¿Estás seguro de que quieres anular esta venta?</p>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="confirmAnularMotivo" style="display: block; margin-bottom: 8px; font-weight: 600; color: #495057;">Motivo de anulación *</label>
+                    <textarea id="confirmAnularMotivo" rows="3" placeholder="Especifique el motivo de la anulación..." style="width: 100%; padding: 10px; border: 2px solid #555; border-radius: 6px; font-family: inherit; resize: vertical; min-height: 80px; background: #2a2a2a; color: #fff; box-shadow: none !important;"></textarea>
                 </div>
-                <span class="close">&times;</span>
+                <p class="warning-text">Esta acción no se puede deshacer</p>
             </div>
-            <div class="modal-body">
-                <form id="formAnularVenta">
-                    <div class="form-group">
-                        <label for="motivoAnulacion">Motivo de Anulación *</label>
-                        <textarea id="motivoAnulacion" name="motivo" rows="3" required placeholder="Especifique el motivo de la anulación..."></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancelar">
-                    <i class="fa-solid fa-times"></i> Cancelar
-                </button>
-                <button type="button" class="btn-anular" id="btnConfirmarAnulacion">
-                    <i class="fa-solid fa-ban"></i> Anular Venta
-                </button>
+            <div class="modal-confirm-footer">
+                <button class="btn-cancel" id="btnCancelAnular">Cancelar</button>
+                <button class="btn-delete" id="btnConfirmAnular">Anular Venta</button>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="/Color_Ink/src/Views/JS/sidebar.js"></script>
     <script src="/Color_Ink/src/Views/JS/ventas.js"></script>
+    
+    <style>
+    /* Estilos para el modal de confirmación estilo SweetAlert - Tema Negro */
+    .modal-confirm-delete {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(3px);
+        animation: fadeIn 0.2s ease-out;
+    }
+    
+    .modal-confirm-delete.show {
+        display: flex;
+    }
+    
+    .modal-confirm-content {
+        background: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 105, 180, 0.4);
+        max-width: 450px;
+        width: 90%;
+        padding: 0;
+        animation: slideDown 0.3s ease-out;
+        border: 1px solid #333;
+    }
+    
+    .modal-confirm-header {
+        padding: 30px 30px 20px;
+        text-align: center;
+        border-bottom: 1px solid #333;
+    }
+    
+    .icon-warning {
+        width: 70px;
+        height: 70px;
+        color: #ff4444;
+        margin: 0 auto 15px;
+        animation: pulse 0.6s ease-in-out;
+    }
+    
+    .modal-confirm-header h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: #fff;
+    }
+    
+    .modal-confirm-body {
+        padding: 25px 30px;
+        text-align: center;
+    }
+    
+    .modal-confirm-body p {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        color: #ccc;
+        line-height: 1.5;
+    }
+    
+    .warning-text {
+        font-size: 14px !important;
+        color: #999 !important;
+        font-weight: 500;
+    }
+    
+    .modal-confirm-footer {
+        padding: 20px 30px 30px;
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+    
+    .btn-cancel, .btn-delete {
+        flex: 1;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-cancel {
+        background: #333;
+        color: #ccc;
+    }
+    
+    .btn-cancel:hover {
+        background: #444;
+        transform: translateY(-1px);
+    }
+    
+    .btn-delete {
+        background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+    }
+    
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #ff5555 0%, #dd0000 100%);
+        box-shadow: 0 6px 16px rgba(255, 68, 68, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideDown {
+        from {
+            transform: translateY(-30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    /* Estilos de paginación */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding: 15px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .pagination-info {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+    }
+    
+    .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .btn-pagination {
+        background: rgba(217, 0, 188, 0.2);
+        border: 1px solid rgba(217, 0, 188, 0.5);
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+    
+    .btn-pagination:hover:not(:disabled) {
+        background: rgba(217, 0, 188, 0.4);
+        border-color: rgba(217, 0, 188, 0.8);
+    }
+    
+    .btn-pagination:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .page-numbers {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .page-number {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        min-width: 40px;
+        text-align: center;
+    }
+    
+    .page-number:hover {
+        background: rgba(217, 0, 188, 0.3);
+        border-color: rgba(217, 0, 188, 0.6);
+    }
+    
+    .page-number.active {
+        background: linear-gradient(135deg, #d900bc, #ba419c);
+        border-color: #d900bc;
+        font-weight: bold;
+    }
+    
+    /* Estilos para Flatpickr */
+    .flatpickr-calendar {
+        background: #1a1a1a !important;
+        border: 1px solid rgba(217, 0, 188, 0.3) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    .flatpickr-day {
+        color: #fff !important;
+        border: none !important;
+    }
+    
+    .flatpickr-day:hover {
+        background: rgba(217, 0, 188, 0.3) !important;
+        border-color: rgba(217, 0, 188, 0.5) !important;
+    }
+    
+    .flatpickr-day.selected {
+        background: linear-gradient(135deg, #d900bc, #ba419c) !important;
+        border-color: #d900bc !important;
+    }
+    
+    .flatpickr-day.inRange {
+        background: rgba(217, 0, 188, 0.2) !important;
+        border-color: rgba(217, 0, 188, 0.4) !important;
+    }
+    
+    .flatpickr-months .flatpickr-month {
+        color: #fff !important;
+    }
+    
+    .flatpickr-weekday {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    
+    .flatpickr-day.prevMonthDay,
+    .flatpickr-day.nextMonthDay {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay) {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    #fechaRange {
+        color: white !important;
+        cursor: pointer;
+    }
+    
+    #fechaRange::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+    </style>
 </body>
 </html>

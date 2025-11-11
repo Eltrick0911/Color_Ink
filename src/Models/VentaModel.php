@@ -59,16 +59,24 @@ class VentaModel
                 return $response;
             }
             
-            // 3. Calcular costo total
+            // 3. Calcular costo total usando precio_unitario si no hay costo_unitario
             $stmt = $this->db->prepare("
-                SELECT COALESCE(SUM(p.costo_unitario * dp.cantidad), 0) as costo_total
+                SELECT 
+                    COALESCE(SUM(
+                        CASE 
+                            WHEN p.costo_unitario > 0 THEN p.costo_unitario * dp.cantidad
+                            ELSE dp.precio_unitario * dp.cantidad * 0.7
+                        END
+                    ), 0) as costo_total
                 FROM detallepedido dp
-                JOIN producto p ON dp.id_producto = p.id_producto
+                LEFT JOIN producto p ON dp.id_producto = p.id_producto
                 WHERE dp.id_pedido = ?
             ");
             $stmt->execute([$idPedido]);
             $costoData = $stmt->fetch(PDO::FETCH_ASSOC);
             $costoTotal = $costoData['costo_total'] ?? 0;
+            
+            error_log('VentaModel - Costo calculado: ' . $costoTotal . ' para pedido: ' . $idPedido);
             
             // 4. Configurar zona horaria y insertar venta
             $this->db->exec("SET time_zone = '-06:00'"); // Ajustar según tu zona horaria
@@ -128,7 +136,7 @@ class VentaModel
     /**
      * Listar todas las ventas - usando JOINs ya que la vista no existe en AWS
      */
-    public function listarVentas(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null): array
+    public function listarVentas(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null, ?string $estado = null, ?string $metodoPago = null, int $pagina = 1, int $limite = 10): array
     {
         try {
             // Usar JOINs en lugar de la vista que no existe
@@ -169,7 +177,56 @@ class VentaModel
                 $params[':fechaHasta'] = $fechaHasta;
             }
 
-            $sql .= " ORDER BY v.fecha_venta DESC";
+            if (!empty($estado)) {
+                $sql .= " AND v.estado = :estado";
+                $params[':estado'] = $estado;
+            }
+
+            if (!empty($metodoPago)) {
+                error_log('VentaModel - Filtro método pago: ' . $metodoPago);
+                $sql .= " AND v.metodo_pago = :metodoPago";
+                $params[':metodoPago'] = $metodoPago;
+            }
+
+            // Contar total de registros con consulta separada
+            $countSql = "
+                SELECT COUNT(*)
+                FROM venta v
+                JOIN pedido p ON v.id_pedido = p.id_pedido
+                JOIN usuario u ON v.id_usuario = u.id_usuario
+                JOIN usuario u_c ON p.id_usuario = u_c.id_usuario
+                WHERE 1=1
+            ";
+            
+            // Aplicar los mismos filtros
+            if (!empty($filtro)) {
+                $countSql .= " AND (u_c.nombre_usuario LIKE :filtro OR u.nombre_usuario LIKE :filtro OR v.id_venta LIKE :filtro)";
+            }
+            if (!empty($fechaDesde)) {
+                $countSql .= " AND DATE(v.fecha_venta) >= :fechaDesde";
+            }
+            if (!empty($fechaHasta)) {
+                $countSql .= " AND DATE(v.fecha_venta) <= :fechaHasta";
+            }
+            if (!empty($estado)) {
+                $countSql .= " AND v.estado = :estado";
+            }
+            if (!empty($metodoPago)) {
+                $countSql .= " AND v.metodo_pago = :metodoPago";
+            }
+            
+            $countStmt = $this->db->prepare($countSql);
+            foreach ($params as $key => $value) {
+                $countStmt->bindValue($key, $value);
+            }
+            $countStmt->execute();
+            $totalRegistros = $countStmt->fetchColumn();
+            
+            $sql .= " ORDER BY v.id_venta DESC";
+            
+            // Agregar LIMIT y OFFSET
+            $offset = ($pagina - 1) * $limite;
+            $sql .= " LIMIT {$limite} OFFSET {$offset}";
 
             $stmt = $this->db->prepare($sql);
             
@@ -180,10 +237,16 @@ class VentaModel
             $stmt->execute();
             $ventas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            error_log('VentaModel - listarVentas: Encontradas ' . count($ventas) . ' ventas');
+            error_log('VentaModel - listarVentas: Encontradas ' . count($ventas) . ' ventas de ' . $totalRegistros . ' total');
             
             $response = responseHTTP::status200('OK');
             $response['data'] = $ventas;
+            $response['pagination'] = [
+                'current_page' => $pagina,
+                'per_page' => $limite,
+                'total' => $totalRegistros,
+                'total_pages' => ceil($totalRegistros / $limite)
+            ];
             return $response;
         } catch (\Throwable $e) {
             error_log('VentaModel - listarVentas ERROR: ' . $e->getMessage());
@@ -360,7 +423,7 @@ class VentaModel
             $estados = $stmtEstados->fetchAll(PDO::FETCH_ASSOC);
             error_log('VentaModel - Estados disponibles: ' . json_encode($estados));
             
-            // Consulta simplificada para obtener pedidos
+            // Consulta con cálculo del total del pedido
             $sql = "
                 SELECT 
                     p.id_pedido,
@@ -369,6 +432,11 @@ class VentaModel
                     p.id_usuario as id_cliente,
                     u.nombre_usuario as nombre_cliente,
                     ep.nombre as estado_nombre,
+                    COALESCE((
+                        SELECT SUM(dp.precio_unitario * dp.cantidad)
+                        FROM detallepedido dp
+                        WHERE dp.id_pedido = p.id_pedido
+                    ), 0) as total_pedido,
                     CONCAT(COALESCE(p.numero_pedido, CONCAT('Pedido #', p.id_pedido)), ' - Cliente: ', u.nombre_usuario) as display_text
                 FROM pedido p
                 INNER JOIN usuario u ON p.id_usuario = u.id_usuario
@@ -437,7 +505,7 @@ class VentaModel
         try {
             error_log('VentaModel - registrarAuditoria: Intentando registrar auditoría para venta ID=' . $idVenta);
             
-            // Insertar auditoría simple
+            // Insertar auditoría con la acción correcta
             $stmt = $this->db->prepare("
                 INSERT INTO venta_aud (
                     id_venta_original, id_pedido_original, fecha_venta_original,
@@ -445,12 +513,12 @@ class VentaModel
                 )
                 SELECT 
                     v.id_venta, v.id_pedido, v.fecha_venta, v.monto_cobrado, v.estado, 
-                    'ANULADA', ?, ?
+                    ?, ?, ?
                 FROM venta v
                 WHERE v.id_venta = ?
             ");
             
-            $result = $stmt->execute([$usuarioAdmin, $motivo, $idVenta]);
+            $result = $stmt->execute([$accion, $usuarioAdmin, $motivo, $idVenta]);
             
             if ($result) {
                 error_log('VentaModel - registrarAuditoria: Auditoría registrada exitosamente');
@@ -465,32 +533,60 @@ class VentaModel
     }
 
     /**
-     * Exportar ventas a Excel usando la vista vw_registro_ventas
+     * Exportar ventas a Excel personalizado
      */
-    public function exportarVentasExcel(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null): array
+    public function exportarVentasExcel(?string $filtro = null, ?string $fechaDesde = null, ?string $fechaHasta = null, ?string $estado = null, ?string $metodoPago = null): void
     {
         try {
-            // Usar la vista vw_registro_ventas que ya tiene todos los JOINs
-            $sql = "SELECT * FROM vw_registro_ventas WHERE 1=1";
+            // Usar JOINs en lugar de la vista
+            $sql = "
+                SELECT 
+                    v.id_venta,
+                    v.fecha_venta,
+                    v.monto_cobrado,
+                    v.costo_total,
+                    v.utilidad,
+                    v.utilidad_pct,
+                    v.metodo_pago,
+                    v.estado,
+                    u.nombre_usuario as usuario,
+                    u_c.nombre_usuario as cliente,
+                    p.id_pedido
+                FROM venta v
+                JOIN pedido p ON v.id_pedido = p.id_pedido
+                JOIN usuario u ON v.id_usuario = u.id_usuario
+                JOIN usuario u_c ON p.id_usuario = u_c.id_usuario
+                WHERE 1=1
+            ";
             $params = [];
 
             // Aplicar filtros
             if (!empty($filtro)) {
-                $sql .= " AND (cliente LIKE :filtro OR usuario LIKE :filtro OR id_venta LIKE :filtro)";
+                $sql .= " AND (u_c.nombre_usuario LIKE :filtro OR u.nombre_usuario LIKE :filtro OR v.id_venta LIKE :filtro)";
                 $params[':filtro'] = "%{$filtro}%";
             }
 
             if (!empty($fechaDesde)) {
-                $sql .= " AND DATE(fecha_venta) >= :fechaDesde";
+                $sql .= " AND DATE(v.fecha_venta) >= :fechaDesde";
                 $params[':fechaDesde'] = $fechaDesde;
             }
 
             if (!empty($fechaHasta)) {
-                $sql .= " AND DATE(fecha_venta) <= :fechaHasta";
+                $sql .= " AND DATE(v.fecha_venta) <= :fechaHasta";
                 $params[':fechaHasta'] = $fechaHasta;
             }
 
-            $sql .= " ORDER BY fecha_venta DESC";
+            if (!empty($estado)) {
+                $sql .= " AND v.estado = :estado";
+                $params[':estado'] = $estado;
+            }
+
+            if (!empty($metodoPago)) {
+                $sql .= " AND v.metodo_pago = :metodoPago";
+                $params[':metodoPago'] = $metodoPago;
+            }
+
+            $sql .= " ORDER BY v.fecha_venta DESC";
 
             $stmt = $this->db->prepare($sql);
             
@@ -501,22 +597,62 @@ class VentaModel
             $stmt->execute();
             $ventas = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Generar Excel
-            $this->generarArchivoExcel($ventas);
+            // Generar Excel personalizado
+            $this->generarArchivoExcelPersonalizado($ventas);
             
-            return responseHTTP::status200('Excel generado exitosamente');
         } catch (\Throwable $e) {
             error_log('VentaModel - exportarVentasExcel ERROR: ' . $e->getMessage());
+            header('Content-Type: application/json');
+            echo json_encode(responseHTTP::status500());
+        }
+    }
+
+    /**
+     * Recalcular costos de TODAS las ventas existentes
+     */
+    public function recalcularCostosVentas(): array
+    {
+        try {
+            $stmt = $this->db->query("SELECT id_venta, id_pedido FROM venta");
+            $ventas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $actualizadas = 0;
+            
+            foreach ($ventas as $venta) {
+                $stmt = $this->db->prepare("
+                    SELECT 
+                        COALESCE(SUM(
+                            CASE 
+                                WHEN p.costo_unitario > 0 THEN p.costo_unitario * dp.cantidad
+                                ELSE dp.precio_unitario * dp.cantidad * 0.7
+                            END
+                        ), 0) as costo_total
+                    FROM detallepedido dp
+                    LEFT JOIN producto p ON dp.id_producto = p.id_producto
+                    WHERE dp.id_pedido = ?
+                ");
+                $stmt->execute([$venta['id_pedido']]);
+                $costoData = $stmt->fetch(PDO::FETCH_ASSOC);
+                $costoTotal = $costoData['costo_total'] ?? 0;
+                
+                $updateStmt = $this->db->prepare("UPDATE venta SET costo_total = ? WHERE id_venta = ?");
+                $updateStmt->execute([$costoTotal, $venta['id_venta']]);
+                $actualizadas++;
+            }
+            
+            return responseHTTP::status200("Todas las ventas actualizadas: $actualizadas");
+        } catch (\Throwable $e) {
+            error_log('VentaModel - recalcularCostosVentas ERROR: ' . $e->getMessage());
             return responseHTTP::status500();
         }
     }
 
     /**
-     * Generar archivo Excel simple
+     * Generar archivo Excel personalizado
      */
-    private function generarArchivoExcel(array $ventas): void
+    private function generarArchivoExcelPersonalizado(array $ventas): void
     {
-        $filename = 'ventas_' . date('Y-m-d_H-i-s') . '.xls';
+        $filename = 'Ventas_ColorInk_' . date('Y-m-d_H-i-s') . '.xls';
         
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -524,52 +660,75 @@ class VentaModel
         header('Pragma: public');
         header('Expires: 0');
 
-        echo "<table border='1'>";
-        echo "<tr style='background-color: #d900bc; color: white; font-weight: bold;'>";
-        echo "<th>ID Venta</th>";
-        echo "<th>Fecha</th>";
-        echo "<th>Cliente</th>";
-        echo "<th>ID Pedido</th>";
-        echo "<th>Método Pago</th>";
-        echo "<th>Monto Cobrado</th>";
-        echo "<th>Costo Total</th>";
-        echo "<th>Utilidad</th>";
-        echo "<th>Margen %</th>";
-        echo "<th>Estado</th>";
-        echo "<th>Usuario</th>";
-        echo "</tr>";
-
-        foreach ($ventas as $venta) {
-            echo "<tr>";
-            echo "<td>" . htmlspecialchars($venta['id_venta']) . "</td>";
-            echo "<td>" . date('d/m/Y H:i', strtotime($venta['fecha_venta'])) . "</td>";
-            echo "<td>" . htmlspecialchars($venta['cliente']) . "</td>";
-            echo "<td>" . htmlspecialchars($venta['id_pedido']) . "</td>";
-            echo "<td>" . htmlspecialchars($venta['metodo_pago']) . "</td>";
-            echo "<td>$" . number_format($venta['monto_cobrado'], 2) . "</td>";
-            echo "<td>$" . number_format($venta['costo_total'], 2) . "</td>";
-            echo "<td>$" . number_format($venta['utilidad'], 2) . "</td>";
-            echo "<td>" . number_format($venta['utilidad_pct'], 1) . "%</td>";
-            echo "<td>" . htmlspecialchars($venta['estado']) . "</td>";
-            echo "<td>" . htmlspecialchars($venta['usuario']) . "</td>";
-            echo "</tr>";
-        }
-        
-        // Fila de totales
         $totalMonto = array_sum(array_column($ventas, 'monto_cobrado'));
         $totalCosto = array_sum(array_column($ventas, 'costo_total'));
         $totalUtilidad = $totalMonto - $totalCosto;
-        $margenPromedio = $totalCosto > 0 ? ($totalUtilidad / $totalCosto * 100) : 0;
+        $margenPromedio = $totalMonto > 0 ? ($totalUtilidad / $totalMonto * 100) : 0;
         
-        echo "<tr style='background-color: #f8f9fa; font-weight: bold;'>";
-        echo "<td colspan='5'>TOTALES</td>";
-        echo "<td>$" . number_format($totalMonto, 2) . "</td>";
-        echo "<td>$" . number_format($totalCosto, 2) . "</td>";
-        echo "<td>$" . number_format($totalUtilidad, 2) . "</td>";
-        echo "<td>" . number_format($margenPromedio, 1) . "%</td>";
-        echo "<td colspan='2'>" . count($ventas) . " ventas</td>";
-        echo "</tr>";
+        echo '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif;">';
         
-        echo "</table>";
+        // Encabezado principal
+        echo '<tr><td colspan="10" style="background-color: #d900bc; color: white; font-size: 16pt; font-weight: bold; text-align: center; padding: 15px;">REPORTE DE VENTAS - COLOR INK</td></tr>';
+        
+        // Información del reporte
+        echo '<tr><td colspan="10" style="background-color: #f8f9fa; padding: 10px; border: 1px solid #dee2e6;">';
+        echo '<b>Fecha:</b> ' . date('d/m/Y H:i:s') . ' | ';
+        echo '<b>Ventas:</b> ' . count($ventas) . ' | ';
+        echo '<b>Ingresos:</b> L ' . number_format($totalMonto, 2) . ' | ';
+        echo '<b>Utilidad:</b> L ' . number_format($totalUtilidad, 2) . ' | ';
+        echo '<b>Margen:</b> ' . number_format($margenPromedio, 1) . '%';
+        echo '</td></tr>';
+        
+        // Fila vacía
+        echo '<tr><td colspan="10" style="height: 10px;"></td></tr>';
+        
+        // Encabezados de columnas
+        echo '<tr style="background-color: #d900bc; color: white; font-weight: bold; text-align: center;">';
+        echo '<td>ID Venta</td>';
+        echo '<td>Fecha</td>';
+        echo '<td>Cliente</td>';
+        echo '<td>ID Pedido</td>';
+        echo '<td>Metodo Pago</td>';
+        echo '<td>Monto Cobrado</td>';
+        echo '<td>Costo Total</td>';
+        echo '<td>Utilidad</td>';
+        echo '<td>Margen %</td>';
+        echo '<td>Estado</td>';
+        echo '<td>Usuario</td>';
+        echo '</tr>';
+
+        // Datos de ventas
+        foreach ($ventas as $index => $venta) {
+            $bgColor = ($index % 2 === 0) ? '#f8f9fa' : '#ffffff';
+            $utilidad = floatval($venta['utilidad'] ?? 0);
+            $utilidadColor = $utilidad >= 0 ? '#28a745' : '#dc3545';
+            $estadoColor = strtolower($venta['estado']) === 'anulada' ? '#dc3545' : '#28a745';
+            
+            echo '<tr style="background-color: ' . $bgColor . ';">';
+            echo '<td style="text-align: center; font-weight: bold;">' . htmlspecialchars($venta['id_venta']) . '</td>';
+            echo '<td style="text-align: center;">' . date('d/m/Y H:i', strtotime($venta['fecha_venta'])) . '</td>';
+            echo '<td>' . htmlspecialchars($venta['cliente']) . '</td>';
+            echo '<td style="text-align: center; color: #d900bc; font-weight: bold;">' . htmlspecialchars($venta['id_pedido']) . '</td>';
+            echo '<td style="text-align: center;">' . htmlspecialchars($venta['metodo_pago']) . '</td>';
+            echo '<td style="text-align: right; font-weight: bold;">L ' . number_format($venta['monto_cobrado'], 2) . '</td>';
+            echo '<td style="text-align: right; font-weight: bold;">L ' . number_format($venta['costo_total'], 2) . '</td>';
+            echo '<td style="text-align: right; font-weight: bold; color: ' . $utilidadColor . ';">L ' . number_format($utilidad, 2) . '</td>';
+            echo '<td style="text-align: center; color: ' . $utilidadColor . '; font-weight: bold;">' . number_format($venta['utilidad_pct'] ?? 0, 1) . '%</td>';
+            echo '<td style="text-align: center; color: ' . $estadoColor . '; font-weight: bold;">' . htmlspecialchars($venta['estado']) . '</td>';
+            echo '<td>' . htmlspecialchars($venta['usuario']) . '</td>';
+            echo '</tr>';
+        }
+        
+        // Fila de totales
+        echo '<tr style="background-color: #e9ecef; font-weight: bold; border-top: 3px solid #d900bc;">';
+        echo '<td colspan="5" style="text-align: center; font-size: 12pt;">TOTALES</td>';
+        echo '<td style="text-align: right; font-size: 12pt;">L ' . number_format($totalMonto, 2) . '</td>';
+        echo '<td style="text-align: right; font-size: 12pt;">L ' . number_format($totalCosto, 2) . '</td>';
+        echo '<td style="text-align: right; font-size: 12pt; color: ' . ($totalUtilidad >= 0 ? '#28a745' : '#dc3545') . ';">L ' . number_format($totalUtilidad, 2) . '</td>';
+        echo '<td style="text-align: center; font-size: 12pt; color: ' . ($totalUtilidad >= 0 ? '#28a745' : '#dc3545') . ';">' . number_format($margenPromedio, 1) . '%</td>';
+        echo '<td style="text-align: center; font-size: 12pt;">' . count($ventas) . ' ventas</td>';
+        echo '</tr>';
+        
+        echo '</table>';
     }
 }

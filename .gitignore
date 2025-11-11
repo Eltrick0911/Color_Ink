@@ -5,7 +5,7 @@
 # NO subir configuración local de Firebase
 src/Config/firebase_config.php
 # Logs
-src/Logs/*.log
+src/Logs/php-error.log
 
 # Archivos temporales
 *.tmp

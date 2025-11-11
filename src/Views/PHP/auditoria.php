@@ -24,6 +24,8 @@ if (strpos($uri, '/public/') !== false) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Locale ES para Flatpickr (evita 'invalid locale undefined') -->
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
 </head>
 <body>
     <main class="sidebar-content">
@@ -53,16 +55,12 @@ if (strpos($uri, '/public/') !== false) {
                         <option value="">Todas</option>
                     </select>
                 </div>
-                <div class="filter-group">
-                    <label>Desde</label>
-                    <input id="startDate" type="date" class="date-input" placeholder="00/00/0000" />
-                </div>
-                <div class="filter-group">
-                    <label>Hasta</label>
-                    <input id="endDate" type="date" class="date-input" placeholder="00/00/0000" />
+                <div class="filter-group" style="min-width:220px;">
+                    <label>Rango de Fechas</label>
+                    <input id="fechaRange" type="text" class="date-input" placeholder="Seleccionar fecha o rango" readonly style="color: white;" />
                 </div>
                 <div class="filter-actions">
-                    <button id="btnSearch" class="btn btn-search"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
+                    
                     <button id="btnClear" class="btn btn-clear"><i class="fa-solid fa-eraser"></i> Limpiar</button>
                 </div>
             </div>
