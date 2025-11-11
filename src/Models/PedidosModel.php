@@ -737,7 +737,7 @@ class PedidosModel
             error_log("PedidosModel - getProductos: Obteniendo lista de productos activos");
             error_log("PedidosModel - getProductos: Connection = " . ($this->connection ? 'OK' : 'NULL'));
             
-            $sql = "SELECT id_producto, nombre_producto 
+            $sql = "SELECT id_producto, nombre_producto, stock, stock_minimo
                     FROM producto 
                     WHERE activo = 1 
                     ORDER BY nombre_producto ASC";
@@ -783,7 +783,7 @@ class PedidosModel
             error_log("PedidosModel - descontarStockPorPedido: Iniciando descuento de stock para pedido ID: $idPedido");
             
             // 1. Obtener los detalles del pedido
-            $sqlPedido = "SELECT detalles_producto FROM pedidos WHERE id_pedido = ?";
+            $sqlPedido = "SELECT detalles_producto FROM pedido WHERE id_pedido = ?";
             $stmtPedido = $this->connection->prepare($sqlPedido);
             $stmtPedido->execute([$idPedido]);
             $pedido = $stmtPedido->fetch(PDO::FETCH_ASSOC);
@@ -809,17 +809,25 @@ class PedidosModel
             $productosActualizados = 0;
             
             // 4. Por cada producto, descontar el stock
-            foreach ($detallesProducto as $detalle) {
-                $idProducto = $detalle['categoria'] ?? null; // El ID del producto está en 'categoria'
-                $cantidad = intval($detalle['cantidad'] ?? 0);
+            foreach ($detallesProducto as $index => $detalle) {
+                error_log("PedidosModel - Procesando detalle #$index: " . json_encode($detalle));
                 
-                // Validar que tenemos un ID numérico de producto
-                if (!$idProducto || !is_numeric($idProducto) || $cantidad <= 0) {
-                    error_log("PedidosModel - descontarStockPorPedido: Producto inválido o cantidad <= 0. ID: $idProducto, Cantidad: $cantidad");
+                // Extraer id_producto - solo productos del catálogo tienen id_producto > 0
+                $idProducto = isset($detalle['id_producto']) ? intval($detalle['id_producto']) : 0;
+                $cantidad = isset($detalle['cantidad']) ? intval($detalle['cantidad']) : 0;
+                
+                // Validar que sea un producto del catálogo (no personalizado)
+                if ($idProducto <= 0) {
+                    error_log("PedidosModel - Detalle #$index: Producto personalizado (id_producto=$idProducto), no se descuenta stock");
                     continue;
                 }
                 
-                error_log("PedidosModel - descontarStockPorPedido: Descontando $cantidad unidades del producto ID: $idProducto");
+                if ($cantidad <= 0) {
+                    error_log("PedidosModel - Detalle #$index: Cantidad inválida ($cantidad)");
+                    continue;
+                }
+                
+                error_log("PedidosModel - Descontando $cantidad unidades del producto ID: $idProducto");
                 
                 // 5. Verificar stock actual
                 $sqlStock = "SELECT stock, nombre_producto FROM producto WHERE id_producto = ?";

@@ -370,4 +370,30 @@ class VentaController
             echo json_encode(responseHTTP::status500());
         }
     }
+
+    /**
+     * POST /api/ventas/recalcular-costos - Recalcular costos de ventas existentes
+     */
+    public function recalcularCostos(): void
+    {
+        try {
+            $usuario = $this->validarAutenticacion();
+            
+            if (!$usuario) {
+                echo json_encode(responseHTTP::status401('No autenticado'));
+                return;
+            }
+
+            if (!$this->validarRol($usuario['id_rol'], true)) {
+                echo json_encode(responseHTTP::status401('Solo Administrador puede recalcular costos'));
+                return;
+            }
+
+            $result = $this->ventaModel->recalcularCostosVentas();
+            echo json_encode($result);
+        } catch (\Throwable $e) {
+            error_log('VentaController - recalcularCostos ERROR: ' . $e->getMessage());
+            echo json_encode(responseHTTP::status500());
+        }
+    }
 }

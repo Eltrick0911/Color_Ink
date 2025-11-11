@@ -23,63 +23,75 @@ class inveController
     {
         error_log('inveController - authorize: Iniciando autorización');
         error_log('inveController - Headers recibidos: ' . json_encode($headers));
+        error_log('inveController - Keys de headers: ' . json_encode(array_keys($headers)));
         
-        // 1) Intentar Firebase ID Token primero (más común en este sistema)
-        $fb = new FirebaseController();
-        $idToken = $this->extractBearer($headers);
-        error_log('inveController - Firebase token extraído: ' . ($idToken ? 'Presente' : 'No presente'));
-        
-        if ($idToken) {
-            $claims = $fb->verifyIdToken($idToken);
-            error_log('inveController - Firebase claims: ' . json_encode($claims));
-            if ($claims) {
-                // Mapear a usuario real de BD si existe por correo
-                $correo = $claims['email'] ?? null;
-                $nombre = $claims['name'] ?? ($claims['email'] ?? 'FirebaseUser');
-                $userModel = new \App\Models\UserModel();
-                $row = $correo ? $userModel->getUserByEmailOrPhone($correo) : null;
-                
-                if ($row) {
-                    $user = [
-                        'id_usuario' => (int)$row['id_usuario'],
-                        'nombre_usuario' => $row['nombre_usuario'],
-                        'id_rol' => (int)$row['id_rol'],
-                        'email' => $row['correo']
-                    ];
-                    error_log('inveController - Usuario encontrado en BD: ' . json_encode($user));
-                } else {
-                    error_log('inveController - Usuario no encontrado en BD, usando claims de Firebase');
-                    // Usar datos de Firebase como fallback
-                    $user = [
-                        'id_usuario' => $claims['user_id'] ?? ($claims['sub'] ?? 0),
-                        'nombre_usuario' => $nombre,
-                        'id_rol' => 2, // Usuario común por defecto
-                        'email' => $correo
-                    ];
-                }
-            } else {
-                error_log('inveController - Token Firebase expirado o inválido');
+        // Buscar Authorization en diferentes formatos (case-insensitive)
+        $authHeaderValue = null;
+        foreach ($headers as $key => $value) {
+            if (strtolower($key) === 'authorization') {
+                $authHeaderValue = $value;
+                error_log('inveController - Authorization encontrado con key: ' . $key);
+                break;
             }
         }
+        
+        if (!$authHeaderValue) {
+            error_log('inveController - ERROR: No se encontró header Authorization en ninguna variante');
+            echo json_encode(responseHTTP::status401('No tiene privilegios para acceder al recurso! Token invalido o ha expirado'));
+            return null;
+        }
+        
+        error_log('inveController - Authorization header value (primeros 50 chars): ' . substr($authHeaderValue, 0, 50));
+        
+        // 1) Intentar JWT local primero
+        try {
+            error_log('inveController - Intentando validar JWT local');
+            $tokenData = Security::validateTokenJwt($headers, Security::secretKey());
+            $data = json_decode(json_encode($tokenData), true);
+            $user = $data['data'] ?? null;
+            error_log('inveController - JWT válido, usuario: ' . json_encode($user));
+        } catch (\Throwable $e) {
+            error_log('inveController - JWT inválido: ' . $e->getMessage());
+            $user = null;
+        }
 
-        // 2) Intentar JWT local si no hay Firebase válido
-        if (!isset($user)) {
-            try {
-                error_log('inveController - Intentando validar JWT local');
-                // Solo intentar JWT local si el token no parece ser de Firebase
-                $token = $this->extractBearer($headers);
-                if ($token && !str_contains($token, 'eyJhbGciOiJSUzI1NiIs')) {
-                    $tokenData = Security::validateTokenJwt($headers, Security::secretKey());
-                    $data = json_decode(json_encode($tokenData), true);
-                    $user = $data['data'] ?? null;
-                    error_log('inveController - JWT válido, usuario: ' . json_encode($user));
+        // 2) Intentar Firebase ID Token como fallback
+        if (!$user) {
+            $fb = new FirebaseController();
+            $idToken = $this->extractBearer($headers);
+            error_log('inveController - Firebase token extraído: ' . ($idToken ? 'Presente (' . substr($idToken, 0, 30) . '...)' : 'No presente'));
+            
+            if ($idToken) {
+                $claims = $fb->verifyIdToken($idToken);
+                error_log('inveController - Firebase claims: ' . json_encode($claims));
+                if ($claims) {
+                    // Mapear a usuario real de BD si existe por correo
+                    $correo = $claims['email'] ?? null;
+                    $nombre = $claims['name'] ?? ($claims['email'] ?? 'FirebaseUser');
+                    $userModel = new \App\Models\UserModel();
+                    $row = $correo ? $userModel->getUserByEmailOrPhone($correo) : null;
+                    
+                    if ($row) {
+                        $user = [
+                            'id_usuario' => (int)$row['id_usuario'],
+                            'nombre_usuario' => $row['nombre_usuario'],
+                            'id_rol' => (int)$row['id_rol'],
+                            'email' => $row['correo']
+                        ];
+                        error_log('inveController - Usuario encontrado en BD: ' . json_encode($user));
+                    } else {
+                        error_log('inveController - Usuario no encontrado en BD, usando claims de Firebase');
+                        // Usar datos de Firebase como fallback
+                        $user = [
+                            'id_usuario' => $claims['user_id'] ?? ($claims['sub'] ?? 0),
+                            'nombre_usuario' => $nombre,
+                            'id_rol' => 2, // Usuario común por defecto
+                            'email' => $correo
+                        ];
+                    }
                 } else {
-                    error_log('inveController - Token parece ser de Firebase, saltando validación JWT local');
-                    $user = null;
+                    error_log('inveController - Token Firebase expirado o inválido');
                 }
-            } catch (\Throwable $e) {
-                error_log('inveController - JWT inválido: ' . $e->getMessage());
-                $user = null;
             }
         }
 
@@ -105,11 +117,32 @@ class inveController
 
     private function extractBearer(array $headers): ?string
     {
-        if (!isset($headers['Authorization'])) return null;
-        $parts = explode(' ', $headers['Authorization']);
-        if (count($parts) === 2 && strtolower($parts[0]) === 'bearer') {
-            return $parts[1];
+        // Buscar Authorization de forma case-insensitive
+        $authHeader = null;
+        foreach ($headers as $key => $value) {
+            if (strtolower($key) === 'authorization') {
+                $authHeader = $value;
+                error_log('inveController - extractBearer: Authorization encontrado con key: ' . $key);
+                break;
+            }
         }
+        
+        if (!$authHeader) {
+            error_log('inveController - extractBearer: No se encontró header Authorization');
+            error_log('inveController - extractBearer: Keys disponibles: ' . json_encode(array_keys($headers)));
+            return null;
+        }
+        
+        error_log('inveController - extractBearer: Authorization value (primeros 50 chars): ' . substr($authHeader, 0, 50));
+        
+        $parts = explode(' ', $authHeader, 2);
+        if (count($parts) === 2 && strtolower(trim($parts[0])) === 'bearer') {
+            $token = trim($parts[1]);
+            error_log('inveController - extractBearer: Token extraído correctamente (longitud: ' . strlen($token) . ')');
+            return $token;
+        }
+        
+        error_log('inveController - extractBearer: Formato de token inválido. Parts: ' . json_encode($parts));
         return null;
     }
 
@@ -292,6 +325,40 @@ class inveController
 
         } catch (\Throwable $e) {
             error_log('inveController - getProveedores: Error: ' . $e->getMessage());
+            echo json_encode(responseHTTP::status500());
+        }
+    }
+
+    /**
+     * Obtiene la lista completa de proveedores con todos los campos
+     * 
+     * @param array $headers Headers de la petición
+     * @return void
+     */
+    public function getProveedoresCompletos(array $headers): void
+    {
+        // TEMPORAL: Desactivar autorización para testing
+        error_log('inveController - getProveedoresCompletos: MODO TESTING - Autorización desactivada');
+        error_log('inveController - getProveedoresCompletos: Obteniendo lista completa de proveedores');
+        
+        try {
+            $proveedores = $this->inveModel->getProveedoresCompletos();
+            error_log('inveController - getProveedoresCompletos: Proveedores obtenidos: ' . json_encode($proveedores));
+            error_log('inveController - getProveedoresCompletos: Cantidad de proveedores: ' . count($proveedores));
+            
+            http_response_code(200);
+            $response = [
+                'status' => 'OK',
+                'message' => 'Proveedores completos obtenidos exitosamente',
+                'data' => $proveedores
+            ];
+            
+            error_log('inveController - getProveedoresCompletos: Respuesta final: ' . json_encode($response));
+            echo json_encode($response);
+
+        } catch (\Throwable $e) {
+            error_log('inveController - getProveedoresCompletos: Error: ' . $e->getMessage());
+            error_log('inveController - getProveedoresCompletos: Stack trace: ' . $e->getTraceAsString());
             echo json_encode(responseHTTP::status500());
         }
     }
@@ -892,6 +959,51 @@ class inveController
 
         } catch (\Throwable $e) {
             error_log('inveController - addProveedor: Error: ' . $e->getMessage());
+            echo json_encode(responseHTTP::status500());
+        }
+    }
+
+    /**
+     * Elimina un proveedor
+     * 
+     * @param array $headers Headers de la petición
+     * @param array $input Datos del proveedor
+     * @return void
+     */
+    public function deleteProveedor(array $headers, array $input): void
+    {
+        error_log('inveController - deleteProveedor: Datos recibidos: ' . json_encode($input));
+        
+        if (!isset($input['id_proveedor']) || !is_numeric($input['id_proveedor'])) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => 'ERROR',
+                'message' => 'ID del proveedor es requerido'
+            ]);
+            return;
+        }
+        
+        try {
+            $result = $this->inveModel->deleteProveedor((int)$input['id_proveedor']);
+            
+            if ($result) {
+                http_response_code(200);
+                $response = [
+                    'status' => 'OK',
+                    'message' => 'Proveedor eliminado exitosamente'
+                ];
+            } else {
+                http_response_code(400);
+                $response = [
+                    'status' => 'ERROR',
+                    'message' => 'Error al eliminar el proveedor'
+                ];
+            }
+            
+            echo json_encode($response);
+
+        } catch (\Throwable $e) {
+            error_log('inveController - deleteProveedor: Error: ' . $e->getMessage());
             echo json_encode(responseHTTP::status500());
         }
     }

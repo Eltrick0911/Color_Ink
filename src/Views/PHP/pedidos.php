@@ -142,7 +142,14 @@ if (strpos($uri, '/public/') !== false) {
     <div id="modalNuevoPedido" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Nuevo Pedido</h2>
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h2>Nuevo Pedido</h2>
+                    </div>
+                </div>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
@@ -238,7 +245,14 @@ if (strpos($uri, '/public/') !== false) {
     <div id="modalDetallesProducto" class="modal">
         <div class="modal-content modal-medium">
             <div class="modal-header">
-                <h2>Detalles de Productos</h2>
+                <div class="modal-header-content">
+                    <div class="modal-icon">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <div class="modal-title-section">
+                        <h2>Detalles de Productos</h2>
+                    </div>
+                </div>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">

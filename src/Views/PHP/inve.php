@@ -373,7 +373,7 @@
                 <form id="formNuevoProveedor" class="producto-form">
                     <div class="form-group">
                         <label for="descripcion_proveedor">Nombre del Proveedor *</label>
-                        <input type="text" id="descripcion_proveedor" name="descripcion_proveedor" required placeholder="Ej: Distribuidora ABC">
+                        <input type="text" id="descripcion_proveedor" name="descripcion_proveedor" required>
                         <button type="submit" class="btn-guardar" style="margin-top: 10px;">Agregar Proveedor</button>
                     </div>
                 </form>
@@ -386,7 +386,7 @@
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="proveedores-tbody">
+                        <tbody id="proveedores-nuevo-tbody">
                             <!-- Los proveedores se cargarán dinámicamente -->
                         </tbody>
                     </table>

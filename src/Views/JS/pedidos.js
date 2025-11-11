@@ -24,8 +24,15 @@ function guardarProductoActual() {
     const descuentoEl = document.getElementById('pdDescuento');
     const impuestoEl = document.getElementById('pdImpuesto');
     
+    // Obtener el id_producto si se seleccionó un producto del catálogo
+    const categoriaValue = categoriaEl ? categoriaEl.value : '';
+    const idProducto = categoriaValue && !isNaN(categoriaValue) ? parseInt(categoriaValue) : 0;
+    
+    console.log('Guardando producto - categoriaValue:', categoriaValue, 'idProducto:', idProducto);
+    
     productosPersonalizados[productoActivo] = {
-        categoria: categoriaEl ? categoriaEl.value : '',
+        id_producto: idProducto, // ID del producto del catálogo (0 si es personalizado)
+        categoria: categoriaEl ? categoriaEl.options[categoriaEl.selectedIndex]?.text || categoriaValue : '',
         colores: coloresEl ? coloresEl.value : '',
         especificaciones: especificacionesEl ? especificacionesEl.value : '',
         cantidad: cantidadEl ? Number(cantidadEl.value) : 1,
@@ -915,8 +922,94 @@ function closeProductDetailsModal() {
     }
 }
 
-function guardarDetallesProducto() {
+async function guardarDetallesProducto() {
     guardarProductoActual();
+    
+    // VALIDAR STOCK antes de guardar
+    const productoActualData = productosPersonalizados[productoActivo];
+    
+    console.log('=== VALIDACIÓN DE STOCK ===');
+    console.log('Producto actual:', productoActualData);
+    console.log('productosDisponibles tiene', productosDisponibles?.length || 0, 'productos');
+    
+    if (productoActualData && productoActualData.id_producto && productoActualData.id_producto > 0) {
+        const idProducto = productoActualData.id_producto;
+        const cantidadSolicitada = productoActualData.cantidad || 0;
+        
+        console.log('ID Producto a validar:', idProducto, 'Cantidad:', cantidadSolicitada);
+        
+        // Verificar que productosDisponibles esté cargado
+        if (!productosDisponibles || productosDisponibles.length === 0) {
+            console.warn('productosDisponibles está vacío, intentando recargar...');
+            try {
+                await cargarProductos();
+            } catch (e) {
+                console.error('Error al cargar productos:', e);
+            }
+        }
+        
+        try {
+            // Buscar el producto en la lista de productos disponibles
+            console.log('Buscando producto con ID', idProducto, 'en lista de', productosDisponibles.length, 'productos');
+            const producto = productosDisponibles.find(p => {
+                console.log('Comparando:', parseInt(p.id_producto), 'con', parseInt(idProducto));
+                return parseInt(p.id_producto) === parseInt(idProducto);
+            });
+            
+            console.log('Producto encontrado:', producto);
+            
+            if (producto) {
+                const stockDisponible = parseInt(producto.stock) || 0;
+                const stockMinimo = parseInt(producto.stock_minimo) || 0;
+                const nombreProducto = producto.nombre_producto || 'Producto';
+                
+                console.log(`Validando stock: ${nombreProducto}`);
+                console.log(`  - Stock disponible: ${stockDisponible}`);
+                console.log(`  - Cantidad solicitada: ${cantidadSolicitada}`);
+                console.log(`  - Stock mínimo: ${stockMinimo}`);
+                
+                // BLOQUEAR si no hay stock suficiente
+                if (stockDisponible <= 0) {
+                    console.error('BLOQUEADO - Stock agotado');
+                    showNotification(
+                        `<strong>${nombreProducto}</strong><br>Stock: 0 unidades`,
+                        'error',
+                        10000
+                    );
+                    return; // No guardar
+                }
+                
+                if (stockDisponible < cantidadSolicitada) {
+                    console.error('BLOQUEADO - Stock insuficiente');
+                    showNotification(
+                        `<strong>${nombreProducto}</strong><br>Stock disponible: ${stockDisponible} unidades`,
+                        'error',
+                        10000
+                    );
+                    return; // No guardar
+                }
+                
+                // Advertencia de stock bajo (no bloquea)
+                if (stockDisponible <= stockMinimo) {
+                    console.warn('Advertencia - Stock bajo');
+                    showNotification(
+                        `<strong>${nombreProducto}</strong><br>Stock bajo: ${stockDisponible} unidades`,
+                        'warning',
+                        8000
+                    );
+                }
+                
+                console.log('Validación de stock exitosa');
+            } else {
+                console.warn('No se encontró el producto con ID:', idProducto, 'en la lista');
+            }
+        } catch (error) {
+            console.error('Error al validar stock:', error);
+        }
+    } else {
+        console.log('Producto personalizado (sin ID) o sin validar stock');
+    }
+    
     // Guardar en sessionStorage
     sessionStorage.setItem('detalles_productos', JSON.stringify(productosPersonalizados));
     // Guardar la cantidad total en observaciones (puedes ajustar esto según tu backend)
@@ -930,7 +1023,7 @@ function guardarDetallesProducto() {
     actualizarResumenNuevoPedido();
 
     closeProductDetailsModal();
-    showNotification('Detalles de productos guardados', 'success');
+    showNotification('Detalles de productos guardados', 'success', 3000);
 }
 
 // Función para actualizar el resumen de totales en el modal de nuevo pedido
@@ -1078,6 +1171,23 @@ async function crearNuevoPedido() {
         
         if (isSuccess) {
             showNotification('Pedido creado exitosamente', 'success');
+            
+            // Verificar alertas de stock en la respuesta
+            if (response.data && response.data.stock_info) {
+                const stockInfo = response.data.stock_info;
+                let alertColor = 'info';
+                
+                if (stockInfo.alerta === 'critical') {
+                    alertColor = 'error';
+                } else if (stockInfo.alerta === 'warning') {
+                    alertColor = 'warning';
+                }
+                
+                // Mostrar notificación de stock con mayor duración
+                setTimeout(() => {
+                    showNotification(stockInfo.mensaje, alertColor, 8000);
+                }, 1500);
+            }
             
             // Cerrar modal
             closeModal();
@@ -1878,32 +1988,153 @@ function searchPedidos(searchTerm) {
     });
 }
 
-function showNotification(message, type = 'info') {
-    // Crear notificación temporal
+function showNotification(message, type = 'info', duration = 3000) {
+    // Crear notificación compacta y elegante
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
-    notification.textContent = message;
     
-    // Estilos de la notificación
+    // Configurar colores según el tipo
+    let accentColor, glowColor, titulo;
+    
+    switch(type) {
+        case 'success':
+            accentColor = '#00d9a3';
+            glowColor = 'rgba(0, 217, 163, 0.3)';
+            titulo = 'OPERACIÓN EXITOSA';
+            break;
+        case 'error':
+            accentColor = '#ff4757';
+            glowColor = 'rgba(255, 71, 87, 0.3)';
+            titulo = 'Producto Agotado';
+            break;
+        case 'warning':
+            accentColor = '#ffa502';
+            glowColor = 'rgba(255, 165, 2, 0.3)';
+            titulo = 'ADVERTENCIA';
+            break;
+        case 'info':
+        default:
+            accentColor = '#5352ed';
+            glowColor = 'rgba(83, 82, 237, 0.3)';
+            titulo = 'INFORMACIÓN';
+            break;
+    }
+    
+    // Estructura HTML compacta sin icono
+    notification.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 6px; position: relative;">
+            <div style="
+                position: absolute;
+                left: -14px;
+                top: 0;
+                width: 3px;
+                height: 100%;
+                background: ${accentColor};
+                border-radius: 12px 0 0 12px;
+                box-shadow: 0 0 15px ${glowColor};
+            "></div>
+            <div style="
+                font-weight: 700; 
+                font-size: 13px; 
+                line-height: 1.3;
+                color: ${accentColor};
+                letter-spacing: 0.5px;
+            ">
+                ${titulo}
+            </div>
+            <div style="
+                font-weight: 400; 
+                font-size: 12px; 
+                line-height: 1.4; 
+                color: #d1d5db;
+                letter-spacing: 0.1px;
+            ">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    // Estilos de la notificación más angosta
     notification.style.cssText = `
         position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: ${type === 'success' ? 'rgba(20, 152, 0, 0.95)' : 'rgba(20, 152, 0, 0.95)'};
-        color: white;
-        padding: 12px 20px;
-        border-radius: 6px;
+        top: 24px;
+        right: 24px;
+        background: rgba(26, 26, 26, 0.98);
+        padding: 12px 14px;
+        border-radius: 8px;
         z-index: 10000;
-        font-weight: bold;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        box-shadow: 
+            0 15px 40px rgba(0, 0, 0, 0.5),
+            0 0 1px rgba(255, 255, 255, 0.1) inset,
+            0 5px 20px ${glowColor};
+        max-width: 280px;
+        min-width: 240px;
+        word-wrap: break-word;
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        animation: slideInRightSmooth 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     `;
+    
+    // Agregar barra de progreso sutil
+    const progressBar = document.createElement('div');
+    progressBar.style.cssText = `
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        background: ${accentColor};
+        width: 100%;
+        transform-origin: left;
+        box-shadow: 0 0 10px ${glowColor};
+        animation: shrinkProgress ${duration}ms linear;
+    `;
+    notification.appendChild(progressBar);
+    
+    // Agregar animaciones CSS si no existen
+    if (!document.getElementById('notification-animations')) {
+        const style = document.createElement('style');
+        style.id = 'notification-animations';
+        style.textContent = `
+            @keyframes slideInRightSmooth {
+                from {
+                    transform: translateX(120%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOutRightSmooth {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(120%);
+                    opacity: 0;
+                }
+            }
+            @keyframes shrinkProgress {
+                from {
+                    transform: scaleX(1);
+                }
+                to {
+                    transform: scaleX(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
     
     document.body.appendChild(notification);
     
-    // Remover después de 3 segundos
+    // Remover después del tiempo especificado
     setTimeout(() => {
-        notification.remove();
-    }, 3000);
+        notification.style.animation = 'slideOutRightSmooth 0.4s cubic-bezier(0.6, 0, 0.8, 0.2)';
+        setTimeout(() => notification.remove(), 400);
+    }, duration);
 }
 
 // Función para el botón de nuevo pedido - ya configurado en el DOMContentLoaded principal
@@ -3256,4 +3487,147 @@ window.addEventListener('DOMContentLoaded', () => {
         renderTablaProductosEditables();
         renderResumenTotalesEdicion();
     }
+    
+    // Inicializar select personalizado con hover verde
+    initCustomSelectHover();
 });
+
+// ===== SELECT PERSONALIZADO CON HOVER VERDE =====
+function initCustomSelectHover() {
+    // Crear contenedor para dropdown personalizado si no existe
+    let overlay = document.querySelector('.custom-select-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'custom-select-overlay';
+        document.body.appendChild(overlay);
+    }
+    
+    let dropdown = document.querySelector('.custom-select-dropdown');
+    if (!dropdown) {
+        dropdown = document.createElement('div');
+        dropdown.className = 'custom-select-dropdown';
+        document.body.appendChild(dropdown);
+    }
+    
+    let activeSelect = null;
+    
+    // Función para mostrar dropdown personalizado
+    function showCustomDropdown(selectElement) {
+        if (selectElement.disabled) return;
+        
+        activeSelect = selectElement;
+        const rect = selectElement.getBoundingClientRect();
+        const options = Array.from(selectElement.options);
+        
+        // Limpiar dropdown
+        dropdown.innerHTML = '';
+        
+        // Crear opciones personalizadas
+        options.forEach((option, index) => {
+            const div = document.createElement('div');
+            div.className = 'custom-select-option';
+            div.textContent = option.text;
+            div.dataset.value = option.value;
+            div.dataset.index = index;
+            
+            // Marcar opción seleccionada
+            if (option.selected) {
+                div.classList.add('selected');
+            }
+            
+            // Click en opción
+            div.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                selectElement.selectedIndex = index;
+                selectElement.value = option.value;
+                
+                // Disparar evento change
+                const event = new Event('change', { bubbles: true });
+                selectElement.dispatchEvent(event);
+                
+                hideCustomDropdown();
+            });
+            
+            dropdown.appendChild(div);
+        });
+        
+        // Calcular posición óptima
+        const viewportHeight = window.innerHeight;
+        const dropdownMaxHeight = 350;
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        // Posición horizontal
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.width = Math.max(rect.width, 180) + 'px';
+        
+        // Posición vertical: decidir si mostrar abajo o arriba
+        if (spaceBelow >= dropdownMaxHeight || spaceBelow >= spaceAbove) {
+            // Mostrar debajo
+            dropdown.style.top = (rect.bottom + window.scrollY + 2) + 'px';
+            dropdown.style.bottom = 'auto';
+            dropdown.style.maxHeight = Math.min(spaceBelow - 10, dropdownMaxHeight) + 'px';
+        } else {
+            // Mostrar arriba
+            dropdown.style.bottom = (viewportHeight - rect.top + 2) + 'px';
+            dropdown.style.top = 'auto';
+            dropdown.style.maxHeight = Math.min(spaceAbove - 10, dropdownMaxHeight) + 'px';
+        }
+        
+        // Mostrar
+        overlay.classList.add('active');
+        dropdown.classList.add('active');
+        
+        // Hacer scroll a la opción seleccionada
+        setTimeout(() => {
+            const selected = dropdown.querySelector('.selected');
+            if (selected) {
+                selected.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
+        }, 50);
+    }
+    
+    // Función para ocultar dropdown
+    function hideCustomDropdown() {
+        overlay.classList.remove('active');
+        dropdown.classList.remove('active');
+        activeSelect = null;
+    }
+    
+    // Interceptar mousedown en los select para prevenir apertura nativa
+    document.addEventListener('mousedown', function(e) {
+        if (e.target.tagName === 'SELECT') {
+            e.preventDefault();
+            e.stopPropagation();
+            showCustomDropdown(e.target);
+            e.target.blur(); // Quitar foco para evitar apertura nativa
+        }
+    }, true);
+    
+    // Click fuera del dropdown para cerrarlo
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.custom-select-dropdown') && e.target.tagName !== 'SELECT') {
+            hideCustomDropdown();
+        }
+    });
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && activeSelect) {
+            hideCustomDropdown();
+        }
+    });
+    
+    // Prevenir que el select se abra con teclado también
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'SELECT' && (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+            e.preventDefault();
+            showCustomDropdown(e.target);
+        }
+    }, true);
+    
+    console.log('✅ Select personalizado con hover verde inicializado');
+}
+

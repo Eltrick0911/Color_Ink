@@ -178,6 +178,40 @@ class PedidosController
                                 error_log("PedidosController - create: ===== PRODUCTO #" . ($index + 1) . " =====");
                                 error_log("PedidosController - create: Producto RAW: " . json_encode($producto));
                                 
+                                // VALIDAR STOCK ANTES DE CREAR EL DETALLE
+                                $idProductoCatalogo = isset($producto['id_producto']) ? (int)$producto['id_producto'] : 0;
+                                if ($idProductoCatalogo > 0) {
+                                    $productoInfo = $this->inveModel->getProducto((string)$idProductoCatalogo);
+                                    
+                                    if ($productoInfo) {
+                                        $stockDisponible = (int)($productoInfo['stock'] ?? 0);
+                                        $stockMinimo = (int)($productoInfo['stock_minimo'] ?? 0);
+                                        $nombreProductoCatalogo = $productoInfo['nombre_producto'] ?? 'Producto';
+                                        $cantidadSolicitada = (int)($producto['cantidad'] ?? 1);
+                                        
+                                        error_log("PedidosController - create: Validando stock para '{$nombreProductoCatalogo}' - Disponible: {$stockDisponible}, Solicitado: {$cantidadSolicitada}");
+                                        
+                                        // BLOQUEAR si no hay stock suficiente
+                                        if ($stockDisponible <= 0) {
+                                            error_log("PedidosController - create: BLOQUEADO - Stock agotado para producto ID $idProductoCatalogo");
+                                            echo json_encode(responseHTTP::status400(
+                                                "STOCK AGOTADO: El producto '{$nombreProductoCatalogo}' no tiene unidades disponibles en inventario."
+                                            ));
+                                            return;
+                                        }
+                                        
+                                        if ($stockDisponible < $cantidadSolicitada) {
+                                            error_log("PedidosController - create: BLOQUEADO - Stock insuficiente para producto ID $idProductoCatalogo");
+                                            echo json_encode(responseHTTP::status400(
+                                                "STOCK INSUFICIENTE: El producto '{$nombreProductoCatalogo}' solo tiene {$stockDisponible} unidades disponibles. No se pueden solicitar {$cantidadSolicitada} unidades."
+                                            ));
+                                            return;
+                                        }
+                                        
+                                        error_log("PedidosController - create: ✓ Stock validado exitosamente para '{$nombreProductoCatalogo}'");
+                                    }
+                                }
+                                
                                 // Calcular el total_linea para este producto específico
                                 $cantidad = (int)($producto['cantidad'] ?? 1);
                                 $precioBase = (float)($producto['precio'] ?? 0);
@@ -727,36 +761,63 @@ class PedidosController
                 return;
             }
 
-            // Si hay un producto del inventario (id_producto válido), descontar stock
+            // VALIDAR STOCK ANTES DE CREAR EL PEDIDO
+            // Si no hay stock suficiente, BLOQUEAR la creación del pedido
+            $stockInfo = null;
             if ($idProductoOriginal > 0) {
-                error_log("PedidosController - crearDetalle: Descontando stock para producto ID: $idProductoOriginal, cantidad: " . $detalleData['cantidad']);
-                $resultadoStock = $this->inveModel->descontarStock($idProductoOriginal, $detalleData['cantidad']);
+                // Verificar stock disponible usando el modelo de inventario
+                $producto = $this->inveModel->getProducto((string)$idProductoOriginal);
                 
-                if ($resultadoStock['status'] !== 'OK') {
-                    error_log("PedidosController - crearDetalle: Error al descontar stock - " . ($resultadoStock['message'] ?? 'Error desconocido'));
-                    echo json_encode(responseHTTP::status400($resultadoStock['message'] ?? 'Error al descontar stock del inventario'));
-                    return;
+                if ($producto) {
+                    $stockDisponible = (int)($producto['stock'] ?? 0);
+                    $stockMinimo = (int)($producto['stock_minimo'] ?? 0);
+                    $nombreProducto = $producto['nombre_producto'] ?? 'Producto';
+                    $cantidadSolicitada = (int)$detalleData['cantidad'];
+                    
+                    error_log("PedidosController - crearDetalle: Producto '{$nombreProducto}' (ID $idProductoOriginal) - Stock disponible: {$stockDisponible}, Cantidad solicitada: {$cantidadSolicitada}");
+                    
+                    // BLOQUEAR si no hay stock suficiente
+                    if ($stockDisponible <= 0) {
+                        error_log("PedidosController - crearDetalle: BLOQUEADO - Stock agotado");
+                        echo json_encode(responseHTTP::status400(
+                            "STOCK AGOTADO: El producto '{$nombreProducto}' no tiene unidades disponibles en inventario."
+                        ));
+                        return;
+                    }
+                    
+                    if ($stockDisponible < $cantidadSolicitada) {
+                        error_log("PedidosController - crearDetalle: BLOQUEADO - Stock insuficiente");
+                        echo json_encode(responseHTTP::status400(
+                            "STOCK INSUFICIENTE: El producto '{$nombreProducto}' solo tiene {$stockDisponible} unidades disponibles. No se pueden solicitar {$cantidadSolicitada} unidades."
+                        ));
+                        return;
+                    }
+                    
+                    // Advertencia de stock bajo (no bloquea, solo informa)
+                    if ($stockDisponible <= $stockMinimo) {
+                        error_log("PedidosController - crearDetalle: ADVERTENCIA - Stock bajo pero suficiente");
+                        $stockInfo = [
+                            'alerta' => 'warning',
+                            'mensaje' => "ADVERTENCIA: El producto '{$nombreProducto}' tiene stock bajo ({$stockDisponible} unidades, mínimo recomendado: {$stockMinimo})",
+                            'stock_actual' => $stockDisponible
+                        ];
+                    }
+                } else {
+                    error_log("PedidosController - crearDetalle: No se pudo obtener información del producto ID $idProductoOriginal");
                 }
-                
-                error_log("PedidosController - crearDetalle: Stock descontado exitosamente. Stock actualizado: " . ($resultadoStock['data']['stock_actualizado'] ?? 'N/A'));
             }
 
-            error_log("PedidosController - crearDetalle: Datos válidos, creando detalle");
+            error_log("PedidosController - crearDetalle: Validación de stock exitosa, creando detalle");
 
             $success = $this->pedidosModel->createDetallePedido($detalleData);
             
             if ($success) {
                 error_log("PedidosController - crearDetalle: Detalle creado exitosamente para pedido $idPedido");
                 
-                // Preparar respuesta con información del stock si se descontó
+                // Preparar respuesta con información del stock
                 $responseData = ['message' => 'Detalle de pedido creado exitosamente'];
-                if ($idProductoOriginal > 0 && isset($resultadoStock['data'])) {
-                    $responseData['stock_info'] = [
-                        'id_producto' => $resultadoStock['data']['id_producto'],
-                        'stock_actualizado' => $resultadoStock['data']['stock_actualizado'],
-                        'alerta_stock' => ($resultadoStock['data']['stock_actualizado'] ?? 0) <= 0 ? 'Producto agotado' : 
-                                        (($resultadoStock['data']['stock_actualizado'] ?? 999) <= 3 ? 'Stock bajo' : null)
-                    ];
+                if ($stockInfo) {
+                    $responseData['stock_info'] = $stockInfo;
                 }
                 
                 $resp = responseHTTP::status200('Detalle de pedido creado exitosamente');
