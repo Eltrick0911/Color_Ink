@@ -1,0 +1,24 @@
+# Ignore local/dev files and secrets
+.env
+.git/
+.gitignore
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs and runtime artifacts
+src/Logs/*
+*.log
+
+# Uploads (store in S3 for prod; exclude from deploy)
+uploads/
+
+# Node modules (if any)
+node_modules/
+
+# Tests and misc
+*.sql
+*.md~
+
+# Optionally exclude vendor so EB runs composer install
+vendor/

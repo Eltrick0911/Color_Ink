@@ -13,12 +13,16 @@ class Security {
     /*METODO para Acceder a la secret key para crear el JWT*/
     final public static function secretKey()
     {
-        //cargamos las variables de entorno en el archivo .env
-        $dotenv = Dotenv::createImmutable(dirname(__DIR__,2)); //nuestras variables de entorno estaran en la raiz
-                    // del proyecto (el numero dos son los niveles a lo externo, para llegar al directorio raiz)
-        $dotenv->load(); //cargando las variables de entorno
-        return $_ENV['SECRET_KEY']; //le doy un nombre a nuestra variable de entorno y la retornamos
-        //en realidad lo que sucede aqui es por medio de la superglobal $_ENV creamos una variable de entorno
+        // Producción (Elastic Beanstalk u otros): las variables ya vienen del entorno.
+        // Desarrollo local: sólo cargar .env si SECRET_KEY no está definida.
+        if (empty($_ENV['SECRET_KEY'])) {
+            $envPath = dirname(__DIR__,2) . '/.env';
+            if (file_exists($envPath)) {
+                $dotenv = Dotenv::createImmutable(dirname(__DIR__,2));
+                $dotenv->load();
+            }
+        }
+        return $_ENV['SECRET_KEY'] ?? 'INSECURE_FALLBACK';
     }
 
     /*METODO para Encriptar la contraseña del usuario*/

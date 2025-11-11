@@ -11,9 +11,22 @@ use Dotenv\Dotenv;
 //activamos la configuración de los errores 
 errorlogs::activa_error_logs();
 
-/* cargamos nuestras variables de entorno de nuestra conexion a BD*/
-$dotenv = Dotenv::createImmutable(dirname(__DIR__,2));
-$dotenv->load(); 
+// Establecer zona horaria de PHP para que coincida con MySQL
+date_default_timezone_set('America/Tegucigalpa');
+
+/* Cargar .env SOLO si las variables aún no existen (producción ya las define) */
+if (empty($_ENV['DB']) || empty($_ENV['USER']) || empty($_ENV['PASSWORD'])) {
+    $envPath = dirname(__DIR__,2) . '/.env';
+    if (file_exists($envPath)) {
+        $dotenv = Dotenv::createImmutable(dirname(__DIR__,2));
+        $dotenv->load();
+        error_log('dataDB.php - Variables cargadas desde .env (modo desarrollo)');
+    } else {
+        error_log('dataDB.php - .env no encontrado y variables de entorno incompletas');
+    }
+} else {
+    error_log('dataDB.php - Usando variables ya presentes en entorno (producción)');
+}
 
 //definimos un arreglos para simplificar y pasar la cadena de caracteres necesaria para abrir la conexion PDO
 $data = array(
