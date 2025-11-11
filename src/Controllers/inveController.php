@@ -24,21 +24,32 @@ class inveController
         error_log('inveController - authorize: Iniciando autorización');
         error_log('inveController - Headers recibidos: ' . json_encode($headers));
         
-        // 1) Intentar Firebase ID Token primero (más común en este sistema)
-        $fb = new FirebaseController();
-        $idToken = $this->extractBearer($headers);
-        error_log('inveController - Firebase token extraído: ' . ($idToken ? 'Presente' : 'No presente'));
-        
-        if ($idToken) {
-            $claims = $fb->verifyIdToken($idToken);
+        $bearer = $this->extractBearer($headers);
+        $user = null;
+        $algDetected = $this->detectJwtAlg($bearer);
+        error_log('inveController - Token alg detectado: ' . ($algDetected ?? 'desconocido'));
+
+        // 1) Priorizar JWT local (HS256) porque contiene el rol de BD
+        if ($bearer && $algDetected === 'HS256') {
+            error_log('inveController - Detectado JWT local (HS256). Validando con Security::validateTokenJwt');
+            // ATENCIÓN: validateTokenJwt hace die() en error. Aseguramos solo llamarlo para HS256.
+            $tokenData = Security::validateTokenJwt($headers, Security::secretKey());
+            $data = json_decode(json_encode($tokenData), true);
+            $user = $data['data'] ?? null;
+            error_log('inveController - JWT local válido, usuario: ' . json_encode($user));
+        }
+
+        // 2) Si no se obtuvo usuario por JWT local, intentar Firebase (RS256)
+        if (!$user && $bearer) {
+            error_log('inveController - Intentando validar como Firebase ID Token');
+            $fb = new FirebaseController();
+            $claims = $fb->verifyIdToken($bearer);
             error_log('inveController - Firebase claims: ' . json_encode($claims));
             if ($claims) {
-                // Mapear a usuario real de BD si existe por correo
                 $correo = $claims['email'] ?? null;
                 $nombre = $claims['name'] ?? ($claims['email'] ?? 'FirebaseUser');
                 $userModel = new \App\Models\UserModel();
                 $row = $correo ? $userModel->getUserByEmailOrPhone($correo) : null;
-                
                 if ($row) {
                     $user = [
                         'id_usuario' => (int)$row['id_usuario'],
@@ -46,40 +57,18 @@ class inveController
                         'id_rol' => (int)$row['id_rol'],
                         'email' => $row['correo']
                     ];
-                    error_log('inveController - Usuario encontrado en BD: ' . json_encode($user));
+                    error_log('inveController - Usuario mapeado desde BD por Firebase: ' . json_encode($user));
                 } else {
                     error_log('inveController - Usuario no encontrado en BD, usando claims de Firebase');
-                    // Usar datos de Firebase como fallback
                     $user = [
                         'id_usuario' => $claims['user_id'] ?? ($claims['sub'] ?? 0),
                         'nombre_usuario' => $nombre,
-                        'id_rol' => 2, // Usuario común por defecto
+                        'id_rol' => 2,
                         'email' => $correo
                     ];
                 }
             } else {
-                error_log('inveController - Token Firebase expirado o inválido');
-            }
-        }
-
-        // 2) Intentar JWT local si no hay Firebase válido
-        if (!isset($user)) {
-            try {
-                error_log('inveController - Intentando validar JWT local');
-                // Solo intentar JWT local si el token no parece ser de Firebase
-                $token = $this->extractBearer($headers);
-                if ($token && !str_contains($token, 'eyJhbGciOiJSUzI1NiIs')) {
-                    $tokenData = Security::validateTokenJwt($headers, Security::secretKey());
-                    $data = json_decode(json_encode($tokenData), true);
-                    $user = $data['data'] ?? null;
-                    error_log('inveController - JWT válido, usuario: ' . json_encode($user));
-                } else {
-                    error_log('inveController - Token parece ser de Firebase, saltando validación JWT local');
-                    $user = null;
-                }
-            } catch (\Throwable $e) {
-                error_log('inveController - JWT inválido: ' . $e->getMessage());
-                $user = null;
+                error_log('inveController - Firebase inválido o expirado');
             }
         }
 
@@ -101,6 +90,30 @@ class inveController
         
         error_log('inveController - Autorización exitosa');
         return $user;
+    }
+
+    /**
+     * Detecta el algoritmo del JWT inspeccionando el header (parte 1 del token)
+     */
+    private function detectJwtAlg(?string $bearer): ?string
+    {
+        if (!$bearer) return null;
+        $parts = explode('.', $bearer);
+        if (count($parts) < 2) return null;
+        $headerJson = $this->base64UrlDecode($parts[0]);
+        if ($headerJson === null) return null;
+        $hdr = json_decode($headerJson, true);
+        return $hdr['alg'] ?? null;
+    }
+
+    private function base64UrlDecode(string $data): ?string
+    {
+        $remainder = strlen($data) % 4;
+        if ($remainder) {
+            $data .= str_repeat('=', 4 - $remainder);
+        }
+        $decoded = base64_decode(strtr($data, '-_', '+/'));
+        return $decoded === false ? null : $decoded;
     }
 
     private function extractBearer(array $headers): ?string
