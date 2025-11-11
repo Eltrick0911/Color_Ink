@@ -1016,7 +1016,7 @@ function updatePaginationControls() {
         btnNextPage.disabled = currentPage >= totalPages;
         
         // Números de página
-        updatePageNumbers(totalPages);
+    updatePageNumbers(totalPages);
     } else {
         paginationContainer.style.display = 'none';
     }
