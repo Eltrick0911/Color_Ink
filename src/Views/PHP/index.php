@@ -13,6 +13,9 @@ if (strpos($uri, '/public/') !== false) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio Color Ink </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Permanent+Marker&family=Righteous&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/index.css">
     <link rel="stylesheet" href="<?php echo $basePath; ?>/src/Views/CSS/sidebar.css">
@@ -46,6 +49,43 @@ if (strpos($uri, '/public/') !== false) {
         <h1>COLOR INK</h1>
         <img src="<?php echo $basePath; ?>/src/Views/IMG/COLOR INK.gif" alt="Color Ink Logo"> <!-- Placeholder para el logo -->
     </main>
+
+    <!-- Carrusel de imágenes -->
+    <div class="carousel-container">
+        <div class="carousel-track">
+            <div class="carousel-slide">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/Carrusel/1.jpg" alt="Imagen 1">
+            </div>
+            <div class="carousel-slide">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/Carrusel/2.jpg" alt="Imagen 2">
+            </div>
+            <div class="carousel-slide">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/Carrusel/3.jpg" alt="Imagen 3">
+            </div>
+            <div class="carousel-slide">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/Carrusel/4.jpg" alt="Imagen 4">
+            </div>
+            <div class="carousel-slide">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/Carrusel/5.jpg" alt="Imagen 5">
+            </div>
+            <!-- Duplicar imágenes para efecto infinito suave -->
+            <div class="carousel-slide">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/Carrusel/1.jpg" alt="Imagen 1">
+            </div>
+            <div class="carousel-slide">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/Carrusel/2.jpg" alt="Imagen 2">
+            </div>
+            <div class="carousel-slide">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/Carrusel/3.jpg" alt="Imagen 3">
+            </div>
+            <div class="carousel-slide">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/Carrusel/4.jpg" alt="Imagen 4">
+            </div>
+            <div class="carousel-slide">
+                <img src="<?php echo $basePath; ?>/src/Views/IMG/Carrusel/5.jpg" alt="Imagen 5">
+            </div>
+        </div>
+    </div>
 
 <script src="<?php echo $basePath; ?>/src/Views/JS/login.js"></script>
 <script src="<?php echo $basePath; ?>/src/Views/JS/index.js"></script>
