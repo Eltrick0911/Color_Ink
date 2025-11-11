@@ -30,6 +30,9 @@ function guardarProductoActual() {
     
     console.log('Guardando producto - categoriaValue:', categoriaValue, 'idProducto:', idProducto);
     
+    // Obtener imágenes actuales del sessionStorage si existen
+    const imagenesSubidas = JSON.parse(sessionStorage.getItem('imagenesSubidas') || '[]');
+    
     productosPersonalizados[productoActivo] = {
         id_producto: idProducto, // ID del producto del catálogo (0 si es personalizado)
         categoria: categoriaEl ? categoriaEl.options[categoriaEl.selectedIndex]?.text || categoriaValue : '',
@@ -39,7 +42,7 @@ function guardarProductoActual() {
         precio: precioEl ? Number(precioEl.value) : 0,
         descuento: descuentoEl ? Number(descuentoEl.value) : 0,
         impuesto: impuestoEl ? Number(impuestoEl.value) : 0,
-        imagenesUrls: productosPersonalizados[productoActivo]?.imagenesUrls || ''
+        imagenes: imagenesSubidas.length > 0 ? imagenesSubidas : (productosPersonalizados[productoActivo]?.imagenes || [])
     };
 }
 
@@ -824,7 +827,7 @@ function setupProductDetailsModal() {
 
 function productoVacio() {
     return {
-        categoria: '', colores: '', especificaciones: '', imagenesUrls: '[]', cantidad: 1, precio: 0, descuento: 0, impuesto: 0
+        categoria: '', colores: '', especificaciones: '', imagenes: [], cantidad: 1, precio: 0, descuento: 0, impuesto: 0
     };
 }
 
@@ -882,7 +885,22 @@ function cargarProductoEnFormulario(idx) {
     document.getElementById('pdDescuento').value = prod.descuento || 0;
     document.getElementById('pdImpuesto').value = prod.impuesto || 0;
     updatePdTotalPreview();
-    // Colores y preview imágenes pueden mejorarse aquí
+    
+    // Cargar imágenes del producto al sessionStorage y mostrar preview
+    const imagenes = prod.imagenes || [];
+    if (imagenes.length > 0) {
+        sessionStorage.setItem('imagenesSubidas', JSON.stringify(imagenes));
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        if (previewContainer) {
+            mostrarPreviewImagenes(imagenes, previewContainer);
+        }
+    } else {
+        sessionStorage.removeItem('imagenesSubidas');
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        if (previewContainer) {
+            previewContainer.innerHTML = '<div class="upload-placeholder"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arrastra imágenes o haz clic para seleccionar</p></div>';
+        }
+    }
 }
 
 function openProductDetailsModal() {
@@ -919,6 +937,15 @@ function closeProductDetailsModal() {
     if (productDetailsModal) {
         productDetailsModal.style.display = 'none';
         document.body.style.overflow = 'auto';
+        
+        // Limpiar sessionStorage de imágenes al cerrar modal
+        sessionStorage.removeItem('imagenesSubidas');
+        
+        // Limpiar preview de imágenes
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        if (previewContainer) {
+            previewContainer.innerHTML = '<div class="upload-placeholder"><i class="fa-solid fa-cloud-arrow-up"></i><p>Arrastra imágenes o haz clic para seleccionar</p></div>';
+        }
     }
 }
 
@@ -1989,6 +2016,117 @@ function searchPedidos(searchTerm) {
 }
 
 function showNotification(message, type = 'info', duration = 3000) {
+    // Detectar si es una alerta de stock (diseño especial)
+    const isStockAlert = message.includes('<strong>') && (
+        message.includes('Stock:') || 
+        message.includes('Stock disponible:') || 
+        message.includes('Stock bajo:')
+    );
+    
+    if (isStockAlert) {
+        showStockNotification(message, type, duration);
+    } else {
+        showSimpleNotification(message, type, duration);
+    }
+}
+
+/**
+ * Notificación simple y clásica (duración por defecto: 3 segundos)
+ */
+function showSimpleNotification(message, type, duration) {
+    const notification = document.createElement('div');
+    
+    // Colores según tipo
+    let bgColor, borderColor, icon;
+    
+    switch(type) {
+        case 'success':
+            bgColor = 'rgba(22, 163, 74, 0.95)';
+            borderColor = 'rgba(34, 197, 94, 1)';
+            icon = '✓';
+            break;
+        case 'error':
+            bgColor = 'rgba(220, 38, 38, 0.95)';
+            borderColor = 'rgba(239, 68, 68, 1)';
+            icon = '✗';
+            break;
+        case 'warning':
+            bgColor = 'rgba(234, 179, 8, 0.95)';
+            borderColor = 'rgba(250, 204, 21, 1)';
+            icon = '⚠';
+            break;
+        default:
+            bgColor = 'rgba(59, 130, 246, 0.95)';
+            borderColor = 'rgba(96, 165, 250, 1)';
+            icon = 'ℹ';
+    }
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 18px; flex-shrink: 0;">${icon}</span>
+            <span style="flex: 1; font-size: 14px; line-height: 1.4;">${message}</span>
+        </div>
+    `;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${bgColor};
+        color: white;
+        padding: 12px 18px;
+        border-radius: 6px;
+        border-left: 4px solid ${borderColor};
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        max-width: 350px;
+        min-width: 250px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    // Agregar animaciones si no existen
+    if (!document.getElementById('simple-notification-animations')) {
+        const style = document.createElement('style');
+        style.id = 'simple-notification-animations';
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(notification);
+    
+    // Remover después del tiempo especificado (por defecto 3 segundos)
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => notification.remove(), 300);
+    }, duration);
+}
+
+/**
+ * Notificación especial para alertas de stock (diseño elegante y único)
+ */
+function showStockNotification(message, type, duration) {
     // Crear notificación compacta y elegante
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
@@ -3305,7 +3443,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!Array.isArray(productos)) productos = [];
             const baseDesc = Number((productos[0] && productos[0].descuento) || 0);
             const baseImp = Number((productos[0] && productos[0].impuesto) || 0);
-            productos.push({ categoria:'productos', cantidad:1, precio:0, descuento:baseDesc, impuesto:baseImp, colores:'', especificaciones:'', imagenesUrls:'' });
+            productos.push({ categoria:'productos', cantidad:1, precio:0, descuento:baseDesc, impuesto:baseImp, colores:'', especificaciones:'', imagenes:[] });
             sessionStorage.setItem('detalles_productos', JSON.stringify(productos));
             renderTablaProductosEditables();
             actualizarCamposTotalesEnEdicion();

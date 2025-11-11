@@ -190,8 +190,9 @@
             const url = this.apiEntry + '?route=upload/multiple&caso=1';
             const formData = new FormData();
             
+            // PHP espera 'imagenes' sin brackets - FormData maneja múltiples archivos automáticamente
             for (let i = 0; i < files.length; i++) {
-                formData.append('imagenes[]', files[i]);
+                formData.append('imagenes', files[i]);
             }
             
             const headers = {};

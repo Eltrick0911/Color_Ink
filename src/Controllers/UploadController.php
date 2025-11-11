@@ -3,22 +3,29 @@
 namespace App\Controllers;
 
 use App\Config\responseHTTP;
+use App\Config\S3Service;
 
 class UploadController
 {
     private $uploadDir;
     private $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     private $maxFileSize = 5242880; // 5MB
+    private $s3Service;
+    private $useS3;
 
     public function __construct()
     {
-        // Directorio de uploads relativo a la raíz del proyecto
-        $this->uploadDir = dirname(__DIR__, 2) . '/uploads/pedidos/';
+        // Directorio temporal para procesar uploads antes de S3
+        $this->uploadDir = sys_get_temp_dir() . '/color_ink_uploads/';
         
-        // Crear directorio si no existe
+        // Crear directorio temporal si no existe
         if (!file_exists($this->uploadDir)) {
             mkdir($this->uploadDir, 0755, true);
         }
+
+        // Inicializar servicio S3
+        $this->s3Service = new S3Service();
+        $this->useS3 = true; // Usar S3 por defecto
     }
 
     /**
@@ -60,25 +67,41 @@ class UploadController
 
             // Generar nombre único
             $nombreUnico = 'pedido_' . date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
-            $rutaDestino = $this->uploadDir . $nombreUnico;
+            
+            // Determinar tipo MIME
+            $mimeType = $this->getMimeType($extension);
 
-            // Mover archivo
-            if (!move_uploaded_file($file['tmp_name'], $rutaDestino)) {
-                error_log('UploadController - Error al mover archivo');
-                echo json_encode(responseHTTP::status500('Error al guardar el archivo'));
-                return;
+            if ($this->useS3) {
+                // Subir a S3
+                $s3Key = 'pedidos/' . $nombreUnico;
+                $result = $this->s3Service->uploadFile($file['tmp_name'], $s3Key, $mimeType);
+
+                if (!$result['success']) {
+                    error_log('UploadController - Error S3: ' . $result['message']);
+                    echo json_encode(responseHTTP::status500($result['message']));
+                    return;
+                }
+
+                $urlArchivo = $result['url'];
+                error_log("UploadController - Archivo subido a S3: $urlArchivo");
+
+            } else {
+                // Fallback: guardar local (modo antiguo)
+                $rutaDestino = $this->uploadDir . $nombreUnico;
+                if (!move_uploaded_file($file['tmp_name'], $rutaDestino)) {
+                    error_log('UploadController - Error al mover archivo');
+                    echo json_encode(responseHTTP::status500('Error al guardar el archivo'));
+                    return;
+                }
+                $urlArchivo = '/Color_Ink/uploads/pedidos/' . $nombreUnico;
             }
-
-            // URL relativa para guardar en BD
-            $urlRelativa = '/Color_Ink/uploads/pedidos/' . $nombreUnico;
-
-            error_log("UploadController - Archivo subido exitosamente: $nombreUnico");
 
             $response = responseHTTP::status200('Imagen subida exitosamente');
             $response['data'] = [
                 'filename' => $nombreUnico,
-                'url' => $urlRelativa,
-                'size' => $file['size']
+                'url' => $urlArchivo,
+                'size' => $file['size'],
+                'storage' => $this->useS3 ? 's3' : 'local'
             ];
 
             header('Content-Type: application/json');
@@ -97,26 +120,48 @@ class UploadController
     {
         try {
             error_log('UploadController - uploadMultiple: Iniciando upload múltiple');
+            error_log('FILES recibido: ' . print_r($files, true));
             
-            if (!isset($files['imagenes']) || !is_array($files['imagenes']['name'])) {
-                echo json_encode(responseHTTP::status400('No se recibieron archivos'));
+            if (!isset($files['imagenes'])) {
+                error_log('ERROR: No existe $files[imagenes]');
+                echo json_encode(responseHTTP::status400('No se recibieron archivos - campo imagenes no encontrado'));
                 return;
             }
+            
+            // Normalizar estructura: si es un solo archivo, convertirlo a array
+            $filesArray = [];
+            
+            if (is_array($files['imagenes']['name'])) {
+                // Múltiples archivos
+                error_log('Múltiples archivos detectados');
+                $totalFiles = count($files['imagenes']['name']);
+                for ($i = 0; $i < $totalFiles; $i++) {
+                    $filesArray[] = [
+                        'name' => $files['imagenes']['name'][$i],
+                        'type' => $files['imagenes']['type'][$i],
+                        'tmp_name' => $files['imagenes']['tmp_name'][$i],
+                        'error' => $files['imagenes']['error'][$i],
+                        'size' => $files['imagenes']['size'][$i]
+                    ];
+                }
+            } else {
+                // Un solo archivo
+                error_log('Un solo archivo detectado');
+                $filesArray[] = [
+                    'name' => $files['imagenes']['name'],
+                    'type' => $files['imagenes']['type'],
+                    'tmp_name' => $files['imagenes']['tmp_name'],
+                    'error' => $files['imagenes']['error'],
+                    'size' => $files['imagenes']['size']
+                ];
+            }
+            
+            error_log('Total de archivos a procesar: ' . count($filesArray));
 
             $uploadedFiles = [];
             $errors = [];
             
-            $totalFiles = count($files['imagenes']['name']);
-            
-            for ($i = 0; $i < $totalFiles; $i++) {
-                // Reconstruir array de archivo individual
-                $file = [
-                    'name' => $files['imagenes']['name'][$i],
-                    'type' => $files['imagenes']['type'][$i],
-                    'tmp_name' => $files['imagenes']['tmp_name'][$i],
-                    'error' => $files['imagenes']['error'][$i],
-                    'size' => $files['imagenes']['size'][$i]
-                ];
+            foreach ($filesArray as $file) {
 
                 // Saltar si no se subió archivo
                 if ($file['error'] === UPLOAD_ERR_NO_FILE) {
@@ -140,19 +185,41 @@ class UploadController
                     continue;
                 }
 
-                // Guardar archivo
+                // Generar nombre único
                 $nombreUnico = 'pedido_' . date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
-                $rutaDestino = $this->uploadDir . $nombreUnico;
+                $mimeType = $this->getMimeType($extension);
 
-                if (move_uploaded_file($file['tmp_name'], $rutaDestino)) {
-                    $uploadedFiles[] = [
-                        'original_name' => $file['name'],
-                        'filename' => $nombreUnico,
-                        'url' => '/Color_Ink/uploads/pedidos/' . $nombreUnico,
-                        'size' => $file['size']
-                    ];
+                if ($this->useS3) {
+                    // Subir a S3
+                    $s3Key = 'pedidos/' . $nombreUnico;
+                    $result = $this->s3Service->uploadFile($file['tmp_name'], $s3Key, $mimeType);
+
+                    if ($result['success']) {
+                        $uploadedFiles[] = [
+                            'original_name' => $file['name'],
+                            'filename' => $nombreUnico,
+                            'url' => $result['url'],
+                            'size' => $file['size'],
+                            'storage' => 's3'
+                        ];
+                    } else {
+                        $errors[] = $file['name'] . ': ' . $result['message'];
+                    }
+
                 } else {
-                    $errors[] = $file['name'] . ': Error al guardar';
+                    // Fallback: guardar local
+                    $rutaDestino = $this->uploadDir . $nombreUnico;
+                    if (move_uploaded_file($file['tmp_name'], $rutaDestino)) {
+                        $uploadedFiles[] = [
+                            'original_name' => $file['name'],
+                            'filename' => $nombreUnico,
+                            'url' => '/Color_Ink/uploads/pedidos/' . $nombreUnico,
+                            'size' => $file['size'],
+                            'storage' => 'local'
+                        ];
+                    } else {
+                        $errors[] = $file['name'] . ': Error al guardar';
+                    }
                 }
             }
 
@@ -192,5 +259,17 @@ class UploadController
             default:
                 return 'Error desconocido al subir el archivo';
         }
+    }
+
+    private function getMimeType(string $extension): string
+    {
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp'
+        ];
+        return $mimeTypes[$extension] ?? 'application/octet-stream';
     }
 }
