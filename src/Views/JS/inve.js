@@ -31,14 +31,82 @@ function logAuthState(context = 'Inventario') {
 // Exponer util para depuración manual desde consola
 window.authDebugDump = logAuthState;
 
-// Construir header Authorization desde sessionStorage (Firebase o JWT local)
+// Construir header Authorization desde sessionStorage (JWT local o Firebase)
 function getAuthHeader() {
     const { firebaseIdToken, accessToken } = getStoredAuth();
-    const token = firebaseIdToken || accessToken;
+    const token = accessToken || firebaseIdToken;
+    
+    console.log('getAuthHeader - Firebase token:', firebaseIdToken ? 'Presente (' + firebaseIdToken.substring(0, 20) + '...)' : 'No presente');
+    console.log('getAuthHeader - JWT token:', accessToken ? 'Presente (' + accessToken.substring(0, 20) + '...)' : 'No presente');
+    
     if (token) {
-        return { 'Authorization': `Bearer ${token}` };
+        const header = { 'Authorization': `Bearer ${token}` };
+        console.log('getAuthHeader - Header generado:', { 'Authorization': `Bearer ${token.substring(0, 20)}...` });
+        return header;
     }
+    console.warn('getAuthHeader: No se encontró token en sessionStorage');
     return {};
+}
+
+// Verificar si hay token disponible antes de hacer peticiones
+function hasValidToken() {
+    const { firebaseIdToken, accessToken } = getStoredAuth();
+    return !!(firebaseIdToken || accessToken);
+}
+
+// Renovar token de Firebase si está disponible
+async function renewFirebaseToken() {
+    try {
+        console.log('🔄 Intentando renovar token de Firebase...');
+        
+        // Verificar si Firebase está disponible
+        if (typeof firebase === 'undefined' || !firebase.auth().currentUser) {
+            console.log('⚠️ Firebase no disponible o usuario no autenticado');
+            return false;
+        }
+        
+        // Obtener nuevo token
+        const newToken = await firebase.auth().currentUser.getIdToken(true);
+        
+        // Guardar el nuevo token
+        sessionStorage.setItem('firebase_id_token', newToken);
+        
+        console.log('✅ Token de Firebase renovado exitosamente');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Error renovando token de Firebase:', error);
+        return false;
+    }
+}
+
+// Manejar errores de autenticación
+async function handleAuthError(error, context = '') {
+    console.error(`Error de autenticación ${context}:`, error);
+    
+    // Verificar si el error es por token inválido o expirado
+    if (error.message && (error.message.includes('token') || error.message.includes('Token') || error.message.includes('401'))) {
+        // Intentar renovar el token de Firebase antes de redirigir
+        console.log('🔄 Intentando renovar token de Firebase...');
+        const renewed = await renewFirebaseToken();
+        
+        if (renewed) {
+            console.log('✅ Token renovado exitosamente');
+            showNotification(' Token renovado exitosamente. Puedes intentar la acción nuevamente.', 'success');
+            return false; // No redirigir, el usuario puede intentar de nuevo
+        }
+        
+        console.log('❌ No se pudo renovar token, redirigiendo al login en 3 segundos...');
+        showNotification(' Tu sesión ha expirado. Redirigiendo al login en 3 segundos...', 'error');
+        
+        // Limpiar tokens y redirigir después de un delay más largo para que el usuario vea el mensaje
+        setTimeout(() => {
+            sessionStorage.clear();
+            window.location.href = 'login';
+        }, 3000);
+        return true;
+    }
+    return false;
 }
 
 // Agregar estilos personalizados para SweetAlert (igual que gestión de usuarios)
@@ -46,9 +114,10 @@ const swalStyle = document.createElement('style');
 swalStyle.textContent = `
     /* Estilos para modales de eliminar (igual a pedidos y gestión de usuarios) */
     .swal-delete-popup {
-        background: #1a1a1a !important;
+        background: linear-gradient(145deg, #1a1a1a 0%, #000000 100%) !important;
+        border: 1px solid rgba(1, 146, 179, 0.3) !important;
         border-radius: 12px !important;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(1, 146, 179, 0.2) !important;
         padding: 0 !important;
         max-width: 450px !important;
         width: 90% !important;
@@ -190,30 +259,7 @@ async function getCurrentUser() {
             }
         }
         
-        // SEGUNDO: Intentar obtener token de Firebase
-        const firebaseToken = sessionStorage.getItem('firebase_id_token');
-        if (firebaseToken) {
-            console.log('Intentando con token Firebase...');
-            try {
-                const response = await fetch(`${getApiBase()}/public/index.php?route=firebase&caso=1&action=me`, {
-                    headers: { 'Authorization': `Bearer ${firebaseToken}` }
-                });
-                console.log('Respuesta Firebase:', response.status, response.statusText);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Usuario obtenido via Firebase:', data.data);
-                    return data.data;
-                } else {
-                    const errorText = await response.text();
-                    console.log('Error Firebase:', errorText);
-                }
-            } catch (firebaseError) {
-                console.log('Error en petición Firebase:', firebaseError);
-            }
-        }
-        
-        // TERCERO: Intentar obtener token JWT local
+        // SEGUNDO: Intentar obtener token JWT local
         const jwtToken = sessionStorage.getItem('access_token');
         if (jwtToken) {
             console.log('Intentando con token JWT...');
@@ -236,6 +282,29 @@ async function getCurrentUser() {
             }
         }
         
+        // TERCERO: Intentar obtener token de Firebase
+        const firebaseToken = sessionStorage.getItem('firebase_id_token');
+        if (firebaseToken) {
+            console.log('Intentando con token Firebase...');
+            try {
+                const response = await fetch(`${getApiBase()}/public/index.php?route=firebase&caso=1&action=me`, {
+                    headers: { 'Authorization': `Bearer ${firebaseToken}` }
+                });
+                console.log('Respuesta Firebase:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Usuario obtenido via Firebase:', data.data);
+                    return data.data;
+                } else {
+                    const errorText = await response.text();
+                    console.log('Error Firebase:', errorText);
+                }
+            } catch (firebaseError) {
+                console.log('Error en petición Firebase:', firebaseError);
+            }
+        }
+        
         console.log('No se pudo obtener usuario de ninguna fuente');
         return null;
     } catch (error) {
@@ -247,53 +316,94 @@ async function getCurrentUser() {
 // Función para verificar autenticación antes de inicializar
 async function checkAuthAndInit() {
     try {
-        console.log('INVENTARIO: Verificando autenticación...');
+        console.log('🔍 INVENTARIO: Verificando autenticación...');
         
-        // Verificar tokens disponibles
-        const firebaseToken = sessionStorage.getItem('firebase_id_token');
+        // PRIMERO: Verificar que hay tokens disponibles
         const jwtToken = sessionStorage.getItem('access_token');
+        const firebaseToken = sessionStorage.getItem('firebase_id_token');
         const storedUser = sessionStorage.getItem('user');
         
-        console.log('Firebase token:', firebaseToken ? 'Presente' : 'No presente');
         console.log('JWT token:', jwtToken ? 'Presente' : 'No presente');
+        console.log('Firebase token:', firebaseToken ? 'Presente' : 'No presente');
         console.log('Usuario almacenado:', storedUser ? 'Presente' : 'No presente');
         
-        // Verificar si el usuario está autenticado
+        // Si no hay tokens, redirigir inmediatamente
+        if (!jwtToken && !firebaseToken) {
+            console.log('❌ No hay tokens disponibles, redirigiendo al login');
+            sessionStorage.clear();
+            window.location.href = 'login';
+            return;
+        }
+        
+        // SEGUNDO: Validar el token con el servidor (no solo confiar en sessionStorage)
         const user = await getCurrentUser();
         console.log('Usuario obtenido en inventario:', user);
         
         if (!user) {
-            console.log('No se pudo obtener usuario, redirigiendo al login');
+            console.log('❌ No se pudo obtener usuario del servidor, redirigiendo al login');
             // Limpiar sessionStorage antes de redirigir
-            sessionStorage.removeItem('firebase_id_token');
-            sessionStorage.removeItem('access_token');
-            sessionStorage.removeItem('user');
+            sessionStorage.clear();
             window.location.href = 'login';
             return;
         }
         
-        console.log('Usuario autenticado:', user.nombre_usuario, 'Rol:', user.id_rol);
+        console.log('✅ Usuario autenticado:', user.nombre_usuario, 'Rol:', user.id_rol);
         
-        // Verificar que el usuario tiene los campos necesarios
+        // TERCERO: Verificar que el usuario tiene los campos necesarios
         if (!user.id_usuario || !user.nombre_usuario) {
-            console.log('Usuario incompleto, redirigiendo al login');
-            sessionStorage.removeItem('firebase_id_token');
-            sessionStorage.removeItem('access_token');
-            sessionStorage.removeItem('user');
+            console.log('❌ Usuario incompleto, redirigiendo al login');
+            sessionStorage.clear();
             window.location.href = 'login';
             return;
         }
         
-        // Si el usuario está autenticado, inicializar la página
-        console.log('Usuario autenticado correctamente, inicializando inventario');
+        // CUARTO: Verificar que el token sigue siendo válido haciendo una petición de prueba
+        const authHeader = getAuthHeader();
+        if (!authHeader || !authHeader.Authorization) {
+            console.log('❌ No se pudo generar header de autenticación, redirigiendo al login');
+            sessionStorage.clear();
+            window.location.href = 'login';
+            return;
+        }
+        
+        // Verificar token con una petición de prueba a la API
+        try {
+            const testResponse = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=estadisticas`, {
+                headers: {
+                    ...authHeader,
+                }
+            });
+            
+            if (testResponse.status === 401) {
+                console.log('❌ Token inválido o expirado en verificación inicial');
+                // Intentar renovar el token antes de redirigir
+                const renewed = await renewFirebaseToken();
+                if (renewed) {
+                    console.log('✅ Token renovado en verificación inicial, continuando...');
+                    // Continuar con el nuevo token
+                } else {
+                    console.log('❌ No se pudo renovar token, redirigiendo al login');
+                    sessionStorage.clear();
+                    window.location.href = 'login';
+                    return;
+                }
+            } else {
+                console.log('✅ Token válido, acceso permitido');
+            }
+        } catch (testError) {
+            console.error('❌ Error verificando token:', testError);
+            // Si hay error de red, permitir continuar (podría ser problema de conexión)
+            console.log('⚠️ Error de conexión, pero continuando...');
+        }
+        
+        // Si todo está bien, inicializar la página
+        console.log('✅ Usuario autenticado correctamente, inicializando inventario');
         logAuthState('DOMContentLoaded');
         initInventarioPage();
         
     } catch (error) {
-        console.error('Error verificando autenticación en inventario:', error);
-        sessionStorage.removeItem('firebase_id_token');
-        sessionStorage.removeItem('access_token');
-        sessionStorage.removeItem('user');
+        console.error('❌ Error verificando autenticación en inventario:', error);
+        sessionStorage.clear();
         window.location.href = 'login';
     }
 }
@@ -310,8 +420,20 @@ let currentPage = 1;
 const itemsPerPage = 10;
 
 function initInventarioPage() {
+    // Verificar que hay token antes de inicializar
+    const jwtToken = sessionStorage.getItem('access_token');
+    const firebaseToken = sessionStorage.getItem('firebase_id_token');
+    
+    if (!jwtToken && !firebaseToken) {
+        console.error('❌ No hay tokens disponibles en initInventarioPage');
+        sessionStorage.clear();
+        window.location.href = 'login';
+        return;
+    }
+    
     // Segundo log al iniciar la página de inventario (por si hay race con sessionStorage)
     logAuthState('initInventarioPage');
+    
     // Configurar botones de acción
     setupActionButtons();
 
@@ -336,7 +458,7 @@ function initInventarioPage() {
     // Cargar estadísticas reales
     loadEstadisticas();
 
-    console.log('Página de inventario inicializada');
+    console.log('✅ Página de inventario inicializada correctamente');
 }
 
 function setupActionButtons() {
@@ -384,7 +506,11 @@ function handleAction(action, button) {
 async function viewProducto(id, codigo, producto) {
     console.log(` Ver producto ID: ${id}`);
     try {
-        const response = await fetch(`/Color_Ink/public/index.php?route=inve&caso=1&action=producto&id=${id}`);
+        const response = await fetch(`/Color_Ink/public/index.php?route=inve&caso=1&action=producto&id=${id}`, {
+            headers: {
+                ...getAuthHeader(),
+            }
+        });
         const data = await response.json();
 
         if (data.status === 'OK') {
@@ -401,7 +527,11 @@ async function viewProducto(id, codigo, producto) {
 async function editProducto(id, codigo, producto) {
     console.log(` Editar producto ID: ${id}`);
     try {
-        const response = await fetch(`/Color_Ink/public/index.php?route=inve&caso=1&action=producto&id=${id}`);
+        const response = await fetch(`/Color_Ink/public/index.php?route=inve&caso=1&action=producto&id=${id}`, {
+            headers: {
+                ...getAuthHeader(),
+            }
+        });
         const data = await response.json();
 
         if (data.status === 'OK') {
@@ -443,6 +573,15 @@ async function deleteProducto(id, codigo, producto, row) {
     
     if (result.isConfirmed) {
         try {
+            // Verificar token antes de hacer la petición
+            if (!hasValidToken()) {
+                showNotification(' No hay sesión activa. Por favor, inicia sesión nuevamente.', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login';
+                }, 2000);
+                return;
+            }
+            
             const authHeader = getAuthHeader();
             console.log('Eliminar producto - Auth header:', authHeader);
             
@@ -454,6 +593,13 @@ async function deleteProducto(id, codigo, producto, row) {
                 },
                 body: JSON.stringify({ id_producto: id })
             });
+
+            // Verificar si la respuesta es un error de autenticación
+            if (response.status === 401) {
+                const errorData = await response.json();
+                handleAuthError(new Error(errorData.message || 'Token inválido'), 'al eliminar producto');
+                return;
+            }
 
             const deleteResult = await response.json();
             console.log('Eliminar producto - Respuesta:', deleteResult);
@@ -917,7 +1063,11 @@ async function loadFormData() {
 async function loadCategorias() {
     try {
         console.log(' Cargando categorías...');
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=categorias');
+        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=categorias', {
+            headers: {
+                ...getAuthHeader(),
+            }
+        });
         const data = await response.json();
         
         if (data.status === 'OK') {
@@ -985,7 +1135,11 @@ async function loadCategorias() {
 async function loadProveedores() {
     try {
         console.log(' Cargando proveedores...');
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=proveedores');
+        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=proveedores', {
+            headers: {
+                ...getAuthHeader(),
+            }
+        });
         const data = await response.json();
         
         if (data.status === 'OK') {
@@ -1029,6 +1183,20 @@ async function loadProveedores() {
 async function handleNuevoProducto(e) {
     e.preventDefault();
     
+    // PRIMERO: Verificar que el usuario esté autenticado antes de continuar
+    const jwtToken = sessionStorage.getItem('access_token');
+    const firebaseToken = sessionStorage.getItem('firebase_id_token');
+    
+    if (!jwtToken && !firebaseToken) {
+        console.error('❌ No hay tokens disponibles');
+        showNotification(' Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 'error');
+        setTimeout(() => {
+            sessionStorage.clear();
+            window.location.href = 'login';
+        }, 2000);
+        return;
+    }
+    
     const form = e.target;
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
@@ -1042,16 +1210,43 @@ async function handleNuevoProducto(e) {
     try {
         // Log rápido del estado de auth justo antes de enviar
         logAuthState('handleNuevoProducto submit');
+        
+        // Verificar que tenemos un token antes de hacer la petición
+        const authHeader = getAuthHeader();
+        console.log('Auth header obtenido:', authHeader);
+        
+        if (!authHeader || !authHeader.Authorization) {
+            console.error('❌ No se encontró token de autenticación');
+            showNotification(' Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 'error');
+            setTimeout(() => {
+                sessionStorage.clear();
+                window.location.href = 'login';
+            }, 2000);
+            return;
+        }
+        
         console.log('Enviando datos:', data);
+        console.log('Headers enviados:', { 'Content-Type': 'application/json', ...authHeader });
+        
+        // Verificar el token completo antes de enviar
+        const { firebaseIdToken, accessToken } = getStoredAuth();
+        const token = accessToken || firebaseIdToken;
+        if (token) {
+            console.log('Token completo (primeros 50 caracteres):', token.substring(0, 50));
+            console.log('Token completo (últimos 20 caracteres):', token.substring(token.length - 20));
+        }
         
         const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=add', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                ...getAuthHeader(),
+                ...authHeader,
             },
             body: JSON.stringify(data)
         });
+        
+        // Log de los headers de respuesta para debugging
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
         
         console.log('Response status:', response.status);
         console.log('Response ok:', response.ok);
@@ -1067,6 +1262,74 @@ async function handleNuevoProducto(e) {
                 errorMessage = errorJson.message || errorMessage;
             } catch (e) {
                 errorMessage = errorText || `Error HTTP ${response.status}`;
+            }
+            
+            // Si es un error 401, intentar renovar token primero
+            if (response.status === 401) {
+                console.error('Error 401: Token inválido o expirado');
+                
+                // Intentar renovar el token antes de redirigir
+                console.log('🔄 Intentando renovar token antes de redirigir...');
+                const renewed = await renewFirebaseToken();
+                
+                if (renewed) {
+                    console.log('✅ Token renovado exitosamente, reintentando petición...');
+                    showNotification(' Token renovado. Reintentando guardar producto...', 'success');
+                    
+                    // Reintentar la petición con el nuevo token
+                    try {
+                        const newAuthHeader = getAuthHeader();
+                        const retryResponse = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=add', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                ...newAuthHeader,
+                            },
+                            body: JSON.stringify(data)
+                        });
+                        
+                        if (retryResponse.ok) {
+                            const retryResult = await retryResponse.json();
+                            if (retryResult.status === 'OK') {
+                                showNotification(' Producto guardado exitosamente', 'success');
+                                // Cerrar modal y recargar productos
+                                const modal = document.getElementById('modalNuevoProducto');
+                                if (modal) {
+                                    modal.classList.remove('show');
+                                }
+                                loadProductos();
+                                loadEstadisticas();
+                                // Limpiar formulario
+                                const form = document.getElementById('formNuevoProducto');
+                                if (form) {
+                                    form.reset();
+                                }
+                                return;
+                            } else {
+                                showNotification(' Error al guardar producto: ' + (retryResult.message || 'Error desconocido'), 'error');
+                                return;
+                            }
+                        } else {
+                            const retryErrorText = await retryResponse.text();
+                            console.error('Error en reintento:', retryErrorText);
+                            showNotification(' Error al guardar producto después de renovar token', 'error');
+                            return;
+                        }
+                    } catch (retryError) {
+                        console.error('Error en reintento:', retryError);
+                        showNotification(' Error al reintentar guardar producto', 'error');
+                        return;
+                    }
+                } else {
+                    // No se pudo renovar, redirigir al login
+                    console.log('❌ No se pudo renovar token, redirigiendo al login');
+                    showNotification(' Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 'error');
+                    setTimeout(() => {
+                        sessionStorage.clear();
+                        window.location.href = 'login';
+                    }, 3000);
+                    return;
+                }
             }
             
             showNotification(' Error al crear producto: ' + errorMessage, 'error');
@@ -1102,7 +1365,11 @@ async function handleNuevoProducto(e) {
 async function loadProductos() {
     console.log(' Cargando productos...');
     try {
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=productos');
+        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=productos', {
+            headers: {
+                ...getAuthHeader(),
+            }
+        });
         const data = await response.json();
         
         console.log(' Respuesta de la API:', data);
@@ -1373,7 +1640,11 @@ function renderProductos(productos) {
 async function loadEstadisticas() {
     console.log(' Cargando estadísticas...');
     try {
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=estadisticas');
+        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=estadisticas', {
+            headers: {
+                ...getAuthHeader(),
+            }
+        });
         const data = await response.json();
         
         console.log(' Respuesta de estadísticas:', data);
@@ -1447,63 +1718,78 @@ function showProductoDetalles(producto) {
         if (productoIdDisplay) {
             productoIdDisplay.textContent = `ID: ${producto.id_producto} | SKU: ${producto.sku}`;
         }
+        
+        // Formatear moneda
+        const formatoLempiras = (valor) => {
+            return `L. ${parseFloat(valor || 0).toFixed(2)}`;
+        };
+        
         detalles.innerHTML = `
-            <div class="producto-detalle">
-                <div class="detalle-row">
-                    <div class="detalle-item">
-                        <label>SKU:</label>
-                        <span>${producto.sku || 'N/A'}</span>
-                    </div>
-                    <div class="detalle-item">
-                        <label>Nombre:</label>
-                        <span>${producto.nombre_producto || 'N/A'}</span>
-                    </div>
-                </div>
-                <div class="detalle-row">
-                    <div class="detalle-item">
-                        <label>Categoría:</label>
-                        <span>${producto.categoria || 'Sin categoría'}</span>
-                    </div>
-                    <div class="detalle-item">
-                        <label>Proveedor:</label>
-                        <span>${producto.proveedor || 'Sin proveedor'}</span>
-                    </div>
-                </div>
-                <div class="detalle-row">
-                    <div class="detalle-item">
-                        <label>Stock Actual:</label>
-                        <span class="stock-value">${producto.stock || 0}</span>
-                    </div>
-                    <div class="detalle-item">
-                        <label>Stock Mínimo:</label>
-                        <span>${producto.stock_minimo || 0}</span>
+            <div class="pedido-details-grid">
+                <!-- Información Básica del Producto -->
+                <div class="pedido-info-section">
+                    <h3><i class="fa-solid fa-box"></i> Información Básica</h3>
+                    <div class="detalle-row">
+                        <div class="detail-item">
+                            <span class="detail-label">SKU:</span>
+                            <span class="detail-value">${producto.sku || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Nombre:</span>
+                            <span class="detail-value">${producto.nombre_producto || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Categoría:</span>
+                            <span class="detail-value">${producto.categoria || 'Sin categoría'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Proveedor:</span>
+                            <span class="detail-value">${producto.proveedor || 'Sin proveedor'}</span>
+                        </div>
                     </div>
                 </div>
-                <div class="detalle-row">
-                    <div class="detalle-item">
-                        <label>Costo Unitario:</label>
-                        <span>L. ${parseFloat(producto.costo_unitario || 0).toFixed(2)}</span>
-                    </div>
-                    <div class="detalle-item">
-                        <label>Precio de Venta:</label>
-                        <span>L. ${parseFloat(producto.precio_venta_base || 0).toFixed(2)}</span>
+                
+                <!-- Información de Stock y Precios -->
+                <div class="pedido-info-section">
+                    <h3><i class="fa-solid fa-warehouse"></i> Stock y Precios</h3>
+                    <div class="detalle-row">
+                        <div class="detail-item">
+                            <span class="detail-label">Stock Actual:</span>
+                            <span class="detail-value stock-value">${producto.stock || 0}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Stock Mínimo:</span>
+                            <span class="detail-value">${producto.stock_minimo || 0}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Estado de Stock:</span>
+                            <span class="detail-value">
+                                <span class="status ${estadoStock.estado}">${estadoStock.texto}</span>
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Costo Unitario:</span>
+                            <span class="detail-value">${formatoLempiras(producto.costo_unitario)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Precio de Venta:</span>
+                            <span class="detail-value">${formatoLempiras(producto.precio_venta_base)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Fecha de Registro:</span>
+                            <span class="detail-value">${new Date(producto.fecha_registro).toLocaleString()}</span>
+                        </div>
                     </div>
                 </div>
-                <div class="detalle-row">
-                    <div class="detalle-item">
-                        <label>Estado de Stock:</label>
-                        <span class="status ${estadoStock.estado}">${estadoStock.texto}</span>
-                    </div>
-                    <div class="detalle-item">
-                        <label>Fecha de Registro:</label>
-                        <span>${new Date(producto.fecha_registro).toLocaleString()}</span>
-                    </div>
-                </div>
+                
                 ${producto.descripcion ? `
-                <div class="detalle-row">
-                    <div class="detalle-item" style="width: 100%;">
-                        <label>Descripción:</label>
-                        <span style="display: block; margin-top: 5px; white-space: pre-wrap;">${producto.descripcion}</span>
+                <!-- Descripción -->
+                <div class="pedido-info-section" style="grid-column: 1 / -1;">
+                    <h3><i class="fa-solid fa-align-left"></i> Descripción</h3>
+                    <div class="detalle-row">
+                        <div class="detail-item" style="width: 100%; border-bottom: none;">
+                            <span class="detail-value" style="text-align: left; white-space: pre-wrap; display: block; margin-top: 10px;">${producto.descripcion}</span>
+                        </div>
                     </div>
                 </div>
                 ` : ''}
@@ -1773,6 +2059,7 @@ function setupNuevoProveedorButton() {
     if (nuevoProveedorBtn) {
         nuevoProveedorBtn.addEventListener('click', function(e) {
             e.preventDefault();
+            console.log('Botón Proveedores clickeado - abriendo modal de gestión');
             openNuevoProveedorModal();
         });
     }
@@ -1789,7 +2076,7 @@ function setupNuevoProveedorButton() {
     if (nuevoProveedorModalBtn) {
         nuevoProveedorModalBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            openNuevoProveedorModal();
+            openVerProveedoresModal();
         });
     }
 }
@@ -1823,7 +2110,7 @@ async function handleNuevoProveedor(e) {
     };
     
     try {
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=add-proveedor', {
+        const response = await fetch('/Color_Ink/src/Routes/inve.php?action=add-proveedor', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1872,12 +2159,20 @@ function openVerProveedoresModal() {
 
 async function loadProveedoresTable() {
     try {
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=proveedores-completos');
+        console.log('Cargando tabla de proveedores...');
+        const response = await fetch('/Color_Ink/src/Routes/inve.php?action=proveedores-completos', {
+            headers: {
+                ...getAuthHeader(),
+            }
+        });
         const data = await response.json();
+        console.log('Respuesta de proveedores-completos:', data);
         
         if (data.status === 'OK') {
+            console.log('Datos de proveedores obtenidos:', data.data);
             renderProveedoresTable(data.data);
         } else {
+            console.error('Error en respuesta:', data.message);
             showNotification(' Error cargando proveedores: ' + data.message, 'error');
         }
     } catch (error) {
@@ -1887,44 +2182,52 @@ async function loadProveedoresTable() {
 }
 
 function renderProveedoresTable(proveedores) {
-    const tbody = document.getElementById('proveedores-tbody');
-    if (!tbody) return;
+    console.log('renderProveedoresTable llamada con:', proveedores);
     
-    tbody.innerHTML = '';
+    // Llenar ambas tablas para asegurar que se muestre en cualquier modal
+    const tbody1 = document.getElementById('proveedores-tbody');
+    const tbody2 = document.getElementById('proveedores-nuevo-tbody');
     
-    if (proveedores.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="2" class="text-center">
-                    <div style="padding: 40px; color: rgba(255, 255, 255, 0.6);">
-                        <i class="fas fa-truck" style="font-size: 3em; margin-bottom: 10px; opacity: 0.5;"></i>
-                        <p>No hay proveedores registrados</p>
-                    </div>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    proveedores.forEach(proveedor => {
-        const row = document.createElement('tr');
+    [tbody1, tbody2].forEach(tbody => {
+        if (!tbody) return;
         
-        row.innerHTML = `
-            <td>${proveedor.descripcion_proveedor || 'N/A'}</td>
-            <td>
-                <button class="btn-action btn-eliminar" data-id="${proveedor.id_proveedor}" title="Eliminar">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(row);
+        tbody.innerHTML = '';
+        
+        if (proveedores.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="2" class="text-center">
+                        <div style="padding: 40px; color: rgba(255, 255, 255, 0.6);">
+                            <i class="fas fa-truck" style="font-size: 3em; margin-bottom: 10px; opacity: 0.5;"></i>
+                            <p>No hay proveedores registrados</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        proveedores.forEach(proveedor => {
+            const row = document.createElement('tr');
+            
+            row.innerHTML = `
+                <td>${proveedor.descripcion_proveedor || 'N/A'}</td>
+                <td>
+                    <button class="btn-action btn-eliminar" data-id="${proveedor.id_proveedor}" title="Eliminar">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
     });
     
     setupProveedoresActionButtons();
 }
 
 function setupProveedoresActionButtons() {
-    const deleteButtons = document.querySelectorAll('#proveedores-tbody .btn-eliminar');
+    // Buscar botones en ambos modales
+    const deleteButtons = document.querySelectorAll('#proveedores-tbody .btn-eliminar, #proveedores-nuevo-tbody .btn-eliminar');
     
     deleteButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -1938,7 +2241,11 @@ function setupProveedoresActionButtons() {
 
 async function editProveedor(id) {
     try {
-        const response = await fetch(`/Color_Ink/public/index.php?route=inve&caso=1&action=proveedor&id=${id}`);
+        const response = await fetch(`/Color_Ink/public/index.php?route=inve&caso=1&action=proveedor&id=${id}`, {
+            headers: {
+                ...getAuthHeader(),
+            }
+        });
         const data = await response.json();
         
         if (data.status === 'OK') {
@@ -1977,17 +2284,30 @@ async function deleteProveedor(id, nombre) {
         title: '¿Eliminar Proveedor?',
         html: `¿Estás seguro de que quieres eliminar el proveedor "${nombre}"?<br><br><span style="color: #999; font-size: 14px; font-weight: 500;">Esta acción no se puede deshacer</span>`,
         icon: 'warning',
+        iconColor: '#dc3545',
         showCancelButton: true,
         confirmButtonText: 'Eliminar',
         cancelButtonText: 'Cancelar',
         confirmButtonColor: '#ff4444',
+        cancelButtonColor: '#f5f5f5',
+        buttonsStyling: false,
+        reverseButtons: true,
+        customClass: {
+            popup: 'swal-delete-popup',
+            title: 'swal-delete-title',
+            htmlContainer: 'swal-delete-content',
+            confirmButton: 'swal-delete-confirm',
+            cancelButton: 'swal-delete-cancel',
+            icon: 'swal-delete-icon'
+        },
         background: '#1a1a1a',
-        color: '#ffffff'
+        color: '#ffffff',
+        focusCancel: true
     });
     
     if (result.isConfirmed) {
         try {
-            const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=delete-proveedor', {
+            const response = await fetch('/Color_Ink/src/Routes/inve.php?action=delete-proveedor', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2017,7 +2337,8 @@ function setupProveedoresSearch() {
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#proveedores-tbody tr');
+            // Buscar en ambos modales
+            const rows = document.querySelectorAll('#proveedores-tbody tr, #proveedores-nuevo-tbody tr');
             
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();

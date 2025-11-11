@@ -59,16 +59,24 @@ class VentaModel
                 return $response;
             }
             
-            // 3. Calcular costo total
+            // 3. Calcular costo total usando precio_unitario si no hay costo_unitario
             $stmt = $this->db->prepare("
-                SELECT COALESCE(SUM(p.costo_unitario * dp.cantidad), 0) as costo_total
+                SELECT 
+                    COALESCE(SUM(
+                        CASE 
+                            WHEN p.costo_unitario > 0 THEN p.costo_unitario * dp.cantidad
+                            ELSE dp.precio_unitario * dp.cantidad * 0.7
+                        END
+                    ), 0) as costo_total
                 FROM detallepedido dp
-                JOIN producto p ON dp.id_producto = p.id_producto
+                LEFT JOIN producto p ON dp.id_producto = p.id_producto
                 WHERE dp.id_pedido = ?
             ");
             $stmt->execute([$idPedido]);
             $costoData = $stmt->fetch(PDO::FETCH_ASSOC);
             $costoTotal = $costoData['costo_total'] ?? 0;
+            
+            error_log('VentaModel - Costo calculado: ' . $costoTotal . ' para pedido: ' . $idPedido);
             
             // 4. Configurar zona horaria y insertar venta
             $this->db->exec("SET time_zone = '-06:00'"); // Ajustar según tu zona horaria
@@ -596,6 +604,46 @@ class VentaModel
             error_log('VentaModel - exportarVentasExcel ERROR: ' . $e->getMessage());
             header('Content-Type: application/json');
             echo json_encode(responseHTTP::status500());
+        }
+    }
+
+    /**
+     * Recalcular costos de TODAS las ventas existentes
+     */
+    public function recalcularCostosVentas(): array
+    {
+        try {
+            $stmt = $this->db->query("SELECT id_venta, id_pedido FROM venta");
+            $ventas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $actualizadas = 0;
+            
+            foreach ($ventas as $venta) {
+                $stmt = $this->db->prepare("
+                    SELECT 
+                        COALESCE(SUM(
+                            CASE 
+                                WHEN p.costo_unitario > 0 THEN p.costo_unitario * dp.cantidad
+                                ELSE dp.precio_unitario * dp.cantidad * 0.7
+                            END
+                        ), 0) as costo_total
+                    FROM detallepedido dp
+                    LEFT JOIN producto p ON dp.id_producto = p.id_producto
+                    WHERE dp.id_pedido = ?
+                ");
+                $stmt->execute([$venta['id_pedido']]);
+                $costoData = $stmt->fetch(PDO::FETCH_ASSOC);
+                $costoTotal = $costoData['costo_total'] ?? 0;
+                
+                $updateStmt = $this->db->prepare("UPDATE venta SET costo_total = ? WHERE id_venta = ?");
+                $updateStmt->execute([$costoTotal, $venta['id_venta']]);
+                $actualizadas++;
+            }
+            
+            return responseHTTP::status200("Todas las ventas actualizadas: $actualizadas");
+        } catch (\Throwable $e) {
+            error_log('VentaModel - recalcularCostosVentas ERROR: ' . $e->getMessage());
+            return responseHTTP::status500();
         }
     }
 

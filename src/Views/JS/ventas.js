@@ -82,12 +82,16 @@
             
             const headers = {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentToken}`
+                'Authorization': `Bearer ${currentToken}`,
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             };
 
             const options = {
                 method: method,
-                headers: headers
+                headers: headers,
+                cache: 'no-store'
             };
 
             if (data) {
@@ -153,6 +157,8 @@
         }
         params.append('pagina', pagina);
         params.append('limite', itemsPerPage);
+        // Agregar timestamp para evitar caché
+        params.append('_t', Date.now());
         
         const url = `${API_BASE_URL}&action=listar&${params.toString()}`;
         console.log('📥 URL de ventas:', url);
@@ -164,6 +170,7 @@
             totalPages = result.pagination?.total_pages || 1;
             totalRecords = result.pagination?.total || 0;
             console.log('✅ Ventas cargadas:', ventasData.length, 'de', totalRecords, 'total');
+            console.log('📊 Datos de ventas:', ventasData);
             console.log('📊 Paginación:', result.pagination);
             actualizarVista();
             actualizarPaginacion();
@@ -267,18 +274,29 @@
      * Calcular KPIs
      */
     function computeKPIs(rows) {
-        const ingresos = rows.reduce((acc, r) => acc + parseFloat(r.monto_cobrado || 0), 0);
-        const costos = rows.reduce((acc, r) => acc + parseFloat(r.costo_total || 0), 0);
+        // Filtrar solo ventas registradas para el cálculo
+        const ventasRegistradas = rows.filter(r => r.estado === 'REGISTRADA');
+        
+        const ingresos = ventasRegistradas.reduce((acc, r) => acc + parseFloat(r.monto_cobrado || 0), 0);
+        const costos = ventasRegistradas.reduce((acc, r) => acc + parseFloat(r.costo_total || 0), 0);
         const resultado = ingresos - costos;
         const margen = ingresos > 0 ? (resultado / ingresos) * 100 : 0;
         
         // Calcular ventas del mes actual
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
-        const ventasMes = rows.filter(r => {
+        const ventasMes = ventasRegistradas.filter(r => {
             const fechaVenta = new Date(r.fecha_venta);
             return fechaVenta.getMonth() === currentMonth && fechaVenta.getFullYear() === currentYear;
         }).length;
+        
+        console.log('📊 KPIs calculados:', {
+            ingresos: ingresos.toFixed(2),
+            costos: costos.toFixed(2),
+            resultado: resultado.toFixed(2),
+            margen: margen.toFixed(1) + '%',
+            ventasMes
+        });
         
         if (kpiIngresos) kpiIngresos.textContent = formatMoney(ingresos);
         const kpiVentasMes = document.getElementById('kpiVentasMes');
@@ -972,7 +990,20 @@
         
         if (sessionValid) {
             console.log('✅ Sesión válida, cargando ventas...');
+            
+            // Limpiar cualquier caché previo
+            ventasData = [];
+            
+            // Cargar ventas y forzar actualización de KPIs
             await cargarVentas();
+            
+            // Forzar recálculo de KPIs después de 500ms para asegurar que los datos estén cargados
+            setTimeout(() => {
+                if (ventasData && ventasData.length > 0) {
+                    console.log('🔄 Forzando recálculo de KPIs con datos:', ventasData.length, 'ventas');
+                    computeKPIs(ventasData);
+                }
+            }, 500);
             
             // Event listeners para formularios
             const formNuevaVenta = document.getElementById('formNuevaVenta');
@@ -1016,6 +1047,25 @@
             console.log('❌ Sesión inválida o usuario sin permisos');
         }
     });
+
+    /**
+     * Función global para actualizar KPIs manualmente
+     */
+    window.actualizarKPIsManual = async function() {
+        console.log('🔄 Actualización manual de KPIs solicitada');
+        mostrarNotificacion('Actualizando datos...', 'info');
+        
+        // Recargar datos desde el servidor
+        await cargarVentas(currentPage);
+        
+        // Forzar recálculo inmediato
+        if (ventasData && ventasData.length > 0) {
+            computeKPIs(ventasData);
+            mostrarNotificacion('KPIs actualizados correctamente', 'success');
+        } else {
+            mostrarNotificacion('No hay datos de ventas para calcular', 'error');
+        }
+    };
 
     // Event listeners para filtros y paginación
     if (searchInput) {
