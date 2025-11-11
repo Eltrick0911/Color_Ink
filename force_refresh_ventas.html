@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Forzar Actualización de Ventas</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .result { background: #2a2a2a; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        pre { background: #333; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Verificación y Actualización de Margen de Ventas</h1>
+        
+        <button onclick="verificarDatos()">📊 Verificar Datos Actuales</button>
+        <button onclick="limpiarCache()">🧹 Limpiar Caché</button>
+        <button onclick="recalcularTodo()">🔄 Recalcular Todo</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE = '/Color_Ink/public/index.php';
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        async function verificarDatos() {
+            log('🔍 Verificando datos actuales de ventas...');
+            
+            try {
+                // Obtener token de sessionStorage
+                const token = sessionStorage.getItem('firebase_id_token') || sessionStorage.getItem('access_token');
+                
+                if (!token) {
+                    log('❌ No hay token de autenticación. Por favor, inicie sesión primero.', 'error');
+                    return;
+                }
+                
+                const response = await fetch(`${API_BASE}?route=ventas&caso=1&action=listar&_t=${Date.now()}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'OK' && data.data) {
+                    const ventas = data.data.filter(v => v.estado === 'REGISTRADA');
+                    
+                    const totalIngresos = ventas.reduce((acc, v) => acc + parseFloat(v.monto_cobrado || 0), 0);
+                    const totalCostos = ventas.reduce((acc, v) => acc + parseFloat(v.costo_total || 0), 0);
+                    const totalUtilidad = totalIngresos - totalCostos;
+                    const margenReal = totalIngresos > 0 ? (totalUtilidad / totalIngresos * 100) : 0;
+                    
+                    log(`✅ Datos obtenidos: ${ventas.length} ventas registradas`, 'success');
+                    log(`💰 Total Ingresos: L${totalIngresos.toFixed(2)}`);
+                    log(`💸 Total Costos: L${totalCostos.toFixed(2)}`);
+                    log(`📈 Total Utilidad: L${totalUtilidad.toFixed(2)}`);
+                    log(`📊 Margen Real: ${margenReal.toFixed(1)}%`, 'success');
+                    
+                    // Mostrar detalles de cada venta
+                    log('<pre>' + JSON.stringify(ventas.map(v => ({
+                        id: v.id_venta,
+                        monto: parseFloat(v.monto_cobrado),
+                        costo: parseFloat(v.costo_total),
+                        utilidad: parseFloat(v.utilidad),
+                        margen: parseFloat(v.utilidad_pct)
+                    })), null, 2) + '</pre>');
+                    
+                } else {
+                    log('❌ Error en respuesta de API: ' + (data.message || 'Respuesta inválida'), 'error');
+                }
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        function limpiarCache() {
+            log('🧹 Limpiando caché del navegador...');
+            
+            // Limpiar localStorage y sessionStorage relacionado con ventas
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key && key.includes('venta')) {
+                    localStorage.removeItem(key);
+                    log(`🗑️ Eliminado de localStorage: ${key}`);
+                }
+            }
+            
+            // Forzar recarga de la página de ventas si está abierta
+            if (window.opener) {
+                try {
+                    window.opener.location.reload();
+                    log('🔄 Página de ventas recargada', 'success');
+                } catch (e) {
+                    log('⚠️ No se pudo recargar la página de ventas automáticamente');
+                }
+            }
+            
+            log('✅ Caché limpiado. Recargue la página de ventas manualmente.', 'success');
+        }
+        
+        async function recalcularTodo() {
+            log('🔄 Iniciando recálculo completo...');
+            
+            try {
+                const token = sessionStorage.getItem('firebase_id_token') || sessionStorage.getItem('access_token');
+                
+                if (!token) {
+                    log('❌ No hay token de autenticación', 'error');
+                    return;
+                }
+                
+                // Llamar al endpoint de recálculo de costos
+                const response = await fetch(`${API_BASE}?route=ventas&caso=1&action=recalcular-costos`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.status === 'OK') {
+                    log('✅ Recálculo completado exitosamente', 'success');
+                    log('🔄 Verificando datos actualizados...');
+                    setTimeout(verificarDatos, 1000);
+                } else {
+                    log('❌ Error en recálculo: ' + (result.message || 'Error desconocido'), 'error');
+                }
+                
+            } catch (error) {
+                log('❌ Error en recálculo: ' + error.message, 'error');
+            }
+        }
+        
+        // Verificar datos al cargar la página
+        window.addEventListener('load', () => {
+            log('🚀 Herramienta de verificación cargada');
+            log('💡 Asegúrese de estar autenticado en la aplicación principal antes de usar estas funciones');
+        });
+    </script>
+</body>
+</html>
