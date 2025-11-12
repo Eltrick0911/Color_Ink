@@ -87,6 +87,11 @@
             border-radius: 8px;
         }
 
+        /* Color base para icono de auditoría - sin !important para permitir hover */
+        .icon-bar i.fa-clipboard-list {
+            color: rgba(255, 140, 60, 0.85);
+        }
+
         /* Efectos hover específicos para cada botón */
         .icon-bar i.fa-house:hover {
             color: rgb(224, 206, 4); /* <-- Esto cambia el color del icono */
@@ -112,11 +117,22 @@
             box-shadow: 0 4px 8px rgba(255, 115, 0, 0.628);
         }
 
+        .icon-bar i.fa-clipboard-list:hover {
+            color: rgb(129, 25, 167); /* Color morado de auditoría */
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(129, 25, 167, 0.6);
+        }
+
 
         /* Efectos hover para el modo sidebar */
         header.sidebar .icon-bar i:hover {
             background-color: inherit;
             transform: scale(1.2);
+        }
+
+        /* Color base para icono de auditoría en sidebar - sin !important */
+        header.sidebar .icon-bar i.fa-clipboard-list {
+            color: rgba(255, 140, 60, 0.85);
         }
 
         header.sidebar .icon-bar i.fa-house:hover {
@@ -141,6 +157,12 @@
             color: rgb(255, 115, 0);
             transform: scale(1.1);
             box-shadow: 0 4px 8px rgba(255, 115, 0, 0.628);
+        }
+
+        header.sidebar .icon-bar i.fa-clipboard-list:hover {
+            color: rgb(129, 25, 167); /* Color morado de auditoría en sidebar */
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgba(129, 25, 167, 0.6);
         }
 
        .user-icon {

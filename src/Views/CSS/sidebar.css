@@ -145,15 +145,15 @@ header.sidebar .icon-bar i.fa-credit-card:hover {
 
 /* Hover para Auditoría */
 .icon-bar i.fa-clipboard-list:hover {
-    color: rgb(0, 191, 165);
+    color: rgb(129, 25, 167);
     transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(0, 191, 165, 0.6);
+    box-shadow: 0 4px 8px rgba(129, 25, 167, 0.3);
 }
 
 header.sidebar .icon-bar i.fa-clipboard-list:hover {
-    color: rgb(0, 191, 165);
+    color: rgb(129, 25, 167);
     transform: scale(1.2);
-    box-shadow: 0 4px 8px rgba(0, 191, 165, 0.6);
+    box-shadow: 0 4px 8px rgba(129, 25, 167, 0.6);
 }
 
 .user-icon {
