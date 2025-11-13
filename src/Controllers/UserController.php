@@ -266,20 +266,23 @@ class UserController
         
         error_log('UserController - delete: Usuario encontrado - ID: ' . $id . ', Email: ' . ($user['correo'] ?? 'N/A'));
         
-        // Eliminar de BD y agregar a lista negra
+        // Primero agregar a lista negra para prevenir re-login
+        if (isset($user['correo']) && !empty($user['correo'])) {
+            $this->addToBlacklist($user['correo'], $auth['id_usuario'], 'Usuario eliminado');
+        }
+        
+        // Luego intentar eliminar de BD
+        // Si tiene FK constraints, quedará bloqueado por blacklist pero permanecerá en la BD
+        // Si no tiene FK, se eliminará y el trigger registrará en usuario_aud
         $ok = $this->userModel->deleteUser($id);
         
         if ($ok) {
-            // Agregar email a la lista negra para prevenir re-login
-            if (isset($user['correo']) && !empty($user['correo'])) {
-                $this->addToBlacklist($user['correo'], $auth['id_usuario'], 'Usuario eliminado');
-            }
-            
-            error_log('UserController - delete: Usuario eliminado exitosamente');
+            error_log('UserController - delete: Usuario eliminado exitosamente de la BD y agregado a blacklist');
             echo json_encode(responseHTTP::status200('Usuario eliminado correctamente'));
         } else {
-            error_log('UserController - delete: Error eliminando usuario');
-            echo json_encode(responseHTTP::status500('Error eliminando usuario'));
+            error_log('UserController - delete: Usuario agregado a blacklist (no se pudo eliminar de BD por FK constraints)');
+            // Aunque el DELETE falle, el usuario está bloqueado por blacklist
+            echo json_encode(responseHTTP::status200('Usuario bloqueado en lista negra (tiene registros asociados)'));
         }
     }
 

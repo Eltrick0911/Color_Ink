@@ -98,14 +98,27 @@ class UserModel
             $stmt = $this->db->query("SELECT id_usuario, nombre_usuario, correo, telefono, fecha_ingreso, ultimo_acceso, id_rol, bloqueado_hasta FROM usuario WHERE id_rol IN (1, 2) ORDER BY id_usuario");
             $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Verificar Lista Negra para cada usuario
-            foreach ($users as &$user) {
-                $user['is_blacklisted'] = $this->isUserBlacklisted($user['correo']);
+            $visibleUsers = [];
+            
+            // Verificar Lista Negra para cada usuario y filtrar eliminados
+            foreach ($users as $user) {
+                $blacklistInfo = $this->getBlacklistInfo($user['correo']);
+                
+                // Si está en blacklist y fue "eliminado", no mostrarlo
+                if ($blacklistInfo && isset($blacklistInfo['razon']) && 
+                    stripos($blacklistInfo['razon'], 'eliminado') !== false) {
+                    error_log('UserModel - listUsers: Usuario eliminado oculto: ' . $user['correo']);
+                    continue;
+                }
+                
+                // Agregar flag de blacklist (bloqueado)
+                $user['is_blacklisted'] = $blacklistInfo !== null;
+                $visibleUsers[] = $user;
             }
             
-            error_log('UserModel - listUsers: Usuarios encontrados: ' . count($users));
-            error_log('UserModel - listUsers: Datos: ' . json_encode($users));
-            return $users ?: [];
+            error_log('UserModel - listUsers: Usuarios visibles: ' . count($visibleUsers));
+            error_log('UserModel - listUsers: Datos: ' . json_encode($visibleUsers));
+            return $visibleUsers;
         } catch (\Throwable $e) {
             error_log('Error listUsers: ' . $e->getMessage());
             return [];
@@ -118,6 +131,7 @@ class UserModel
     private function isUserBlacklisted(string $email): bool
     {
         try {
+            // Intentar usar stored procedure primero
             $stmt = $this->db->prepare("CALL sp_verificar_lista_negra(:email)");
             $stmt->bindParam(':email', $email, PDO::PARAM_STR);
             $stmt->execute();
@@ -128,8 +142,37 @@ class UserModel
             
             return isset($result['en_lista_negra']) && $result['en_lista_negra'] == 1;
         } catch (\Throwable $e) {
-            error_log('Error isUserBlacklisted: ' . $e->getMessage());
-            return false;
+            error_log('Error isUserBlacklisted SP, usando fallback: ' . $e->getMessage());
+            
+            // Fallback: consulta directa a usuarios_eliminados
+            try {
+                $stmt = $this->db->prepare("SELECT 1 FROM usuarios_eliminados WHERE email = :email LIMIT 1");
+                $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+                $stmt->execute();
+                return $stmt->fetch(PDO::FETCH_ASSOC) !== false;
+            } catch (\Throwable $e2) {
+                error_log('Error isUserBlacklisted fallback: ' . $e2->getMessage());
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Obtiene información de blacklist de un usuario (razón, fecha, etc.)
+     */
+    private function getBlacklistInfo(string $email): ?array
+    {
+        try {
+            // Consulta directa para obtener toda la información
+            $stmt = $this->db->prepare("SELECT email, razon, fecha_eliminacion, eliminado_por FROM usuarios_eliminados WHERE email = :email LIMIT 1");
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            return $result ?: null;
+        } catch (\Throwable $e) {
+            error_log('Error getBlacklistInfo: ' . $e->getMessage());
+            return null;
         }
     }
 

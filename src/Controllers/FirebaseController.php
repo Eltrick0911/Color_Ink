@@ -49,6 +49,13 @@ class FirebaseController
             return;
         }
         
+        // Verificar si el usuario está en la lista negra (bloqueado/eliminado)
+        if ($this->isUserBlacklisted($correo)) {
+            error_log("[LOGIN DBG {$corr}] Usuario bloqueado en lista negra: {$correo}");
+            echo json_encode(responseHTTP::status401('Usuario bloqueado o eliminado. Contacte al administrador.'));
+            return;
+        }
+        
         $userModel = new UserModel();
         $user = $userModel->getUserByEmailOrPhone($correo);
         
