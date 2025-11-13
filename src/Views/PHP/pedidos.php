@@ -53,7 +53,15 @@ if (strpos($uri, '/public/') !== false) {
                 </select>
             </div>
 
-            <div class="pedidos-table">
+            <!-- Botón para alternar la visibilidad de la tabla en móviles -->
+            <div class="mobile-toggle">
+                <button id="btnToggleTablaPedidos" class="btn-nuevo-pedido btn-toggle-tabla" title="Ver Lista de Pedidos">
+                    <i class="fa-solid fa-table"></i>
+                    <span class="btn-text">Ver Lista de Pedidos</span>
+                </button>
+            </div>
+
+            <div class="pedidos-table" id="tableWrapperPedidos">
                 <table>
                     <thead>
                         <tr>

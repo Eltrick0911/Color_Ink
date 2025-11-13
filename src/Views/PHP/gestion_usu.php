@@ -29,8 +29,8 @@ if (strpos($uri, '/public/') !== false) {
     </script>
     
     <main class="sidebar-content">
+        <h1>Gestión de Usuarios</h1>
         <div class="usuarios-container">
-            <h1>Gestión de Usuarios</h1>
             <div class="usuarios-header">
                 <h2>Control de Usuarios</h2>
                 <button class="btn-nuevo-usuario">
@@ -93,8 +93,16 @@ if (strpos($uri, '/public/') !== false) {
                 </select>
             </div>
 
+            <!-- Botón para alternar la visibilidad de la tabla en móviles -->
+            <div class="mobile-toggle">
+                <button id="btnToggleTablaUsuarios" class="btn-nuevo-usuario btn-toggle-tabla" title="Ver Lista de Usuarios">
+                    <i class="fa-solid fa-table"></i>
+                    <span class="btn-text">Ver Lista de Usuarios</span>
+                </button>
+            </div>
+
             <!-- ===== TABLA DINÁMICA (Mejorada de la API ACTUAL) ===== -->
-            <div class="usuarios-table">
+            <div class="usuarios-table" id="tableWrapperUsuarios">
                 <table>
                     <thead>
                         <tr>

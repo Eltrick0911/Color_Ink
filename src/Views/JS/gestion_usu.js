@@ -247,7 +247,46 @@ document.head.appendChild(style);
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar autenticación y autorización antes de inicializar
     checkAuthAndInit();
+    setupTableToggle();
 });
+
+// Alternar visibilidad de la tabla en móviles
+function setupTableToggle() {
+    const btn = document.getElementById('btnToggleTablaUsuarios');
+    const wrapper = document.getElementById('tableWrapperUsuarios');
+    const paginationContainer = document.getElementById('paginationContainer');
+    
+    if (!btn || !wrapper) return;
+    
+    const updateText = () => {
+        const span = btn.querySelector('.btn-text');
+        if (!span) return;
+        const visible = wrapper.classList.contains('tabla-visible');
+        span.textContent = visible ? 'Ocultar Lista de Usuarios' : 'Ver Lista de Usuarios';
+    };
+    
+    btn.addEventListener('click', () => {
+        const isVisible = wrapper.classList.toggle('tabla-visible');
+        updateText();
+        
+        // Controlar visibilidad de paginación si existe
+        if (paginationContainer) {
+            paginationContainer.style.display = isVisible ? '' : 'none';
+        }
+        
+        // Scroll suave hacia la tabla si se muestra
+        if (isVisible) {
+            setTimeout(() => wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        }
+    });
+    
+    updateText();
+    
+    // Ocultar paginación por defecto en móvil
+    if (paginationContainer && window.innerWidth <= 576) {
+        paginationContainer.style.display = 'none';
+    }
+}
 
 /**
  * Inicializa la renovación automática de tokens

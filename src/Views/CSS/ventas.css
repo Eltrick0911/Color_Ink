@@ -215,7 +215,8 @@ body {
 .ventas-table {
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     width: 100%;
 }
@@ -823,4 +824,81 @@ body {
 .modal-ver-venta .venta-info-section .detail-label,
 .modal-ver-venta .info-pedido-container .detail-label {
     color: rgba(186, 65, 156, 0.9) !important;
+}
+
+/* Botón de alternar tabla (visible solo en móviles) */
+.btn-toggle-tabla {
+    display: none;
+    margin: 6px 0 14px 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+}
+.btn-toggle-tabla .btn-text { font-size: 1em; }
+.mobile-toggle { display: none; }
+
+/* Responsive móvil */
+@media (max-width: 576px), (orientation: portrait) and (max-width: 768px) {
+    .ventas-header h2 { font-size: 1.4em; }
+    
+    /* Botón nueva venta como icon-only */
+    .btn-nueva-venta {
+        padding: 8px 10px;
+        font-size: 0;
+        min-width: 40px;
+        height: 40px;
+        justify-content: center;
+    }
+    .btn-nueva-venta i { font-size: 18px; }
+    
+    /* Botones de filtro compactos y icon-only */
+    .btn-export, .btn-limpiar-filtros {
+        padding: 8px 10px;
+        font-size: 0;
+        min-width: 40px;
+        height: 40px;
+    }
+    .btn-export i, .btn-limpiar-filtros i { font-size: 16px; }
+    
+    /* Stats como grid 2x2 en móvil */
+    .ventas-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    .stat-card {
+        padding: 15px;
+        gap: 10px;
+    }
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+    }
+    .stat-icon i { font-size: 1.1em; }
+    .stat-info h3 {
+        font-size: 0.85em;
+        margin-bottom: 4px;
+    }
+    .stat-number { font-size: 1.3em; }
+    
+    /* Mostrar toggle y ocultar tabla por defecto */
+    .mobile-toggle { display: block; }
+    .btn-toggle-tabla { display: inline-flex; align-items: center; gap: 8px; }
+    .ventas-table { display: none; }
+    .ventas-table.tabla-visible { display: block; animation: fadeSlideIn 0.25s ease-out; }
+    
+    /* Ajustar paginación en móvil */
+    .pagination-container {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px;
+    }
+    .pagination-info { font-size: 0.85em; }
+    .pagination-controls { flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .page-numbers { gap: 4px; }
+    .btn-pagination { min-width: 32px; height: 32px; font-size: 0.85em; padding: 6px 10px; }
+}
+
+/* Animación de entrada suave para la tabla */
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
 }

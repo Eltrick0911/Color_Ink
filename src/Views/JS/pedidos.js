@@ -165,6 +165,7 @@ function generarOpcionesProductos(valorSeleccionado = '') {
 document.addEventListener('DOMContentLoaded', function() {
     try {
         // Configurar UI de pedidos
+        setupTableToggle();
         setupActionButtons();
         setupFilters();
         setupSearch();
@@ -3767,5 +3768,36 @@ function initCustomSelectHover() {
     }, true);
     
     console.log('✅ Select personalizado con hover verde inicializado');
+}
+
+// Función para configurar el toggle de tabla en móviles
+function setupTableToggle() {
+    const btnToggle = document.getElementById('btnToggleTablaPedidos');
+    const tableWrapper = document.getElementById('tableWrapperPedidos');
+    const paginationWrapper = document.getElementById('paginationWrapper');
+    
+    if (!btnToggle || !tableWrapper) return;
+    
+    btnToggle.addEventListener('click', function() {
+        const isVisible = tableWrapper.classList.toggle('tabla-visible');
+        
+        // Actualizar texto del botón
+        const btnText = this.querySelector('.btn-text');
+        if (btnText) {
+            btnText.textContent = isVisible ? 'Ocultar Lista de Pedidos' : 'Ver Lista de Pedidos';
+        }
+        
+        // Controlar visibilidad de paginación
+        if (paginationWrapper) {
+            paginationWrapper.style.display = isVisible ? 'block' : 'none';
+        }
+        
+        // Scroll suave hacia la tabla si se muestra
+        if (isVisible) {
+            setTimeout(() => {
+                tableWrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+    });
 }
 

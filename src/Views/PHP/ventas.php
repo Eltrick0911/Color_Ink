@@ -81,7 +81,15 @@
                 </button>
             </div>
 
-            <div class="ventas-table">
+            <!-- Botón para alternar la visibilidad de la tabla en móviles -->
+            <div class="mobile-toggle">
+                <button id="btnToggleTablaVentas" class="btn-nueva-venta btn-toggle-tabla" title="Mostrar Ventas">
+                    <i class="fa-solid fa-table"></i>
+                    <span class="btn-text">Mostrar Ventas</span>
+                </button>
+            </div>
+
+            <div class="ventas-table" id="tableWrapperVentas">
                 <table>
                     <thead>
                         <tr>
@@ -100,7 +108,6 @@
                         <!-- Filas dinámicas -->
                     </tbody>
                 </table>
-            </div>
             
             <!-- Paginación -->
             <div class="pagination-container" id="paginationContainer" style="display: none;">
@@ -116,6 +123,7 @@
                         Siguiente <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
+            </div>
             </div>
         </div>
     </main>

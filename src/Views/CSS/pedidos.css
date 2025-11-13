@@ -6,6 +6,21 @@
     flex-grow: 1; /* Permite que el contenedor principal crezca */
 }
 
+.pedidos-container {
+    padding: 0 1rem 1rem;
+    max-width: 1190px;
+    margin-left: 3%; /* Margen izquierdo más grande */
+    margin-right: 1%; /* Margen derecho más pequeño */
+    margin-top: 20px; /* Separación del header */
+    width: 96%; /* Contenido más grande */
+    box-sizing: border-box;
+}
+
+/* Reservar espacio del sidebar cuando está activo */
+body.sidebar-active .pedidos-container {
+    padding-right: calc(80px + 1rem);
+}
+
 .pedidos-header {
     display: flex;
     justify-content: space-between;
@@ -144,7 +159,8 @@
 .pedidos-table {
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -2153,4 +2169,77 @@ select option:checked {
 /* Estilos adicionales para notificaciones */
 .notification {
     animation: slideInRight 0.3s ease-out;
+}
+
+/* Botón de alternar tabla (visible solo en móviles) */
+.btn-toggle-tabla {
+    display: none;
+    margin: 6px 0 14px 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+}
+.btn-toggle-tabla .btn-text { font-size: 1em; }
+.mobile-toggle { display: none; }
+
+/* Responsive móvil */
+@media (max-width: 576px), (orientation: portrait) and (max-width: 768px) {
+    .pedidos-container {
+        width: 99%;
+        margin-left: 0.5%;
+        margin-right: 0.5%;
+    }
+    
+    /* Ajustar padding cuando sidebar está activo en móvil */
+    body.sidebar-active .pedidos-container {
+        padding-right: calc(56px + 0.5rem);
+    }
+    
+    .pedidos-container h1 { font-size: 1.5em; }
+    .pedidos-header h2 { font-size: 1.4em; }
+    
+    /* Botones de header como icon-only */
+    .header-buttons { gap: 8px; }
+    .btn-nuevo-pedido, .btn-exportar-excel {
+        padding: 8px 10px;
+        font-size: 0;
+        min-width: 40px;
+        height: 40px;
+        justify-content: center;
+    }
+    .btn-nuevo-pedido i, .btn-exportar-excel i { font-size: 18px; }
+    
+    /* Filtros en columna en móvil */
+    .pedidos-filters {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .search-input, .filter-select {
+        width: 100%;
+        min-width: 100%;
+    }
+    
+    /* Mostrar toggle y ocultar tabla por defecto */
+    .mobile-toggle { display: block; }
+    .btn-toggle-tabla { display: inline-flex; align-items: center; gap: 8px; }
+    .pedidos-table { display: none; }
+    .pedidos-table.tabla-visible { display: block; animation: fadeSlideIn 0.25s ease-out; }
+    
+    /* Ocultar paginación por defecto en móvil (controlado por JS) */
+    #paginationWrapper { display: none; }
+    
+    /* Ajustar paginación en móvil */
+    .pagination-container {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px;
+    }
+    .pagination-info { font-size: 0.85em; }
+    .pagination-buttons { flex-wrap: wrap; justify-content: center; }
+    .btn-pagination { min-width: 32px; height: 32px; font-size: 0.85em; }
+}
+
+/* Animación de entrada suave para la tabla */
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
 }

@@ -986,6 +986,8 @@
     document.addEventListener('DOMContentLoaded', async () => {
         console.log('🔍 VENTAS: Verificando autenticación...');
         
+        setupTableToggle();
+        
         const sessionValid = initSession();
         
         if (sessionValid) {
@@ -1101,4 +1103,42 @@
     const btnNext = document.getElementById('btnNextPage');
     if (btnPrev) btnPrev.addEventListener('click', () => cambiarPagina(currentPage - 1));
     if (btnNext) btnNext.addEventListener('click', () => cambiarPagina(currentPage + 1));
-})();
+    })();
+
+// Alternar visibilidad de la tabla en móviles
+function setupTableToggle() {
+    const btn = document.getElementById('btnToggleTablaVentas');
+    const wrapper = document.getElementById('tableWrapperVentas');
+    const paginationContainer = document.getElementById('paginationContainer');
+    
+    if (!btn || !wrapper) return;
+    
+    const updateText = () => {
+        const span = btn.querySelector('.btn-text');
+        if (!span) return;
+        const visible = wrapper.classList.contains('tabla-visible');
+        span.textContent = visible ? 'Ocultar Ventas' : 'Mostrar Ventas';
+    };
+    
+    btn.addEventListener('click', () => {
+        const isVisible = wrapper.classList.toggle('tabla-visible');
+        updateText();
+        
+        // Controlar visibilidad de paginación si existe
+        if (paginationContainer) {
+            paginationContainer.style.display = isVisible ? '' : 'none';
+        }
+        
+        // Scroll suave hacia la tabla si se muestra
+        if (isVisible) {
+            setTimeout(() => wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        }
+    });
+    
+    updateText();
+    
+    // Ocultar paginación por defecto en móvil
+    if (paginationContainer && window.innerWidth <= 576) {
+        paginationContainer.style.display = 'none';
+    }
+}
