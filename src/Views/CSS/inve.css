@@ -49,7 +49,7 @@
     border: none;
     padding: 12px 24px;
     border-radius: 8px;
-    font-size: 1.1em;
+    font-size: 1em;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -197,6 +197,44 @@
     color: white;
 }
 
+/* Botón toggle para móviles */
+.btn-toggle-tabla {
+    display: none;
+    width: 100%;
+    background: linear-gradient(45deg, rgba(1, 100, 181, 0.9), rgba(1, 146, 179, 0.8));
+    color: white;
+    border: 2px solid rgba(1, 146, 179, 0.4);
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.btn-toggle-tabla span {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.btn-toggle-tabla i:last-child {
+    transition: transform 0.3s ease;
+}
+
+.btn-toggle-tabla.active i:last-child {
+    transform: rotate(180deg);
+}
+
+.btn-toggle-tabla:hover {
+    background: linear-gradient(45deg, rgba(1, 100, 181, 1), rgba(1, 146, 179, 0.95));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(1, 146, 179, 0.4);
+}
+
 /* Tabla de inventario */
 .inventario-table {
     background-color: rgba(255, 255, 255, 0.05);
@@ -216,7 +254,7 @@
     padding: 16px 12px;
     text-align: left;
     font-weight: bold;
-    font-size: 1.1em;
+    font-size: 1.05em;
 }
 
 .inventario-table td {
@@ -326,50 +364,75 @@ body.sidebar-active .sidebar-content {
     }
     
     .header-buttons {
-        flex-direction: column;
+        flex-direction: row;
         width: 100%;
+        justify-content: space-between;
+        gap: 8px;
     }
     
     .btn-nuevo-producto,
+    .btn-nuevo-proveedor,
     .btn-exportar-excel {
-        width: 100%;
+        flex: 1;
+        min-width: 0;
+        padding: 12px 8px;
+        font-size: 1.2em;
         justify-content: center;
+    }
+    
+    /* Ocultar texto, solo mostrar íconos */
+    .btn-nuevo-producto span,
+    .btn-nuevo-proveedor span,
+    .btn-exportar-excel span {
+        display: none;
+    }
+    
+    .btn-nuevo-producto i,
+    .btn-nuevo-proveedor i,
+    .btn-exportar-excel i {
+        margin: 0;
+        font-size: 1em;
     }
     
     .inventario-stats {
         grid-template-columns: 1fr;
-        gap: 15px;
+        gap: 12px;
+        margin-bottom: 20px;
     }
     
     .stat-card {
         flex-direction: row;
         text-align: left;
-        padding: 15px;
+        padding: 12px;
     }
     
     .stat-icon {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2em;
+        width: 45px;
+        height: 45px;
+        font-size: 1.1em;
     }
     
     .stat-info h3 {
-        font-size: 0.85em;
+        font-size: 0.75em;
+        margin: 0 0 4px 0;
     }
     
     .stat-number {
-        font-size: 1.5em;
+        font-size: 1.3em;
     }
     
     .inventario-filters {
         flex-direction: column;
-        gap: 15px;
+        gap: 12px;
+        margin-bottom: 20px;
     }
     
     .search-input,
     .filter-select {
         min-width: auto;
         width: 100%;
+        font-size: 0.95em;
+        padding: 14px 16px;
     }
     
     .inventario-table {
@@ -407,6 +470,55 @@ body.sidebar-active .sidebar-content {
     .inventario-container {
         width: 100%;
     }
+    
+    /* Mostrar botón toggle en móviles */
+    .btn-toggle-tabla {
+        display: flex;
+    }
+    
+    /* Ocultar tabla por defecto en móviles */
+    .inventario-table {
+        display: none;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, opacity 0.3s ease;
+        opacity: 0;
+    }
+    
+    /* Mostrar tabla cuando está activa */
+    .inventario-table.tabla-visible {
+        display: block;
+        max-height: 2000px;
+        opacity: 1;
+        animation: slideDown 0.4s ease;
+    }
+    
+    /* Ocultar paginación por defecto en móviles */
+    .pagination-container {
+        display: none;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+        opacity: 0;
+    }
+    
+    /* Mostrar paginación cuando la tabla está visible */
+    .inventario-table.tabla-visible ~ .pagination-container {
+        display: flex !important;
+        max-height: 200px;
+        opacity: 1;
+    }
+    
+    @keyframes slideDown {
+        from {
+            max-height: 0;
+            opacity: 0;
+        }
+        to {
+            max-height: 2000px;
+            opacity: 1;
+        }
+    }
 }
 
 @media (max-width: 480px) {
@@ -425,18 +537,49 @@ body.sidebar-active .sidebar-content {
     }
     
     .inventario-header h2 {
-        font-size: 1.3em;
+        font-size: 1.2em;
+    }
+    
+    .header-buttons {
+        gap: 6px;
+    }
+    
+    .btn-nuevo-producto,
+    .btn-nuevo-proveedor,
+    .btn-exportar-excel {
+        padding: 10px 6px;
+        font-size: 1.1em;
+        min-width: 50px;
+    }
+    
+    /* Asegurar que el texto permanezca oculto */
+    .btn-nuevo-producto span,
+    .btn-nuevo-proveedor span,
+    .btn-exportar-excel span {
+        display: none;
     }
     
     .stat-card {
-        flex-direction: column;
-        text-align: center;
-        padding: 12px;
+        flex-direction: row;
+        text-align: left;
+        padding: 10px;
+        gap: 10px;
     }
     
     .stat-icon {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
+        font-size: 1em;
+        flex-shrink: 0;
+    }
+    
+    .stat-info h3 {
+        font-size: 0.7em;
+        margin: 0 0 3px 0;
+    }
+    
+    .stat-number {
+        font-size: 1.2em;
     }
     
     .inventario-table table {
@@ -448,6 +591,22 @@ body.sidebar-active .sidebar-content {
     .inventario-table td {
         padding: 10px 6px;
     }
+    
+    /* Botón toggle más compacto en móviles pequeños */
+    .btn-toggle-tabla {
+        padding: 12px 16px;
+        font-size: 0.9em;
+        box-shadow: 0 4px 15px rgba(1, 146, 179, 0.3);
+    }
+    
+    .btn-toggle-tabla i:first-child {
+        font-size: 1em;
+    }
+    
+    .btn-toggle-tabla i:last-child {
+        font-size: 0.9em;
+    }
+}
 }
 
 /* =====================================================
@@ -681,7 +840,7 @@ body.sidebar-active .sidebar-content {
 .form-group label {
     color: rgba(255, 255, 255, 0.9);
     font-weight: bold;
-    font-size: 1em;
+    font-size: 0.9em;
 }
 
 .form-group input,

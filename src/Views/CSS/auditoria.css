@@ -173,6 +173,16 @@
     cursor: not-allowed;
 }
 
+/* Botón de alternar tabla (visible solo en móviles) */
+.btn-toggle-tabla {
+    display: none; /* oculto por defecto (escritorio) */
+    margin: 6px 0 14px 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+}
+.btn-toggle-tabla .btn-text { font-size: 1em; }
+.mobile-toggle { display: none; }
+
 /* Modal */
 .modal { 
     position: fixed; 
@@ -382,6 +392,13 @@
     }
     .header-actions .btn i { font-size: 18px; }
 
+    /* Mostrar botón de alternar y ocultar tabla por defecto en móvil */
+    .mobile-toggle { display: block; }
+    .btn-toggle-tabla { display: inline-flex; align-items: center; gap: 8px; }
+    /* Ocultar la tabla por defecto en móviles y mostrar cuando esté activa */
+    .auditoria-table { display: none; }
+    .auditoria-table.tabla-visible { display: block; animation: fadeSlideIn 0.25s ease-out; }
+
     /* Filtros un poco más compactos sin forzar */
     .auditoria-filters { gap: 12px; }
     .filter-select, .date-input { padding: 10px 12px; min-width: 0; }
@@ -415,3 +432,9 @@ body.sidebar-active .auditoria-container { padding-right: calc(80px + 12px); }
     box-shadow: 0 0 12px rgba(129,25,167,0.35);
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Animación de entrada suave para la tabla al mostrarse */
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}

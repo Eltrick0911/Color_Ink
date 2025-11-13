@@ -16,13 +16,13 @@
                 <h2>Control de Stock</h2>
                 <div class="header-buttons">
                     <button class="btn-exportar-excel" title="Exportar a Excel">
-                        <i class="fa-solid fa-file-excel"></i> Exportar Excel
+                        <i class="fa-solid fa-file-excel"></i><span> Exportar Excel</span>
                     </button>
-                    <button class="btn-nuevo-proveedor">
-                        <i class="fa-solid fa-truck"></i> Proveedores
+                    <button class="btn-nuevo-proveedor" title="Proveedores">
+                        <i class="fa-solid fa-truck"></i><span> Proveedores</span>
                     </button>
-                    <button class="btn-nuevo-producto">
-                        <i class="fa-solid fa-plus"></i> Nuevo Producto
+                    <button class="btn-nuevo-producto" title="Nuevo Producto">
+                        <i class="fa-solid fa-plus"></i><span> Nuevo Producto</span>
                     </button>
                 </div>
             </div>
@@ -71,7 +71,14 @@
                 </select>
             </div>
 
-            <div class="inventario-table">
+            <!-- Botón toggle para móviles -->
+            <button class="btn-toggle-tabla" id="btnToggleTabla">
+                <i class="fa-solid fa-list"></i>
+                <span>Ver Lista de Productos</span>
+                <i class="fa-solid fa-chevron-down" id="iconToggle"></i>
+            </button>
+
+            <div class="inventario-table" id="inventarioTable">
                 <table>
                     <thead>
                         <tr>

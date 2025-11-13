@@ -874,6 +874,29 @@
     document.addEventListener('keydown', e => { if(e.key === 'Escape') document.getElementById('detailModal').classList.add('hidden'); });
   }
 
+  // Alternar visibilidad de la tabla en móviles
+  function setupTableToggle(){
+    const btn = document.getElementById('btnToggleTablaAud');
+    const wrapper = document.getElementById('tableWrapper');
+    if (!btn || !wrapper) return;
+    const updateText = () => {
+      const span = btn.querySelector('.btn-text');
+      if (!span) return;
+      const visible = wrapper.classList.contains('tabla-visible');
+      span.textContent = visible ? 'Ocultar Lista' : 'Ver Lista de Cambios';
+    };
+    btn.addEventListener('click', () => {
+      wrapper.classList.toggle('tabla-visible');
+      updateText();
+      if (wrapper.classList.contains('tabla-visible')) {
+        // Desplazar hacia la tabla cuando se muestra
+        setTimeout(() => wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+      }
+    });
+    // Estado inicial: oculto en móvil, visible en escritorio via CSS.
+    updateText();
+  }
+
   // Reutilizable: mostrar notificación (similar a ventas.js) si no existe ya en página
   function mostrarNotificacion(mensaje, tipo = 'info') {
     const notification = document.createElement('div');
@@ -896,6 +919,7 @@
 
   document.addEventListener('DOMContentLoaded', function(){
     initEvents();
+    setupTableToggle();
     renderTableHead();
     // Cargar mapa de usuarios en segundo plano y luego tablas
     ensureUsersMap().finally(() => {

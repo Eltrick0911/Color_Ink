@@ -14,3 +14,4 @@ src/Logs/php-error.log
 .DS_Store
 Thumbs.db
 *.log
+src/DB/Dump20251112 p.sql

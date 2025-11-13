@@ -448,6 +448,9 @@ function initInventarioPage() {
 
     // Configurar paginación
     setupPagination();
+    
+    // Configurar toggle de tabla para móviles
+    setupTableToggle();
 
     // Cargar datos para formularios
     loadFormData();
@@ -2472,4 +2475,40 @@ function updatePagination() {
     } else {
         paginationContainer.style.display = 'none';
     }
+}
+
+// Configurar toggle de tabla para móviles
+function setupTableToggle() {
+    const btnToggle = document.getElementById('btnToggleTabla');
+    const tabla = document.getElementById('inventarioTable');
+    const iconToggle = document.getElementById('iconToggle');
+    
+    if (!btnToggle || !tabla) {
+        console.log('Toggle de tabla no disponible (no estamos en móvil)');
+        return;
+    }
+    
+    btnToggle.addEventListener('click', function() {
+        // Toggle clase activa
+        tabla.classList.toggle('tabla-visible');
+        btnToggle.classList.toggle('active');
+        
+        // Cambiar texto del botón
+        const span = btnToggle.querySelector('span');
+        if (tabla.classList.contains('tabla-visible')) {
+            span.textContent = 'Ocultar Lista de Productos';
+            
+            // Scroll suave hacia la tabla después de un pequeño delay para la animación
+            setTimeout(() => {
+                tabla.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        } else {
+            span.textContent = 'Ver Lista de Productos';
+            
+            // Scroll hacia el botón cuando se oculta
+            btnToggle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+    
+    console.log('✅ Toggle de tabla configurado para móviles');
 }

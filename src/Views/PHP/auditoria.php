@@ -65,6 +65,14 @@ if (strpos($uri, '/public/') !== false) {
                 </div>
             </div>
 
+            <!-- Botón para alternar la visibilidad de la tabla en móviles -->
+            <div class="mobile-toggle">
+                <button id="btnToggleTablaAud" class="btn btn-print btn-toggle-tabla">
+                    <i class="fa-solid fa-table"></i>
+                    <span class="btn-text">Ver Lista de Cambios</span>
+                </button>
+            </div>
+
             <div class="auditoria-table" id="tableWrapper">
                 <table>
                     <thead id="tableHead"></thead>

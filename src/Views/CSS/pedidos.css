@@ -160,7 +160,7 @@
     padding: 16px 12px;
     text-align: center;
     font-weight: bold;
-    font-size: 1.1em;
+    font-size: 1.05em;
 }
 
 /* Anchos específicos para cada columna */
@@ -426,7 +426,7 @@
 .form-group label {
     color: rgba(255, 255, 255, 0.9);
     font-weight: bold;
-    font-size: 1em;
+    font-size: 0.9em;
 }
 
 .form-group input,
@@ -665,7 +665,7 @@
 .product-details-form .form-group label {
     color: rgba(255, 255, 255, 0.9);
     font-weight: bold;
-    font-size: 1em;
+    font-size: 0.9em;
 }
 
 .product-details-form .form-group input,

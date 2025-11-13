@@ -53,7 +53,7 @@ body.sidebar-active .sidebar-content {
     border: none;
     padding: 12px 24px;
     border-radius: 8px;
-    font-size: 1.1em;
+    font-size: 1em;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
