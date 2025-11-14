@@ -21,7 +21,7 @@
     $rawRoute = isset($_GET['route']) && $_GET['route'] !== '' ? $_GET['route'] : $requestPath;
     $url = explode('/', $rawRoute);
     
-    $lista = ['auth', 'user', 'login', 'index', 'pedidos', 'ventas', 'gestion_usu', 'inve', 'firebase', 'perfil', 'register', 'audit', 'auditoria', 'productos', 'upload', 'diagnostic']; // lista de rutas permitidas
+    $lista = ['auth', 'user', 'login', 'index', 'pedidos', 'ventas', 'gestion_usu', 'inve', 'firebase', 'perfil', 'register', 'audit', 'auditoria', 'productos', 'upload', 'diagnostic', 'debug_db', 'ping_db']; // lista de rutas permitidas
     $caso = filter_input(INPUT_GET, "caso");
     $file = "";
     if($caso != ""){
