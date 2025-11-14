@@ -8,7 +8,7 @@ function loadEnv($path) {
     foreach ($lines as $line) {
         if (strpos(trim($line), '#') === 0) continue;
         list($name, $value) = explode('=', $line, 2);
-        $_ENV[trim($name)] = trim($value, '"');
+        $_ENV[trim($name)] = trim(trim($value), '"');
     }
     return true;
 }
@@ -17,8 +17,8 @@ function loadEnv($path) {
 $envPath = dirname(dirname(dirname(__DIR__))) . '/.env';
 loadEnv($envPath);
 
-$host = $_ENV['IP'];
-$port = $_ENV['PORT'];
+$host = getenv('IP') ?: $_ENV['IP'];
+$port = getenv('PORT') ?: $_ENV['PORT'];
 
 echo "Testing connection to: $host:$port\n";
 echo "Timestamp: " . date('Y-m-d H:i:s') . "\n";
@@ -34,8 +34,10 @@ if ($socket) {
 
 // Test MySQL connection
 try {
+    $user = getenv('USER') ?: $_ENV['USER'];
+    $pass = getenv('PASSWORD') ?: $_ENV['PASSWORD'];
     $dsn = "mysql:host=$host;port=$port;charset=utf8mb4";
-    $pdo = new PDO($dsn, $_ENV['USER'], $_ENV['PASSWORD'], [
+    $pdo = new PDO($dsn, $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_TIMEOUT => 10
     ]);

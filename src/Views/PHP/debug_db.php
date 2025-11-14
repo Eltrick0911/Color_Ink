@@ -9,7 +9,7 @@ function loadEnv($path) {
     foreach ($lines as $line) {
         if (strpos(trim($line), '#') === 0) continue;
         list($name, $value) = explode('=', $line, 2);
-        $_ENV[trim($name)] = trim($value, '"');
+        $_ENV[trim($name)] = trim(trim($value), '"');
     }
     return true;
 }
@@ -23,15 +23,15 @@ $result = [
 ];
 
 try {
-    // Cargar .env desde la raíz del proyecto
+    // Usar variables de entorno del sistema (Render) primero, luego .env como fallback
     $envPath = dirname(dirname(dirname(__DIR__))) . '/.env';
     $result['env_loaded'] = loadEnv($envPath);
     
-    $host = $_ENV['IP'] ?? 'not_found';
-    $port = $_ENV['PORT'] ?? 'not_found';
-    $db = $_ENV['DB'] ?? 'not_found';
-    $user = $_ENV['USER'] ?? 'not_found';
-    $pass = $_ENV['PASSWORD'] ?? 'not_found';
+    $host = getenv('IP') ?: ($_ENV['IP'] ?? 'not_found');
+    $port = getenv('PORT') ?: ($_ENV['PORT'] ?? 'not_found');
+    $db = getenv('DB') ?: ($_ENV['DB'] ?? 'not_found');
+    $user = getenv('USER') ?: ($_ENV['USER'] ?? 'not_found');
+    $pass = getenv('PASSWORD') ?: ($_ENV['PASSWORD'] ?? 'not_found');
     
     $result['config'] = [
         'host' => $host,
