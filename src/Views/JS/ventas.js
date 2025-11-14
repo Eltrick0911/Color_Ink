@@ -62,7 +62,7 @@
                 mostrarNotificacion('Acceso denegado. Solo Gerente y Administrador pueden acceder a ventas.', 'error');
                 // Redirigir al dashboard después de 3 segundos
                 setTimeout(() => {
-                    window.location.href = 'http://localhost/Color_Ink/public/index';
+                    window.location.href = getProjectBase() + '/public/index';
                 }, 3000);
                 return false;
             }

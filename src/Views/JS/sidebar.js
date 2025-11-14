@@ -65,10 +65,7 @@ class SidebarManager {
         userIcon.className = 'fa-solid fa-user user-icon';
         userIcon.title = 'Gestión de Usuarios';
         userIcon.onclick = () => {
-            const parts = window.location.pathname.split('/');
-            const pIdx = parts.indexOf('public');
-            const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
-            window.location.href = base + '/public/gestion_usu';
+            window.location.href = '/gestion_usu';
         };
 
         // Crear el contenedor de iconos - Replica exacta
@@ -105,11 +102,15 @@ class SidebarManager {
         const getBase = () => {
             const parts = window.location.pathname.split('/');
             const pIdx = parts.indexOf('public');
-            return pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '';
+            if (pIdx > 1) {
+                return '/' + parts.slice(1, pIdx).join('/');
+            }
+            // Para rutas en la raíz como /auditoria, /ventas, etc.
+            return '';
         };
         const basePath = getBase();
 
-        // Definir los iconos con la misma lógica que index.html
+        // Definir los iconos con rutas directas para Render
         const icons = [
             { 
                 class: 'fa-house', 
@@ -118,17 +119,17 @@ class SidebarManager {
             },
             { 
                 class: 'fa-truck-ramp-box', 
-                onclick: () => this.handleOtherClick(basePath + '/public/pedidos'),
+                onclick: () => this.handleOtherClick('/pedidos'),
                 title: 'Pedidos'
             },
             { 
                 class: 'fa-truck', 
-                onclick: () => this.handleOtherClick(basePath + '/public/inve'),
+                onclick: () => this.handleOtherClick('/inve'),
                 title: 'Inventario'
             },
             { 
                 class: 'fa-credit-card', 
-                onclick: () => this.handleOtherClick(basePath + '/public/ventas'),
+                onclick: () => this.handleOtherClick('/ventas'),
                 title: 'Ventas'
             }
         ];
@@ -137,7 +138,7 @@ class SidebarManager {
         if (isAdmin) {
             icons.push({
                 class: 'fa-clipboard-list',
-                onclick: () => this.handleOtherClick(basePath + '/public/auditoria'),
+                onclick: () => this.handleOtherClick('/auditoria'),
                 title: 'Auditoría'
             });
         }
@@ -169,11 +170,8 @@ class SidebarManager {
             }
             // Fallback local
             try {
-                const parts = window.location.pathname.split('/');
-                const pIdx = parts.indexOf('public');
-                const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
-                const apiEntry = `${base}/public/index.php`;
-                const loginUrl = `${base}/public/login`;
+                const apiEntry = `/public/index.php`;
+                const loginUrl = `/login`;
                 const jwtToken = sessionStorage.getItem('access_token');
                 if (jwtToken) {
                     try {
@@ -190,10 +188,7 @@ class SidebarManager {
                 window.location.replace(loginUrl);
             } catch (_) {
                 sessionStorage.clear();
-                const parts = window.location.pathname.split('/');
-                const pIdx = parts.indexOf('public');
-                const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
-                window.location.replace(base + '/public/login');
+                window.location.replace('/login');
             }
         });
 
@@ -222,10 +217,7 @@ class SidebarManager {
             this.resetBarPosition();
         } else {
             // Si estamos en otra página, navegar a index
-            const parts = window.location.pathname.split('/');
-            const pIdx = parts.indexOf('public');
-            const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
-            window.location.href = base + '/public/index';
+            window.location.href = '/index';
         }
     }
 
