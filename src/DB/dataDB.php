@@ -35,7 +35,7 @@ if (is_readable($envDir . '/.env')) {
         if (strpos(trim($line), '#') === 0) continue;
         if (strpos($line, '=') === false) continue;
         list($key, $value) = explode('=', $line, 2);
-        $_ENV[trim($key)] = trim($value, '"');
+        $_ENV[trim($key)] = trim(trim($value), '"');
     }
 }
 
