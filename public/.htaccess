@@ -1,3 +1,24 @@
+# Enable URL rewriting
+RewriteEngine On
+
+# Security: disable directory listing
+Options -Indexes
+
+# Security: block access to hidden files (e.g., .env)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# If the requested resource exists as a file or directory, serve it directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Map root to the default route
+RewriteRule ^$ index.php?route=index [QSA,L]
+
+# Rewrite everything else to index.php with route param
+RewriteRule ^(.+)$ index.php?route=$1 [QSA,L]
 RewriteEngine On
 Options All -Indexes
 

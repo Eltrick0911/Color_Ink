@@ -1,0 +1,29 @@
+# Ignore local development files
+.env.local
+.DS_Store
+Thumbs.db
+
+# Ignore version control
+.git
+.gitignore
+
+# Ignore test files
+test_*.php
+
+# Ignore local SQL dumps
+*.sql
+
+# Ignore logs
+src/Logs/*.log
+src/Logs/*.json
+
+# Ignore deployment artifacts
+Color_Ink_Deploy.zip
+
+# Ignore IDE files
+.vscode/
+.idea/
+
+# Ignore Elastic Beanstalk files
+.elasticbeanstalk/
+.ebextensions/

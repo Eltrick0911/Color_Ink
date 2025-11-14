@@ -5,6 +5,8 @@
 
 # Logs
 src/Logs/php-error.log
+src/Logs/*.log
+src/Logs/*.json
 
 # Archivos temporales
 *.tmp
@@ -14,4 +16,27 @@ src/Logs/php-error.log
 .DS_Store
 Thumbs.db
 *.log
-src/DB/Dump20251112 p.sql
+
+# SQL dumps
+src/DB/*.sql
+
+# Deployment artifacts
+Color_Ink_Deploy.zip
+
+# Vendor (Render ejecutará composer install)
+vendor/
+
+# Uploads locales
+uploads/
+
+# IDE
+.vscode/
+.idea/
+
+# Tests locales
+test_*.php
+
+# Elastic Beanstalk
+.elasticbeanstalk/
+.ebextensions/
+.platform/
