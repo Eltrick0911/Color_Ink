@@ -40,8 +40,9 @@ RUN chown -R www-data:www-data /var/www/html \
     && chown -R www-data:www-data uploads \
     && chmod -R 775 uploads
 
-# ServerName to suppress warning
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+# ServerName to suppress warning and allow .htaccess overrides
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
+    && sed -ri 's/AllowOverride\s+None/AllowOverride All/g' /etc/apache2/apache2.conf /etc/apache2/sites-available/*.conf
 
 # Expose fixed HTTP port 80 (Render can detect automatically or set PORT=80)
 EXPOSE 80
