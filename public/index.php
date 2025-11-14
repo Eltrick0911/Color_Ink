@@ -12,8 +12,10 @@
     require $autoloadPath;
     //print_r($_POST);
     //print_r($_GET);
-   
-    $url = explode('/',$_GET['route']);
+
+    // Fallback seguro: si no viene ?route= lo asignamos a 'login' (o 'index' si prefieres portada)
+    $rawRoute = isset($_GET['route']) && $_GET['route'] !== '' ? $_GET['route'] : 'login';
+    $url = explode('/', $rawRoute);
     
     $lista = ['auth', 'user', 'login', 'index', 'pedidos', 'ventas', 'gestion_usu', 'inve', 'firebase', 'perfil', 'register', 'audit', 'auditoria', 'productos', 'upload']; // lista de rutas permitidas
     $caso = filter_input(INPUT_GET, "caso");
@@ -26,7 +28,7 @@
     
     errorlogs::activa_error_logs(); //activamos los errors    
     //echo $_GET['route'];
-    if(isset($_GET['route'])){
+    if($rawRoute !== ''){
         if(!in_array($url[0], $lista)){
             //echo "La ruta no existe";
             echo json_encode(responseHTTP::status200('Dentro!'));
@@ -46,8 +48,9 @@
         }
 
         //echo "existe la variable route";
-    }else{
-        echo "no existe la variable route";
+    } else {
+        // Nunca debería llegar aquí porque forzamos fallback, pero por claridad:
+        require dirname(__DIR__) . '/src/Views/PHP/login.php';
     }
 
 ?>
