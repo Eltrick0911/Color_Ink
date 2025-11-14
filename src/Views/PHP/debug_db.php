@@ -23,15 +23,15 @@ $result = [
 ];
 
 try {
-    // Usar variables de entorno del sistema (Render) primero, luego .env como fallback
+    // Cargar .env primero, luego variables del sistema como fallback
     $envPath = dirname(dirname(dirname(__DIR__))) . '/.env';
     $result['env_loaded'] = loadEnv($envPath);
     
-    $host = getenv('IP') ?: ($_ENV['IP'] ?? 'not_found');
-    $port = getenv('PORT') ?: ($_ENV['PORT'] ?? 'not_found');
-    $db = getenv('DB') ?: ($_ENV['DB'] ?? 'not_found');
-    $user = getenv('USER') ?: ($_ENV['USER'] ?? 'not_found');
-    $pass = getenv('PASSWORD') ?: ($_ENV['PASSWORD'] ?? 'not_found');
+    $host = $_ENV['IP'] ?? (getenv('IP') ?: 'not_found');
+    $port = $_ENV['PORT'] ?? (getenv('DB_PORT') ?: 'not_found');
+    $db = $_ENV['DB'] ?? (getenv('DB') ?: 'not_found');
+    $user = $_ENV['USER'] ?? (getenv('DB_USER') ?: 'not_found');
+    $pass = $_ENV['PASSWORD'] ?? (getenv('DB_PASSWORD') ?: 'not_found');
     
     $result['config'] = [
         'host' => $host,
