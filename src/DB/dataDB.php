@@ -28,6 +28,17 @@ if (method_exists($dotenv, 'safeLoad')) {
     }
 }
 
+// Forzar sobrescritura con valores del .env si existen
+if (is_readable($envDir . '/.env')) {
+    $envLines = file($envDir . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($envLines as $line) {
+        if (strpos(trim($line), '#') === 0) continue;
+        if (strpos($line, '=') === false) continue;
+        list($key, $value) = explode('=', $line, 2);
+        $_ENV[trim($key)] = trim($value, '"');
+    }
+}
+
 //definimos un arreglos para simplificar y pasar la cadena de caracteres necesaria para abrir la conexion PDO
 $data = array(
     // Credenciales y parámetros - priorizar .env sobre variables del sistema
