@@ -1,8 +1,14 @@
 # Enable URL rewriting
 RewriteEngine On
 
-# Security: disable directory listing
-Options -Indexes
+# Security + avoid Apache MultiViews interfering with rewrites
+Options -Indexes -MultiViews
+
+# Optional base (docroot is /public)
+# RewriteBase /
+
+# Do not rewrite direct calls to index.php
+RewriteRule ^index\.php$ - [L]
 
 # Security: block access to hidden files (e.g., .env)
 <FilesMatch "^\.">
