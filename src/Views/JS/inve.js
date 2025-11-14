@@ -239,7 +239,7 @@ function getApiBase() {
         const parts = path.split('/public/');
         return parts[0];
     }
-    return '/Color_Ink';
+    return '';
 }
 
 // Función para obtener el usuario actual
@@ -509,7 +509,7 @@ function handleAction(action, button) {
 async function viewProducto(id, codigo, producto) {
     console.log(` Ver producto ID: ${id}`);
     try {
-        const response = await fetch(`/Color_Ink/public/index.php?route=inve&caso=1&action=producto&id=${id}`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=producto&id=${id}`, {
             headers: {
                 ...getAuthHeader(),
             }
@@ -530,7 +530,7 @@ async function viewProducto(id, codigo, producto) {
 async function editProducto(id, codigo, producto) {
     console.log(` Editar producto ID: ${id}`);
     try {
-        const response = await fetch(`/Color_Ink/public/index.php?route=inve&caso=1&action=producto&id=${id}`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=producto&id=${id}`, {
             headers: {
                 ...getAuthHeader(),
             }
@@ -588,7 +588,7 @@ async function deleteProducto(id, codigo, producto, row) {
             const authHeader = getAuthHeader();
             console.log('Eliminar producto - Auth header:', authHeader);
             
-            const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=delete', {
+            const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=delete`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -917,7 +917,7 @@ async function generarSkuPorCategoria(idCategoria, skuInputId = 'sku') {
     
     try {
         console.log(' Generando SKU para categoría ID:', idCategoria, 'en input:', skuInputId);
-        const url = `/Color_Ink/public/index.php?route=inve&caso=1&action=siguiente-sku&id_categoria=${idCategoria}`;
+        const url = `${getApiBase()}/public/index.php?route=inve&caso=1&action=siguiente-sku&id_categoria=${idCategoria}`;
         console.log(' URL de petición:', url);
         
         const response = await fetch(url);
@@ -1066,7 +1066,7 @@ async function loadFormData() {
 async function loadCategorias() {
     try {
         console.log(' Cargando categorías...');
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=categorias', {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=categorias`, {
             headers: {
                 ...getAuthHeader(),
             }

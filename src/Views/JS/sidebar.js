@@ -105,7 +105,7 @@ class SidebarManager {
         const getBase = () => {
             const parts = window.location.pathname.split('/');
             const pIdx = parts.indexOf('public');
-            return pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
+            return pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '';
         };
         const basePath = getBase();
 

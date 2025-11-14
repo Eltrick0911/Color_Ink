@@ -1,6 +1,16 @@
 // Lógica de Ventas: conectado a la API REST y Firebase
 (function() {
-    const API_BASE_URL = '/Color_Ink/public/index.php?route=ventas&caso=1';
+    // Función para obtener la base URL de la API
+    function getApiBase() {
+        const path = window.location.pathname;
+        if (path.includes('/public/')) {
+            const parts = path.split('/public/');
+            return parts[0];
+        }
+        return '';
+    }
+    
+    const API_BASE_URL = `${getApiBase()}/public/index.php?route=ventas&caso=1`;
     
     let ventasData = [];
     let currentUser = null;
@@ -653,7 +663,7 @@
             select.innerHTML = '<option value="">Cargando pedidos...</option>';
             
             try {
-                const url = '/Color_Ink/public/index.php?route=ventas&caso=1&action=pedidos-disponibles';
+                const url = `${getApiBase()}/public/index.php?route=ventas&caso=1&action=pedidos-disponibles`;
                 console.log('🔗 URL para pedidos:', url);
                 const result = await apiCall('GET', url);
                 
