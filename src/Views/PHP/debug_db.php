@@ -38,8 +38,12 @@ try {
         'PASSWORD_set' => !empty($_ENV['PASSWORD'] ?? '')
     ];
     
-    // Usar connectionDB para probar
-    $pdo = connectionDB::getConnection();
+    // Test directo con los datos que dataDB.php debería haber configurado
+    $dsn = "mysql:host={$_ENV['IP']};port={$_ENV['PORT']};dbname={$_ENV['DB']};charset=utf8mb4";
+    $pdo = new PDO($dsn, $_ENV['USER'], $_ENV['PASSWORD'], [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_TIMEOUT => 10
+    ]);
     $result['connection_test'] = true;
     $result['server_info'] = $pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
     
