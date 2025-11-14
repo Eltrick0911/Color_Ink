@@ -2,7 +2,14 @@
     use App\Config\errorlogs;
     use App\Config\responseHTTP;
     use App\Config\Security;
-    require dirname(__DIR__).'\vendor\autoload.php';
+    // Cargar autoload con separador universal (evita mezcla de \ en Linux)
+    $autoloadPath = dirname(__DIR__) . '/vendor/autoload.php';
+    if (!file_exists($autoloadPath)) {
+        http_response_code(500);
+        echo 'Autoload no encontrado en ' . htmlspecialchars($autoloadPath);
+        exit;
+    }
+    require $autoloadPath;
     //print_r($_POST);
     //print_r($_GET);
    
