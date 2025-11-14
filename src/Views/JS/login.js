@@ -22,26 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('#loginForm');
     if (!form) return;
 
-    // Detectar base del proyecto (e.g., /api_colorINK)
-    const projectBase = (() => {
-        const parts = window.location.pathname.split('/');
-        // path típico: /api_colorINK/src/Views/PHP/login.html
-        const idx = parts.indexOf('src');
-        if (idx > 1) {
-            return '/' + parts.slice(1, idx).join('/');
-        }
-        // fallback al primer segmento
-        return '/' + (parts[1] || '');
-    })();
-    const apiEntry = `${projectBase}/public/index.php`;
-    const dashboardUrl = `${projectBase}/public/index`;
+    // Base del proyecto servida desde la raíz (front controller en /public)
+    const base = '/';
+    const apiEntry = `${base}index.php`;
+    const dashboardUrl = `${base}index`;
 
     // Navegación a registro
     const goRegister = document.querySelector('#goRegister');
     if (goRegister) {
         goRegister.addEventListener('click', (e) => {
             e.preventDefault();
-            window.location.href = `${projectBase}/public/register`;
+            window.location.href = `${base}register`;
         });
     }
 
@@ -266,9 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
 window.authGuard = function() {
     const token = sessionStorage.getItem('firebase_id_token') || sessionStorage.getItem('access_token');
     if (!token) {
-        const parts = window.location.pathname.split('/');
-        const pIdx = parts.indexOf('public');
-        const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '/' + (parts[1] || '');
-        window.location.href = base + '/public/login';
+        window.location.href = '/login';
     }
 }
