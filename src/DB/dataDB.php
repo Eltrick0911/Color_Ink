@@ -30,12 +30,12 @@ if (method_exists($dotenv, 'safeLoad')) {
 
 //definimos un arreglos para simplificar y pasar la cadena de caracteres necesaria para abrir la conexion PDO
 $data = array(
-    // Credenciales y parámetros
-    "user" => $_ENV['DB_USER'] ?? $_ENV['USER'] ?? '',
-    "password" => $_ENV['DB_PASSWORD'] ?? $_ENV['PASSWORD'] ?? '',
-    "DB" => $_ENV['DB_NAME'] ?? $_ENV['DB'] ?? '',
-    "IP" => $_ENV['DB_HOST'] ?? $_ENV['IP'] ?? '127.0.0.1',
-    "port" => $_ENV['DB_PORT'] ?? $_ENV['PORT'] ?? '3306',
+    // Credenciales y parámetros - priorizar .env sobre variables del sistema
+    "user" => $_ENV['USER'] ?? $_ENV['DB_USER'] ?? '',
+    "password" => $_ENV['PASSWORD'] ?? $_ENV['DB_PASSWORD'] ?? '',
+    "DB" => $_ENV['DB'] ?? $_ENV['DB_NAME'] ?? '',
+    "IP" => $_ENV['IP'] ?? $_ENV['DB_HOST'] ?? '127.0.0.1',
+    "port" => $_ENV['PORT'] ?? $_ENV['DB_PORT'] ?? '3306',
     "charset" => $_ENV['DB_CHARSET'] ?? 'utf8mb4',
     "ssl_ca" => $_ENV['DB_SSL_CA'] ?? '',
     "ssl_verify" => $_ENV['DB_SSL_VERIFY'] ?? 'true'
