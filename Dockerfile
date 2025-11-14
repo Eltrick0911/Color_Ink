@@ -40,8 +40,16 @@ RUN chown -R www-data:www-data /var/www/html \
     && chown -R www-data:www-data uploads \
     && chmod -R 775 uploads
 
-# Expose port 80
-EXPOSE 80
+# Dynamic port support for Render (uses $PORT) and fallback to 80
+ARG PORT=80
+ENV PORT=${PORT}
+
+# Configure Apache to listen on $PORT instead of hard-coded 80
+RUN sed -ri "s/^Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf \
+    && sed -ri "s/:80>/:${PORT}>/" /etc/apache2/sites-available/000-default.conf \
+    && echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+EXPOSE ${PORT}
 
 # Start Apache in foreground
 CMD ["apache2-foreground"]
