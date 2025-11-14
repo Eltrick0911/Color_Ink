@@ -5,10 +5,14 @@ RewriteEngine On
 Options -Indexes -MultiViews
 
 # Optional base (docroot is /public)
-# RewriteBase /
+RewriteBase /
 
 # Do not rewrite direct calls to index.php
 RewriteRule ^index\.php$ - [L]
+
+# Bypass rewrites for static assets and favicon
+RewriteRule \.(css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|eot|pdf)$ - [NC,L]
+RewriteRule ^favicon\.ico$ - [L]
 
 # Security: block access to hidden files (e.g., .env)
 <FilesMatch "^\.">

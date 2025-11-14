@@ -28,6 +28,12 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+# Copiar assets de vistas dentro de public para que /src/Views/... sea servible
+RUN mkdir -p public/src/Views \ 
+    && cp -r src/Views/CSS public/src/Views/ \ 
+    && cp -r src/Views/JS public/src/Views/ \ 
+    && cp -r src/Views/IMG public/src/Views/
+
 # Set Apache DocumentRoot to /var/www/html/public
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
