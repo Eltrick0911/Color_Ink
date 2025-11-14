@@ -1,36 +1,47 @@
 <?php
-// Endpoint de diagnóstico usando dataDB.php
+// Diagnóstico de dataDB.php y connectionDB.php
 header('Content-Type: application/json');
-
-require_once dirname(dirname(dirname(__DIR__))) . '/vendor/autoload.php';
-require_once dirname(dirname(__DIR__)) . '/DB/dataDB.php';
 
 use App\DB\connectionDB;
 
 $result = [
     'timestamp' => date('Y-m-d H:i:s'),
+    'env_before_datadb' => [],
     'datadb_loaded' => false,
+    'env_after_datadb' => [],
     'connection_test' => false,
     'table_test' => false,
     'errors' => []
 ];
 
 try {
+    // Capturar estado antes de cargar dataDB.php
+    $result['env_before_datadb'] = [
+        'IP' => $_ENV['IP'] ?? 'not_set',
+        'PORT' => $_ENV['PORT'] ?? 'not_set',
+        'DB' => $_ENV['DB'] ?? 'not_set',
+        'USER' => $_ENV['USER'] ?? 'not_set',
+        'PASSWORD_set' => !empty($_ENV['PASSWORD'] ?? '')
+    ];
+    
+    // Cargar dataDB.php
+    require_once dirname(dirname(dirname(__DIR__))) . '/vendor/autoload.php';
+    require_once dirname(dirname(__DIR__)) . '/DB/dataDB.php';
     $result['datadb_loaded'] = true;
     
-    // Usar dataDB.php para obtener conexión
+    // Capturar estado después de cargar dataDB.php
+    $result['env_after_datadb'] = [
+        'IP' => $_ENV['IP'] ?? 'not_set',
+        'PORT' => $_ENV['PORT'] ?? 'not_set', 
+        'DB' => $_ENV['DB'] ?? 'not_set',
+        'USER' => $_ENV['USER'] ?? 'not_set',
+        'PASSWORD_set' => !empty($_ENV['PASSWORD'] ?? '')
+    ];
+    
+    // Usar connectionDB para probar
     $pdo = connectionDB::getConnection();
     $result['connection_test'] = true;
     $result['server_info'] = $pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
-    
-    // Mostrar configuración desde variables de entorno
-    $result['config'] = [
-        'host' => $_ENV['IP'] ?? 'not_found',
-        'port' => $_ENV['PORT'] ?? 'not_found',
-        'database' => $_ENV['DB'] ?? 'not_found',
-        'user' => $_ENV['USER'] ?? 'not_found',
-        'password_set' => !empty($_ENV['PASSWORD'] ?? '')
-    ];
     
     // Test tabla pedido
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM pedido LIMIT 1");
