@@ -13,8 +13,12 @@
     //print_r($_POST);
     //print_r($_GET);
 
-    // Fallback seguro: si no viene ?route= lo asignamos a 'login' (o 'index' si prefieres portada)
-    $rawRoute = isset($_GET['route']) && $_GET['route'] !== '' ? $_GET['route'] : 'login';
+    // Resolver ruta: primero query ?route=, si no existe usar REQUEST_URI path
+    $requestPath = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+    if ($requestPath === '') {
+        $requestPath = 'login';
+    }
+    $rawRoute = isset($_GET['route']) && $_GET['route'] !== '' ? $_GET['route'] : $requestPath;
     $url = explode('/', $rawRoute);
     
     $lista = ['auth', 'user', 'login', 'index', 'pedidos', 'ventas', 'gestion_usu', 'inve', 'firebase', 'perfil', 'register', 'audit', 'auditoria', 'productos', 'upload']; // lista de rutas permitidas
@@ -49,7 +53,6 @@
 
         //echo "existe la variable route";
     } else {
-        // Nunca debería llegar aquí porque forzamos fallback, pero por claridad:
         require dirname(__DIR__) . '/src/Views/PHP/login.php';
     }
 

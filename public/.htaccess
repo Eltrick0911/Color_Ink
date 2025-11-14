@@ -1,59 +1,16 @@
-# Enable URL rewriting
 RewriteEngine On
-
-# Security + avoid Apache MultiViews interfering with rewrites
 Options -Indexes -MultiViews
-
-# Optional base (docroot is /public)
 RewriteBase /
 
-# Do not rewrite direct calls to index.php
-RewriteRule ^index\.php$ - [L]
-
-# Bypass rewrites for static assets and favicon
-RewriteRule \.(css|js|png|jpe?g|gif|svg|ico|woff2?|ttf|eot|pdf)$ - [NC,L]
-RewriteRule ^favicon\.ico$ - [L]
-
-# Security: block access to hidden files (e.g., .env)
+# Block hidden files (.env, .git, etc.)
 <FilesMatch "^\.">
-    Require all denied
+	Require all denied
 </FilesMatch>
 
-# If the requested resource exists as a file or directory, serve it directly
+# Serve existing files/directories directly
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Map root to the default route
-RewriteRule ^$ index.php?route=index [QSA,L]
-
-# Rewrite everything else to index.php with route param
-RewriteRule ^(.+)$ index.php?route=$1 [QSA,L]
-RewriteEngine On
-Options All -Indexes
-
-# prevenir acceso al archivo .htaccess
-<Files ".htaccess">
-	Require all denied
-</Files>
-
-# camuflar archivos PHP como NAS, se puede ocultar la versión de php también, etc.
-AddType application/x-httpd-php .nas
-
-# Base del proyecto (ajusta si cambias la carpeta)
-RewriteBase /Color_Ink/public/
-
-# No reescribir si el recurso existe como archivo o directorio
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
-
-# Redirigir URLs con .php a su versión sin extensión (canonical)
-RewriteCond %{REQUEST_URI} \.php$ [NC]
-RewriteRule ^(.+)\.php$ /Color_Ink/public/$1 [R=301,L]
-
-# Redirigir la raíz /public/ al login
-RewriteRule ^$ index.php?route=login [QSA,L]
-
-# URL amigables: cualquier ruta -> index.php?route=<ruta>
-RewriteRule ^([0-9a-zA-Z-_@./]+)$ index.php?route=$1 [QSA,L]
+# Front controller: route all other requests to index.php
+RewriteRule ^ index.php [QSA,L]
