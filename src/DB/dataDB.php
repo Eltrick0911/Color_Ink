@@ -30,17 +30,29 @@ if (method_exists($dotenv, 'safeLoad')) {
 
 //definimos un arreglos para simplificar y pasar la cadena de caracteres necesaria para abrir la conexion PDO
 $data = array(
-    // Preferir variables con prefijo DB_ si existen (más específicas en producción)
+    // Credenciales y parámetros
     "user" => $_ENV['DB_USER'] ?? $_ENV['USER'] ?? '',
     "password" => $_ENV['DB_PASSWORD'] ?? $_ENV['PASSWORD'] ?? '',
     "DB" => $_ENV['DB_NAME'] ?? $_ENV['DB'] ?? '',
-    "IP" => $_ENV['DB_HOST'] ?? $_ENV['IP'] ?? '127.0.0.1', 
-    // Prefer DB_PORT if present to avoid conflicts with platform PORT
-    "port" => $_ENV['DB_PORT'] ?? $_ENV['PORT'] ?? '3306'
+    "IP" => $_ENV['DB_HOST'] ?? $_ENV['IP'] ?? '127.0.0.1',
+    "port" => $_ENV['DB_PORT'] ?? $_ENV['PORT'] ?? '3306',
+    "charset" => $_ENV['DB_CHARSET'] ?? 'utf8mb4',
+    "ssl_ca" => $_ENV['DB_SSL_CA'] ?? '',
+    "ssl_verify" => $_ENV['DB_SSL_VERIFY'] ?? 'true'
 );
 
-/* conectamos a la base de datos llamando al metodo de la clase que retorna PDO*/
-$host = 'mysql:host='.$data['IP'].';'.'port='.$data['port'].';'.'dbname='.$data['DB']; //cadena necesaria
+// Construir DSN con charset explícito
+$host = 'mysql:host='.$data['IP'].';port='.$data['port'].';dbname='.$data['DB'].';charset='.$data['charset'];
 
-//inicializamos el objeto conexión
-connectionDB::inicializar($host, $data['user'], $data['password']);
+// Opciones PDO adicionales (SSL si se configura)
+$pdoOptions = [];
+if (!empty($data['ssl_ca'])) {
+    $pdoOptions[\PDO::MYSQL_ATTR_SSL_CA] = $data['ssl_ca'];
+    // Permitir desactivar verificación del cert si explícito
+    if (strtolower($data['ssl_verify']) === 'false') {
+        $pdoOptions[\PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+    }
+}
+
+// Inicializamos conexión
+connectionDB::inicializar($host, $data['user'], $data['password'], $pdoOptions);

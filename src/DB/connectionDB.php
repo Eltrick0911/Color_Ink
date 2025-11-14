@@ -7,39 +7,39 @@ use PDO; //usaremos el objeto PDO para interactuar con la BD
 require __DIR__.'/dataDB.php'; //__DIR__ estamos en la misma carpeta
 
 class connectionDB{
-    private static $host = ''; //arreglo de datos (servidor, puerto, etc...)
+    private static $host = ''; // DSN
     private static $user = '';
     private static $pass = '';
+    private static $options = []; // Opciones PDO adicionales (SSL, fetch mode, etc.)
 
-    final public static function inicializar($host, $user, $pass){
-        //this or self?
-        //self hace referencia a la clase para así mandar llamar funciones estáticas.
-        //this hace referencia a un objeto ya instanciado para mandar llamar funciones de cualquier otro tipo
+    /**
+     * Inicializa credenciales y opciones PDO.
+     */
+    final public static function inicializar($host, $user, $pass, array $options = []){
         self::$host = $host;
         self::$user = $user;
         self::$pass = $pass;
+        self::$options = $options;
     }
     //metodo que retorna la conexion
     final public static function getConnection(){
         try{
-            //opciones de conexion
-            $opt = [\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC];
+            $start = microtime(true);
+            // Merge opciones por defecto + específicas
+            $opt = [\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC] + self::$options;
             $pdo = new PDO(self::$host,self::$user,self::$pass, $opt);
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            
-            // Establecer zona horaria de Tegucigalpa, Honduras (UTC-6)
-            // Esto afecta NOW(), CURDATE(), CURTIME() y TIMESTAMP en todas las queries
             $pdo->exec("SET time_zone = '-06:00'");
-            
-            // Verificar que se aplicó correctamente (log temporal)
-            $tz = $pdo->query("SELECT @@session.time_zone, NOW() as hora_actual")->fetch();
-            error_log("Conexión exitosa - Zona horaria: " . $tz['@@session.time_zone'] . " - Hora MySQL: " . $tz['hora_actual']);
-            
+            $tz = $pdo->query("SELECT @@session.time_zone AS tz, NOW() AS hora_actual")->fetch();
+            $dur = round((microtime(true)-$start)*1000,2);
+            // Mask credentials in DSN log
+            $dsnMask = preg_replace('/password=[^;]+/i','password=***', self::$host);
+            error_log("[DB-CONNECT] OK dur={$dur}ms tz={$tz['tz']} hora={$tz['hora_actual']} dsn=".$dsnMask);
             return $pdo;
         }catch(\PDOException $e){
-            error_log("Error en la conexión a la BD! ERROR: ".$e);
-            die(json_encode(responseHTTP::status500()));
-
+            error_log("[DB-CONNECT] FAIL msg=".$e->getMessage());
+            echo json_encode(responseHTTP::status500()+['debug'=>'DB connection failed']);
+            exit;
         }
     }
    
