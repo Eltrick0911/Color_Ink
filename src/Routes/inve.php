@@ -98,6 +98,10 @@ try {
             } elseif ($action === 'alertas-stock') {
                 error_log('inve route: Llamando getAlertasStock');
                 $controller->getAlertasStock($headers);
+            } elseif ($action === 'proveedor') {
+                error_log('inve route: Llamando getProveedor');
+                $id = $_GET['id'] ?? '';
+                $controller->getProveedor($headers, $id);
             } else {
                 error_log('inve route: Acción GET no válida: ' . $action);
                 http_response_code(400);
@@ -146,6 +150,11 @@ try {
                 $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
                 error_log('inve route: Input recibido: ' . json_encode($input));
                 $controller->deleteProveedor($headers, $input);
+            } elseif ($action === 'update-proveedor') {
+                error_log('inve route: Llamando updateProveedor');
+                $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+                error_log('inve route: Input recibido: ' . json_encode($input));
+                $controller->updateProveedor($headers, $input);
             } else {
                 error_log('inve route: Acción POST no válida: ' . $action);
                 http_response_code(400);

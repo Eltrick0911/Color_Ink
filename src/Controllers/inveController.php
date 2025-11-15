@@ -346,6 +346,12 @@ class inveController
             error_log('inveController - getProveedoresCompletos: Proveedores obtenidos: ' . json_encode($proveedores));
             error_log('inveController - getProveedoresCompletos: Cantidad de proveedores: ' . count($proveedores));
             
+            // Asegurar que siempre devolvemos un array, nunca null
+            if ($proveedores === null) {
+                $proveedores = [];
+                error_log('inveController - getProveedoresCompletos: Proveedores era null, convertido a array vacío');
+            }
+            
             http_response_code(200);
             $response = [
                 'status' => 'OK',
@@ -1004,6 +1010,109 @@ class inveController
 
         } catch (\Throwable $e) {
             error_log('inveController - deleteProveedor: Error: ' . $e->getMessage());
+            echo json_encode(responseHTTP::status500());
+        }
+    }
+
+    /**
+     * Actualiza un proveedor existente
+     * 
+     * @param array $headers Headers de la petición
+     * @param array $input Datos del proveedor
+     * @return void
+     */
+    public function updateProveedor(array $headers, array $input): void
+    {
+        // TEMPORAL: Desactivar autorización para testing
+        error_log('inveController - updateProveedor: MODO TESTING - Autorización desactivada');
+        error_log('inveController - updateProveedor: Datos recibidos: ' . json_encode($input));
+        
+        // Validar datos requeridos
+        if (!isset($input['id_proveedor']) || !is_numeric($input['id_proveedor'])) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => 'ERROR',
+                'message' => 'ID del proveedor es requerido'
+            ]);
+            return;
+        }
+        
+        if (!isset($input['descripcion_proveedor']) || empty(trim($input['descripcion_proveedor']))) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => 'ERROR',
+                'message' => 'El nombre del proveedor es requerido'
+            ]);
+            return;
+        }
+        
+        try {
+            $result = $this->inveModel->updateProveedor($input);
+            
+            if ($result) {
+                http_response_code(200);
+                $response = [
+                    'status' => 'OK',
+                    'message' => 'Proveedor actualizado exitosamente',
+                    'data' => $result
+                ];
+            } else {
+                http_response_code(400);
+                $response = [
+                    'status' => 'ERROR',
+                    'message' => 'Error al actualizar el proveedor'
+                ];
+            }
+            
+            echo json_encode($response);
+
+        } catch (\Throwable $e) {
+            error_log('inveController - updateProveedor: Error: ' . $e->getMessage());
+            echo json_encode(responseHTTP::status500());
+        }
+    }
+
+    /**
+     * Obtiene un proveedor específico por ID
+     * 
+     * @param array $headers Headers de la petición
+     * @param string $id ID del proveedor
+     * @return void
+     */
+    public function getProveedor(array $headers, string $id): void
+    {
+        // TEMPORAL: Desactivar autorización para testing
+        error_log('inveController - getProveedor: MODO TESTING - Autorización desactivada');
+
+        if (empty($id) || !is_numeric($id)) {
+            echo json_encode(['status' => 'ERROR', 'message' => 'ID de proveedor inválido']);
+            return;
+        }
+
+        error_log('inveController - getProveedor: Obteniendo proveedor ID: ' . $id);
+        
+        try {
+            $proveedor = $this->inveModel->getProveedor((int)$id);
+            
+            if (empty($proveedor)) {
+                echo json_encode(['status' => 'ERROR', 'message' => 'Proveedor no encontrado']);
+                return;
+            }
+            
+            error_log('inveController - getProveedor: Proveedor obtenido: ' . json_encode($proveedor));
+            
+            http_response_code(200);
+            $response = [
+                'status' => 'OK',
+                'message' => 'Proveedor obtenido exitosamente',
+                'data' => $proveedor
+            ];
+            error_log('inveController - getProveedor: Respuesta final: ' . json_encode($response));
+            
+            echo json_encode($response);
+
+        } catch (\Throwable $e) {
+            error_log('inveController - getProveedor: Error: ' . $e->getMessage());
             echo json_encode(responseHTTP::status500());
         }
     }

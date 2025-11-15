@@ -2113,7 +2113,7 @@ async function handleNuevoProveedor(e) {
     };
     
     try {
-        const response = await fetch('/Color_Ink/src/Routes/inve.php?action=add-proveedor', {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=add-proveedor`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2163,7 +2163,7 @@ function openVerProveedoresModal() {
 async function loadProveedoresTable() {
     try {
         console.log('Cargando tabla de proveedores...');
-        const response = await fetch('/Color_Ink/src/Routes/inve.php?action=proveedores-completos', {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=proveedores-completos`, {
             headers: {
                 ...getAuthHeader(),
             }
@@ -2250,7 +2250,7 @@ function setupProveedoresActionButtons() {
 
 async function editProveedor(id) {
     try {
-        const response = await fetch(`/Color_Ink/public/index.php?route=inve&caso=1&action=proveedor&id=${id}`, {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=proveedor&id=${id}`, {
             headers: {
                 ...getAuthHeader(),
             }
@@ -2316,7 +2316,7 @@ async function deleteProveedor(id, nombre) {
     
     if (result.isConfirmed) {
         try {
-            const response = await fetch('/Color_Ink/src/Routes/inve.php?action=delete-proveedor', {
+            const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=delete-proveedor`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2370,7 +2370,7 @@ async function handleEditarProveedor(e) {
     };
     
     try {
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=update-proveedor', {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=update-proveedor`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
