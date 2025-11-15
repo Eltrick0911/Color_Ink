@@ -14,7 +14,9 @@ class responseHTTP{
     }
 
     public static function sendResponse($data) {
-        header('Content-Type: application/json');
+        if (!headers_sent()) {
+            header('Content-Type: application/json');
+        }
         echo json_encode($data);
         exit;
     }
@@ -22,33 +24,33 @@ class responseHTTP{
     // Códigos de estado HTTP
 
     final public static function status200(string $res = 'OK'): array {
-        http_response_code(200);
+        if (!headers_sent()) http_response_code(200);
         return self::base('OK', $res);
     }
 
     final public static function status201(string $res = 'Recurso creado exitosamente!'): array {
-        http_response_code(201);
+        if (!headers_sent()) http_response_code(201);
         return self::base('OK', $res);
     }
 
     final public static function status400(string $res): array {
-        http_response_code(400);
+        if (!headers_sent()) http_response_code(400);
         return self::base('ERROR', $res);
     }
 
     final public static function status401(string $str = 'No autenticado'): array {
-        http_response_code(401);
+        if (!headers_sent()) http_response_code(401);
         $res = 'No tiene privilegios para acceder al recurso! ' . $str;
         return self::base('ERROR', $res);
     }
 
     final public static function status404(string $res = 'No existe el recurso solicitado!'): array {
-        http_response_code(404);
+        if (!headers_sent()) http_response_code(404);
         return self::base('ERROR', $res);
     }
 
     final public static function status500(string $res = 'Se ha producido un error en el servidor!'): array {
-        http_response_code(500);
+        if (!headers_sent()) http_response_code(500);
         return self::base('ERROR', $res);
     }
 }
