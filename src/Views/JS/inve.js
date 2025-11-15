@@ -1138,7 +1138,7 @@ async function loadCategorias() {
 async function loadProveedores() {
     try {
         console.log(' Cargando proveedores...');
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=proveedores', {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=proveedores`, {
             headers: {
                 ...getAuthHeader(),
             }
@@ -1239,7 +1239,7 @@ async function handleNuevoProducto(e) {
             console.log('Token completo (últimos 20 caracteres):', token.substring(token.length - 20));
         }
         
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=add', {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=add`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1368,7 +1368,7 @@ async function handleNuevoProducto(e) {
 async function loadProductos() {
     console.log(' Cargando productos...');
     try {
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=productos', {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=productos`, {
             headers: {
                 ...getAuthHeader(),
             }
@@ -1643,7 +1643,7 @@ function renderProductos(productos) {
 async function loadEstadisticas() {
     console.log(' Cargando estadísticas...');
     try {
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=estadisticas', {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=estadisticas`, {
             headers: {
                 ...getAuthHeader(),
             }
@@ -1978,7 +1978,7 @@ async function handleEditarProducto(e) {
     const data = Object.fromEntries(formData.entries());
     
     try {
-        const response = await fetch('/Color_Ink/public/index.php?route=inve&caso=1&action=update', {
+        const response = await fetch(`${getApiBase()}/public/index.php?route=inve&caso=1&action=update`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2186,6 +2186,12 @@ async function loadProveedoresTable() {
 
 function renderProveedoresTable(proveedores) {
     console.log('renderProveedoresTable llamada con:', proveedores);
+    
+    // Validar que proveedores no sea null o undefined
+    if (!proveedores || !Array.isArray(proveedores)) {
+        console.warn('proveedores es null, undefined o no es un array:', proveedores);
+        proveedores = [];
+    }
     
     // Llenar ambas tablas para asegurar que se muestre en cualquier modal
     const tbody1 = document.getElementById('proveedores-tbody');
