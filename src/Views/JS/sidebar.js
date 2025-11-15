@@ -108,7 +108,7 @@ class SidebarManager {
             // Para rutas en la raíz como /auditoria, /ventas, etc.
             return '';
         };
-        const basePath = getBase();
+        this.basePath = getBase();
 
         // Definir los iconos con rutas directas para Render
         const icons = [
@@ -170,8 +170,8 @@ class SidebarManager {
             }
             // Fallback local
             try {
-                const apiEntry = `/public/index.php`;
-                const loginUrl = `/login`;
+                const apiEntry = `/index.php`;
+                const loginUrl = `${this.basePath}/login`;
                 const jwtToken = sessionStorage.getItem('access_token');
                 if (jwtToken) {
                     try {
@@ -188,7 +188,7 @@ class SidebarManager {
                 window.location.replace(loginUrl);
             } catch (_) {
                 sessionStorage.clear();
-                window.location.replace('/login');
+                window.location.replace(`${this.basePath}/login`);
             }
         });
 

@@ -9,13 +9,7 @@
 (function (window, document) {
     'use strict';
 
-    const defaultApiEntry = (function () {
-        // Apuntar a public/index.php que es el punto de entrada del enrutador
-        const parts = window.location.pathname.split('/');
-        const pIdx = parts.indexOf('public');
-        const base = pIdx > 1 ? '/' + parts.slice(1, pIdx).join('/') : '';
-        return base + '/public/index.php';
-    })();
+    const defaultApiEntry = '/public/index.php';
 
     function safeJSON(res) {
         return res.text().then(text => {
